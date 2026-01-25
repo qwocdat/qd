@@ -1,23 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-<meta charset="utf-8">
-<title>DAT GET KEY</title>
+  <meta charset="UTF-8">
+  <title>DAT GET KEY</title>
+  <style>
+    body{background:black;color:#00ff9c;font-family:monospace;text-align:center;padding-top:40px}
+    button{font-size:18px;padding:10px 20px;background:#00ff9c;border:none;cursor:pointer}
+    pre{margin-top:20px;font-size:20px;color:#0f0}
+  </style>
 </head>
-<body style="background:black;color:lime;font-family:monospace;text-align:center">
-
-<h1>DAT KEY SYSTEM</h1>
-<button onclick="getKey()">GET KEY</button>
-<pre id="out"></pre>
-
+<body>
+  <h1>DAT KEY SYSTEM</h1>
+  <button onclick="getKey()">GET KEY</button>
+  <pre id="out"></pre>
 <script>
-function getKey(){
- fetch("https://brenton-auriform-uncouthly.ngrok-free.dev/getkey")
- .then(r=>r.json())
- .then(d=>out.innerText=d.key)
- .catch(()=>out.innerText="SERVER OFFLINE")
+async function getKey(){
+  const out = document.getElementById("out");
+  out.innerText = "Đang kết nối server..."
+
+  try {
+    const res = await fetch("https://brenton-auriform-uncouthly.ngrok-free.dev/getkey")
+    const data = await res.json()
+    out.innerText = data.key
+  } catch(e) {
+    out.innerText = "SERVER OFFLINE"
+  }
 }
 </script>
-
 </body>
 </html>
