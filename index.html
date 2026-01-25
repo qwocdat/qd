@@ -28,9 +28,9 @@
 </head>
 <body>
 
-  <h1>DAT KEY SYSTEM</h1>
-  <button onclick="getKey()">GET KEY</button>
-  <pre id="out"></pre>
+<h1>DAT KEY SYSTEM</h1>
+<button onclick="getKey()">GET KEY</button>
+<pre id="out"></pre>
 
 <script>
 async function getKey() {
@@ -38,16 +38,14 @@ async function getKey() {
   out.innerText = "Đang kết nối server..."
 
   try {
-    const response = await fetch("https://brenton-auriform-uncouthly.ngrok-free.dev/getkey")
-    const data = await response.json()
-    out.innerText = data.key
+    const res = await fetch("https://brenton-auriform-uncouthly.ngrok-free.dev/getkey");
+    const data = await res.json();
+    out.innerText = data.key;
   } catch (e) {
-    out.innerText = "SERVER OFFLINE"
+    out.innerText = "SERVER OFFLINE";
   }
 }
 </script>
 
 </body>
 </html>
-
-
