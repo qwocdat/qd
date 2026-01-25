@@ -1,76 +1,21 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>DAT CONTROL PANEL | GET KEY</title>
-<style>
-body{
-  margin:0;
-  height:100vh;
-  background:black;
-  color:#00ff9c;
-  font-family:Consolas,monospace;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.panel{
-  border:2px solid #00ff9c;
-  padding:30px;
-  width:420px;
-  text-align:center;
-  box-shadow:0 0 25px #00ff9c55;
-}
-button{
-  margin-top:20px;
-  padding:14px;
-  width:100%;
-  background:#00ff9c;
-  border:none;
-  font-size:16px;
-  font-weight:bold;
-  cursor:pointer;
-}
-.key{
-  margin-top:15px;
-  padding:10px;
-  border:1px dashed #00ff9c;
-  word-break:break-all;
-  display:none;
-}
-.status{
-  margin-top:10px;
-  font-size:13px;
-  color:#aaa;
-}
-</style>
+<meta charset="utf-8">
+<title>DAT GET KEY</title>
 </head>
-<body>
+<body style="background:black;color:lime;font-family:monospace;text-align:center">
 
-<div class="panel">
-  <h2>DAT CONTROL PANEL</h2>
-  <p>Click để lấy KEY</p>
-  <button onclick="getKey()">GET KEY</button>
-  <div id="key" class="key"></div>
-  <div id="status" class="status"></div>
-</div>
+<h1>DAT KEY SYSTEM</h1>
+<button onclick="getKey()">GET KEY</button>
+<pre id="out"></pre>
 
 <script>
-/* ⚠️ ĐỔI THÀNH IP / DOMAIN SERVER CỦA MÀY */
-const API = "http://IP-HOAC-DOMAIN:5000/getkey";
-
-async function getKey(){
-  const st = document.getElementById("status");
-  st.innerText = "Đang kết nối server...";
-  try{
-    const r = await fetch(API);
-    const key = await r.text();
-    document.getElementById("key").style.display="block";
-    document.getElementById("key").innerText = key;
-    st.innerText = "✔ Lấy KEY thành công";
-  }catch(e){
-    st.innerText = "❌ Không kết nối được server key";
-  }
+function getKey(){
+ fetch("https://brenton-auriform-uncouthly.ngrok-free.dev/getkey")
+ .then(r=>r.json())
+ .then(d=>out.innerText=d.key)
+ .catch(()=>out.innerText="SERVER OFFLINE")
 }
 </script>
 
