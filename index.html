@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SUNWIN FINAL FIX V11</title>
+    <title>SUNWIN INSTANT V12</title>
     <style>
-        /* --- RESET & CẤU HÌNH --- */
+        /* --- CẤU HÌNH CHUNG --- */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: manipulation; }
         body {
             margin: 0; padding: 0;
@@ -14,25 +14,10 @@
             height: 100vh; width: 100vw;
             overflow: hidden;
             display: flex; flex-direction: column;
-            background-image: url('https://i.imgur.com/example-bg.jpg'); /* Fallback */
             background: radial-gradient(circle at center, #3c0808 0%, #000 100%);
         }
 
-        /* --- MÀN HÌNH CHỜ (BẮT BUỘC ĐỂ KÍCH HOẠT JS) --- */
-        #loading-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 9999;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-        }
-        .btn-entry {
-            padding: 15px 50px; background: linear-gradient(to bottom, #f1c40f, #d35400);
-            border: 2px solid #fff; border-radius: 30px;
-            color: #fff; font-size: 20px; font-weight: bold;
-            box-shadow: 0 0 20px #f1c40f; animation: pulse 1s infinite;
-        }
-        @keyframes pulse { 0% {transform: scale(1);} 50% {transform: scale(1.05);} 100% {transform: scale(1);} }
-
-        /* --- HEADER (GIỐNG ẢNH 100%) --- */
+        /* --- HEADER (CHUẨN 100% ẢNH GỬI) --- */
         .sunwin-header {
             height: 80px; width: 100%;
             display: flex; align-items: center; justify-content: space-between;
@@ -40,7 +25,7 @@
             z-index: 100; position: absolute; top: 0; left: 0;
         }
 
-        /* Avatar Group */
+        /* Avatar & Tên */
         .user-section { position: relative; width: 140px; height: 50px; }
         .avatar {
             width: 55px; height: 55px; border-radius: 50%;
@@ -58,7 +43,7 @@
             box-shadow: inset 0 0 5px #000;
         }
 
-        /* Balance Bar (Chuẩn ảnh) */
+        /* Thanh Số Dư (Chuẩn ảnh) */
         .balance-section {
             display: flex; align-items: center;
             background: linear-gradient(180deg, #b8860b, #5a2d0c);
@@ -94,7 +79,7 @@
         .game-area {
             flex: 1; display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            margin-top: 40px; /* Né header */
+            margin-top: 40px;
         }
 
         .board-layout {
@@ -113,7 +98,6 @@
         .gate-name { font-size: 30px; font-weight: 900; color: #fff; -webkit-text-stroke: 1px #d4af37; }
         .gate-money { color: #0f0; font-weight: bold; font-size: 13px; margin-top: 5px; }
 
-        /* PLATE & BOWL */
         .plate-container {
             position: relative; width: 40vw; height: 40vw; max-width: 180px; max-height: 180px;
             display: flex; justify-content: center; align-items: center;
@@ -159,13 +143,13 @@
             background: radial-gradient(#f1c40f, #d35400); border: 2px dashed #fff;
             color: #000; font-weight: bold; font-size: 10px;
             display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 3px 0 #8e581e;
+            box-shadow: 0 3px 0 #8e581e; cursor: pointer;
         }
         .chip:active { transform: scale(0.95); }
 
         .action-bar { display: flex; gap: 10px; height: 45px; }
         .btn {
-            flex: 1; border: none; border-radius: 25px;
+            flex: 1; border: none; border-radius: 25px; cursor: pointer;
             font-weight: 900; font-size: 16px; text-transform: uppercase;
             color: #2d1e03; box-shadow: 0 3px 0 rgba(0,0,0,0.5);
         }
@@ -173,9 +157,9 @@
         .btn-confirm { background: linear-gradient(#f1c40f, #f39c12); flex: 1.5; }
         .btn:disabled { filter: grayscale(1); opacity: 0.5; }
 
-        /* --- TOOL HACK --- */
+        /* --- TOOL HACK & WIN MSG --- */
         #tool-btn {
-            position: fixed; top: 120px; right: 0;
+            position: fixed; top: 120px; right: 0; cursor: pointer;
             width: 40px; height: 40px; background: #000; border: 2px solid #0f0; border-right: none;
             border-radius: 10px 0 0 10px; color: #0f0; display: flex; justify-content: center; align-items: center;
             font-size: 24px; z-index: 900;
@@ -190,23 +174,24 @@
             text-align: center; border-radius: 10px;
         }
         .hack-res { font-size: 50px; font-weight: 900; margin: 20px 0; color: #fff; }
-
-        /* --- EFFECTS --- */
+        
         #win-msg {
             position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%);
             font-size: 50px; font-weight: 900; color: yellow; text-shadow: 0 0 20px red;
             display: none; z-index: 500; text-align: center; width: 100%;
         }
+
+        /* Modal Nạp tiền */
+        #deposit-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 1001; display: none;
+            justify-content: center; align-items: center;
+        }
     </style>
 </head>
 <body>
 
-    <div id="loading-overlay">
-        <h2 style="color:#f1c40f; margin-bottom: 20px;">ĐANG TẢI DỮ LIỆU...</h2>
-        <button class="btn-entry" onclick="app.start()">VÀO GAME</button>
-    </div>
-
-    <div id="main-app" style="display: none; width: 100%; height: 100%; flex-direction: column;">
+    <div id="main-app" style="display: flex; width: 100%; height: 100%; flex-direction: column;">
         
         <div class="sunwin-header">
             <div class="user-section">
@@ -218,7 +203,7 @@
                 <div class="balance-inner">
                     <div class="icon-dollar">$</div>
                     <div class="balance-txt" id="balance">10,000,000</div>
-                    <div class="btn-plus" onclick="app.deposit()">+</div>
+                    <div class="btn-plus" onclick="app.openDep()">+</div>
                 </div>
             </div>
         </div>
@@ -267,20 +252,28 @@
         </div>
 
         <div id="tool-btn" onclick="tool.open()">🤖</div>
+        
         <div id="tool-modal">
             <div class="tool-content">
                 <div style="text-align:right; color:#fff; cursor:pointer" onclick="tool.close()">[X]</div>
-                <div style="color:#0f0; font-weight:bold">HACKER AI</div>
+                <div style="color:#0f0; font-weight:bold">HACKER AI V12</div>
                 <div class="hack-res" id="hack-val">---</div>
                 <button class="btn" style="background:#0f0; width:100%" onclick="tool.analyze()">PHÂN TÍCH</button>
                 <button class="btn" style="background:#fff; width:100%; margin-top:10px" onclick="tool.auto()">AUTO CƯỢC</button>
             </div>
         </div>
 
+        <div id="deposit-modal">
+            <div class="tool-content">
+                <div style="text-align:right; color:#fff; cursor:pointer" onclick="app.closeDep()">[X]</div>
+                <h3>NẠP TIỀN</h3>
+                <button class="btn" style="background:orange; width:100%; margin-bottom:5px" onclick="app.doDep(50000000)">+ 50 Triệu</button>
+                <button class="btn" style="background:orange; width:100%" onclick="app.doDep(100000000)">+ 100 Triệu</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        /* --- GLOBAL APP LOGIC --- */
         const app = {
             balance: 10000000,
             state: 'STOP',
@@ -292,35 +285,8 @@
             interval: null,
             forcedRes: null,
 
-            // DOM Elements Cache
-            el: {
-                start: null, main: null, bal: null, timer: null, bowl: null, 
-                status: null, winMsg: null, btnOk: null,
-                gateTai: null, gateXiu: null, betTai: null, betXiu: null
-            },
-
             init: function() {
-                // Cache DOM elements
-                this.el.start = document.getElementById('loading-overlay');
-                this.el.main = document.getElementById('main-app');
-                this.el.bal = document.getElementById('balance');
-                this.el.timer = document.getElementById('timer');
-                this.el.bowl = document.getElementById('bowl');
-                this.el.status = document.getElementById('status');
-                this.el.winMsg = document.getElementById('win-msg');
-                this.el.btnOk = document.getElementById('btn-ok');
-                this.el.gateTai = document.getElementById('gate-tai');
-                this.el.gateXiu = document.getElementById('gate-xiu');
-                this.el.betTai = document.getElementById('bet-tai');
-                this.el.betXiu = document.getElementById('bet-xiu');
-                
-                this.updateDisplayBal();
-            },
-
-            start: function() {
-                this.init(); // Re-init to be safe
-                this.el.start.style.display = 'none';
-                this.el.main.style.display = 'flex';
+                this.updateDisplayBal(this.balance);
                 this.newRound();
             },
 
@@ -333,22 +299,21 @@
                 this.forcedRes = null;
                 clearInterval(this.interval);
 
-                // UI Reset
-                this.el.bowl.classList.remove('open');
-                this.el.winMsg.style.display = 'none';
-                this.el.status.innerText = "MỜI ĐẶT CƯỢC";
-                this.el.btnOk.disabled = false;
-                this.el.gateTai.classList.remove('active');
-                this.el.gateXiu.classList.remove('active');
+                document.getElementById('bowl').classList.remove('open');
+                document.getElementById('win-msg').style.display = 'none';
+                document.getElementById('status').innerText = "MỜI ĐẶT CƯỢC";
+                document.getElementById('btn-ok').disabled = false;
+                document.getElementById('gate-tai').classList.remove('active');
+                document.getElementById('gate-xiu').classList.remove('active');
                 this.updateBetUI();
                 document.getElementById('hack-val').innerText = "---";
 
                 this.timerVal = 15;
-                this.el.timer.innerText = this.timerVal;
+                document.getElementById('timer').innerText = this.timerVal;
                 
                 this.interval = setInterval(() => {
                     this.timerVal--;
-                    this.el.timer.innerText = this.timerVal;
+                    document.getElementById('timer').innerText = this.timerVal;
                     if(this.timerVal <= 0) {
                         clearInterval(this.interval);
                         this.shake();
@@ -359,11 +324,11 @@
             select: function(side) {
                 if(this.state !== 'BETTING' || this.confirmedSide) return;
                 this.selected = side;
-                this.el.gateTai.classList.remove('active');
-                this.el.gateXiu.classList.remove('active');
+                document.getElementById('gate-tai').classList.remove('active');
+                document.getElementById('gate-xiu').classList.remove('active');
                 
-                if(side === 'TAI') this.el.gateTai.classList.add('active');
-                else this.el.gateXiu.classList.add('active');
+                if(side === 'TAI') document.getElementById('gate-tai').classList.add('active');
+                else document.getElementById('gate-xiu').classList.add('active');
                 
                 this.tempBet = 0;
                 this.updateBetUI();
@@ -392,19 +357,20 @@
                 this.confirmedAmt = this.tempBet;
                 this.confirmedSide = this.selected;
                 
+                // Hiệu ứng số chạy giảm dần
                 this.animateNumber(oldBal, this.balance, 1000);
                 
-                this.el.status.innerText = "ĐÃ ĐẶT CƯỢC";
-                this.el.btnOk.disabled = true;
+                document.getElementById('status').innerText = "ĐÃ ĐẶT CƯỢC";
+                document.getElementById('btn-ok').disabled = true;
             },
 
             shake: function() {
                 this.state = 'SHAKING';
-                this.el.status.innerText = "ĐANG LẮC...";
-                this.el.btnOk.disabled = true;
-                this.el.bowl.classList.add('shaking');
+                document.getElementById('status').innerText = "ĐANG LẮC...";
+                document.getElementById('btn-ok').disabled = true;
+                document.getElementById('bowl').classList.add('shaking');
                 setTimeout(() => {
-                    this.el.bowl.classList.remove('shaking');
+                    document.getElementById('bowl').classList.remove('shaking');
                     this.result();
                 }, 2000);
             },
@@ -435,15 +401,40 @@
                 document.getElementById('d2').innerText = icons[r2-1];
                 document.getElementById('d3').innerText = icons[r3-1];
 
-                this.el.bowl.classList.add('open');
-                this.el.status.innerText = `KẾT QUẢ: ${type} (${total})`;
+                document.getElementById('bowl').classList.add('open');
+                document.getElementById('status').innerText = `KẾT QUẢ: ${type} (${total})`;
 
                 if(this.confirmedSide === type) {
                     let win = this.confirmedAmt * 2;
                     let oldBal = this.balance;
                     this.balance += win;
                     
-                    this.el.winMsg.style.display = 'block';
+                    document.getElementById('win-msg').style.display = 'block';
                     document.getElementById('win-amount').innerText = "+" + this.fmt(win);
                     
-                    // Win Animatio
+                    // Hiệu ứng số chạy tăng lên
+                    setTimeout(() => {
+                        this.animateNumber(oldBal, this.balance, 1500);
+                    }, 500);
+                }
+
+                setTimeout(() => this.newRound(), 5000);
+            },
+
+            // Utils
+            updateDisplayBal: function(val) { document.getElementById('balance').innerText = this.fmt(val); },
+            
+            updateBetUI: function() {
+                document.getElementById('bet-tai').innerText = "0";
+                document.getElementById('bet-xiu').innerText = "0";
+                if(this.selected === 'TAI') document.getElementById('bet-tai').innerText = this.fmt(this.tempBet);
+                if(this.selected === 'XIU') document.getElementById('bet-xiu').innerText = this.fmt(this.tempBet);
+            },
+
+            fmt: function(n) { return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); },
+
+            animateNumber: function(start, end, duration) {
+                let startTime = null;
+                const step = (timestamp) => {
+                    if (!startTime) startTime = timestamp;
+                    const progress = Math.min((timestamp - startTime) / duration, 1)
