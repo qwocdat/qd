@@ -3,451 +3,406 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SUNWIN MOBILE V15</title>
+    <title>SUNWIN REAL FIXED</title>
     <style>
-        /* --- 1. RESET & CẤU HÌNH CƠ BẢN --- */
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: manipulation; margin: 0; padding: 0; }
+        /* --- CẤU HÌNH CƠ BẢN --- */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; margin: 0; padding: 0; }
         body {
-            background: #000;
-            font-family: Arial, sans-serif;
-            height: 100vh; width: 100vw;
-            overflow: hidden; /* Chặn cuộn trang */
+            background: #000; font-family: Arial, sans-serif;
+            height: 100vh; width: 100vw; overflow: hidden;
             display: flex; flex-direction: column;
-            background: radial-gradient(circle at center, #420808 0%, #1a0202 70%, #000 100%);
+            background: radial-gradient(circle, #3a0e0e 0%, #000 100%);
         }
 
-        /* --- 2. HEADER (TỐI ƯU MOBILE) --- */
+        /* --- 1. HEADER (Cố định 60px) --- */
         .header {
-            height: 60px; width: 100%; flex-shrink: 0;
-            background: linear-gradient(180deg, #cd9933, #f2dca5, #b88a2d);
-            border-bottom: 2px solid #5a390f;
+            height: 60px; flex-shrink: 0;
+            background: linear-gradient(180deg, #d4af37, #b8860b);
             display: flex; align-items: center; justify-content: space-between;
-            padding: 0 10px; z-index: 100;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+            padding: 0 10px; border-bottom: 2px solid #fff;
+            z-index: 10;
         }
-        .user-info { display: flex; align-items: center; gap: 8px; }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #fff; background: #333; overflow: hidden; }
-        .avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .user-details { display: flex; flex-direction: column; }
-        .u-name { font-weight: bold; font-size: 13px; color: #4b2c10; }
-        .u-id { font-size: 10px; color: #555; }
-
-        .balance-pill {
-            background: #111; border: 1px solid #ffd700; border-radius: 20px;
-            padding: 4px 12px; display: flex; align-items: center; gap: 5px;
-            color: #ffd700; font-weight: bold; font-size: 15px;
-            box-shadow: inset 0 0 5px #ffd700;
+        .user { font-weight: bold; color: #2d1e03; font-size: 14px; }
+        .bal-box {
+            background: #000; color: #ffd700; padding: 5px 15px;
+            border-radius: 20px; font-weight: bold; border: 1px solid #ffd700;
         }
 
-        /* --- 3. BÀN CHƠI (GAME AREA) --- */
-        .game-board {
+        /* --- 2. BÀN CHƠI (Tự co giãn phần giữa) --- */
+        .game-area {
             flex: 1; position: relative; width: 100%;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
         /* Soi cầu */
-        .history-wrap {
-            position: absolute; top: 10px; width: 95%; height: 26px;
-            background: rgba(0,0,0,0.6); border-radius: 13px;
-            display: flex; align-items: center; justify-content: flex-end;
-            padding: 0 8px; gap: 4px; overflow: hidden; border: 1px solid #444;
+        .history {
+            position: absolute; top: 10px; height: 30px; background: rgba(0,0,0,0.5);
+            border-radius: 15px; padding: 0 10px; display: flex; align-items: center; gap: 5px;
         }
-        .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-        .dot.tai { background: #00e600; box-shadow: 0 0 4px #00e600; }
-        .dot.xiu { background: #ff0000; box-shadow: 0 0 4px #ff0000; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .dot.T { background: #0f0; box-shadow: 0 0 5px #0f0; } /* Tài */
+        .dot.X { background: #f00; box-shadow: 0 0 5px #f00; } /* Xỉu */
 
-        /* Khu vực Đĩa & Cửa đặt (Layout Flex) */
-        .bet-area {
-            width: 100%; display: flex; align-items: center; justify-content: space-between;
-            padding: 0 5px; margin-top: 15px;
+        /* Bàn cược */
+        .board {
+            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; padding: 0 5px;
         }
-
-        /* Cửa Tài / Xỉu */
+        
         .gate {
-            width: 28vw; height: 28vw; max-width: 120px; max-height: 120px;
-            background: linear-gradient(180deg, #590d0d, #2e0505);
-            border: 2px solid #8c6028; border-radius: 12px;
+            width: 30vw; height: 30vw; max-width: 120px; max-height: 120px;
+            background: #2a0a0a; border: 2px solid #b8860b; border-radius: 10px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            position: relative; transition: all 0.2s;
-            box-shadow: 0 5px 10px rgba(0,0,0,0.6);
+            position: relative; transition: 0.1s;
         }
-        .gate.active { border-color: #ffd700; box-shadow: 0 0 15px #ffd700; transform: scale(1.05); }
-        .gate-label { font-size: 24px; font-weight: 900; color: #fff; text-shadow: 2px 2px 0 #000; font-family: Tahoma, sans-serif; }
-        .gate-money { 
-            position: absolute; bottom: 5px; 
-            font-size: 11px; color: #ffff00; font-weight: bold; 
-            background: rgba(0,0,0,0.8); padding: 2px 6px; border-radius: 4px;
-        }
+        .gate.active { background: #4e1a1a; border-color: #ffd700; box-shadow: 0 0 15px #ffd700; transform: scale(1.05); }
+        .gate-title { color: #fff; font-weight: 900; font-size: 24px; }
+        .gate-bet { color: #ffd700; font-size: 12px; margin-top: 5px; font-weight: bold; }
 
-        /* Đĩa ở giữa */
-        .plate-container {
-            width: 38vw; height: 38vw; max-width: 160px; max-height: 160px;
-            position: relative; display: flex; justify-content: center; align-items: center;
+        /* Bát đĩa */
+        .plate-area {
+            position: relative; width: 35vw; height: 35vw; max-width: 150px; max-height: 150px;
+            display: flex; justify-content: center; align-items: center;
         }
-        .plate-bg {
+        .plate {
             width: 100%; height: 100%; border-radius: 50%;
-            background: radial-gradient(#b8860b, #4b2c10);
-            border: 4px solid #ffd700; box-shadow: 0 10px 20px #000;
+            background: radial-gradient(#d4af37, #5c3c0d); border: 3px solid #fff;
         }
         .bowl {
-            position: absolute; width: 105%; height: 105%; border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #ffd700, #b8860b, #3d1e05);
-            z-index: 10; display: flex; justify-content: center; align-items: center;
-            box-shadow: inset 0 -5px 15px rgba(0,0,0,0.5), 0 10px 25px #000;
-            transition: transform 0.4s ease-out, opacity 0.3s;
+            position: absolute; width: 110%; height: 110%; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ffd700, #b8860b);
+            z-index: 5; box-shadow: 0 5px 15px #000;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 20px; font-weight: bold; color: #5c3c0d;
+            transition: transform 0.5s;
         }
         .bowl.open { transform: translateY(-150%); opacity: 0; pointer-events: none; }
         
         /* Xúc xắc */
-        .dice-grp {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            display: flex; gap: 3px; z-index: 5;
-        }
-        .dice {
-            width: 28px; height: 28px; background: #fff; border-radius: 6px;
+        .dice-wrap { position: absolute; z-index: 2; display: flex; gap: 2px; }
+        .dice { 
+            width: 30px; height: 30px; background: #fff; border-radius: 5px; 
             display: flex; justify-content: center; align-items: center;
-            font-size: 20px; font-weight: bold; color: #d00;
-            box-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            font-size: 20px; color: #000; font-weight: bold;
         }
 
-        /* Đồng hồ */
-        .timer {
-            position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
-            width: 40px; height: 40px; background: #000; border: 2px solid red; border-radius: 50%;
-            color: red; display: flex; justify-content: center; align-items: center;
-            font-weight: bold; font-size: 18px; z-index: 20; box-shadow: 0 0 10px red;
+        /* Timer */
+        .timer-badge {
+            position: absolute; top: -20px; background: #000; border: 2px solid red;
+            color: red; width: 40px; height: 40px; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 18px;
+            z-index: 20;
         }
 
-        /* Thông báo thắng */
-        .win-noti {
-            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
-            z-index: 50; text-align: center; display: none; width: 100%;
-        }
-        .win-text { font-size: 50px; font-weight: 900; color: #ffeb3b; text-shadow: 0 0 20px #f00; -webkit-text-stroke: 2px #b00; }
-        .win-amt { font-size: 24px; color: #fff; font-weight: bold; text-shadow: 1px 1px 2px #000; margin-top: -10px; }
-
-        /* --- 4. CONTROLS (THANH ĐIỀU KHIỂN) --- */
+        /* --- 3. ĐIỀU KHIỂN (Luôn ở dưới đáy, Z-index cao nhất) --- */
         .controls {
-            background: #140505; border-top: 2px solid #b8860b;
-            padding: 8px; display: flex; flex-direction: column; gap: 8px;
-            flex-shrink: 0;
+            flex-shrink: 0; background: #1a0505; border-top: 2px solid #b8860b;
+            padding: 10px; display: flex; flex-direction: column; gap: 10px;
+            z-index: 9999; /* QUAN TRỌNG: Đảm bảo nút luôn bấm được */
         }
-        
-        /* Thanh trạng thái */
-        .status-bar { text-align: center; color: #f39c12; font-size: 14px; font-weight: bold; margin-bottom: 2px; }
 
-        /* Chọn chip (Cuộn ngang) */
-        .chip-scroll {
-            display: flex; gap: 12px; overflow-x: auto; padding-bottom: 5px;
-            justify-content: flex-start; /* Cho phép cuộn từ trái */
-            padding-left: 5px; padding-right: 5px;
-        }
-        /* Ẩn thanh cuộn */
-        .chip-scroll::-webkit-scrollbar { display: none; }
-        
+        .status { text-align: center; color: #fff; font-size: 14px; min-height: 20px; }
+
+        .chips { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; }
         .chip {
-            width: 50px; height: 50px; border-radius: 50%; flex-shrink: 0;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 11px; font-weight: 900; color: #000; cursor: pointer;
-            border: 2px dashed rgba(255,255,255,0.4); box-shadow: 0 3px 0 #5e431f;
+            min-width: 50px; height: 50px; border-radius: 50%;
+            background: url('https://i.imgur.com/w9M7f1g.png'); /* Fallback color below */
+            background: radial-gradient(#f1c40f, #d35400);
+            border: 2px dashed #fff; display: flex; justify-content: center; align-items: center;
+            color: #000; font-weight: bold; font-size: 11px; cursor: pointer;
         }
-        .chip:active { transform: scale(0.9); }
-        /* Màu chip */
-        .c-100k { background: radial-gradient(#e74c3c, #c0392b); color: #fff; }
-        .c-500k { background: radial-gradient(#9b59b6, #8e44ad); color: #fff; }
-        .c-1m { background: radial-gradient(#f1c40f, #f39c12); }
-        .c-5m { background: radial-gradient(#3498db, #2980b9); color: #fff; }
-        .c-10m { background: radial-gradient(#fff, #bdc3c7); border: 2px solid gold; }
+        .chip.active { border: 2px solid #0f0; transform: scale(1.1); }
 
-        /* Hàng nút bấm (Flex row để không bị len ra ngoài) */
-        .btn-row { display: flex; gap: 6px; width: 100%; }
+        .btns { display: flex; gap: 10px; width: 100%; }
         .btn {
-            border: none; border-radius: 8px; height: 45px;
-            font-weight: 900; font-size: 14px; color: #3e2723;
-            text-transform: uppercase; cursor: pointer;
-            display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 3px 0 rgba(0,0,0,0.5);
+            border: none; padding: 12px; border-radius: 5px;
+            font-weight: bold; font-size: 16px; flex: 1; cursor: pointer;
+            color: #fff; text-transform: uppercase;
         }
-        .btn:active { transform: translateY(2px); box-shadow: none; }
-        
-        /* Chia tỷ lệ nút hợp lý */
-        .btn-cancel { flex: 1; background: #95a5a6; color: #fff; font-size: 12px; }
-        .btn-allin { flex: 1; background: #e74c3c; color: #fff; font-size: 12px; }
-        .btn-ok { flex: 2.5; background: linear-gradient(to bottom, #f1c40f, #f39c12); font-size: 18px; }
-        
-        .btn.disabled { opacity: 0.5; filter: grayscale(1); pointer-events: none; }
+        .btn-cancel { background: #555; flex: 0.5; }
+        .btn-ok { background: linear-gradient(#e67e22, #d35400); flex: 1.5; }
+        .btn.disabled { opacity: 0.5; pointer-events: none; background: #333; }
 
-        /* Tool Icon */
-        #tool-btn {
-            position: fixed; top: 70px; right: 0; padding: 8px 12px;
-            background: #000; border: 1px solid #0f0; border-right: none;
-            border-radius: 20px 0 0 20px; color: #0f0; font-weight: bold;
-            z-index: 200; font-size: 12px; box-shadow: 0 0 10px #00f;
+        /* --- 4. TOOL HACK --- */
+        .tool-btn {
+            position: fixed; top: 70px; right: 0; background: #000; border: 1px solid #0f0;
+            color: #0f0; padding: 5px 10px; border-radius: 10px 0 0 10px; z-index: 999; cursor: pointer;
         }
 
-        /* Animation Rung */
+        /* Hiệu ứng rung */
         @keyframes shake {
             0% { transform: translate(1px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
             50% { transform: translate(-1px, 2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 1px) rotate(0deg); }
-            70% { transform: translate(3px, 1px) rotate(-1deg); }
-            80% { transform: translate(-1px, -1px) rotate(1deg); }
-            90% { transform: translate(1px, 2px) rotate(0deg); }
             100% { transform: translate(1px, -2px) rotate(-1deg); }
         }
         .shaking { animation: shake 0.5s infinite; }
+
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="user-info">
-            <div class="avatar"><img src="https://ui-avatars.com/api/?name=Vip&background=random" alt="A"></div>
-            <div class="user-details">
-                <span class="u-name">VIP MEMBER</span>
-                <span class="u-id">ID: 888999</span>
-            </div>
-        </div>
-        <div class="balance-pill">
-            <span>$</span> <span id="balance">50.000.000</span>
-        </div>
+        <div class="user">VIP MEMBER</div>
+        <div class="bal-box" id="balance">50.000.000</div>
     </div>
 
-    <div class="game-board">
-        <div class="history-wrap" id="history"></div>
+    <div class="game-area">
+        <div class="history" id="history"></div>
         
-        <div class="win-noti" id="win-noti">
-            <div class="win-text">NỔ HŨ</div>
-            <div class="win-amt" id="win-amt">+0</div>
-        </div>
+        <div class="timer-badge" id="timer">15</div>
 
-        <div class="bet-area">
+        <div class="board">
             <div class="gate" id="gate-tai" onclick="game.select('TAI')">
-                <div class="gate-label">TÀI</div>
-                <div class="gate-money" id="bet-tai">0</div>
+                <div class="gate-title">TÀI</div>
+                <div class="gate-bet" id="bet-tai">0</div>
             </div>
 
-            <div class="plate-container">
-                <div class="timer" id="timer">00</div>
-                <div class="plate-bg"></div>
-                <div class="dice-grp">
+            <div class="plate-area">
+                <div class="plate"></div>
+                <div class="dice-wrap">
                     <div class="dice" id="d1">1</div>
                     <div class="dice" id="d2">2</div>
                     <div class="dice" id="d3">3</div>
                 </div>
-                <div class="bowl" id="bowl"></div>
+                <div class="bowl" id="bowl">SUNWIN</div>
             </div>
 
             <div class="gate" id="gate-xiu" onclick="game.select('XIU')">
-                <div class="gate-label">XỈU</div>
-                <div class="gate-money" id="bet-xiu">0</div>
+                <div class="gate-title">XỈU</div>
+                <div class="gate-bet" id="bet-xiu">0</div>
             </div>
         </div>
     </div>
 
     <div class="controls">
-        <div class="status-bar" id="status">VUI LÒNG ĐẶT CƯỢC</div>
-        
-        <div class="chip-scroll">
-            <div class="chip c-100k" onclick="game.addChip(100000)">100K</div>
-            <div class="chip c-500k" onclick="game.addChip(500000)">500K</div>
-            <div class="chip c-1m" onclick="game.addChip(1000000)">1M</div>
-            <div class="chip c-5m" onclick="game.addChip(5000000)">5M</div>
-            <div class="chip c-10m" onclick="game.addChip(10000000)">10M</div>
+        <div class="status" id="status">Vui lòng chọn cửa cược</div>
+
+        <div class="chips">
+            <div class="chip" onclick="game.setChip(100000)">100K</div>
+            <div class="chip" onclick="game.setChip(500000)">500K</div>
+            <div class="chip" onclick="game.setChip(1000000)">1M</div>
+            <div class="chip" onclick="game.setChip(5000000)">5M</div>
+            <div class="chip" onclick="game.setChip(10000000)">10M</div>
         </div>
 
-        <div class="btn-row">
+        <div class="btns">
             <button class="btn btn-cancel" onclick="game.cancel()">HỦY</button>
-            <button class="btn btn-allin" onclick="game.allin()">TẤT TAY</button>
-            <button class="btn btn-ok" id="btn-ok" onclick="game.confirm()">ĐẶT CƯỢC</button>
+            <button class="btn btn-ok" id="btn-confirm" onclick="game.confirm()">ĐẶT CƯỢC</button>
         </div>
     </div>
 
-    <div id="tool-btn" onclick="tool.activate()">🤖 TOOL OFF</div>
+    <div class="tool-btn" id="tool-display" onclick="game.toggleTool()">🤖 TOOL: OFF</div>
 
     <script>
+        // Đảm bảo code chạy sau khi HTML load xong
+        document.addEventListener('DOMContentLoaded', function() {
+            game.init();
+        });
+
         const game = {
-            balance: 50000000,
-            state: 'STOP',
+            bal: 50000000,
+            currChip: 100000,
             tempBet: 0,
             side: null, // 'TAI' or 'XIU'
-            confirmed: 0,
-            confirmedSide: null,
-            timer: 0,
+            isBetting: true,
+            timer: 15,
             interval: null,
             history: [],
-            isHack: false, // Trạng thái hack
-            hackResult: null,
+            toolEnabled: false,
+            nextResult: null, // Hack result
 
-            // Chạy khi tải xong
-            start: function() {
+            init: function() {
                 this.updateBal();
+                this.startTimer();
                 this.renderHistory();
-                this.newRound();
             },
 
-            newRound: function() {
-                this.state = 'BETTING';
-                this.tempBet = 0;
+            // --- HỆ THỐNG TIMER (Đã sửa lỗi không chạy) ---
+            startTimer: function() {
+                clearInterval(this.interval);
+                this.timer = 15;
+                this.isBetting = true;
                 this.side = null;
-                this.confirmed = 0;
-                this.confirmedSide = null;
-                this.hackResult = null;
+                this.tempBet = 0;
+                this.nextResult = null; // Reset hack
                 
                 // Reset UI
+                document.getElementById('timer').innerText = this.timer;
                 document.getElementById('bowl').classList.remove('open', 'shaking');
-                document.getElementById('win-noti').style.display = 'none';
                 document.getElementById('gate-tai').classList.remove('active');
                 document.getElementById('gate-xiu').classList.remove('active');
-                document.getElementById('btn-ok').classList.remove('disabled');
-                document.getElementById('status').innerText = "THỜI GIAN ĐẶT CƯỢC";
-                document.getElementById('status').style.color = "#f39c12";
-                this.updateBetUI();
+                document.getElementById('bet-tai').innerText = "0";
+                document.getElementById('bet-xiu').innerText = "0";
+                document.getElementById('status').innerText = "VUI LÒNG ĐẶT CƯỢC";
+                document.getElementById('btn-confirm').classList.remove('disabled');
 
-                // Nếu có tool, tính trước kết quả
-                if(this.isHack) {
-                    this.hackResult = Math.random() > 0.5 ? 'TAI' : 'XIU';
-                    document.getElementById('tool-btn').innerText = "🤖 VỀ: " + this.hackResult;
-                } else {
-                    document.getElementById('tool-btn').innerText = "🤖 TOOL OFF";
+                // Tool Hack Check
+                if(this.toolEnabled) {
+                    this.nextResult = Math.random() > 0.5 ? 'TAI' : 'XIU';
+                    document.getElementById('tool-display').innerText = "🤖 VỀ: " + this.nextResult;
+                    document.getElementById('tool-display').style.color = "#0f0";
                 }
 
-                // Timer
-                this.timer = 15; 
-                document.getElementById('timer').innerText = this.timer;
-                clearInterval(this.interval);
+                // Loop
                 this.interval = setInterval(() => {
                     this.timer--;
-                    document.getElementById('timer').innerText = this.timer < 10 ? '0'+this.timer : this.timer;
-                    if(this.timer <= 0) {
+                    document.getElementById('timer').innerText = this.timer;
+                    
+                    if (this.timer <= 0) {
                         clearInterval(this.interval);
                         this.shake();
                     }
                 }, 1000);
             },
 
-            // Logic cược
+            // --- HỆ THỐNG CƯỢC (Đã sửa lỗi không bấm được) ---
+            setChip: function(val) {
+                this.currChip = val;
+                // Hiệu ứng Visual để biết đã chọn chip
+                document.getElementById('status').innerText = "Đã chọn chip: " + (val/1000) + "k";
+            },
+
             select: function(s) {
-                if(this.state !== 'BETTING' || this.confirmedSide) return;
-                this.side = s;
-                // Highlight UI
-                document.getElementById('gate-tai').classList.remove('active');
-                document.getElementById('gate-xiu').classList.remove('active');
-                if(s === 'TAI') document.getElementById('gate-tai').classList.add('active');
-                else document.getElementById('gate-xiu').classList.add('active');
+                if (!this.isBetting) return;
                 
-                // Reset tempBet nếu đổi cửa (logic đơn giản)
-                // this.tempBet = 0; 
-                this.updateBetUI();
-            },
-
-            addChip: function(val) {
-                if(this.state !== 'BETTING' || !this.side || this.confirmedSide) {
-                    if(!this.side && this.state === 'BETTING') alert("Vui lòng chọn cửa (Tài/Xỉu) trước!");
-                    return;
+                // Nếu đổi cửa thì reset tiền cược cửa cũ
+                if(this.side && this.side !== s) {
+                    this.tempBet = 0;
                 }
-                if(this.balance - this.tempBet >= val) {
-                    this.tempBet += val;
-                    this.updateBetUI();
+
+                this.side = s;
+                
+                // Cộng dồn tiền
+                if (this.bal >= this.currChip) {
+                    this.tempBet += this.currChip;
+                    // Cập nhật UI ngay lập tức
+                    document.getElementById('gate-tai').classList.remove('active');
+                    document.getElementById('gate-xiu').classList.remove('active');
+                    
+                    if(s === 'TAI') {
+                        document.getElementById('gate-tai').classList.add('active');
+                        document.getElementById('bet-tai').innerText = this.fmt(this.tempBet);
+                    } else {
+                        document.getElementById('gate-xiu').classList.add('active');
+                        document.getElementById('bet-xiu').innerText = this.fmt(this.tempBet);
+                    }
                 } else {
-                    alert("Số dư không đủ!");
+                    alert("Hết tiền rồi đại gia!");
                 }
-            },
-
-            allin: function() {
-                if(this.state !== 'BETTING' || !this.side || this.confirmedSide) return;
-                this.tempBet = this.balance;
-                this.updateBetUI();
-            },
-
-            cancel: function() {
-                if(this.state !== 'BETTING' || this.confirmedSide) return;
-                this.tempBet = 0;
-                this.updateBetUI();
             },
 
             confirm: function() {
-                if(this.tempBet <= 0) return;
-                this.confirmedSide = this.side;
-                this.confirmed = this.tempBet;
-                this.balance -= this.confirmed;
-                this.updateBal();
-                document.getElementById('status').innerText = "ĐÃ ĐẶT CƯỢC THÀNH CÔNG";
-                document.getElementById('btn-ok').classList.add('disabled');
+                if(this.tempBet > 0 && this.isBetting) {
+                    this.bal -= this.tempBet;
+                    this.updateBal();
+                    document.getElementById('status').innerText = "ĐÃ CHỐT CƯỢC THÀNH CÔNG";
+                    document.getElementById('btn-confirm').classList.add('disabled');
+                    this.isBetting = false; // Khóa cược
+                }
             },
 
-            // Logic Xử lý kết quả
+            cancel: function() {
+                if(this.isBetting) {
+                    this.tempBet = 0;
+                    this.side = null;
+                    document.getElementById('gate-tai').classList.remove('active');
+                    document.getElementById('gate-xiu').classList.remove('active');
+                    document.getElementById('bet-tai').innerText = "0";
+                    document.getElementById('bet-xiu').innerText = "0";
+                }
+            },
+
+            // --- XỬ LÝ KẾT QUẢ ---
             shake: function() {
-                this.state = 'SHAKING';
-                document.getElementById('status').innerText = "NHÀ CÁI ĐANG XÓC...";
+                document.getElementById('status').innerText = "ĐANG XÓC...";
                 document.getElementById('bowl').classList.add('shaking');
-                document.getElementById('btn-ok').classList.add('disabled');
                 
                 setTimeout(() => {
                     document.getElementById('bowl').classList.remove('shaking');
-                    this.openResult();
+                    this.result();
                 }, 2000);
             },
 
-            openResult: function() {
-                this.state = 'RESULT';
+            result: function() {
                 let d1, d2, d3, total, resType;
 
-                // Logic Random hoặc Hack
-                if(this.isHack && this.hackResult) {
-                    // Force result
-                    resType = this.hackResult;
+                // Nếu có Tool Hack
+                if(this.nextResult) {
+                    resType = this.nextResult;
+                    // Random Dice sao cho khớp kết quả
                     do {
                         d1 = Math.ceil(Math.random()*6);
                         d2 = Math.ceil(Math.random()*6);
                         d3 = Math.ceil(Math.random()*6);
-                        total = d1+d2+d3;
-                    } while( (resType==='TAI' && total<=10) || (resType==='XIU' && total>10) );
+                        total = d1 + d2 + d3;
+                    } while( (resType === 'TAI' && total <= 10) || (resType === 'XIU' && total > 10) );
                 } else {
-                    // Random thuần
+                    // Random thật
                     d1 = Math.ceil(Math.random()*6);
                     d2 = Math.ceil(Math.random()*6);
                     d3 = Math.ceil(Math.random()*6);
-                    total = d1+d2+d3;
+                    total = d1 + d2 + d3;
                     resType = total > 10 ? 'TAI' : 'XIU';
                 }
 
-                // Hiển thị xúc xắc
+                // Render Xúc xắc
                 document.getElementById('d1').innerText = d1;
                 document.getElementById('d2').innerText = d2;
                 document.getElementById('d3').innerText = d3;
                 
-                // Màu xúc xắc (đỏ cho 1 và 4 cho đẹp)
-                [d1,d2,d3].forEach((v,i) => {
-                   document.getElementById('d'+(i+1)).style.color = (v===1||v===4) ? 'red' : 'black';
-                });
-
+                // Mở bát
                 document.getElementById('bowl').classList.add('open');
                 document.getElementById('status').innerText = `KẾT QUẢ: ${total} - ${resType}`;
-                document.getElementById('status').style.color = "#fff";
 
-                // Xử lý thắng thua
-                if(this.confirmedSide === resType) {
-                    let win = this.confirmed * 2; // Tỉ lệ 1:1
-                    this.balance += win;
-                    
-                    document.getElementById('win-noti').style.display = 'block';
-                    document.getElementById('win-amt').innerText = "+" + this.fmt(win);
-                    setTimeout(() => this.updateBal(), 1000);
+                // Trả thưởng
+                if(this.side === resType && !this.isBetting) { 
+                    // !isBetting nghĩa là đã bấm chốt cược
+                    let win = this.tempBet * 2;
+                    this.bal += win;
+                    setTimeout(() => alert("CHÚC MỪNG! BẠN THẮNG " + this.fmt(win)), 500);
                 }
 
-                // Cập nhật lịch sử
-                this.history.push(resType);
+                this.updateBal();
+                
+                // Lưu lịch sử
+                this.history.push(resType === 'TAI' ? 'T' : 'X');
                 if(this.history.length > 15) this.history.shift();
                 this.renderHistory();
 
                 // Ván mới
-                setTimeout(() => this.newRound(), 5000);
+                setTimeout(() => {
+                    this.startTimer();
+                }, 4000);
             },
 
-            // Utils
-            updateBal: function() 
+            // --- TIỆN ÍCH ---
+            toggleTool: function() {
+                this.toolEnabled = !this.toolEnabled;
+                if(!this.toolEnabled) {
+                    document.getElementById('tool-display').innerText = "🤖 TOOL: OFF";
+                    document.getElementById('tool-display').style.color = "#0f0";
+                    this.nextResult = null;
+                } else {
+                    alert("Đã bật Tool Hack!");
+                }
+            },
+            
+            updateBal: function() {
+                document.getElementById('balance').innerText = this.fmt(this.bal);
+            },
+            
+            renderHistory: function() {
+                let h = document.getElementById('history');
+                h.innerHTML = '';
+                this.history.forEach(r => {
+                    let d = document.createElement('div');
+                    d.className = 'dot ' + r;
+                    h.appendChild(d);
+                });
+            },
+            
+            fmt: function(n) { return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
+        };
+    </script>
+</body>
+</html>
