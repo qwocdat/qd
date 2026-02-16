@@ -2,81 +2,96 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <title>XÁC MINH</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XÁC MINH THÀNH CÔNG</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
         body { background: #050505; color: #fff; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .box { background: #111; padding: 40px; border-radius: 20px; border: 1px solid #333; text-align: center; width: 90%; max-width: 400px; box-shadow: 0 0 50px rgba(0, 255, 136, 0.2); display: none; } /* Mặc định ẩn */
+        .box { padding: 40px; border: 1px solid #333; border-radius: 20px; background: #111; text-align: center; width: 90%; max-width: 400px; display: none; }
         
-        /* Giao diện lỗi */
+        /* Màn hình lỗi */
         .error-screen { text-align: center; display: none; }
-        .error-icon { font-size: 50px; margin-bottom: 20px; }
-        .error-text { color: #ff5555; font-size: 18px; font-weight: bold; }
-        
-        h1 { color: #00ff88; font-family: 'Orbitron'; margin-bottom: 10px; font-size: 22px; }
-        .key-display { font-size: 32px; color: #fff; background: #000; border: 2px dashed #00ff88; padding: 20px; margin: 20px 0; font-family: 'Orbitron'; letter-spacing: 2px; border-radius: 10px; }
-        .timer { color: #888; font-size: 13px; margin-top: 10px; }
-        button { background: #00ff88; border: none; padding: 12px 30px; font-weight: bold; cursor: pointer; border-radius: 8px; margin-top: 20px; font-size: 16px; transition: 0.3s; }
-        button:hover { transform: scale(1.05); }
+        .error-icon { font-size: 60px; margin-bottom: 20px; }
+        .btn-back { background: #ff5555; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 20px; display: inline-block; }
+
+        .key-display { font-size: 30px; color: #fff; border: 2px dashed #00ff88; padding: 15px; margin: 20px 0; font-family: 'Orbitron'; letter-spacing: 2px; border-radius: 10px; word-break: break-all; }
+        .btn-copy { background: #00ff88; border: none; padding: 12px 30px; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 16px; }
     </style>
 </head>
 <body>
 
     <div class="box" id="successBox">
-        <h1>XÁC MINH THÀNH CÔNG</h1>
-        <p style="color:#aaa; font-size:14px">Cảm ơn bạn đã vượt link!</p>
+        <h2 style="color:#00ff88; font-family:'Orbitron'">XÁC MINH THÀNH CÔNG</h2>
+        <p style="color:#aaa; font-size:13px">Token hợp lệ. Key của bạn:</p>
         <div class="key-display" id="finalKey">LOADING...</div>
-        <div class="timer">Key hết hạn sau: <span id="timeCount" style="color: #fff">--</span>s</div>
-        <button onclick="copyKey()">SAO CHÉP KEY</button>
+        <div style="color:#888; font-size:12px">Key hết hạn sau: <span id="timeCount" style="color:#fff">--</span>s</div>
+        <br>
+        <button class="btn-copy" onclick="copyKey()">SAO CHÉP KEY</button>
     </div>
 
     <div class="error-screen" id="errorBox">
         <div class="error-icon">⛔</div>
-        <div class="error-text">TRUY CẬP BỊ TỪ CHỐI</div>
-        <p style="color:#888; margin-top:10px">Bạn chưa vượt qua link rút gọn.</p>
-        <a href="index.html" style="color:#00ff88; text-decoration:none; margin-top:20px; display:inline-block">Quay lại trang chủ</a>
+        <h2 style="color:#ff5555">TRUY CẬP BỊ TỪ CHỐI</h2>
+        <p style="color:#ccc; font-size:14px; margin-top:10px">Link không hợp lệ hoặc đã hết hạn!</p>
+        <p style="color:#666; font-size:12px">Vui lòng không copy link hoặc bookmark trang này.</p>
+        <a href="index.html" class="btn-back">VƯỢT LINK LẠI</a>
     </div>
 
     <script>
         const SECRET = "QUOC_DAT_SECRET_KEY_2026"; 
 
-        // --- BẢO MẬT: KIỂM TRA LINK ---
-        const urlParams = new URLSearchParams(window.location.search);
-        // Chỉ hiện Key nếu có ?verify=true
-        if (urlParams.get('verify') === 'true') {
+        function checkSecurity() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tokenFromUrl = urlParams.get('auth');
+            
+            const tokenStored = localStorage.getItem('vip_token');
+            const expiryStored = localStorage.getItem('vip_expiry');
+
+            // 1. KIỂM TRA CƠ BẢN
+            if (!tokenFromUrl || !tokenStored || !expiryStored) return false;
+
+            // 2. SO SÁNH TOKEN (Chống copy link cho người khác)
+            if (tokenFromUrl !== tokenStored) return false;
+
+            // 3. KIỂM TRA THỜI GIAN (Chống dùng lại link cũ quá 5 phút)
+            if (Date.now() > parseInt(expiryStored)) return false;
+
+            return true;
+        }
+
+        if (checkSecurity()) {
             document.getElementById('successBox').style.display = 'block';
-            startSystem();
+            
+            // Xóa token ngay lập tức để không dùng lại được (Bảo mật tối đa)
+            // localStorage.removeItem('vip_token'); 
+            // localStorage.removeItem('vip_expiry');
+            // (Nếu muốn F5 trang vẫn còn key thì comment 2 dòng trên lại)
+            
+            startKeyGen();
         } else {
             document.getElementById('errorBox').style.display = 'block';
         }
 
-        function startSystem() {
+        function startKeyGen() {
             updateKey();
             setInterval(updateKey, 1000);
         }
 
         function updateKey() {
             const now = Math.floor(Date.now() / 1000);
-            const duration = 180; // 3 phút
+            const duration = 180;
             const timeStep = Math.floor(now / duration);
-            
             const raw = SECRET + timeStep;
             const hash = CryptoJS.MD5(raw).toString();
             const num = parseInt(hash.substring(0, 8), 16) % 10000;
-            const key = "dat_" + num.toString().padStart(4, '0');
             
-            document.getElementById("finalKey").innerText = key;
+            document.getElementById("finalKey").innerText = "dat_" + num.toString().padStart(4, '0');
             
-            // Đếm ngược
             const timeLeft = duration - (now % duration);
             document.getElementById("timeCount").innerText = timeLeft;
             
-            // Nếu hết giờ (còn 0s), tự reload để đổi key
-            if (timeLeft === 0) {
-                 setTimeout(() => window.location.reload(), 1000);
-            }
+            if (timeLeft === 0) setTimeout(() => window.location.reload(), 1500);
         }
 
         function copyKey() {
