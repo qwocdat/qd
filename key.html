@@ -3,28 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIP Access Key</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <title>XÁC MINH THÀNH CÔNG</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
         body { background: #050505; color: #fff; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .box { background: #111; padding: 40px; border-radius: 20px; border: 1px solid #333; text-align: center; box-shadow: 0 0 50px rgba(0, 255, 136, 0.2); width: 90%; max-width: 400px; }
-        h1 { color: #00ff88; font-family: 'Orbitron'; margin-bottom: 10px; }
-        .key { font-size: 32px; color: #fff; background: #000; border: 2px dashed #00ff88; padding: 20px; margin: 20px 0; font-family: 'Orbitron'; letter-spacing: 2px; }
-        .timer { color: #888; font-size: 14px; }
-        button { background: #00ff88; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 5px; margin-top: 10px; }
-        button:hover { background: #00cc6a; }
+        .box { background: #111; padding: 40px; border-radius: 20px; border: 1px solid #333; text-align: center; width: 90%; max-width: 400px; box-shadow: 0 0 50px rgba(0, 255, 136, 0.2); }
+        h1 { color: #00ff88; font-family: 'Orbitron'; margin-bottom: 10px; font-size: 22px; }
+        p { color: #aaa; font-size: 14px; margin-bottom: 30px; }
+        
+        .key-display { 
+            font-size: 32px; color: #fff; background: #000; 
+            border: 2px dashed #00ff88; padding: 20px; margin: 20px 0; 
+            font-family: 'Orbitron'; letter-spacing: 2px; border-radius: 10px;
+        }
+        
+        .timer { color: #888; font-size: 13px; margin-top: 10px; }
+        
+        button { 
+            background: #00ff88; border: none; padding: 12px 30px; 
+            font-weight: bold; cursor: pointer; border-radius: 8px; 
+            margin-top: 20px; font-size: 16px; transition: 0.3s;
+        }
+        button:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(0, 255, 136, 0.4); }
     </style>
 </head>
 <body>
     <div class="box">
         <h1>XÁC MINH THÀNH CÔNG</h1>
-        <p>Cảm ơn bạn đã vượt link!</p>
+        <p>Cảm ơn bạn đã vượt link ủng hộ!</p>
         
-        <div class="key" id="keyDisplay">LOADING...</div>
+        <div class="key-display" id="finalKey">LOADING...</div>
         
-        <div class="timer">Key thay đổi sau: <span id="time" style="color: #fff">--</span>s</div>
-        <button onclick="copy()">Sao Chép Key</button>
+        <div class="timer">Key thay đổi sau: <span id="timeCount" style="color: #fff">--</span>s</div>
+        <button onclick="copyKey()">SAO CHÉP KEY</button>
     </div>
 
     <script>
@@ -32,7 +44,7 @@
         const SECRET = "QUOC_DAT_SECRET_KEY_2026"; 
         // -------------------------------------
 
-        function update() {
+        function updateKey() {
             const now = Math.floor(Date.now() / 1000);
             const duration = 180; // 3 phút
             const timeStep = Math.floor(now / duration);
@@ -42,17 +54,17 @@
             const num = parseInt(hash.substring(0, 8), 16) % 10000;
             const key = "dat_" + num.toString().padStart(4, '0');
             
-            document.getElementById("keyDisplay").innerText = key;
-            document.getElementById("time").innerText = duration - (now % duration);
+            document.getElementById("finalKey").innerText = key;
+            document.getElementById("timeCount").innerText = duration - (now % duration);
         }
 
-        function copy() {
-            navigator.clipboard.writeText(document.getElementById("keyDisplay").innerText);
+        function copyKey() {
+            navigator.clipboard.writeText(document.getElementById("finalKey").innerText);
             alert("Đã sao chép!");
         }
 
-        setInterval(update, 1000);
-        update();
+        setInterval(updateKey, 1000);
+        updateKey();
     </script>
 </body>
 </html>
