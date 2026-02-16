@@ -3,206 +3,287 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QUOCDAT TOOL - Trang Chủ</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>QUOCDAT TOOL - Official</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Inter:wght@300;600&display=swap" rel="stylesheet">
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.ripples/0.5.3/jquery.ripples.min.js"></script>
+
     <style>
-        /* --- RESET & BASIC --- */
-        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
-        
+        /* --- CẤU HÌNH CƠ BẢN --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            background-color: #0a0a0a; /* Màu nền đen xám tối giản */
-            color: #e0e0e0;
+            background-color: #000;
+            /* Hình nền Abstract tối để hiệu ứng nước đẹp nhất */
+            background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #fff;
             font-family: 'Inter', sans-serif;
-            line-height: 1.6;
-            overflow-x: hidden;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        a { text-decoration: none; color: inherit; transition: 0.3s; }
-        ul { list-style: none; }
+        /* Lớp phủ mờ để chữ dễ đọc hơn */
+        .overlay-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            pointer-events: none;
+            z-index: 0;
+        }
 
-        /* --- HEADER & MENU --- */
+        /* --- HEADER & HAMBURGER --- */
         header {
             position: fixed;
             top: 0; left: 0; width: 100%;
-            padding: 20px 40px;
+            padding: 25px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(10, 10, 10, 0.8); /* Kính mờ nhẹ */
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             z-index: 1000;
         }
 
         .logo {
-            font-size: 20px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(0,255,136,0.5);
             color: #fff;
         }
 
-        .nav-links {
-            display: flex;
-            gap: 30px;
+        /* Nút 3 gạch ngang (Hamburger) */
+        .hamburger {
+            cursor: pointer;
+            z-index: 1002;
+            width: 30px;
+            height: 20px;
+            position: relative;
+            transition: 0.5s ease-in-out;
         }
 
-        .nav-links a {
-            font-size: 14px;
-            color: #888;
-            font-weight: 500;
-        }
-
-        .nav-links a:hover, .nav-links a.active {
-            color: #fff;
-        }
-
-        /* Nút Get Key đặc biệt trên menu */
-        .btn-menu-get {
+        .hamburger span {
+            display: block;
+            position: absolute;
+            height: 2px;
+            width: 100%;
             background: #fff;
-            color: #000 !important;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: 600;
-        }
-        .btn-menu-get:hover {
-            background: #ccc;
+            border-radius: 9px;
+            opacity: 1;
+            left: 0;
+            transform: rotate(0deg);
+            transition: .25s ease-in-out;
         }
 
-        /* --- SECTIONS --- */
-        section {
-            padding: 100px 20px;
-            min-height: 100vh;
+        .hamburger span:nth-child(1) { top: 0px; }
+        .hamburger span:nth-child(2) { top: 9px; }
+        .hamburger span:nth-child(3) { top: 18px; }
+
+        /* Hiệu ứng biến thành dấu X khi mở menu */
+        .hamburger.open span:nth-child(1) { top: 9px; transform: rotate(135deg); background: #ff5555; }
+        .hamburger.open span:nth-child(2) { opacity: 0; left: -60px; }
+        .hamburger.open span:nth-child(3) { top: 9px; transform: rotate(-135deg); background: #ff5555; }
+
+        /* --- MENU TOÀN MÀN HÌNH --- */
+        .nav-overlay {
+            position: fixed;
+            top: 0; right: -100%; /* Giấu bên phải */
+            width: 100%; height: 100%;
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: 0.5s ease-in-out;
+        }
+
+        .nav-overlay.active { right: 0; }
+
+        .nav-menu li {
+            list-style: none;
+            margin: 20px 0;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: 0.5s;
+        }
+
+        .nav-overlay.active .nav-menu li {
+            opacity: 1;
+            transform: translateY(0);
+            transition-delay: 0.2s;
+        }
+
+        .nav-menu a {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 30px;
+            text-decoration: none;
+            color: #888;
+            transition: 0.3s;
+        }
+
+        .nav-menu a:hover {
+            color: #fff;
+            text-shadow: 0 0 20px rgba(255,255,255,0.5);
+        }
+
+        .btn-menu-highlight {
+            color: #00ff88 !important;
+            border: 1px solid #00ff88;
+            padding: 10px 30px;
+            border-radius: 50px;
+        }
+        .btn-menu-highlight:hover {
+            background: #00ff88;
+            color: #000 !important;
+        }
+
+        /* --- NỘI DUNG CHÍNH (HERO) --- */
+        .container {
+            position: relative;
+            z-index: 10;
+            height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            max-width: 800px;
-            margin: 0 auto;
+            pointer-events: none;
         }
+        .container * { pointer-events: auto; }
 
-        /* Hero Section (Trang chủ) */
         h1 {
-            font-size: 48px;
-            font-weight: 800;
-            margin-bottom: 20px;
-            letter-spacing: -1px;
-            background: linear-gradient(to right, #fff, #666);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 60px;
+            font-weight: 900;
+            letter-spacing: -2px;
+            margin-bottom: 10px;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        p.subtitle {
-            font-size: 18px;
-            color: #666;
+        p.sub {
+            font-size: 16px;
+            color: #aaa;
             margin-bottom: 40px;
             max-width: 500px;
         }
 
-        .btn-primary {
-            display: inline-block;
+        .btn-main {
+            padding: 16px 45px;
+            font-size: 16px;
+            font-weight: bold;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(5px);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-main:hover {
             background: #fff;
             color: #000;
-            padding: 15px 40px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 16px;
-            border: 1px solid transparent;
+            box-shadow: 0 0 30px rgba(255,255,255,0.3);
+            transform: scale(1.05);
         }
-
-        .btn-primary:hover {
-            background: transparent;
-            color: #fff;
-            border-color: #fff;
-        }
-
-        /* Giới thiệu & Thông tin */
-        .section-title {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 30px;
-            color: #fff;
-        }
-
-        .info-card {
-            background: #111;
-            border: 1px solid #222;
-            padding: 30px;
-            border-radius: 12px;
-            text-align: left;
-            width: 100%;
-            margin-bottom: 20px;
-        }
-
-        .info-card h3 { color: #fff; margin-bottom: 10px; font-size: 18px; }
-        .info-card p { color: #888; font-size: 14px; margin-bottom: 0; }
 
         /* Footer */
-        footer {
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
             text-align: center;
-            padding: 40px;
             color: #444;
-            font-size: 12px;
-            border-top: 1px solid #111;
+            font-size: 11px;
+            z-index: 10;
         }
 
-        /* Mobile Responsive */
+        /* Mobile */
         @media (max-width: 768px) {
-            header { padding: 15px 20px; }
-            .nav-links { display: none; } /* Ẩn menu trên mobile cho gọn */
-            h1 { font-size: 36px; }
+            h1 { font-size: 40px; }
+            .logo { font-size: 20px; }
         }
     </style>
 </head>
 <body>
 
+    <div class="overlay-bg"></div>
+
     <header>
         <div class="logo">QUOCDAT.</div>
-        <nav>
-            <ul class="nav-links">
-                <li><a href="#home" class="active">Trang chủ</a></li>
-                <li><a href="#about">Giới thiệu</a></li>
-                <li><a href="#info">Thông tin</a></li>
-                <li><a href="index.html" class="btn-menu-get">Get Key</a></li>
-            </ul>
-        </nav>
-        <a href="index.html" class="btn-menu-get" style="display:none; @media(max-width:768px){display:block}">GET KEY</a>
+        <div class="hamburger" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
     </header>
 
-    <section id="home">
-        <h1>Bảo mật & Tối ưu hóa<br>Mã nguồn Python</h1>
-        <p class="subtitle">Công cụ Obfuscate chuyên nghiệp, tích hợp hệ thống Key 15 phút an toàn tuyệt đối.</p>
+    <div class="nav-overlay" id="navOverlay">
+        <ul class="nav-menu">
+            <li><a href="#" onclick="toggleMenu()">Trang Chủ</a></li>
+            <li><a href="#">Giới Thiệu</a></li>
+            <li><a href="#">Thông Tin</a></li>
+            <li><a href="#">Liên Hệ</a></li>
+            <li style="margin-top: 40px;">
+                <a href="index.html" class="btn-menu-highlight">LẤY KEY VIP</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <h1>UNLIMITED.<br>SECURITY.</h1>
+        <p class="sub">Hệ thống bảo vệ mã nguồn Python tối ưu.<br>Key bảo mật 15 phút - Chống chia sẻ.</p>
         
-        <a href="index.html" class="btn-primary">LẤY KEY NGAY &rarr;</a>
-    </section>
+        <a href="index.html">
+            <button class="btn-main">GET KEY NOW</button>
+        </a>
+    </div>
 
-    <section id="about">
-        <h2 class="section-title">Giới Thiệu</h2>
-        <div class="info-card">
-            <h3>🛡️ Bảo mật mạnh mẽ</h3>
-            <p>Sử dụng thuật toán mã hóa AES-256 kết hợp với AST Transformation, giúp mã nguồn của bạn không thể bị dịch ngược.</p>
-        </div>
-        <div class="info-card">
-            <h3>⚡ Key Hệ Thống</h3>
-            <p>Hệ thống cấp Key tự động qua Link4M. Mỗi Key chỉ có thời hạn sử dụng 15 phút, đảm bảo tính độc quyền và chống chia sẻ.</p>
-        </div>
-    </section>
+    <div class="footer">
+        © 2026 QuocDat Security. Design by QD.
+    </div>
 
-    <section id="info">
-        <h2 class="section-title">Thông Tin</h2>
-        <div class="info-card">
-            <h3>Phiên bản</h3>
-            <p>Tool Version: 5.0 (Stable)<br>Web System: v7.0 (Anti-Bypass)</p>
-        </div>
-        <div class="info-card">
-            <h3>Liên hệ</h3>
-            <p>Telegram: @quocdat_dev<br>Website: qwocdat.github.io</p>
-        </div>
-    </section>
+    <script>
+        // 1. Logic Menu (3 Gạch -> X)
+        function toggleMenu() {
+            const hamburger = document.querySelector('.hamburger');
+            const nav = document.querySelector('.nav-overlay');
+            
+            hamburger.classList.toggle('open');
+            nav.classList.toggle('active');
+        }
 
-    <footer>
-        &copy; 2026 QuocDat. All rights reserved.
-    </footer>
-
+        // 2. Logic Hiệu Ứng Nước (Liquid Glass)
+        $(document).ready(function() {
+            try {
+                $('body').ripples({
+                    resolution: 512, // Độ nét sóng
+                    dropRadius: 25,  // Độ to giọt nước
+                    perturbance: 0.04, // Độ méo hình
+                });
+                
+                // Tự động nhỏ giọt nước ngẫu nhiên
+                setInterval(function() {
+                    var $el = $('body');
+                    var x = Math.random() * $el.outerWidth();
+                    var y = Math.random() * $el.outerHeight();
+                    var dropRadius = 20;
+                    var strength = 0.04 + Math.random() * 0.04;
+                    $el.ripples('drop', x, y, dropRadius, strength);
+                }, 4000);
+            } catch (e) {
+                console.log("Thiết bị không hỗ trợ hiệu ứng WebGL.");
+            }
+        });
+    </script>
 </body>
-</html>
+                                                                </html>
+                                                                
