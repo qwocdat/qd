@@ -5,106 +5,161 @@
     <title>HỆ THỐNG VIP KEY</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400&display=swap" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.ripples/0.5.3/jquery.ripples.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #000 url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat fixed; color: #fff; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); pointer-events: none; z-index: 0; }
+        body { background: #050505; color: #fff; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
         
-        /* HEADER */
-        header { position: fixed; top: 0; left: 0; width: 100%; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; z-index: 100; background: rgba(255,255,255,0.02); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .logo { font-family: 'Orbitron'; font-weight: 900; font-size: 20px; color: #fff; }
-        .hamburger { cursor: pointer; width: 30px; height: 20px; position: relative; z-index: 102; }
-        .hamburger span { display: block; position: absolute; height: 2px; width: 100%; background: #fff; border-radius: 9px; transition: .25s; }
-        .hamburger span:nth-child(1) { top: 0px; } .hamburger span:nth-child(2) { top: 9px; } .hamburger span:nth-child(3) { top: 18px; }
-        .hamburger.open span:nth-child(1) { top: 9px; transform: rotate(135deg); background: #ff5555; }
-        .hamburger.open span:nth-child(2) { opacity: 0; left: -60px; }
-        .hamburger.open span:nth-child(3) { top: 9px; transform: rotate(-135deg); background: #ff5555; }
-
-        /* MENU */
-        .nav-overlay { position: fixed; top: 0; right: -100%; width: 100%; height: 100%; background: rgba(5,5,5,0.95); backdrop-filter: blur(20px); z-index: 101; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.5s; }
-        .nav-overlay.active { right: 0; }
-        .nav-menu li { list-style: none; margin: 25px 0; text-align: center; }
-        .nav-menu a { font-family: 'Orbitron'; font-size: 24px; text-decoration: none; color: #888; transition: 0.3s; }
-        .nav-menu a:hover { color: #fff; }
-
-        /* BOX */
-        .main-box { position: relative; z-index: 10; margin: auto; width: 350px; padding: 40px; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; background: rgba(0,0,0,0.6); text-align: center; backdrop-filter: blur(5px); }
+        .box { width: 380px; padding: 30px; border: 1px solid #333; border-radius: 20px; background: #111; text-align: center; box-shadow: 0 0 50px rgba(0,255,136,0.1); }
         h2 { color: #00ff88; font-family: 'Orbitron'; margin-bottom: 5px; }
-        .btn { width: 100%; padding: 15px; background: #fff; color: #000; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; }
-        .btn:hover { background: #00ff88; }
-        .loader { border: 4px solid #333; border-top: 4px solid #00ff88; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .status { color: #ffff00; font-size: 12px; margin-top: 10px; display: none; }
+        
+        .btn { width: 100%; padding: 15px; background: #fff; color: #000; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; }
+        .btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(255,255,255,0.4); }
+        .btn-manual { background: #ff5555; color: #fff; display: none; margin-top: 15px; } /* Nút dự phòng */
+
+        /* Thanh tiến trình Proxy */
+        .progress-box { width: 100%; height: 6px; background: #333; border-radius: 3px; margin-top: 20px; overflow: hidden; display: none; }
+        .progress-bar { width: 0%; height: 100%; background: #00ff88; transition: width 0.3s; }
+
+        .status { color: #ffff00; font-size: 12px; margin-top: 10px; display: none; font-family: monospace; }
+        .server-name { color: #888; font-size: 10px; margin-top: 5px; display: none; }
     </style>
 </head>
 <body>
-    <div class="overlay"></div>
-    <header>
-        <div class="logo">QUOCDAT.KEY</div>
-        <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
-    </header>
-    <div class="nav-overlay" id="navOverlay">
-        <ul class="nav-menu">
-            <li><a href="ui.html">Trang Chủ</a></li>
-            <li><a href="shop.html">Tổng Hợp (Shop)</a></li>
-            <li><a href="https://t.me/quocdadv">Liên Hệ Admin</a></li>
-        </ul>
-    </div>
-
-    <div class="main-box">
+    <div class="box">
         <h2>VIP SYSTEM</h2>
-        <p style="color:#aaa; font-size:12px">Secure Token (15 Min)</p>
-        <button id="btnGet" class="btn" onclick="genLink()">🚀 TẠO LINK BẢO MẬT</button>
-        <div id="loader" class="loader"></div>
+        <p style="color:#666; font-size:12px">Multi-Proxy System (15 Server)</p>
+        
+        <button id="btnGet" class="btn" onclick="processKey()">🚀 LẤY LINK (AUTO PROXY)</button>
+        
+        <div id="pBox" class="progress-box"><div id="pBar" class="progress-bar"></div></div>
+        
         <div id="status" class="status">Đang khởi tạo...</div>
+        <div id="serverName" class="server-name">...</div>
+
+        <button id="btnManual" class="btn btn-manual" onclick="manualLink()">🛠️ BẤM ĐỂ TẠO THỦ CÔNG</button>
     </div>
 
     <script>
-        function toggleMenu() { $('.hamburger').toggleClass('open'); $('.nav-overlay').toggleClass('active'); }
-        $(document).ready(function() { try { $('body').ripples({ resolution: 512, dropRadius: 20, perturbance: 0.04 }); } catch(e){} });
-
-        const API_TOKEN = "6992df868b3d1e423d1ab833";
+        const API_TOKEN = "6992df868b3d1e423d1ab833"; 
         const TARGET_FILE = "key.html"; 
-        const PROXIES = [
-            u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-            u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-            u => `https://thingproxy.freeboard.io/fetch/${u}`
+        
+        let finalTargetUrl = "";
+
+        // --- DANH SÁCH 15 PROXY MẠNH NHẤT (Cập nhật 2026) ---
+        // Hệ thống sẽ thử lần lượt từ trên xuống dưới
+        const PROXY_LIST = [
+            u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`, // 1. AllOrigins (Rất ổn định)
+            u => `https://corsproxy.io/?${encodeURIComponent(u)}`,             // 2. CorsProxy.io (Nhanh)
+            u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`, // 3. CodeTabs (Châu Âu)
+            u => `https://thingproxy.freeboard.io/fetch/${u}`,                  // 4. ThingProxy
+            u => `https://api.cors.lol/?url=${encodeURIComponent(u)}`,          // 5. Cors.lol
+            u => `https://proxy.cors.sh/${u}`,                                  // 6. Cors.sh
+            u => `https://cors-anywhere.herokuapp.com/${u}`,                    // 7. Heroku (Cần demo nhưng cứ thử)
+            u => `https://api.incolumitas.com/?url=${encodeURIComponent(u)}`,   // 8. Incolumitas
+            u => `https://cors.eu.org/${u}`,                                    // 9. EU Org
+            u => `https://test.cors.workers.dev/?${encodeURIComponent(u)}`,     // 10. Cloudflare Worker Test
+            u => `https://cors-get-proxy.sirjosh.workers.dev/?url=${encodeURIComponent(u)}`, // 11. SirJosh Worker
+            u => `https://jsonp.afeld.me/?url=${encodeURIComponent(u)}`,        // 12. JSONP
+            u => `https://yacdn.org/proxy/${u}`,                                // 13. YACDN
+            u => `https://api.scraperapi.com/?api_key=your_key&url=${encodeURIComponent(u)}`, // 14. (Placeholder)
+            u => u // 15. Thử kết nối trực tiếp (Nếu mạng người dùng cho phép)
         ];
 
-        async function genLink() {
-            if (window.location.protocol === 'file:') return alert("Upload lên GitHub Pages!");
-            document.getElementById('btnGet').style.display = 'none';
-            document.getElementById('loader').style.display = 'block';
-            document.getElementById('status').style.display = 'block';
+        async function processKey() {
+            if (window.location.protocol === 'file:') return alert("Lỗi: Hãy upload lên GitHub Pages!");
 
-            const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
-            const expiry = Date.now() + (15 * 60 * 1000); 
+            const btn = document.getElementById('btnGet');
+            const pBox = document.getElementById('pBox');
+            const pBar = document.getElementById('pBar');
+            const status = document.getElementById('status');
+            const sName = document.getElementById('serverName');
+            const btnManual = document.getElementById('btnManual');
 
-            localStorage.setItem('secure_token', token);
-            localStorage.setItem('secure_expiry', expiry);
+            // Reset giao diện
+            btn.style.display = 'none';
+            btnManual.style.display = 'none';
+            pBox.style.display = 'block';
+            status.style.display = 'block';
+            sName.style.display = 'block';
+            status.innerText = "Đang sinh mã bảo mật...";
+            pBar.style.width = "5%";
 
-            let path = window.location.href.split('?')[0];
-            if (path.endsWith("index.html")) path = path.substring(0, path.lastIndexOf("index.html"));
-            if (!path.endsWith("/")) path += "/";
-            const target = `${path}${TARGET_FILE}?t=${token}&e=${expiry}`;
+            try {
+                // 1. Tạo Token bảo mật
+                const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
+                const expiry = Date.now() + (15 * 60 * 1000); // 15 phút
+                
+                localStorage.setItem('secure_token', token);
+                localStorage.setItem('secure_expiry', expiry);
 
-            const api = `https://link4m.co/api-shorten/v2?api=${API_TOKEN}&url=${encodeURIComponent(target)}`;
-            
-            let success = false;
-            for (let p of PROXIES) {
-                try {
-                    const res = await fetch(p(api));
-                    const data = await res.json();
-                    if (data.status === "success") {
-                        document.getElementById('status').innerText = "Thành công! Đang chuyển hướng...";
-                        setTimeout(() => window.location.href = data.shortenedUrl, 800);
-                        success = true; break;
+                // 2. Tạo Link Đích
+                let path = window.location.href.split('?')[0];
+                if (path.endsWith("index.html")) path = path.substring(0, path.lastIndexOf("index.html"));
+                if (!path.endsWith("/")) path += "/";
+                
+                finalTargetUrl = `${path}${TARGET_FILE}?t=${token}&e=${expiry}`;
+
+                // 3. CHẠY VÒNG LẶP THỬ PROXY
+                const api = `https://link4m.co/api-shorten/v2?api=${API_TOKEN}&url=${encodeURIComponent(finalTargetUrl)}`;
+                let shortLink = null;
+
+                for (let i = 0; i < PROXY_LIST.length; i++) {
+                    const progress = Math.round(((i + 1) / PROXY_LIST.length) * 100);
+                    pBar.style.width = `${progress}%`;
+                    
+                    status.innerText = `Đang thử Server ${i + 1}/${PROXY_LIST.length}...`;
+                    sName.innerText = `Connecting: Proxy Node ${i+1}`;
+                    
+                    try {
+                        // Timeout 3 giây mỗi server để không đợi lâu
+                        const controller = new AbortController();
+                        const id = setTimeout(() => controller.abort(), 3500);
+                        
+                        const res = await fetch(PROXY_LIST[i](api), { signal: controller.signal });
+                        clearTimeout(id);
+
+                        if (res.ok) {
+                            // Cố gắng parse JSON
+                            const text = await res.text();
+                            try {
+                                const data = JSON.parse(text);
+                                if (data.status === "success") {
+                                    shortLink = data.shortenedUrl;
+                                    break; // THÀNH CÔNG -> THOÁT VÒNG LẶP NGAY
+                                }
+                            } catch(e) {}
+                        }
+                    } catch (e) {
+                        console.log(`Server ${i+1} fail.`);
                     }
-                } catch(e){}
+                    // Nghỉ 100ms giữa các lần thử để mượt
+                    await new Promise(r => setTimeout(r, 100));
+                }
+
+                if (shortLink) {
+                    pBar.style.width = "100%";
+                    pBar.style.background = "#00ff88";
+                    status.innerText = "✅ THÀNH CÔNG! ĐANG CHUYỂN HƯỚNG...";
+                    status.style.color = "#00ff88";
+                    setTimeout(() => window.location.href = shortLink, 1000);
+                } else {
+                    throw new Error("Tất cả Server đều bận");
+                }
+
+            } catch (err) {
+                // --- CHẾ ĐỘ DỰ PHÒNG ---
+                pBox.style.display = 'none';
+                status.innerText = "⚠️ Server quá tải. Vui lòng tạo thủ công.";
+                status.style.color = "#ff5555";
+                sName.style.display = 'none';
+                
+                btnManual.style.display = 'block';
             }
-            if(!success) window.open(`https://link4m.co/api?api=${API_TOKEN}&url=${encodeURIComponent(target)}`, '_blank');
+        }
+
+        function manualLink() {
+            const manualUrl = `https://link4m.co/api?api=${API_TOKEN}&url=${encodeURIComponent(finalTargetUrl)}`;
+            window.open(manualUrl, '_blank');
         }
     </script>
 </body>
