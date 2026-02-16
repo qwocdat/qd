@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HỆ THỐNG VIP KEY</title>
+    <title>VIP KEY SYSTEM</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
@@ -12,20 +12,17 @@
         h2 { color: #00ff88; font-family: 'Orbitron'; margin-bottom: 5px; }
         .status { font-size: 12px; color: #666; margin-bottom: 20px; }
         
-        /* Button */
         .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase; margin-top: 10px; font-size: 14px; }
         .btn-link { background: #fff; color: #000; }
         .btn-link:hover { background: #ccc; }
         .btn-copy { background: #00ff88; color: #000; }
         
-        /* Elements */
         #step2 { display: none; }
         .key-display { font-family: 'Orbitron'; font-size: 26px; color: #00ff88; border: 2px dashed #333; padding: 15px; margin: 15px 0; border-radius: 8px; letter-spacing: 2px; }
         .timer { font-size: 13px; color: #888; }
         
-        /* Loader & Error */
         .loader { border: 3px solid #333; border-top: 3px solid #00ff88; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: none; margin: 10px auto; }
-        .error-msg { color: #ff4444; font-size: 12px; margin-top: 10px; display: none; border: 1px solid #ff4444; padding: 5px; border-radius: 5px; background: rgba(255,0,0,0.1); }
+        .error-msg { color: #ff4444; font-size: 11px; margin-top: 10px; display: none; border: 1px solid #ff4444; padding: 8px; border-radius: 5px; background: rgba(255,0,0,0.1); word-break: break-word; text-align: left; }
         
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
@@ -34,7 +31,7 @@
 
     <div class="box">
         <h2>VIP SYSTEM</h2>
-        <p class="status">Link4M Auto-Gen API v2</p>
+        <p class="status">Link4M Auto-Gen API v3</p>
 
         <div id="step1">
             <button class="btn btn-link" onclick="handleGetLink()">👉 BẤM ĐỂ LẤY KEY</button>
@@ -56,7 +53,6 @@
         const API_TOKEN = "6992df868b3d1e423d1ab833"; 
         // ==========================================
 
-        // Kiểm tra URL hiện tại xem có ?verify=true không
         const urlParams = new URLSearchParams(window.location.search);
         const isVerified = urlParams.get('verify') === 'true';
 
@@ -67,60 +63,62 @@
         }
 
         async function handleGetLink() {
-            // Chặn chạy file offline (sẽ gây lỗi API)
             if (window.location.protocol === 'file:') {
-                showError("Lỗi: Bạn phải upload file này lên GitHub Pages!");
+                showError("Lỗi: Bạn đang chạy file offline. Hãy upload lên GitHub Pages!");
                 return;
             }
 
             const btn = document.querySelector('.btn-link');
             const loader = document.getElementById('loader');
-            const errDiv = document.getElementById('errorDisplay');
-
-            // Reset giao diện
+            
             btn.style.display = 'none';
             loader.style.display = 'block';
-            errDiv.style.display = 'none';
+            hideError();
 
-            // 1. Tạo link đích (Link hiện tại + ?verify=true)
-            // Ví dụ: https://qwocdat.github.io/tx/ -> https://qwocdat.github.io/tx/?verify=true
+            // 1. Tạo link đích
             let currentUrl = window.location.href.split('?')[0];
-            // Đảm bảo không bị thiếu dấu / cuối nếu là thư mục
             if (!currentUrl.includes(".html") && !currentUrl.endsWith("/")) {
                 currentUrl += "/";
             }
             const targetUrl = currentUrl + "?verify=true";
-            
-            console.log("Mục tiêu rút gọn:", targetUrl);
+            console.log("Target:", targetUrl);
 
-            // 2. Gọi API qua Proxy (corsproxy.io) để vượt tường lửa
-            // Encode targetUrl để gửi lên Link4M
-            const link4mUrl = `https://link4m.com/api-shorten/v2?api=${API_TOKEN}&url=${encodeURIComponent(targetUrl)}`;
+            // 2. Gọi API Link4M (Lưu ý dùng miền .co theo tài liệu ảnh)
+            // Thêm timestamp để tránh cache
+            const link4mApi = `https://link4m.co/api-shorten/v2?api=${API_TOKEN}&url=${encodeURIComponent(targetUrl)}`;
             
-            // Encode link4mUrl để gửi qua Proxy
-            const proxyUrl = `https://corsproxy.io/?` + encodeURIComponent(link4mUrl);
+            // 3. Dùng Proxy AllOrigins để lấy dữ liệu text thô
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(link4mApi)}&t=${Date.now()}`;
 
             try {
                 const response = await fetch(proxyUrl);
-                const data = await response.json();
+                const dataWrapper = await response.json();
+                
+                // dataWrapper.contents chứa nội dung trả về từ Link4M (có thể là JSON hoặc HTML lỗi)
+                if (!dataWrapper.contents) throw new Error("Proxy không trả về dữ liệu.");
 
-                // Kiểm tra kết quả trả về từ Link4M
+                console.log("Raw Response:", dataWrapper.contents);
+
+                // Cố gắng parse JSON
+                let data;
+                try {
+                    data = JSON.parse(dataWrapper.contents);
+                } catch (e) {
+                    // Nếu không parse được JSON, nghĩa là nhận được HTML lỗi
+                    throw new Error("API trả về HTML thay vì JSON. Có thể sai Token hoặc Server lỗi.\nNội dung: " + dataWrapper.contents.substring(0, 50) + "...");
+                }
+
                 if (data.status === "success" && data.shortenedUrl) {
-                    // Thành công -> Chuyển hướng
                     window.location.href = data.shortenedUrl;
                 } else {
-                    // Link4M báo lỗi (ví dụ: tên miền bị cấm, sai token...)
-                    throw new Error(data.message || "Không nhận được link rút gọn.");
+                    throw new Error(data.message || "Link4M từ chối tạo link.");
                 }
+
             } catch (err) {
                 console.error(err);
-                // Hiển thị lỗi ra màn hình để debug
-                showError("Lỗi tạo link: " + err.message + ". Vui lòng thử lại sau giây lát.");
+                showError("Lỗi: " + err.message);
                 btn.style.display = 'block';
                 loader.style.display = 'none';
-                
-                // FALLBACK: Nếu API lỗi quá nhiều, mở tab mới để người dùng tự rút gọn (Phương án dự phòng)
-                // window.open("https://link4m.com/member/tools/quick-link", "_blank");
             }
         }
 
@@ -128,6 +126,10 @@
             const errDiv = document.getElementById('errorDisplay');
             errDiv.innerText = msg;
             errDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('errorDisplay').style.display = 'none';
         }
 
         function startKeyGen() {
