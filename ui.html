@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUOCDAT VIP TOOL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.ripples/0.5.3/jquery.ripples.min.js"></script>
+
+    <style>
+        /* --- CẤU HÌNH GIAO DIỆN --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000;
+            /* Hình nền Abstract tối màu để hiệu ứng nước đẹp nhất */
+            background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop'); 
+            background-size: cover;
+            background-position: center;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden; /* Chặn thanh cuộn */
+            color: #fff;
+        }
+
+        /* Lớp phủ tối để chữ dễ đọc hơn */
+        .overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            pointer-events: none; /* Để chuột xuyên qua tác động xuống mặt nước */
+            z-index: 1;
+        }
+
+        /* --- NAVBAR (PHONG CÁCH MACOS GLASS) --- */
+        .navbar {
+            position: fixed;
+            top: 20px; left: 50%;
+            transform: translateX(-50%);
+            width: 90%; max-width: 1000px;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            
+            /* Hiệu ứng kính mờ */
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            z-index: 100;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 20px;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, #fff, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .menu {
+            display: flex;
+            gap: 25px;
+            list-style: none;
+        }
+
+        .menu a {
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .menu a:hover { color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+
+        /* Nút Get Key trên Menu */
+        .btn-menu-key {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 12px;
+            color: #fff !important;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .btn-menu-key:hover {
+            background: #fff;
+            color: #000 !important;
+        }
+
+        /* --- HERO SECTION --- */
+        .container {
+            position: relative;
+            z-index: 10; /* Nổi lên trên lớp phủ */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            pointer-events: none; /* Để chuột không bị chặn bởi container */
+        }
+
+        /* Cho phép click vào các nút bên trong container */
+        .container * { pointer-events: auto; }
+
+        h1 {
+            font-size: 70px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 20px rgba(165, 180, 252, 0.3));
+        }
+
+        p {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.7);
+            max-width: 600px;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        /* Nút Action Chính */
+        .btn-main {
+            padding: 18px 50px;
+            font-size: 18px;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-main:hover {
+            background: #fff;
+            color: #000;
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.4);
+        }
+
+        /* Footer */
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 12px;
+            z-index: 10;
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            h1 { font-size: 40px; }
+            .navbar { width: 95%; padding: 15px; }
+            .menu { display: none; } /* Ẩn menu trên mobile cho gọn */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay"></div>
+
+    <nav class="navbar">
+        <div class="logo">QUOCDAT.UI</div>
+        <ul class="menu">
+            <li><a href="#">Trang Chủ</a></li>
+            <li><a href="#">Dịch Vụ</a></li>
+            <li><a href="index.html" class="btn-menu-key">Lấy Key</a></li>
+        </ul>
+        <a href="index.html" class="btn-menu-key" style="display:none; @media(max-width:768px){display:block}">GET KEY</a>
+    </nav>
+
+    <div class="container">
+        <h1>UNLIMITED POWER</h1>
+        <p>Hệ thống cung cấp Key bảo mật cao cấp. Tích hợp Anti-Share, thời gian thực 15 phút và giao diện tối ưu hóa trải nghiệm người dùng.</p>
+        
+        <a href="index.html">
+            <button class="btn-main">KÍCH HOẠT NGAY</button>
+        </a>
+    </div>
+
+    <div class="footer">
+        Designed by QuocDat &copy; 2026. All rights reserved.
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            try {
+                $('body').ripples({
+                    resolution: 512, // Độ phân giải của sóng (càng cao càng mịn nhưng nặng)
+                    dropRadius: 20,  // Độ to của giọt nước
+                    perturbance: 0.03, // Độ nhiễu (độ méo hình)
+                });
+                
+                // Hiệu ứng tự động nhỏ giọt ngẫu nhiên cho sinh động
+                setInterval(function() {
+                    var $el = $('body');
+                    var x = Math.random() * $el.outerWidth();
+                    var y = Math.random() * $el.outerHeight();
+                    var dropRadius = 20;
+                    var strength = 0.04 + Math.random() * 0.04;
+
+                    $el.ripples('drop', x, y, dropRadius, strength);
+                }, 3000); // 3 giây nhỏ 1 giọt
+            } catch (e) {
+                console.log("Hiệu ứng nước không chạy được trên thiết bị này.");
+            }
+        });
+    </script>
+
+</body>
+</html>
