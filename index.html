@@ -2,123 +2,109 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <title>HỆ THỐNG VIP KEY</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>hệ thống key</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.ripples/0.5.3/jquery.ripples.min.js"></script>
     <style>
-        body { background: #050505; color: #fff; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
-        .box { width: 350px; padding: 30px; border: 1px solid #333; border-radius: 20px; background: #111; text-align: center; box-shadow: 0 0 50px rgba(0, 255, 136, 0.1); }
-        h2 { color: #00ff88; font-family: 'Orbitron'; margin-bottom: 5px; }
-        .btn { width: 100%; padding: 15px; background: #fff; color: #000; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; }
-        .btn:hover { background: #ccc; transform: scale(1.02); }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #000 url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat fixed; color: #fff; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); pointer-events: none; z-index: 0; }
         
-        .progress-container { width: 100%; background: #222; height: 6px; border-radius: 3px; margin-top: 20px; overflow: hidden; display: none; }
-        .progress-bar { height: 100%; background: #00ff88; width: 0%; transition: width 0.3s; }
-        .status { color: #ffff00; font-size: 12px; margin-top: 10px; display: none; font-family: monospace; }
-        .error { color: #ff5555; font-size: 11px; margin-top: 10px; display: none; border: 1px solid #ff5555; padding: 5px; }
+        /* HEADER */
+        header { position: fixed; top: 0; left: 0; width: 100%; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; z-index: 100; background: rgba(255,255,255,0.02); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .logo { font-family: 'Orbitron'; font-weight: 900; font-size: 20px; color: #fff; }
+        .hamburger { cursor: pointer; width: 30px; height: 20px; position: relative; z-index: 102; }
+        .hamburger span { display: block; position: absolute; height: 2px; width: 100%; background: #fff; border-radius: 9px; transition: .25s; }
+        .hamburger span:nth-child(1) { top: 0px; } .hamburger span:nth-child(2) { top: 9px; } .hamburger span:nth-child(3) { top: 18px; }
+        .hamburger.open span:nth-child(1) { top: 9px; transform: rotate(135deg); background: #ff5555; }
+        .hamburger.open span:nth-child(2) { opacity: 0; left: -60px; }
+        .hamburger.open span:nth-child(3) { top: 9px; transform: rotate(-135deg); background: #ff5555; }
+
+        /* MENU */
+        .nav-overlay { position: fixed; top: 0; right: -100%; width: 100%; height: 100%; background: rgba(5,5,5,0.95); backdrop-filter: blur(20px); z-index: 101; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.5s; }
+        .nav-overlay.active { right: 0; }
+        .nav-menu li { list-style: none; margin: 25px 0; text-align: center; }
+        .nav-menu a { font-family: 'Orbitron'; font-size: 24px; text-decoration: none; color: #888; transition: 0.3s; }
+        .nav-menu a:hover { color: #fff; }
+
+        /* BOX */
+        .main-box { position: relative; z-index: 10; margin: auto; width: 350px; padding: 40px; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; background: rgba(0,0,0,0.6); text-align: center; backdrop-filter: blur(5px); }
+        h2 { color: #00ff88; font-family: 'Orbitron'; margin-bottom: 5px; }
+        .btn { width: 100%; padding: 15px; background: #fff; color: #000; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; }
+        .btn:hover { background: #00ff88; }
+        .loader { border: 4px solid #333; border-top: 4px solid #00ff88; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .status { color: #ffff00; font-size: 12px; margin-top: 10px; display: none; }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h2>Key SYSTEM</h2>
-        <p style="color:#666; font-size:12px">Secure Token 15m (Anti-Share)</p>
+    <div class="overlay"></div>
+    <header>
+        <div class="logo">QUOCDAT.KEY</div>
+        <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+    </header>
+    <div class="nav-overlay" id="navOverlay">
+        <ul class="nav-menu">
+            <li><a href="ui.html">Trang Chủ</a></li>
+            <li><a href="shop.html">Tổng Hợp (Shop)</a></li>
+            <li><a href="https://t.me/quocdadv">Liên Hệ Admin</a></li>
+        </ul>
+    </div>
 
-        <button id="btnGet" class="btn" onclick="generateSecureLink()">🚀 LẤY LINK BẢO MẬT</button>
-        
-        <div id="pBox" class="progress-container"><div id="pBar" class="progress-bar"></div></div>
+    <div class="main-box">
+        <h2>VIP SYSTEM</h2>
+        <p style="color:#aaa; font-size:12px">Secure Token (15 Min)</p>
+        <button id="btnGet" class="btn" onclick="genLink()">🚀 TẠO LINK BẢO MẬT</button>
+        <div id="loader" class="loader"></div>
         <div id="status" class="status">Đang khởi tạo...</div>
-        <div id="err" class="error"></div>
     </div>
 
     <script>
-        // --- CẤU HÌNH ---
-        const API_TOKEN = "6992df868b3d1e423d1ab833"; 
-        const TARGET_FILE = "key.html"; 
-        // ----------------
+        function toggleMenu() { $('.hamburger').toggleClass('open'); $('.nav-overlay').toggleClass('active'); }
+        $(document).ready(function() { try { $('body').ripples({ resolution: 512, dropRadius: 20, perturbance: 0.04 }); } catch(e){} });
 
-        const PROXY_LIST = [
-            (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-            (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-            (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
-            (u) => `https://thingproxy.freeboard.io/fetch/${u}`
+        const API_TOKEN = "6992df868b3d1e423d1ab833";
+        const TARGET_FILE = "key.html"; 
+        const PROXIES = [
+            u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+            u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+            u => `https://thingproxy.freeboard.io/fetch/${u}`
         ];
 
-        async function generateSecureLink() {
-            if (window.location.protocol === 'file:') return alert("Lỗi: Hãy upload lên GitHub Pages!");
+        async function genLink() {
+            if (window.location.protocol === 'file:') return alert("Upload lên GitHub Pages!");
+            document.getElementById('btnGet').style.display = 'none';
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('status').style.display = 'block';
 
-            const btn = document.getElementById('btnGet');
-            const pBox = document.getElementById('pBox');
-            const pBar = document.getElementById('pBar');
-            const status = document.getElementById('status');
-            const errDiv = document.getElementById('err');
+            const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
+            const expiry = Date.now() + (15 * 60 * 1000); 
 
-            btn.style.display = 'none';
-            errDiv.style.display = 'none';
-            pBox.style.display = 'block';
-            status.style.display = 'block';
+            localStorage.setItem('secure_token', token);
+            localStorage.setItem('secure_expiry', expiry);
 
-            // 1. SINH MÃ BẢO MẬT (TOKEN)
-            // Token ngẫu nhiên + Timestamp
-            const securityToken = Math.random().toString(36).substring(2) + Date.now().toString(36);
-            
-            // Thời gian hết hạn của link (15 phút tính từ lúc bấm nút)
-            // Để khớp với thời gian sống của Key
-            const expiryTime = Date.now() + (15 * 60 * 1000); 
+            let path = window.location.href.split('?')[0];
+            if (path.endsWith("index.html")) path = path.substring(0, path.lastIndexOf("index.html"));
+            if (!path.endsWith("/")) path += "/";
+            const target = `${path}${TARGET_FILE}?t=${token}&e=${expiry}`;
 
-            // 2. LƯU VÀO TRÌNH DUYỆT (LocalStorage)
-            // Đây là chìa khóa: Chỉ trình duyệt này mới có mã này
-            localStorage.setItem('secure_token', securityToken);
-            localStorage.setItem('secure_expiry', expiryTime);
-
-            // 3. TẠO LINK ĐÍCH KÈM TOKEN
-            let currentPath = window.location.href.split('?')[0];
-            if (currentPath.endsWith("index.html")) currentPath = currentPath.substring(0, currentPath.lastIndexOf("index.html"));
-            if (!currentPath.endsWith("/")) currentPath += "/";
-            
-            // Link sẽ có dạng: .../key.html?t=abc123xyz&e=1700000000
-            const targetUrl = `${currentPath}${TARGET_FILE}?t=${securityToken}&e=${expiryTime}`;
-            
-            console.log("Link gốc:", targetUrl);
-
-            // 4. GỌI API LINK4M
-            const link4mApi = `https://link4m.co/api-shorten/v2?api=${API_TOKEN}&url=${encodeURIComponent(targetUrl)}`;
+            const api = `https://link4m.co/api-shorten/v2?api=${API_TOKEN}&url=${encodeURIComponent(target)}`;
             
             let success = false;
-            for (let i = 0; i < PROXY_LIST.length; i++) {
-                status.innerText = `Đang kết nối Server ${i+1}...`;
-                pBar.style.width = `${((i+1)/PROXY_LIST.length)*100}%`;
-                
+            for (let p of PROXIES) {
                 try {
-                    const controller = new AbortController();
-                    setTimeout(() => controller.abort(), 6000);
-                    const res = await fetch(PROXY_LIST[i](link4mApi), { signal: controller.signal });
-                    
-                    if(!res.ok) throw new Error();
-                    const text = await res.text();
-                    const data = JSON.parse(text); // Cố gắng parse JSON
-                    
-                    if (data.status === "success" && data.shortenedUrl) {
-                        pBar.style.width = '100%';
-                        status.innerText = "✅ Thành công! Đang chuyển hướng...";
-                        status.style.color = "#00ff88";
+                    const res = await fetch(p(api));
+                    const data = await res.json();
+                    if (data.status === "success") {
+                        document.getElementById('status').innerText = "Thành công! Đang chuyển hướng...";
                         setTimeout(() => window.location.href = data.shortenedUrl, 800);
-                        success = true;
-                        break;
+                        success = true; break;
                     }
                 } catch(e){}
-                await new Promise(r => setTimeout(r, 200));
             }
-
-            if (!success) {
-                // Fallback thủ công
-                pBox.style.display = 'none';
-                status.style.display = 'none';
-                btn.style.display = 'block';
-                btn.innerText = "TẠO THỦ CÔNG (SERVER BẬN)";
-                btn.onclick = () => window.open(`https://link4m.co/api?api=${API_TOKEN}&url=${encodeURIComponent(targetUrl)}`, '_blank');
-                errDiv.style.display = 'block';
-                errDiv.innerText = "Không thể tạo link tự động. Vui lòng bấm nút trên để tạo thủ công.";
-            }
+            if(!success) window.open(`https://link4m.co/api?api=${API_TOKEN}&url=${encodeURIComponent(target)}`, '_blank');
         }
     </script>
 </body>
