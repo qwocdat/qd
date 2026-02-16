@@ -3,128 +3,386 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QUOCDAT - TRANG CHỦ</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Inter:wght@300;600&display=swap" rel="stylesheet">
+    <title>QUOCDAT TOOL | Bảo Mật Mã Nguồn Python Chuyên Nghiệp</title>
+    <meta name="description" content="Công cụ Obfuscate Python mạnh mẽ nhất. Bảo vệ mã nguồn game, tool MMO với công nghệ AST Transformation và Key hệ thống 15 phút.">
+    <meta name="keywords" content="python obfuscator, bảo mật code, anti-crack python, tool blox fruit, quocdat tool">
+    <meta name="author" content="QuocDat Security">
+    
+    <meta property="og:title" content="QuocDat Tool - Bảo Mật Python Số 1">
+    <meta property="og:description" content="Ngăn chặn Decompile, Anti-Debug, Key System 15 phút. Trải nghiệm ngay!">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1000&auto=format&fit=crop">
+    <meta property="og:type" content="website">
+
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.ripples/0.5.3/jquery.ripples.min.js"></script>
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* --- I. PERFORMANCE & RESET --- */
+        :root {
+            --primary: #00ff88;
+            --secondary: #00b8ff;
+            --bg-dark: #050505;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-muted: #aaaaaa;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+        
         body {
-            background: #000 url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat fixed;
-            color: #fff; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden;
+            background-color: var(--bg-dark);
+            background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover; background-position: center; background-attachment: fixed;
+            color: var(--text-main); font-family: 'Inter', sans-serif; line-height: 1.6;
+            overflow-x: hidden;
         }
-        
-        /* Lớp phủ tối */
-        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 0; pointer-events: none; }
 
-        /* HEADER */
+        /* Lớp phủ tối để tăng độ tương phản (H. Accessibility) */
+        .overlay-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 0; pointer-events: none; }
+
+        /* --- UI COMPONENTS --- */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 10; }
+        
+        /* Glassmorphism Card */
+        .glass-card {
+            background: var(--glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border); border-radius: 16px; padding: 30px;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        .glass-card:hover { transform: translateY(-5px); border-color: var(--primary); }
+
+        /* Buttons (F. UI/UX) */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+            padding: 12px 30px; border-radius: 50px; font-weight: 600; font-size: 15px;
+            cursor: pointer; transition: all 0.3s ease; text-decoration: none; border: none;
+        }
+        .btn-primary {
+            background: var(--primary); color: #000; box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+        .btn-primary:hover { transform: scale(1.05); box-shadow: 0 0 40px rgba(0, 255, 136, 0.6); }
+        .btn-outline {
+            background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.3);
+        }
+        .btn-outline:hover { background: #fff; color: #000; }
+
+        /* Typography */
+        h1, h2, h3 { font-family: 'Orbitron', sans-serif; }
+        .text-gradient { background: linear-gradient(to right, #fff, #aaa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .text-primary { color: var(--primary); }
+        
+        /* --- HEADER --- */
         header {
-            position: fixed; top: 0; left: 0; width: 100%; padding: 20px 40px;
-            display: flex; justify-content: space-between; align-items: center; z-index: 100;
-            background: rgba(255,255,255,0.02); backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            position: fixed; top: 0; left: 0; width: 100%; padding: 15px 0; z-index: 1000;
+            background: rgba(5,5,5,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border);
         }
-        .logo { font-family: 'Orbitron'; font-weight: 900; font-size: 22px; letter-spacing: 2px; color: #fff; }
-
-        /* MENU ICON */
-        .hamburger { cursor: pointer; z-index: 102; width: 30px; height: 20px; position: relative; }
-        .hamburger span { display: block; position: absolute; height: 2px; width: 100%; background: #fff; border-radius: 9px; transition: .25s; }
-        .hamburger span:nth-child(1) { top: 0px; } .hamburger span:nth-child(2) { top: 9px; } .hamburger span:nth-child(3) { top: 18px; }
-        .hamburger.open span:nth-child(1) { top: 9px; transform: rotate(135deg); background: #ff5555; }
-        .hamburger.open span:nth-child(2) { opacity: 0; left: -60px; }
-        .hamburger.open span:nth-child(3) { top: 9px; transform: rotate(-135deg); background: #ff5555; }
-
-        /* MENU FULLSCREEN */
-        .nav-overlay {
-            position: fixed; top: 0; right: -100%; width: 100%; height: 100%;
-            background: rgba(5,5,5,0.95); backdrop-filter: blur(20px); z-index: 101;
-            display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.5s;
-        }
-        .nav-overlay.active { right: 0; }
-        .nav-menu li { list-style: none; margin: 25px 0; text-align: center; }
-        /* Link trong menu dẫn tới các file khác */
-        .nav-menu a { font-family: 'Orbitron'; font-size: 26px; text-decoration: none; color: #888; transition: 0.3s; }
-        .nav-menu a:hover { color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
-
-        /* HERO CONTENT */
-        .container { 
-            position: relative; z-index: 10; height: 100vh; 
-            display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            text-align: center; 
-        }
+        .nav-flex { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 20px; font-weight: 900; letter-spacing: 1px; color: #fff; display: flex; align-items: center; gap: 10px; }
         
-        h1 { font-size: 70px; font-weight: 900; margin-bottom: 20px; text-shadow: 0 10px 30px rgba(0,0,0,0.5); letter-spacing: -2px; line-height: 1; }
-        p { color: #ccc; margin-bottom: 40px; font-size: 16px; max-width: 600px; line-height: 1.6; }
+        /* Desktop Menu */
+        .desktop-menu { display: flex; gap: 30px; }
+        .desktop-menu a { color: var(--text-muted); font-size: 14px; text-decoration: none; transition: 0.3s; }
+        .desktop-menu a:hover { color: #fff; }
 
-        .btn-group { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+        /* Mobile Hamburger */
+        .hamburger { display: none; cursor: pointer; font-size: 24px; }
 
-        /* Nút Lấy Key */
-        .btn-main {
-            padding: 16px 45px; border-radius: 50px; 
-            background: #fff; color: #000; font-weight: bold; font-size: 16px;
-            cursor: pointer; transition: 0.3s; text-decoration: none; border: none;
+        /* --- HERO SECTION --- */
+        .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; padding-top: 80px; }
+        .hero h1 { font-size: 56px; line-height: 1.1; margin-bottom: 20px; text-shadow: 0 0 30px rgba(0,0,0,0.5); }
+        .hero p { font-size: 18px; color: var(--text-muted); max-width: 700px; margin: 0 auto 40px; }
+        
+        /* --- FEATURES SECTION --- */
+        .section-padding { padding: 100px 0; }
+        .section-title { text-align: center; margin-bottom: 60px; }
+        .section-title h2 { font-size: 36px; margin-bottom: 10px; }
+        
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .feature-icon { font-size: 40px; color: var(--primary); margin-bottom: 20px; }
+
+        /* --- HOW TO USE (TIMELINE) --- */
+        .step-box { display: flex; gap: 20px; margin-bottom: 30px; align-items: flex-start; }
+        .step-num { 
+            background: var(--primary); color: #000; width: 40px; height: 40px; 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            font-weight: bold; flex-shrink: 0; 
         }
-        .btn-main:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(255,255,255,0.5); }
 
-        /* Nút Vào Shop */
-        .btn-sec {
-            padding: 16px 45px; border-radius: 50px; 
-            background: rgba(255,255,255,0.1); color: #fff; font-weight: bold; font-size: 16px;
-            border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(5px);
-            cursor: pointer; transition: 0.3s; text-decoration: none;
+        /* --- FAQ --- */
+        details { margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        summary { cursor: pointer; font-weight: 600; padding: 10px 0; list-style: none; display: flex; justify-content: space-between; }
+        summary::after { content: '+'; color: var(--primary); font-size: 20px; }
+        details[open] summary::after { content: '-'; }
+        .faq-ans { color: var(--text-muted); font-size: 14px; padding-top: 10px; }
+
+        /* --- LEGAL & FOOTER --- */
+        footer { background: #000; padding: 50px 0 20px; margin-top: 50px; border-top: 1px solid var(--border); font-size: 13px; color: #666; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; margin-bottom: 40px; }
+        .footer h4 { color: #fff; margin-bottom: 20px; font-family: 'Orbitron'; }
+        .footer ul li { margin-bottom: 10px; list-style: none; }
+        .footer a { color: #666; text-decoration: none; }
+        .footer a:hover { color: var(--primary); }
+
+        /* --- MOBILE RESPONSIVE (G) --- */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 36px; }
+            .desktop-menu { display: none; } /* Ẩn menu desktop */
+            .hamburger { display: block; }   /* Hiện hamburger */
+            
+            /* Mobile Menu Overlay */
+            .mobile-nav {
+                position: fixed; top: 0; right: -100%; width: 80%; height: 100vh;
+                background: #111; z-index: 1001; padding: 80px 30px; transition: 0.4s;
+                border-left: 1px solid var(--border);
+            }
+            .mobile-nav.active { right: 0; }
+            .mobile-nav a { display: block; font-size: 18px; margin-bottom: 20px; color: #fff; text-decoration: none; border-bottom: 1px solid #222; padding-bottom: 10px; }
         }
-        .btn-sec:hover { background: rgba(255,255,255,0.2); border-color: #fff; }
-
-        /* Footer */
-        footer { position: absolute; bottom: 20px; width: 100%; text-align: center; color: rgba(255,255,255,0.4); font-size: 12px; z-index: 10; }
-
-        @media(max-width: 768px) { h1 { font-size: 40px; } .btn-group { flex-direction: column; } }
     </style>
 </head>
 <body>
-    <div class="overlay"></div>
+
+    <div class="overlay-bg"></div>
 
     <header>
-        <div class="logo">QUOCDAT.HUB</div>
-        <div class="hamburger" onclick="toggleMenu()">
-            <span></span><span></span><span></span>
+        <div class="container nav-flex">
+            <div class="logo">
+                <i class="fas fa-shield-alt text-primary"></i> QUOCDAT.SEC
+            </div>
+            
+            <nav class="desktop-menu">
+                <a href="#about">Giới Thiệu</a>
+                <a href="#features">Tính Năng</a>
+                <a href="#tutorial">Hướng Dẫn</a>
+                <a href="#faq">FAQ</a>
+                <a href="shop.html">Kho Tài Liệu</a>
+            </nav>
+
+            <a href="index.html" class="btn btn-primary">
+                <i class="fas fa-key"></i> LẤY KEY NGAY
+            </a>
+
+            <div class="hamburger" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </div>
         </div>
     </header>
 
-    <div class="nav-overlay" id="navOverlay">
-        <ul class="nav-menu">
-            <li><a href="ui.html" style="color:#fff">Trang Chủ</a></li>
-            <li><a href="shop.html">Kho Tổng Hợp</a></li>
-            <li><a href="https://t.me/quocdadv">Liên Hệ Admin</a></li>
-            <li style="margin-top: 30px;">
-                <a href="index.html" style="color:#00ff88; border:1px solid #00ff88; padding:10px 30px; border-radius:30px;">LẤY KEY VIP</a>
-            </li>
-        </ul>
+    <div class="mobile-nav" id="mobileNav">
+        <a href="#about" onclick="toggleMenu()">Giới Thiệu</a>
+        <a href="#features" onclick="toggleMenu()">Tính Năng</a>
+        <a href="shop.html" onclick="toggleMenu()">Kho Tài Liệu</a>
+        <a href="index.html" onclick="toggleMenu()" style="color:var(--primary)">Lấy Key VIP</a>
+        <div style="margin-top: 50px; color: #666; font-size: 12px;">© 2026 QuocDat Security</div>
     </div>
 
-    <div class="container">
-        <h1>UNLIMITED.<br>SECURITY.</h1>
-        <p>
-            Chào mừng đến với hệ thống Tool Python độc quyền của QuocDat.<br>
-            Tích hợp bảo mật Token 15 phút, Anti-Share và kho tài liệu miễn phí.
-        </p>
-        
-        <div class="btn-group">
-            <a href="index.html" class="btn-main">LẤY KEY NGAY</a>
-            
-            <a href="shop.html" class="btn-sec">VÀO KHO TÀI LIỆU</a>
+    <section class="hero">
+        <div class="container">
+            <div style="margin-bottom: 20px; display: inline-block; padding: 5px 15px; border: 1px solid var(--primary); border-radius: 20px; color: var(--primary); font-size: 12px; font-weight: bold; background: rgba(0,255,136,0.1);">
+                🚀 PHIÊN BẢN 5.0 CẬP NHẬT MỚI
+            </div>
+            <h1>BẢO VỆ MÃ NGUỒN PYTHON<br><span class="text-gradient">TOÀN DIỆN & AN TOÀN</span></h1>
+            <p>
+                Giải pháp Obfuscate (làm rối mã) chuyên nghiệp dành cho lập trình viên Game, Tool MMO. 
+                Tích hợp hệ thống Key 15 phút chống Crack, chống Decompile hiệu quả.
+            </p>
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <a href="index.html" class="btn btn-primary">BẮT ĐẦU MIỄN PHÍ</a>
+                <a href="shop.html" class="btn btn-outline">XEM KHO TOOL</a>
+            </div>
+            <div style="margin-top: 40px; color: #666; font-size: 13px;">
+                <i class="fas fa-check-circle text-primary"></i> 10.000+ Downloads &nbsp;&nbsp;
+                <i class="fas fa-check-circle text-primary"></i> 99.9% Uptime &nbsp;&nbsp;
+                <i class="fas fa-check-circle text-primary"></i> Hỗ trợ 24/7
+            </div>
         </div>
-    </div>
+    </section>
 
-    <footer>© 2026 QuocDat. All rights reserved.</footer>
+    <section id="about" class="section-padding">
+        <div class="container">
+            <div class="glass-card">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;">
+                    <div>
+                        <h2 class="text-primary" style="margin-bottom: 20px;">QUOCDAT TOOL LÀ GÌ?</h2>
+                        <p style="color: #ccc; margin-bottom: 15px;">
+                            Là bộ công cụ giúp bạn mã hóa các file Python (`.py`) để người khác không thể đọc trộm code hoặc chỉnh sửa bản quyền của bạn.
+                        </p>
+                        <p style="color: #ccc;">
+                            <strong>Dành cho ai?</strong><br>
+                            - Dev tạo Hack Game (Roblox, Blox Fruit).<br>
+                            - Người viết Tool MMO, Automation.<br>
+                            - Bất kỳ ai muốn bảo vệ chất xám của mình.
+                        </p>
+                    </div>
+                    <div style="background: #000; height: 250px; border-radius: 10px; border: 1px solid #333; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                        <i class="fas fa-code" style="font-size: 50px; color: #333; margin-bottom: 10px;"></i>
+                        <span style="color: #555; font-family: monospace;">[SCREENSHOT GIAO DIỆN TOOL]</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="section-padding">
+        <div class="container">
+            <div class="section-title">
+                <h2>TÍNH NĂNG VƯỢT TRỘI</h2>
+                <p style="color:#888">Tại sao bạn nên chọn chúng tôi thay vì các tool khác?</p>
+            </div>
+            
+            <div class="grid-3">
+                <div class="glass-card">
+                    <i class="fas fa-lock feature-icon"></i>
+                    <h3>Mã Hóa Đa Lớp</h3>
+                    <p class="text-muted">Sử dụng thuật toán AES-256 kết hợp biến đổi AST, biến tên biến thành ký tự vô nghĩa.</p>
+                </div>
+                <div class="glass-card">
+                    <i class="fas fa-clock feature-icon"></i>
+                    <h3>Key System 15 Phút</h3>
+                    <p class="text-muted">Key tự động hết hạn sau 15 phút. Người dùng buộc phải lấy key mới, giúp bạn tăng view/doanh thu.</p>
+                </div>
+                <div class="glass-card">
+                    <i class="fas fa-user-shield feature-icon"></i>
+                    <h3>Anti-Share & Anti-VM</h3>
+                    <p class="text-muted">Hệ thống Token thông minh chặn việc copy link key gửi cho người khác. Chống chạy trên máy ảo.</p>
+                </div>
+                <div class="glass-card">
+                    <i class="fas fa-tachometer-alt feature-icon"></i>
+                    <h3>Hiệu Năng Cao</h3>
+                    <p class="text-muted">Code sau khi obfuscate vẫn chạy mượt mà, không gây lag game hay tụt FPS.</p>
+                </div>
+                <div class="glass-card">
+                    <i class="fas fa-robot feature-icon"></i>
+                    <h3>Hỗ Trợ Mọi Nền Tảng</h3>
+                    <p class="text-muted">Tương thích Windows, Linux (Termux), và các trình giả lập Mobile (Delta, Fluxus).</p>
+                </div>
+                <div class="glass-card">
+                    <i class="fas fa-sync feature-icon"></i>
+                    <h3>Cập Nhật Liên Tục</h3>
+                    <p class="text-muted">Luôn update thuật toán mới để chống lại các tool Decompile hiện đại nhất.</p>
+                </div>
+            </div>
+
+            <div style="margin-top: 50px; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; font-size: 14px; text-align: center;">
+                <strong>🖥️ Yêu cầu hệ thống:</strong> Python 3.8+ | Windows 10/11 hoặc Android 10+ (Termux) | RAM 4GB+
+            </div>
+        </div>
+    </section>
+
+    <section id="tutorial" class="section-padding">
+        <div class="container">
+            <div class="section-title">
+                <h2>QUY TRÌNH HOẠT ĐỘNG</h2>
+            </div>
+            
+            <div class="glass-card" style="max-width: 800px; margin: 0 auto;">
+                <div class="step-box">
+                    <div class="step-num">1</div>
+                    <div>
+                        <h3>Tải Tool & Cài Đặt</h3>
+                        <p class="text-muted">Tải file `obfuscator.py` từ Kho Tài Liệu. Cài đặt thư viện: `pip install pycryptodome`.</p>
+                    </div>
+                </div>
+                <div class="step-box">
+                    <div class="step-num">2</div>
+                    <div>
+                        <h3>Lấy Key Kích Hoạt</h3>
+                        <p class="text-muted">Mở Tool, hệ thống yêu cầu Key. Truy cập web này, bấm nút <strong>"LẤY KEY NGAY"</strong>, vượt qua Link4M để nhận Key.</p>
+                    </div>
+                </div>
+                <div class="step-box">
+                    <div class="step-num">3</div>
+                    <div>
+                        <h3>Sử Dụng & Tận Hưởng</h3>
+                        <p class="text-muted">Nhập Key vào Tool. Chọn file Python cần khóa và đợi 5s để nhận file kết quả đã bảo mật.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="faq" class="section-padding">
+        <div class="container" style="max-width: 800px;">
+            <div class="section-title">
+                <h2>CÂU HỎI THƯỜNG GẶP</h2>
+            </div>
+            
+            <div class="glass-card">
+                <details>
+                    <summary>Key VIP khác gì Key thường?</summary>
+                    <div class="faq-ans">Hiện tại hệ thống chỉ cung cấp 1 loại Key miễn phí duy nhất với thời hạn 15 phút để đảm bảo công bằng.</div>
+                </details>
+                <details>
+                    <summary>Tại sao phải dùng Token 15 phút?</summary>
+                    <div class="faq-ans">Để tránh việc 1 người lấy key rồi chia sẻ cho hàng nghìn người khác dùng chung. Mỗi người phải tự lấy key của riêng mình.</div>
+                </details>
+                <details>
+                    <summary>Tool có chạy được trên Termux không?</summary>
+                    <div class="faq-ans">Có. Tool hỗ trợ tốt Python trên Termux (Android).</div>
+                </details>
+                <details>
+                    <summary>Tôi bị lỗi "Token Mismatch"?</summary>
+                    <div class="faq-ans">Lỗi này do bạn copy link key gửi sang máy khác hoặc dùng trình duyệt ẩn danh. Vui lòng lấy link và nhập key trên CÙNG MỘT THIẾT BỊ.</div>
+                </details>
+                <details>
+                    <summary>Làm sao để liên hệ hỗ trợ?</summary>
+                    <div class="faq-ans">Bạn có thể nhắn tin qua Telegram @quocdadv hoặc gửi Email.</div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <h4>QUOCDAT SECURITY</h4>
+                    <p>Giải pháp bảo vệ mã nguồn toàn diện cho cộng đồng lập trình viên Việt Nam.</p>
+                </div>
+                <div>
+                    <h4>LIÊN KẾT</h4>
+                    <ul>
+                        <li><a href="#about">Giới Thiệu</a></li>
+                        <li><a href="shop.html">Shop File</a></li>
+                        <li><a href="index.html">Get Key</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>PHÁP LÝ</h4>
+                    <ul>
+                        <li><a href="#">Điều khoản sử dụng</a></li>
+                        <li><a href="#">Chính sách bảo mật</a></li>
+                        <li><a href="#">Miễn trừ trách nhiệm</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>LIÊN HỆ</h4>
+                    <ul>
+                        <li><i class="fab fa-telegram"></i> <a href="https://t.me/quocdadv">@quocdadv</a></li>
+                        <li><i class="fas fa-envelope"></i> <a href="mailto:admin@quocdat.vip">admin@quocdat.vip</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div style="border-top: 1px solid #222; padding-top: 20px;">
+                © 2026 QuocDat. All rights reserved. <br>
+                <span style="font-size: 11px; color: #444;">This tool is for educational purposes only.</span>
+            </div>
+        </div>
+    </footer>
 
     <script>
         function toggleMenu() {
-            $('.hamburger').toggleClass('open');
-            $('.nav-overlay').toggleClass('active');
+            const nav = document.getElementById('mobileNav');
+            if (nav.classList.contains('active')) {
+                nav.classList.remove('active');
+            } else {
+                nav.classList.add('active');
+            }
         }
+
         $(document).ready(function() {
             try { $('body').ripples({ resolution: 512, dropRadius: 20, perturbance: 0.04 }); } catch(e){}
         });
