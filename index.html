@@ -3,171 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIP KEY SYSTEM</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <title>Đang tạo liên kết...</title>
     <style>
-        :root { --main: #00ff88; --bg: #090909; --card: #151515; }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        
-        .container { 
-            width: 380px; padding: 30px; background: var(--card); border-radius: 20px; 
-            border: 1px solid #333; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.5); 
-            position: relative;
-        }
-        
-        h2 { color: var(--main); font-family: 'Orbitron'; margin-bottom: 5px; }
-        p { color: #888; font-size: 13px; margin-bottom: 25px; }
-        
-        .btn {
-            width: 100%; padding: 15px; border: none; border-radius: 10px;
-            font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px;
-            transition: 0.3s; text-transform: uppercase;
-        }
-        
-        .btn-link { background: #333; color: #fff; border: 1px solid #444; }
-        .btn-link:hover { background: #444; }
-        
-        .btn-gen { background: var(--main); color: #000; box-shadow: 0 0 15px rgba(0, 255, 136, 0.3); }
-        .btn-gen:hover { transform: scale(1.02); }
-
-        .key-area { display: none; margin-top: 20px; }
-        .key-box { 
-            background: #000; border: 2px dashed var(--main); color: var(--main); 
-            font-family: 'Orbitron'; font-size: 28px; padding: 15px; 
-            border-radius: 8px; margin-bottom: 10px; letter-spacing: 2px;
-        }
-        .timer { font-size: 14px; color: #aaa; }
-        
-        #step1, #step2 { display: none; }
-        
-        .loader {
-            border: 4px solid #333; border-top: 4px solid var(--main);
-            border-radius: 50%; width: 30px; height: 30px;
-            animation: spin 1s linear infinite; margin: 10px auto; display: none;
-        }
+        body { background: #000; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; }
+        .loader { border: 5px solid #333; border-top: 5px solid #00ff00; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        p { margin-top: 20px; color: #ffff00; }
+        button { margin-top: 20px; padding: 10px 20px; cursor: pointer; display: none; }
     </style>
 </head>
 <body>
-
-    <div class="container">
-        <h2>HỆ THỐNG VIP</h2>
-        <p>API Link4M Auto - No Error</p>
-
-        <div id="step1">
-            <button class="btn btn-link" onclick="getLinkAuto()">👉 BẤM ĐỂ LẤY LINK KEY</button>
-            <div id="loading" class="loader"></div>
-            <div id="statusText" style="font-size:12px; margin-top:10px; color:#ffff00; display:none;">Đang kết nối API...</div>
-        </div>
-
-        <div id="step2">
-            <div style="color:#00ff88; margin-bottom:15px; font-weight:bold;">✅ Đã vượt link thành công!</div>
-            <button class="btn btn-gen" onclick="startGen()">KHỞI TẠO KEY NGAY</button>
-        </div>
-
-        <div id="keyDisplayArea" class="key-area">
-            <div class="key-box" id="finalKey">LOADING...</div>
-            <div class="timer">Key đổi sau: <span id="timeCount" style="color:#fff">--</span>s</div>
-            <button class="btn btn-link" onclick="copyKey()" style="margin-top:15px; font-size:12px;">Sao chép</button>
-        </div>
-    </div>
+    <div class="loader"></div>
+    <p id="status">Đang kết nối API Link4M...</p>
+    <button onclick="location.reload()">Thử lại</button>
 
     <script>
-        // ===========================================
-        // CẤU HÌNH API
-        const SECRET = "QUOC_DAT_SECRET_KEY_2026"; 
-        const API_TOKEN = "6992df868b3d1e423d1ab833"; // Token của bạn
-        // ===========================================
+        // --- CẤU HÌNH ---
+        const API_TOKEN = "6992df868b3d1e423d1ab833"; 
+        // Tên file trang đích thứ 2 (Phải upload file này lên cùng thư mục)
+        const TARGET_PAGE = "key.html"; 
+        // ----------------
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const isVerified = urlParams.get('verify') === 'true';
-
-        if (isVerified) {
-            document.getElementById('step2').style.display = 'block';
-        } else {
-            document.getElementById('step1').style.display = 'block';
-        }
-
-        async function getLinkAuto() {
-            // Kiểm tra nếu đang chạy file offline
-            if (window.location.protocol === 'file:') {
-                alert("LỖI: Bạn phải upload file này lên GitHub Pages thì API mới hoạt động!");
-                return;
+        async function createLink() {
+            const status = document.getElementById("status");
+            
+            // 1. Tự động lấy đường dẫn hiện tại và trỏ tới file key.html
+            // Ví dụ: https://ban.github.io/tool/index.html -> https://ban.github.io/tool/key.html
+            let currentPath = window.location.href;
+            // Xóa index.html hoặc dấu / cuối cùng nếu có
+            if (currentPath.endsWith("index.html")) {
+                currentPath = currentPath.substring(0, currentPath.lastIndexOf("index.html"));
+            } else if (!currentPath.endsWith("/")) {
+                currentPath += "/";
             }
+            
+            const targetUrl = currentPath + TARGET_PAGE;
+            console.log("Mục tiêu rút gọn:", targetUrl);
 
-            const btn = document.querySelector('.btn-link');
-            const loader = document.getElementById('loading');
-            const status = document.getElementById('statusText');
-
-            btn.style.display = 'none';
-            loader.style.display = 'block';
-            status.style.display = 'block';
-
-            // Tạo link đích (Link hiện tại + ?verify=true)
-            const currentUrl = window.location.href.split('?')[0];
-            const targetUrl = encodeURIComponent(currentUrl + "?verify=true");
-
-            // Cách 1: Dùng Proxy để lấy JSON (Ưu tiên)
-            const apiUrl = `https://link4m.com/api-shorten/v2?api=${API_TOKEN}&url=${targetUrl}`;
-            // Dùng allorigins làm cầu nối để vượt lỗi CORS
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
+            // 2. Gọi API qua Proxy (allorigins) để tránh lỗi CORS và Link Error
+            // Encode 2 lần để đảm bảo link không bị lỗi ký tự đặc biệt
+            const finalApiUrl = `https://link4m.com/api-shorten/v2?api=${API_TOKEN}&url=${encodeURIComponent(targetUrl)}`;
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(finalApiUrl)}`;
 
             try {
                 const response = await fetch(proxyUrl);
-                const dataWrapper = await response.json();
-                
-                // Parse dữ liệu từ proxy
-                if (dataWrapper.contents) {
-                    const data = JSON.parse(dataWrapper.contents);
-                    
-                    if (data.status === "success") {
-                        status.innerText = "Đã tạo link! Đang chuyển hướng...";
-                        setTimeout(() => {
-                            window.location.href = data.shortenedUrl;
-                        }, 500);
-                        return;
-                    }
-                }
-                throw new Error("API JSON thất bại");
+                const data = await response.json();
 
-            } catch (error) {
-                console.log("Chuyển sang chế độ Direct Redirect...");
-                // Cách 2: Nếu Proxy lỗi, dùng Direct Redirect API (Chắc chắn 100% thành công)
-                // Link này sẽ tự động chuyển hướng người dùng luôn
-                const fallbackUrl = `https://link4m.com/api?api=${API_TOKEN}&url=${targetUrl}`;
-                window.location.href = fallbackUrl;
+                if (data.status === "success") {
+                    status.innerText = "Đã tạo link xong! Đang chuyển hướng...";
+                    // Chuyển hướng người dùng sang Link4M
+                    window.location.href = data.shortenedUrl;
+                } else {
+                    status.innerText = "Lỗi từ Link4M: " + data.message;
+                    document.querySelector("button").style.display = "block";
+                }
+            } catch (err) {
+                console.error(err);
+                status.innerText = "Lỗi kết nối! Đang thử phương thức dự phòng...";
+                
+                // Fallback: Nếu Proxy lỗi, dùng cách chuyển hướng trực tiếp qua API
+                setTimeout(() => {
+                    window.location.href = `https://link4m.com/api?api=${API_TOKEN}&url=${encodeURIComponent(targetUrl)}`;
+                }, 1500);
             }
         }
 
-        let interval;
-        function startGen() {
-            document.getElementById('step2').style.display = 'none';
-            document.getElementById('keyDisplayArea').style.display = 'block';
-            updateKey();
-            interval = setInterval(updateKey, 1000);
-        }
-
-        function updateKey() {
-            const now = Math.floor(Date.now() / 1000);
-            const duration = 180; 
-            const timeStep = Math.floor(now / duration);
-            
-            const raw = SECRET + timeStep;
-            const hash = CryptoJS.MD5(raw).toString();
-            const num = parseInt(hash.substring(0, 8), 16) % 10000;
-            const key = "dat_" + num.toString().padStart(4, '0');
-            
-            document.getElementById("finalKey").innerText = key;
-            document.getElementById("timeCount").innerText = duration - (now % duration);
-        }
-
-        function copyKey() {
-            const k = document.getElementById("finalKey").innerText;
-            navigator.clipboard.writeText(k);
-            alert("Đã sao chép: " + k);
-        }
+        // Chạy ngay khi vào trang
+        createLink();
     </script>
 </body>
 </html>
