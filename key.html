@@ -8,41 +8,54 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
         body { background: #050505; color: #fff; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .box { background: #111; padding: 40px; border-radius: 20px; border: 1px solid #333; text-align: center; width: 90%; max-width: 400px; box-shadow: 0 0 50px rgba(0, 255, 136, 0.2); }
+        .box { background: #111; padding: 40px; border-radius: 20px; border: 1px solid #333; text-align: center; width: 90%; max-width: 400px; box-shadow: 0 0 50px rgba(0, 255, 136, 0.2); display: none; } /* Mặc định ẩn */
+        
+        /* Giao diện lỗi */
+        .error-screen { text-align: center; display: none; }
+        .error-icon { font-size: 50px; margin-bottom: 20px; }
+        .error-text { color: #ff5555; font-size: 18px; font-weight: bold; }
+        
         h1 { color: #00ff88; font-family: 'Orbitron'; margin-bottom: 10px; font-size: 22px; }
-        p { color: #aaa; font-size: 14px; margin-bottom: 30px; }
-        
-        .key-display { 
-            font-size: 32px; color: #fff; background: #000; 
-            border: 2px dashed #00ff88; padding: 20px; margin: 20px 0; 
-            font-family: 'Orbitron'; letter-spacing: 2px; border-radius: 10px;
-        }
-        
+        .key-display { font-size: 32px; color: #fff; background: #000; border: 2px dashed #00ff88; padding: 20px; margin: 20px 0; font-family: 'Orbitron'; letter-spacing: 2px; border-radius: 10px; }
         .timer { color: #888; font-size: 13px; margin-top: 10px; }
-        
-        button { 
-            background: #00ff88; border: none; padding: 12px 30px; 
-            font-weight: bold; cursor: pointer; border-radius: 8px; 
-            margin-top: 20px; font-size: 16px; transition: 0.3s;
-        }
-        button:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(0, 255, 136, 0.4); }
+        button { background: #00ff88; border: none; padding: 12px 30px; font-weight: bold; cursor: pointer; border-radius: 8px; margin-top: 20px; font-size: 16px; transition: 0.3s; }
+        button:hover { transform: scale(1.05); }
     </style>
 </head>
 <body>
-    <div class="box">
+
+    <div class="box" id="successBox">
         <h1>XÁC MINH THÀNH CÔNG</h1>
-        <p>Cảm ơn bạn đã vượt link ủng hộ!</p>
-        
+        <p style="color:#aaa; font-size:14px">Cảm ơn bạn đã vượt link!</p>
         <div class="key-display" id="finalKey">LOADING...</div>
-        
-        <div class="timer">Key thay đổi sau: <span id="timeCount" style="color: #fff">--</span>s</div>
+        <div class="timer">Key hết hạn sau: <span id="timeCount" style="color: #fff">--</span>s</div>
         <button onclick="copyKey()">SAO CHÉP KEY</button>
     </div>
 
+    <div class="error-screen" id="errorBox">
+        <div class="error-icon">⛔</div>
+        <div class="error-text">TRUY CẬP BỊ TỪ CHỐI</div>
+        <p style="color:#888; margin-top:10px">Bạn chưa vượt qua link rút gọn.</p>
+        <a href="index.html" style="color:#00ff88; text-decoration:none; margin-top:20px; display:inline-block">Quay lại trang chủ</a>
+    </div>
+
     <script>
-        // --- CẤU HÌNH (PHẢI GIỐNG PYTHON) ---
         const SECRET = "QUOC_DAT_SECRET_KEY_2026"; 
-        // -------------------------------------
+
+        // --- BẢO MẬT: KIỂM TRA LINK ---
+        const urlParams = new URLSearchParams(window.location.search);
+        // Chỉ hiện Key nếu có ?verify=true
+        if (urlParams.get('verify') === 'true') {
+            document.getElementById('successBox').style.display = 'block';
+            startSystem();
+        } else {
+            document.getElementById('errorBox').style.display = 'block';
+        }
+
+        function startSystem() {
+            updateKey();
+            setInterval(updateKey, 1000);
+        }
 
         function updateKey() {
             const now = Math.floor(Date.now() / 1000);
@@ -55,16 +68,21 @@
             const key = "dat_" + num.toString().padStart(4, '0');
             
             document.getElementById("finalKey").innerText = key;
-            document.getElementById("timeCount").innerText = duration - (now % duration);
+            
+            // Đếm ngược
+            const timeLeft = duration - (now % duration);
+            document.getElementById("timeCount").innerText = timeLeft;
+            
+            // Nếu hết giờ (còn 0s), tự reload để đổi key
+            if (timeLeft === 0) {
+                 setTimeout(() => window.location.reload(), 1000);
+            }
         }
 
         function copyKey() {
             navigator.clipboard.writeText(document.getElementById("finalKey").innerText);
             alert("Đã sao chép!");
         }
-
-        setInterval(updateKey, 1000);
-        updateKey();
     </script>
 </body>
 </html>
