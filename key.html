@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>XÁC MINH THÀNH CÔNG</title>
+    <title>key quocdat</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
@@ -13,11 +13,14 @@
         /* Màn hình lỗi */
         .error-screen { text-align: center; display: none; }
         .error-icon { font-size: 60px; margin-bottom: 20px; }
-        .btn-back { background: #ff5555; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 20px; display: inline-block; }
+        .btn-back { background: #ff5555; color: #fff; padding: 12px 25px; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 25px; display: inline-block; transition: 0.3s; }
+        .btn-back:hover { background: #ff3333; transform: scale(1.05); }
 
         .key-display { font-size: 32px; color: #fff; border: 2px dashed #00ff88; padding: 15px; margin: 20px 0; font-family: 'Orbitron'; letter-spacing: 2px; border-radius: 10px; word-break: break-all; }
         .btn-copy { background: #00ff88; border: none; padding: 12px 30px; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 16px; }
         .timer { font-family: 'Orbitron'; color: #ffff00; font-size: 14px; }
+        
+        .debug-msg { color: #555; font-size: 10px; margin-top: 15px; font-family: monospace; border: 1px solid #333; padding: 5px; border-radius: 4px; display: inline-block;}
     </style>
 </head>
 <body>
@@ -25,10 +28,8 @@
     <div class="box" id="successBox">
         <h2 style="color:#00ff88; font-family:'Orbitron'">XÁC MINH THÀNH CÔNG</h2>
         <p style="color:#aaa; font-size:13px">Key 15 phút của bạn:</p>
-        
         <div class="key-display" id="finalKey">LOADING...</div>
-        
-        <div class="timer">Hết hạn sau: <span id="timeCount" style="color:#fff">--:--</span></div>
+        <div class="timer">Key hết hạn sau: <span id="timeCount" style="color:#fff">--:--</span></div>
         <br>
         <button class="btn-copy" onclick="copyKey()">SAO CHÉP KEY</button>
     </div>
@@ -36,31 +37,54 @@
     <div class="error-screen" id="errorBox">
         <div class="error-icon">⛔</div>
         <h2 style="color:#ff5555">TRUY CẬP BỊ TỪ CHỐI</h2>
-        <p style="color:#ccc; font-size:14px; margin-top:10px">Link không hợp lệ hoặc bạn chưa vượt link!</p>
-        <a href="index.html" class="btn-back">LẤY KEY LẠI</a>
+        <p id="errorReason" style="color:#ccc; font-size:14px; margin-top:10px">Link không hợp lệ!</p>
+        
+        <div id="debugInfo" class="debug-msg"></div>
+        <br>
+        
+        <a href="index.html" class="btn-back">VƯỢT LINK LẠI</a>
     </div>
 
     <script>
-        // --- CẤU HÌNH (QUAN TRỌNG) ---
+        // --- CẤU HÌNH ---
         const SECRET = "QUOC_DAT_SECRET_KEY_2026"; 
-        const DURATION = 900; // 900 giây = 15 Phút (Phải giống Python)
-        // ------------------------------
+        const DURATION = 900; // 15 Phút (Phải giống Python)
+        // ----------------
 
         function checkSecurity() {
-            // Logic kiểm tra bảo mật (verify=true hoặc token)
-            // Ở đây mình dùng check đơn giản verify=true để khớp với code index.html trước đó
-            // Nếu bạn dùng bản token nâng cao thì thay logic này nhé.
             const urlParams = new URLSearchParams(window.location.search);
+            const tokenUrl = urlParams.get('t'); // Token trên link
+            const expiryUrl = urlParams.get('e'); // Thời gian hết hạn trên link
             
-            // Cách 1: Kiểm tra verify=true (Dễ dùng)
-            if (urlParams.get('verify') === 'true') return true;
-            
-            // Cách 2: Kiểm tra Token (Nếu bạn dùng bản Secure Token v7.0)
-            // const token = urlParams.get('auth');
-            // const stored = localStorage.getItem('vip_token');
-            // if(token && token === stored) return true;
+            const tokenLocal = localStorage.getItem('secure_token'); // Token trong máy
+            const expiryLocal = localStorage.getItem('secure_expiry'); // Thời gian trong máy
 
-            return false;
+            const debug = document.getElementById('debugInfo');
+
+            // 1. Kiểm tra thiếu thông tin
+            if (!tokenUrl || !expiryUrl) {
+                document.getElementById('errorReason').innerText = "Link thiếu mã xác thực (Bạn có copy link không?)";
+                debug.innerText = "Missing URL params";
+                return false;
+            }
+
+            // 2. Kiểm tra khớp lệnh (Chống Share Link)
+            // Nếu token trên link KHÁC token trong máy -> Người này đang dùng link của người khác
+            if (tokenUrl !== tokenLocal) {
+                document.getElementById('errorReason').innerText = "Link này không dành cho thiết bị của bạn (Chống Share)!";
+                debug.innerText = "Token mismatch (Share detected)";
+                return false;
+            }
+
+            // 3. Kiểm tra hết hạn (Chống Bookmark/Dùng lại link cũ)
+            const now = Date.now();
+            if (now > parseInt(expiryUrl)) {
+                document.getElementById('errorReason').innerText = "Link đã hết hạn (Quá 15 phút)!";
+                debug.innerText = "Link Expired";
+                return false;
+            }
+
+            return true;
         }
 
         if (checkSecurity()) {
@@ -78,7 +102,7 @@
         function updateKey() {
             const now = Math.floor(Date.now() / 1000);
             
-            // Tính toán Key
+            // Tính Key dựa trên chu kỳ 15 phút
             const timeStep = Math.floor(now / DURATION);
             const raw = SECRET + timeStep;
             const hash = CryptoJS.MD5(raw).toString();
@@ -86,17 +110,14 @@
             
             document.getElementById("finalKey").innerText = "dat_" + num.toString().padStart(4, '0');
             
-            // Tính thời gian đếm ngược
+            // Đếm ngược thời gian còn lại của chu kỳ 15 phút
             const timeLeft = DURATION - (now % DURATION);
             
-            // Đổi giây sang phút:giây cho đẹp (VD: 14:59)
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            const m = Math.floor(timeLeft / 60);
+            const s = timeLeft % 60;
+            document.getElementById("timeCount").innerText = `${m}:${s.toString().padStart(2, '0')}`;
             
-            document.getElementById("timeCount").innerText = formattedTime;
-            
-            // Hết giờ -> Tự reload để Key cũ chết ngay
+            // Khi hết giờ -> Reload trang -> Link sẽ bị báo hết hạn ở bước checkSecurity
             if (timeLeft === 0) {
                 setTimeout(() => window.location.reload(), 1500);
             }
