@@ -3,289 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Get Key VIP System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+    <title>VIP KEY SYSTEM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
-        :root {
-            --primary: #00f3ff;
-            --secondary: #bd00ff;
-            --bg: #050505;
-            --card-bg: rgba(20, 20, 20, 0.6);
-            --text: #ffffff;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            background-image: radial-gradient(circle at 50% 0%, #1a1a2e, #050505);
-            color: var(--text);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        /* Hiệu ứng nền */
-        .background-glow {
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            filter: blur(100px);
-            opacity: 0.2;
-            z-index: -1;
-            animation: pulse 10s infinite alternate;
-        }
-
-        .container {
-            width: 90%;
-            max-width: 400px;
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 40px 30px;
-            text-align: center;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        :root { --main: #00ff88; --bg: #090909; --card: #151515; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        
+        .container { 
+            width: 380px; padding: 30px; background: var(--card); border-radius: 20px; 
+            border: 1px solid #333; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.5); 
             position: relative;
-            overflow: hidden;
         }
-
-        /* Đường viền sáng chạy quanh */
-        .container::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        
+        h2 { color: var(--main); font-family: 'Orbitron'; margin-bottom: 5px; }
+        p { color: #888; font-size: 13px; margin-bottom: 25px; }
+        
+        .btn {
+            width: 100%; padding: 15px; border: none; border-radius: 10px;
+            font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px;
+            transition: 0.3s; text-transform: uppercase;
         }
+        
+        .btn-link { background: #333; color: #fff; border: 1px solid #444; }
+        .btn-link:hover { background: #444; }
+        
+        .btn-gen { background: var(--main); color: #000; box-shadow: 0 0 15px rgba(0, 255, 136, 0.3); }
+        .btn-gen:hover { transform: scale(1.02); }
 
-        h1 {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 10px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            background: linear-gradient(to right, #fff, #aaa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .key-area { display: none; margin-top: 20px; }
+        .key-box { 
+            background: #000; border: 2px dashed var(--main); color: var(--main); 
+            font-family: 'Orbitron'; font-size: 28px; padding: 15px; 
+            border-radius: 8px; margin-bottom: 10px; letter-spacing: 2px;
         }
-
-        p.subtitle {
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.5);
-            margin-bottom: 30px;
-        }
-
-        .key-wrapper {
-            position: relative;
-            margin-bottom: 30px;
-        }
-
-        .key-box {
-            font-family: 'Orbitron', monospace;
-            font-size: 32px;
-            font-weight: 700;
-            color: var(--primary);
-            text-shadow: 0 0 15px rgba(0, 243, 255, 0.5);
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px dashed rgba(255, 255, 255, 0.2);
-            padding: 20px;
-            border-radius: 12px;
-            letter-spacing: 2px;
-            transition: all 0.3s ease;
-        }
-
-        .timer-circle {
-            position: relative;
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 30px;
-        }
-
-        svg {
-            transform: rotate(-90deg);
-            width: 120px;
-            height: 120px;
-        }
-
-        circle {
-            fill: none;
-            stroke-width: 6;
-            stroke-linecap: round;
-        }
-
-        .circle-bg { stroke: rgba(255, 255, 255, 0.1); }
-        .circle-progress {
-            stroke: var(--secondary);
-            stroke-dasharray: 283; /* 2 * PI * 45 */
-            stroke-dashoffset: 0;
-            transition: stroke-dashoffset 1s linear;
-        }
-
-        .timer-text {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 20px;
-            color: #fff;
-        }
-
-        .btn-copy {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--secondary), var(--primary));
-            color: #fff;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .btn-copy:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0, 243, 255, 0.3);
-        }
-
-        .btn-copy:active { transform: translateY(0); }
-
-        /* Toast Notification */
-        .toast {
-            position: fixed;
-            top: 20px; left: 50%;
-            transform: translateX(-50%) translateY(-100px);
-            background: rgba(0, 255, 65, 0.15);
-            border: 1px solid #00ff41;
-            color: #00ff41;
-            padding: 12px 24px;
-            border-radius: 50px;
-            font-size: 14px;
-            backdrop-filter: blur(10px);
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .toast.show { transform: translateX(-50%) translateY(0); }
-
-        @keyframes pulse {
-            0% { transform: scale(0.8); opacity: 0.2; }
-            100% { transform: scale(1.2); opacity: 0.4; }
-        }
+        .timer { font-size: 14px; color: #aaa; }
+        #step1, #step2 { display: none; }
+        .loading { font-size: 12px; color: #ffff00; margin-top: 5px; display: none; }
     </style>
 </head>
 <body>
 
-    <div class="background-glow"></div>
-
     <div class="container">
-        <h1>Access Key VIP</h1>
-        <p class="subtitle">Hệ thống bảo mật tự động đổi Key mỗi 3 phút</p>
+        <h2>HỆ THỐNG VIP</h2>
+        <p>Tự động tạo link - API Link4M</p>
 
-        <div class="timer-circle">
-            <svg>
-                <circle class="circle-bg" cx="60" cy="60" r="45"></circle>
-                <circle class="circle-progress" id="progressRing" cx="60" cy="60" r="45"></circle>
-            </svg>
-            <div class="timer-text" id="timeLeft">--:--</div>
+        <div id="step1">
+            <button class="btn btn-link" onclick="getLink4M()">👉 BẤM ĐỂ LẤY LINK KEY</button>
+            <div id="loadingMsg" class="loading">Đang kết nối tới Link4M... vui lòng chờ...</div>
         </div>
 
-        <div class="key-wrapper">
-            <div class="key-box" id="keyDisplay">LOADING</div>
+        <div id="step2">
+            <div style="color:#00ff88; margin-bottom:15px; font-weight:bold;">✅ Xác minh thành công!</div>
+            <button class="btn btn-gen" onclick="startGen()">KHỞI TẠO KEY NGAY</button>
         </div>
 
-        <button class="btn-copy" onclick="copyKey()">Sao chép Key</button>
-    </div>
-
-    <div class="toast" id="toast">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
-        <span>Đã sao chép Key thành công!</span>
+        <div id="keyDisplayArea" class="key-area">
+            <div class="key-box" id="finalKey">LOADING...</div>
+            <div class="timer">Đổi sau: <span id="timeCount" style="color:#fff">--</span>s</div>
+            <button class="btn btn-link" onclick="copyKey()" style="margin-top:15px; font-size:12px;">Sao chép</button>
+        </div>
     </div>
 
     <script>
-        // ==========================================
-        // CẤU HÌNH (QUAN TRỌNG: PHẢI GIỐNG PYTHON)
+        // ===========================================
+        // CẤU HÌNH API LINK4M
         const SECRET = "QUOC_DAT_SECRET_KEY_2026"; 
-        // ==========================================
+        const API_TOKEN = "6992df868b3d1e423d1ab833"; // API Của bạn
+        // ===========================================
 
-        const duration = 180; // 3 phút
-        const circle = document.getElementById('progressRing');
-        const radius = circle.r.baseVal.value;
-        const circumference = radius * 2 * Math.PI;
+        // Kiểm tra URL xem đã vượt link chưa
+        const urlParams = new URLSearchParams(window.location.search);
+        const isVerified = urlParams.get('verify') === 'true';
 
-        circle.style.strokeDasharray = `${circumference} ${circumference}`;
-        circle.style.strokeDashoffset = circumference;
-
-        function setProgress(percent) {
-            const offset = circumference - (percent / 100) * circumference;
-            circle.style.strokeDashoffset = offset;
+        if (isVerified) {
+            document.getElementById('step2').style.display = 'block';
+        } else {
+            document.getElementById('step1').style.display = 'block';
         }
 
-        function generateKey() {
+        async function getLink4M() {
+            const btn = document.querySelector('.btn-link');
+            const msg = document.getElementById('loadingMsg');
+            
+            btn.disabled = true;
+            btn.innerText = "ĐANG TẠO LINK...";
+            msg.style.display = 'block';
+
+            // Tạo URL đích (Link web hiện tại + ?verify=true)
+            // Loại bỏ các tham số cũ nếu có để tránh lỗi
+            const currentUrl = window.location.href.split('?')[0]; 
+            const targetUrl = encodeURIComponent(currentUrl + "?verify=true");
+
+            // Gọi API Link4M
+            try {
+                const response = await fetch(`https://link4m.com/api-shorten/v2?api=${API_TOKEN}&url=${targetUrl}`);
+                const data = await response.json();
+
+                if (data.status === "success") {
+                    // Chuyển hướng người dùng đến link rút gọn
+                    window.location.href = data.shortenedUrl;
+                } else {
+                    alert("Lỗi tạo link: " + data.message);
+                    btn.disabled = false;
+                    btn.innerText = "👉 BẤM ĐỂ LẤY LINK KEY";
+                    msg.style.display = 'none';
+                }
+            } catch (error) {
+                console.error(error);
+                // Nếu fetch lỗi (do CORS), thử cách chuyển hướng trực tiếp
+                // Đây là phương án dự phòng
+                alert("Đang thử phương thức kết nối dự phòng...");
+                window.location.href = `https://link4m.com/api?api=${API_TOKEN}&url=${targetUrl}`;
+            }
+        }
+
+        let interval;
+        function startGen() {
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('keyDisplayArea').style.display = 'block';
+            updateKey();
+            interval = setInterval(updateKey, 1000);
+        }
+
+        function updateKey() {
             const now = Math.floor(Date.now() / 1000);
+            const duration = 180; 
             const timeStep = Math.floor(now / duration);
             
-            // Logic tạo Key (Giống Python)
             const raw = SECRET + timeStep;
             const hash = CryptoJS.MD5(raw).toString();
             const num = parseInt(hash.substring(0, 8), 16) % 10000;
             const key = "dat_" + num.toString().padStart(4, '0');
             
-            document.getElementById("keyDisplay").innerText = key;
-            
-            // Logic đếm ngược
-            const secondsPassed = now % duration;
-            const secondsLeft = duration - secondsPassed;
-            
-            // Cập nhật vòng tròn
-            const percent = (secondsLeft / duration) * 100;
-            setProgress(percent);
-            
-            // Đổi màu vòng tròn khi sắp hết giờ
-            if (secondsLeft < 30) {
-                circle.style.stroke = "#ff0055"; // Màu đỏ cảnh báo
-            } else {
-                circle.style.stroke = "#bd00ff"; // Màu tím mặc định
-            }
-
-            // Hiển thị phút:giây
-            const m = Math.floor(secondsLeft / 60);
-            const s = secondsLeft % 60;
-            document.getElementById("timeLeft").innerText = `${m}:${s.toString().padStart(2, '0')}`;
+            document.getElementById("finalKey").innerText = key;
+            document.getElementById("timeCount").innerText = duration - (now % duration);
         }
 
         function copyKey() {
-            const key = document.getElementById("keyDisplay").innerText;
-            if (key === "LOADING") return;
-
-            navigator.clipboard.writeText(key).then(() => {
-                showToast();
-            });
+            const k = document.getElementById("finalKey").innerText;
+            navigator.clipboard.writeText(k);
+            alert("Đã sao chép: " + k);
         }
-
-        function showToast() {
-            const toast = document.getElementById("toast");
-            toast.classList.add("show");
-            setTimeout(() => {
-                toast.classList.remove("show");
-            }, 3000);
-        }
-
-        setInterval(generateKey, 1000);
-        generateKey();
     </script>
 </body>
 </html>
