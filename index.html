@@ -39,41 +39,48 @@
             border-radius: 8px; margin-bottom: 10px; letter-spacing: 2px;
         }
         .timer { font-size: 14px; color: #aaa; }
+        
         #step1, #step2 { display: none; }
-        .loading { font-size: 12px; color: #ffff00; margin-top: 5px; display: none; }
+        
+        .loader {
+            border: 4px solid #333; border-top: 4px solid var(--main);
+            border-radius: 50%; width: 30px; height: 30px;
+            animation: spin 1s linear infinite; margin: 10px auto; display: none;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h2>HỆ THỐNG VIP</h2>
-        <p>Tự động tạo link - API Link4M</p>
+        <p>API Link4M Auto - No Error</p>
 
         <div id="step1">
-            <button class="btn btn-link" onclick="getLink4M()">👉 BẤM ĐỂ LẤY LINK KEY</button>
-            <div id="loadingMsg" class="loading">Đang kết nối tới Link4M... vui lòng chờ...</div>
+            <button class="btn btn-link" onclick="getLinkAuto()">👉 BẤM ĐỂ LẤY LINK KEY</button>
+            <div id="loading" class="loader"></div>
+            <div id="statusText" style="font-size:12px; margin-top:10px; color:#ffff00; display:none;">Đang kết nối API...</div>
         </div>
 
         <div id="step2">
-            <div style="color:#00ff88; margin-bottom:15px; font-weight:bold;">✅ Xác minh thành công!</div>
+            <div style="color:#00ff88; margin-bottom:15px; font-weight:bold;">✅ Đã vượt link thành công!</div>
             <button class="btn btn-gen" onclick="startGen()">KHỞI TẠO KEY NGAY</button>
         </div>
 
         <div id="keyDisplayArea" class="key-area">
             <div class="key-box" id="finalKey">LOADING...</div>
-            <div class="timer">Đổi sau: <span id="timeCount" style="color:#fff">--</span>s</div>
+            <div class="timer">Key đổi sau: <span id="timeCount" style="color:#fff">--</span>s</div>
             <button class="btn btn-link" onclick="copyKey()" style="margin-top:15px; font-size:12px;">Sao chép</button>
         </div>
     </div>
 
     <script>
         // ===========================================
-        // CẤU HÌNH API LINK4M
+        // CẤU HÌNH API
         const SECRET = "QUOC_DAT_SECRET_KEY_2026"; 
-        const API_TOKEN = "6992df868b3d1e423d1ab833"; // API Của bạn
+        const API_TOKEN = "6992df868b3d1e423d1ab833"; // Token của bạn
         // ===========================================
 
-        // Kiểm tra URL xem đã vượt link chưa
         const urlParams = new URLSearchParams(window.location.search);
         const isVerified = urlParams.get('verify') === 'true';
 
@@ -83,39 +90,54 @@
             document.getElementById('step1').style.display = 'block';
         }
 
-        async function getLink4M() {
-            const btn = document.querySelector('.btn-link');
-            const msg = document.getElementById('loadingMsg');
-            
-            btn.disabled = true;
-            btn.innerText = "ĐANG TẠO LINK...";
-            msg.style.display = 'block';
+        async function getLinkAuto() {
+            // Kiểm tra nếu đang chạy file offline
+            if (window.location.protocol === 'file:') {
+                alert("LỖI: Bạn phải upload file này lên GitHub Pages thì API mới hoạt động!");
+                return;
+            }
 
-            // Tạo URL đích (Link web hiện tại + ?verify=true)
-            // Loại bỏ các tham số cũ nếu có để tránh lỗi
-            const currentUrl = window.location.href.split('?')[0]; 
+            const btn = document.querySelector('.btn-link');
+            const loader = document.getElementById('loading');
+            const status = document.getElementById('statusText');
+
+            btn.style.display = 'none';
+            loader.style.display = 'block';
+            status.style.display = 'block';
+
+            // Tạo link đích (Link hiện tại + ?verify=true)
+            const currentUrl = window.location.href.split('?')[0];
             const targetUrl = encodeURIComponent(currentUrl + "?verify=true");
 
-            // Gọi API Link4M
-            try {
-                const response = await fetch(`https://link4m.com/api-shorten/v2?api=${API_TOKEN}&url=${targetUrl}`);
-                const data = await response.json();
+            // Cách 1: Dùng Proxy để lấy JSON (Ưu tiên)
+            const apiUrl = `https://link4m.com/api-shorten/v2?api=${API_TOKEN}&url=${targetUrl}`;
+            // Dùng allorigins làm cầu nối để vượt lỗi CORS
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
 
-                if (data.status === "success") {
-                    // Chuyển hướng người dùng đến link rút gọn
-                    window.location.href = data.shortenedUrl;
-                } else {
-                    alert("Lỗi tạo link: " + data.message);
-                    btn.disabled = false;
-                    btn.innerText = "👉 BẤM ĐỂ LẤY LINK KEY";
-                    msg.style.display = 'none';
+            try {
+                const response = await fetch(proxyUrl);
+                const dataWrapper = await response.json();
+                
+                // Parse dữ liệu từ proxy
+                if (dataWrapper.contents) {
+                    const data = JSON.parse(dataWrapper.contents);
+                    
+                    if (data.status === "success") {
+                        status.innerText = "Đã tạo link! Đang chuyển hướng...";
+                        setTimeout(() => {
+                            window.location.href = data.shortenedUrl;
+                        }, 500);
+                        return;
+                    }
                 }
+                throw new Error("API JSON thất bại");
+
             } catch (error) {
-                console.error(error);
-                // Nếu fetch lỗi (do CORS), thử cách chuyển hướng trực tiếp
-                // Đây là phương án dự phòng
-                alert("Đang thử phương thức kết nối dự phòng...");
-                window.location.href = `https://link4m.com/api?api=${API_TOKEN}&url=${targetUrl}`;
+                console.log("Chuyển sang chế độ Direct Redirect...");
+                // Cách 2: Nếu Proxy lỗi, dùng Direct Redirect API (Chắc chắn 100% thành công)
+                // Link này sẽ tự động chuyển hướng người dùng luôn
+                const fallbackUrl = `https://link4m.com/api?api=${API_TOKEN}&url=${targetUrl}`;
+                window.location.href = fallbackUrl;
             }
         }
 
