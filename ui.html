@@ -3,44 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QUOCDAT OFFICIAL</title>
+    <title>QUOCDAT - TRANG CHỦ</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Inter:wght@300;600&display=swap" rel="stylesheet">
     
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.ripples/0.5.3/jquery.ripples.min.js"></script>
 
     <style>
-        /* --- CẤU HÌNH CHUNG --- */
-        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background-color: #000;
-            background-image: url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed; /* Hình nền đứng yên khi cuộn */
-            color: #fff;
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
+            background: #000 url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat fixed;
+            color: #fff; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden;
         }
-
+        
         /* Lớp phủ tối */
-        .overlay-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); pointer-events: none; z-index: 0;
-        }
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 0; pointer-events: none; }
 
-        /* --- HEADER & MENU --- */
+        /* HEADER */
         header {
             position: fixed; top: 0; left: 0; width: 100%; padding: 20px 40px;
-            display: flex; justify-content: space-between; align-items: center; z-index: 1000;
-            background: rgba(10,10,10,0.8); backdrop-filter: blur(15px);
+            display: flex; justify-content: space-between; align-items: center; z-index: 100;
+            background: rgba(255,255,255,0.02); backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .logo { font-family: 'Orbitron'; font-weight: 900; font-size: 22px; color: #fff; letter-spacing: 2px; }
+        .logo { font-family: 'Orbitron'; font-weight: 900; font-size: 22px; letter-spacing: 2px; color: #fff; }
 
-        /* HAMBURGER ICON */
-        .hamburger { cursor: pointer; width: 30px; height: 20px; position: relative; z-index: 1002; }
+        /* MENU ICON */
+        .hamburger { cursor: pointer; z-index: 102; width: 30px; height: 20px; position: relative; }
         .hamburger span { display: block; position: absolute; height: 2px; width: 100%; background: #fff; border-radius: 9px; transition: .25s; }
         .hamburger span:nth-child(1) { top: 0px; } .hamburger span:nth-child(2) { top: 9px; } .hamburger span:nth-child(3) { top: 18px; }
         .hamburger.open span:nth-child(1) { top: 9px; transform: rotate(135deg); background: #ff5555; }
@@ -50,222 +39,95 @@
         /* MENU FULLSCREEN */
         .nav-overlay {
             position: fixed; top: 0; right: -100%; width: 100%; height: 100%;
-            background: rgba(5,5,5,0.98); backdrop-filter: blur(20px); z-index: 1001;
+            background: rgba(5,5,5,0.95); backdrop-filter: blur(20px); z-index: 101;
             display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.5s;
         }
         .nav-overlay.active { right: 0; }
         .nav-menu li { list-style: none; margin: 25px 0; text-align: center; }
+        /* Link trong menu dẫn tới các file khác */
         .nav-menu a { font-family: 'Orbitron'; font-size: 26px; text-decoration: none; color: #888; transition: 0.3s; }
         .nav-menu a:hover { color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
 
-        /* --- CÁC SECTION (KHỐI NỘI DUNG) --- */
-        section {
-            min-height: 100vh; /* Mỗi phần chiếm ít nhất 1 màn hình */
-            padding: 100px 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            z-index: 10;
+        /* HERO CONTENT */
+        .container { 
+            position: relative; z-index: 10; height: 100vh; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            text-align: center; 
         }
+        
+        h1 { font-size: 70px; font-weight: 900; margin-bottom: 20px; text-shadow: 0 10px 30px rgba(0,0,0,0.5); letter-spacing: -2px; line-height: 1; }
+        p { color: #ccc; margin-bottom: 40px; font-size: 16px; max-width: 600px; line-height: 1.6; }
 
-        .section-title {
-            font-family: 'Orbitron'; font-size: 40px; margin-bottom: 50px;
-            background: linear-gradient(to right, #fff, #aaa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            text-align: center;
+        .btn-group { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+
+        /* Nút Lấy Key */
+        .btn-main {
+            padding: 16px 45px; border-radius: 50px; 
+            background: #fff; color: #000; font-weight: bold; font-size: 16px;
+            cursor: pointer; transition: 0.3s; text-decoration: none; border: none;
         }
+        .btn-main:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(255,255,255,0.5); }
 
-        /* 1. TRANG CHỦ (HERO) */
-        #home h1 { font-size: 70px; font-weight: 900; line-height: 1.1; margin-bottom: 20px; text-align: center; text-shadow: 0 0 30px rgba(0,0,0,0.5); }
-        #home p { color: #aaa; font-size: 18px; margin-bottom: 40px; max-width: 600px; text-align: center; }
-        .btn-hero { padding: 18px 50px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: #fff; font-weight: bold; backdrop-filter: blur(5px); cursor: pointer; transition: 0.3s; }
-        .btn-hero:hover { background: #fff; color: #000; box-shadow: 0 0 40px rgba(255,255,255,0.3); }
-
-        /* 2. SHOP (GRID) */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; max-width: 1200px; width: 100%; }
-        .card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 25px; transition: 0.3s; position: relative; backdrop-filter: blur(5px); }
-        .card:hover { transform: translateY(-10px); background: rgba(255,255,255,0.1); border-color: #00ff88; }
-        .tag { position: absolute; top: 15px; right: 15px; font-size: 10px; padding: 4px 10px; border-radius: 20px; background: rgba(0,255,136,0.2); color: #00ff88; font-weight: bold; }
-        .btn-down { width: 100%; padding: 10px; background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; cursor: pointer; transition: 0.3s; margin-top: 15px; }
-        .btn-down:hover { background: #fff; color: #000; }
-
-        /* 3. ABOUT & FAQ */
-        .glass-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 30px; max-width: 800px; width: 100%; backdrop-filter: blur(5px); }
-        details { background: rgba(0,0,0,0.3); margin-bottom: 10px; border-radius: 8px; overflow: hidden; }
-        summary { padding: 15px; cursor: pointer; font-weight: 600; list-style: none; position: relative; }
-        summary::after { content: '+'; position: absolute; right: 20px; color: #888; }
-        details[open] summary::after { content: '-'; color: #00ff88; }
-        .faq-content { padding: 15px; color: #aaa; font-size: 14px; border-top: 1px solid rgba(255,255,255,0.05); }
-
-        /* 4. GET KEY SECTION */
-        .key-box { max-width: 400px; width: 100%; text-align: center; }
-        .btn-gen { width: 100%; padding: 15px; background: #fff; color: #000; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; }
-        .btn-gen:hover { background: #00ff88; box-shadow: 0 0 20px rgba(0,255,136,0.4); }
-        .loader { border: 4px solid #333; border-top: 4px solid #00ff88; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .status { color: #ffff00; font-size: 12px; margin-top: 10px; display: none; }
+        /* Nút Vào Shop */
+        .btn-sec {
+            padding: 16px 45px; border-radius: 50px; 
+            background: rgba(255,255,255,0.1); color: #fff; font-weight: bold; font-size: 16px;
+            border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(5px);
+            cursor: pointer; transition: 0.3s; text-decoration: none;
+        }
+        .btn-sec:hover { background: rgba(255,255,255,0.2); border-color: #fff; }
 
         /* Footer */
-        footer { padding: 40px; text-align: center; color: #444; font-size: 12px; position: relative; z-index: 10; border-top: 1px solid rgba(255,255,255,0.05); background: #000; }
+        footer { position: absolute; bottom: 20px; width: 100%; text-align: center; color: rgba(255,255,255,0.4); font-size: 12px; z-index: 10; }
 
-        @media(max-width: 768px) { #home h1 { font-size: 40px; } }
+        @media(max-width: 768px) { h1 { font-size: 40px; } .btn-group { flex-direction: column; } }
     </style>
 </head>
 <body>
-
-    <div class="overlay-bg"></div>
+    <div class="overlay"></div>
 
     <header>
-        <div class="logo">QUOCDAT.</div>
-        <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+        <div class="logo">QUOCDAT.HUB</div>
+        <div class="hamburger" onclick="toggleMenu()">
+            <span></span><span></span><span></span>
+        </div>
     </header>
 
     <div class="nav-overlay" id="navOverlay">
         <ul class="nav-menu">
-            <li><a href="#home" onclick="toggleMenu()">Trang Chủ</a></li>
-            <li><a href="#shop" onclick="toggleMenu()">Kho Tổng Hợp</a></li>
-            <li><a href="#about" onclick="toggleMenu()">Giới Thiệu</a></li>
-            <li><a href="#getkey" onclick="toggleMenu()" style="color:#00ff88">Lấy Key Vip</a></li>
+            <li><a href="ui.html" style="color:#fff">Trang Chủ</a></li>
+            <li><a href="shop.html">Kho Tổng Hợp</a></li>
+            <li><a href="https://t.me/quocdadv">Liên Hệ Admin</a></li>
+            <li style="margin-top: 30px;">
+                <a href="index.html" style="color:#00ff88; border:1px solid #00ff88; padding:10px 30px; border-radius:30px;">LẤY KEY VIP</a>
+            </li>
         </ul>
     </div>
 
-    <section id="home">
-        <h1>UNLIMITED.<br>POWER.</h1>
-        <p>Hệ thống Tool Python tối ưu hóa. Bảo mật Token - Key 15 Phút.<br>Giao diện Liquid Glass mượt mà.</p>
-        <a href="#getkey"><button class="btn-hero">LẤY KEY NGAY</button></a>
-    </section>
-
-    <section id="shop">
-        <h2 class="section-title">KHO TÀI LIỆU</h2>
-        <div class="grid">
-            <div class="card">
-                <span class="tag">FREE</span>
-                <h3>Hack Blox Fruit</h3>
-                <p>Script Auto Farm, Auto Raid. Fix lỗi Anti-Ban mới nhất.</p>
-                <a href="#"><button class="btn-down">TẢI XUỐNG</button></a>
-            </div>
-            <div class="card">
-                <span class="tag" style="color:#ff5555; background:rgba(255,85,85,0.2)">VIP</span>
-                <h3>Tool Obfuscate</h3>
-                <p>Tool khóa code Python 3 lớp. Key hệ thống 15 phút.</p>
-                <a href="#"><button class="btn-down">TẢI XUỐNG</button></a>
-            </div>
-            <div class="card">
-                <span class="tag">UPD</span>
-                <h3>Fix Lag Roblox</h3>
-                <p>File xóa texture, giảm đồ họa cho máy cấu hình yếu.</p>
-                <a href="#"><button class="btn-down">TẢI XUỐNG</button></a>
-            </div>
-        </div>
-    </section>
-
-    <section id="about">
-        <h2 class="section-title">THÔNG TIN</h2>
-        <div class="glass-box">
-            <h3 style="margin-bottom:15px; color:#00ff88">Về Tool QuocDat</h3>
-            <p style="color:#ccc; margin-bottom:30px; line-height:1.6">
-                Đây là hệ thống cung cấp Key và Script hỗ trợ game thủ và lập trình viên. 
-                Chúng tôi sử dụng thuật toán bảo mật Token 15 phút để đảm bảo an toàn và công bằng.
-            </p>
-
-            <h3 style="margin-bottom:15px; color:#00ff88">FAQ - Câu hỏi</h3>
-            <details>
-                <summary>Key dùng được bao lâu?</summary>
-                <div class="faq-content">Key có thời hạn 15 phút. Sau đó bạn cần lấy Key mới.</div>
-            </details>
-            <details>
-                <summary>Liên hệ Admin ở đâu?</summary>
-                <div class="faq-content">Telegram: @quocdadv</div>
-            </details>
-            <details>
-                <summary>Tool có an toàn không?</summary>
-                <div class="faq-content">An toàn 100%. Không chứa mã độc hại.</div>
-            </details>
-        </div>
-    </section>
-
-    <section id="getkey">
-        <h2 class="section-title">LẤY KEY VIP</h2>
-        <div class="glass-box key-box">
-            <p style="color:#aaa; font-size:13px; margin-bottom:20px;">Hệ thống tạo Link Bảo Mật (15 Phút)</p>
+    <div class="container">
+        <h1>UNLIMITED.<br>SECURITY.</h1>
+        <p>
+            Chào mừng đến với hệ thống Tool Python độc quyền của QuocDat.<br>
+            Tích hợp bảo mật Token 15 phút, Anti-Share và kho tài liệu miễn phí.
+        </p>
+        
+        <div class="btn-group">
+            <a href="index.html" class="btn-main">LẤY KEY NGAY</a>
             
-            <button id="btnGet" class="btn-gen" onclick="generateLink()">🚀 TẠO LINK LẤY KEY</button>
-            
-            <div id="loader" class="loader"></div>
-            <div id="status" class="status">Đang kết nối Server...</div>
+            <a href="shop.html" class="btn-sec">VÀO KHO TÀI LIỆU</a>
         </div>
-    </section>
+    </div>
 
-    <footer>
-        © 2026 QuocDat. Design by QD. <br>
-        <a href="https://t.me/quocdadv" style="color:#666; text-decoration:none">Contact: t.me/quocdadv</a>
-    </footer>
+    <footer>© 2026 QuocDat. All rights reserved.</footer>
 
     <script>
-        // 1. Menu Toggle
-        function toggleMenu() { 
-            $('.hamburger').toggleClass('open'); 
-            $('.nav-overlay').toggleClass('active'); 
+        function toggleMenu() {
+            $('.hamburger').toggleClass('open');
+            $('.nav-overlay').toggleClass('active');
         }
-
-        // 2. Ripple Effect
-        $(document).ready(function() { 
-            try { $('body').ripples({ resolution: 512, dropRadius: 20, perturbance: 0.04 }); } catch(e){} 
+        $(document).ready(function() {
+            try { $('body').ripples({ resolution: 512, dropRadius: 20, perturbance: 0.04 }); } catch(e){}
         });
-
-        // 3. LOGIC TẠO KEY (Copy từ index.html sang)
-        const API_TOKEN = "6992df868b3d1e423d1ab833";
-        const TARGET_FILE = "key.html"; 
-        const PROXIES = [
-            u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-            u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-            u => `https://thingproxy.freeboard.io/fetch/${u}`
-        ];
-
-        async function generateLink() {
-            if (window.location.protocol === 'file:') return alert("Lỗi: Hãy upload lên GitHub Pages!");
-            
-            document.getElementById('btnGet').style.display = 'none';
-            document.getElementById('loader').style.display = 'block';
-            document.getElementById('status').style.display = 'block';
-
-            // Tạo Token
-            const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
-            const expiry = Date.now() + (15 * 60 * 1000); 
-
-            // Lưu vào máy
-            localStorage.setItem('secure_token', token);
-            localStorage.setItem('secure_expiry', expiry);
-
-            // Tạo link đích (Trỏ về key.html nằm cùng thư mục)
-            let path = window.location.href.split('?')[0];
-            path = path.substring(0, path.lastIndexOf("/")+1); // Lấy đường dẫn thư mục cha
-            const target = `${path}${TARGET_FILE}?t=${token}&e=${expiry}`;
-
-            // Gọi API
-            const api = `https://link4m.co/api-shorten/v2?api=${API_TOKEN}&url=${encodeURIComponent(target)}`;
-            
-            let success = false;
-            for (let p of PROXIES) {
-                try {
-                    const res = await fetch(p(api));
-                    const data = await res.json();
-                    if (data.status === "success") {
-                        document.getElementById('status').innerText = "Thành công! Đang chuyển hướng...";
-                        setTimeout(() => window.location.href = data.shortenedUrl, 800);
-                        success = true; break;
-                    }
-                } catch(e){}
-            }
-            
-            if(!success) {
-                // Fallback
-                window.open(`https://link4m.co/api?api=${API_TOKEN}&url=${encodeURIComponent(target)}`, '_blank');
-                document.getElementById('status').innerText = "Vui lòng kiểm tra tab mới mở...";
-            }
-        }
     </script>
 </body>
-                </html>
-                
+</html>
