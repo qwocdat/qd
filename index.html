@@ -5,122 +5,221 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HỆ THỐNG VIP KEY</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
-        body { background: #000; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: 'Inter', sans-serif; }
-        .box { text-align: center; width: 350px; padding: 20px; border: 1px solid #333; border-radius: 15px; background: #111; }
-        .loader { border: 4px solid #333; border-top: 4px solid #00ff88; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* CSS GIAO DIỆN DARK MODE */
+        body { background: #050505; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: 'Inter', sans-serif; overflow: hidden; }
         
-        .status { color: #ffff00; font-size: 13px; margin-top: 10px; display: none; }
-        .error-box { color: #ff5555; font-size: 12px; margin-top: 15px; padding: 10px; border: 1px solid #ff5555; background: rgba(255,0,0,0.1); display: none; word-wrap: break-word; }
+        .box { 
+            text-align: center; width: 380px; padding: 30px; 
+            border: 1px solid #333; border-radius: 20px; 
+            background: linear-gradient(145deg, #111, #0a0a0a); 
+            box-shadow: 0 0 50px rgba(0, 255, 136, 0.1); 
+            position: relative; 
+        }
+
+        h2 { color: #00ff88; font-family: 'Orbitron'; margin-bottom: 5px; text-shadow: 0 0 10px rgba(0,255,136,0.5); }
+        .sub-text { color: #666; font-size: 12px; margin-bottom: 25px; }
+
+        /* BUTTON STYLE */
+        .btn { 
+            width: 100%; padding: 15px; border: none; border-radius: 12px; 
+            font-weight: bold; cursor: pointer; text-transform: uppercase; 
+            font-size: 14px; transition: all 0.3s; margin-top: 10px;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-link { background: #fff; color: #000; box-shadow: 0 5px 15px rgba(255,255,255,0.1); }
+        .btn-link:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255,255,255,0.2); }
+        .btn-copy { background: #00ff88; color: #000; box-shadow: 0 5px 15px rgba(0,255,136,0.2); }
+        .btn-copy:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,255,136,0.4); }
+
+        /* THANH LOADING (PROGRESS BAR) */
+        .progress-container {
+            width: 100%; background: #222; height: 10px; border-radius: 5px;
+            margin-top: 20px; overflow: hidden; display: none; position: relative;
+        }
+        .progress-bar {
+            height: 100%; background: linear-gradient(90deg, #00ff88, #00b8ff);
+            width: 0%; transition: width 0.4s ease-in-out;
+            box-shadow: 0 0 10px #00ff88;
+        }
+        .status-text {
+            color: #ffff00; font-size: 12px; margin-top: 10px; 
+            display: none; font-family: monospace;
+        }
+
+        /* KEY DISPLAY & ERROR */
+        #step2 { display: none; animation: fadeIn 0.5s; }
+        .key-display { 
+            font-family: 'Orbitron'; font-size: 28px; color: #00ff88; 
+            background: rgba(0, 255, 136, 0.05); border: 2px dashed #333; 
+            padding: 15px; margin: 20px 0; border-radius: 10px; letter-spacing: 3px; 
+        }
+        .timer { font-size: 13px; color: #888; }
         
-        .btn { width: 100%; padding: 14px; background: #fff; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
-        .btn:hover { background: #ccc; }
+        .error-box { 
+            color: #ff5555; font-size: 12px; margin-top: 15px; 
+            padding: 12px; border: 1px solid #ff5555; border-radius: 8px;
+            background: rgba(255,0,0,0.1); display: none; word-wrap: break-word; 
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
     <div class="box">
-        <h2 style="color:#00ff88; font-family:'Orbitron'">VIP SYSTEM</h2>
-        <p style="color:#888; font-size:13px">Link4M Auto-Gen API (.co)</p>
+        <h2>VIP SYSTEM</h2>
+        <p class="sub-text">Hệ thống tạo Link4M tự động v5.0</p>
 
-        <button id="btnGet" class="btn" onclick="createLink()">👉 BẤM ĐỂ LẤY KEY</button>
-        
-        <div id="loader" class="loader"></div>
-        <div id="status" class="status">Đang kết nối API...</div>
-        <div id="errorDisplay" class="error-box"></div>
+        <div id="step1">
+            <button id="btnGet" class="btn btn-link" onclick="handleGetLink()">
+                <span>🚀</span> BẤM ĐỂ LẤY KEY
+            </button>
+            
+            <div id="progressBox" class="progress-container">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+            <div id="status" class="status-text">Đang khởi tạo...</div>
+            <div id="errorDisplay" class="error-box"></div>
+        </div>
+
+        <div id="step2">
+            <div style="color:#00ff88; font-weight:bold; font-size:14px; margin-bottom:10px;">✅ XÁC MINH THÀNH CÔNG</div>
+            <div class="key-display" id="finalKey">LOADING...</div>
+            <div class="timer">Key đổi sau: <span id="timeCount" style="color:#fff">--</span>s</div>
+            <button class="btn btn-copy" onclick="copyKey()">SAO CHÉP KEY</button>
+        </div>
     </div>
 
     <script>
-        // --- CẤU HÌNH ---
+        // ==========================================
+        // CẤU HÌNH API
+        const SECRET = "QUOC_DAT_SECRET_KEY_2026"; 
         const API_TOKEN = "6992df868b3d1e423d1ab833"; 
-        const TARGET_FILE = "key.html"; // Tên file đích
-        // ----------------
+        const TARGET_FILE = "key.html"; 
+        // ==========================================
 
-        async function createLink() {
+        // DANH SÁCH 10 CỔNG KẾT NỐI (PROXY) MẠNH NHẤT
+        // Hệ thống sẽ tự động nhảy qua server khác nếu server trước bị lỗi
+        const PROXY_LIST = [
+            (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`, // Server Mỹ (Ổn định)
+            (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,             // Server Cloudflare (Nhanh)
+            (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`, // Server Châu Âu
+            (u) => `https://thingproxy.freeboard.io/fetch/${u}`,                  // Server Dự phòng 1
+            (u) => `https://api.cors.lol/?url=${encodeURIComponent(u)}`,          // Server Dự phòng 2
+            (u) => `https://cors-anywhere.herokuapp.com/${u}`,                    // Server Dự phòng 3
+            (u) => `https://proxy.cors.sh/${u}`,                                  // Server Dự phòng 4
+            // Thử kết nối trực tiếp (Nếu mạng người dùng cho phép)
+            (u) => u 
+        ];
+
+        // --- KIỂM TRA TRẠNG THÁI VƯỢT LINK ---
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('verify') === 'true') {
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+            startKeyGen();
+        }
+
+        // --- HÀM XỬ LÝ CHÍNH ---
+        async function handleGetLink() {
             // Chặn chạy offline
             if (window.location.protocol === 'file:') {
-                showError("Lỗi: Vui lòng upload lên GitHub Pages!");
+                showError("⚠️ Lỗi: Bạn đang chạy file trên máy. Hãy upload lên GitHub Pages!");
                 return;
             }
 
             const btn = document.getElementById('btnGet');
-            const loader = document.getElementById('loader');
+            const progressBox = document.getElementById('progressBox');
+            const progressBar = document.getElementById('progressBar');
             const status = document.getElementById('status');
             const errBox = document.getElementById('errorDisplay');
 
-            // Reset UI
+            // Reset giao diện
             btn.style.display = 'none';
             errBox.style.display = 'none';
-            loader.style.display = 'block';
+            progressBox.style.display = 'block';
             status.style.display = 'block';
+            progressBar.style.width = '5%';
 
-            // 1. Xác định đường dẫn file key.html
-            // Lấy URL thư mục hiện tại + key.html
-            let currentPath = window.location.href;
-            // Xóa tên file index.html hoặc dấu ? tham số
-            currentPath = currentPath.split('?')[0];
-            if (currentPath.endsWith("index.html")) {
-                currentPath = currentPath.substring(0, currentPath.lastIndexOf("index.html"));
-            }
+            // 1. Tạo Link Đích
+            let currentPath = window.location.href.split('?')[0];
+            if (currentPath.endsWith("index.html")) currentPath = currentPath.substring(0, currentPath.lastIndexOf("index.html"));
             if (!currentPath.endsWith("/")) currentPath += "/";
-            
             const targetUrl = currentPath + TARGET_FILE;
-            console.log("Mục tiêu rút gọn:", targetUrl);
 
-            // 2. Gọi API Link4M (QUAN TRỌNG: DÙNG .CO)
+            // Link API gốc Link4M (.co)
             const link4mApi = `https://link4m.co/api-shorten/v2?api=${API_TOKEN}&url=${encodeURIComponent(targetUrl)}`;
             
-            // 3. Dùng Proxy corsproxy.io (Mạnh nhất hiện nay để vượt lỗi CORS)
-            const proxyUrl = `https://corsproxy.io/?` + encodeURIComponent(link4mApi);
-
-            try {
-                const response = await fetch(proxyUrl);
+            // 2. CHẠY VÒNG LẶP THỬ CÁC PROXY
+            let success = false;
+            
+            for (let i = 0; i < PROXY_LIST.length; i++) {
+                // Tính phần trăm load
+                const percent = Math.round(((i + 1) / PROXY_LIST.length) * 100);
+                progressBar.style.width = `${percent}%`;
                 
-                // Kiểm tra xem phản hồi có OK không
-                if (!response.ok) throw new Error("Lỗi mạng Proxy: " + response.status);
-
-                const data = await response.json();
+                // Cập nhật trạng thái text
+                status.innerText = `Đang kết nối Server ${i + 1} / ${PROXY_LIST.length}...`;
                 
-                // Kiểm tra dữ liệu JSON từ Link4M
-                if (data.status === "success" && data.shortenedUrl) {
-                    status.innerText = "Thành công! Đang chuyển hướng...";
-                    status.style.color = "#00ff88";
-                    
-                    // Chuyển hướng
-                    setTimeout(() => {
-                        window.location.href = data.shortenedUrl;
-                    }, 500);
-                } else {
-                    throw new Error(data.message || "Link4M không trả về link rút gọn.");
-                }
-
-            } catch (err) {
-                console.error(err);
-                
-                // Nếu Proxy corsproxy.io lỗi, thử Proxy dự phòng (allorigins)
-                console.log("Thử Proxy dự phòng...");
                 try {
-                    const backupProxy = `https://api.allorigins.win/get?url=${encodeURIComponent(link4mApi)}`;
-                    const backupRes = await fetch(backupProxy);
-                    const backupDataWrapper = await backupRes.json();
-                    const backupData = JSON.parse(backupDataWrapper.contents);
+                    const proxyUrl = PROXY_LIST[i](link4mApi);
+                    
+                    // Gọi API (Timeout 5 giây mỗi server để không đợi lâu)
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 5000);
+                    
+                    const response = await fetch(proxyUrl, { signal: controller.signal });
+                    clearTimeout(timeoutId);
 
-                    if (backupData.status === "success" && backupData.shortenedUrl) {
-                        window.location.href = backupData.shortenedUrl;
-                        return;
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    
+                    // Xử lý dữ liệu trả về
+                    const textData = await response.text();
+                    let data;
+                    try {
+                        data = JSON.parse(textData); // Thử parse JSON
+                    } catch {
+                        // Nếu response là HTML (lỗi 403 từ proxy), bỏ qua
+                        throw new Error("Phản hồi không hợp lệ");
                     }
-                } catch (e) {
-                    // Cả 2 đều lỗi
-                }
 
-                // Hiển thị lỗi ra màn hình
-                loader.style.display = 'none';
-                status.style.display = 'none';
-                btn.style.display = 'block';
-                btn.innerText = "THỬ LẠI";
+                    if (data.status === "success" && data.shortenedUrl) {
+                        // === THÀNH CÔNG ===
+                        progressBar.style.width = '100%';
+                        progressBar.style.background = '#00ff88';
+                        status.innerText = "✅ Đã tạo link thành công! Đang chuyển hướng...";
+                        status.style.color = "#00ff88";
+                        
+                        setTimeout(() => {
+                            window.location.href = data.shortenedUrl;
+                        }, 800); // Đợi xíu cho đẹp
+                        
+                        success = true;
+                        break; // Thoát vòng lặp
+                    }
+
+                } catch (err) {
+                    console.warn(`Server ${i+1} thất bại.`);
+                }
                 
-                showError("Lỗi kết nối API: " + err.message + "\n(Vui lòng thử lại sau vài giây)");
+                // Nghỉ 300ms giữa các lần thử để hiệu ứng mượt
+                await new Promise(r => setTimeout(r, 300));
+            }
+
+            // 3. XỬ LÝ KHI THẤT BẠI TOÀN TẬP
+            if (!success) {
+                progressBox.style.display = 'none';
+                status.style.display = 'none';
+                btn.style.display = 'flex'; // Hiện lại nút
+                btn.innerText = "🔄 THỬ LẠI (HOẶC CLICK ĐỂ TẠO THỦ CÔNG)";
+                btn.onclick = () => {
+                    // Mở trang tạo link thủ công nếu auto hỏng
+                    window.open(`https://link4m.co/api?api=${API_TOKEN}&url=${encodeURIComponent(targetUrl)}`, '_blank');
+                };
+                
+                showError("❌ Tất cả cổng kết nối đều bận. Vui lòng bấm nút trên để hệ thống tự chuyển hướng thủ công.");
             }
         }
 
@@ -128,6 +227,28 @@
             const errBox = document.getElementById('errorDisplay');
             errBox.innerText = msg;
             errBox.style.display = 'block';
+        }
+
+        // --- LOGIC KEY ---
+        function startKeyGen() {
+            updateKey();
+            setInterval(updateKey, 1000);
+        }
+
+        function updateKey() {
+            const now = Math.floor(Date.now() / 1000);
+            const duration = 180; 
+            const timeStep = Math.floor(now / duration);
+            const raw = SECRET + timeStep;
+            const hash = CryptoJS.MD5(raw).toString();
+            const num = parseInt(hash.substring(0, 8), 16) % 10000;
+            document.getElementById("finalKey").innerText = "dat_" + num.toString().padStart(4, '0');
+            document.getElementById("timeCount").innerText = duration - (now % duration);
+        }
+
+        function copyKey() {
+            navigator.clipboard.writeText(document.getElementById("finalKey").innerText);
+            alert("Đã sao chép Key!");
         }
     </script>
 </body>
