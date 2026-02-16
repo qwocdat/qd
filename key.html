@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>XÁC MINH</title>
+    <title>XÁC MINH THÀNH CÔNG</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
@@ -15,17 +15,20 @@
         .error-icon { font-size: 60px; margin-bottom: 20px; }
         .btn-back { background: #ff5555; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 20px; display: inline-block; }
 
-        .key-display { font-size: 30px; color: #fff; border: 2px dashed #00ff88; padding: 15px; margin: 20px 0; font-family: 'Orbitron'; letter-spacing: 2px; border-radius: 10px; word-break: break-all; }
+        .key-display { font-size: 32px; color: #fff; border: 2px dashed #00ff88; padding: 15px; margin: 20px 0; font-family: 'Orbitron'; letter-spacing: 2px; border-radius: 10px; word-break: break-all; }
         .btn-copy { background: #00ff88; border: none; padding: 12px 30px; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 16px; }
+        .timer { font-family: 'Orbitron'; color: #ffff00; font-size: 14px; }
     </style>
 </head>
 <body>
 
     <div class="box" id="successBox">
         <h2 style="color:#00ff88; font-family:'Orbitron'">XÁC MINH THÀNH CÔNG</h2>
-        <p style="color:#aaa; font-size:13px">Token hợp lệ. Key của bạn:</p>
+        <p style="color:#aaa; font-size:13px">Key 15 phút của bạn:</p>
+        
         <div class="key-display" id="finalKey">LOADING...</div>
-        <div style="color:#888; font-size:12px">Key hết hạn sau: <span id="timeCount" style="color:#fff">--</span>s</div>
+        
+        <div class="timer">Hết hạn sau: <span id="timeCount" style="color:#fff">--:--</span></div>
         <br>
         <button class="btn-copy" onclick="copyKey()">SAO CHÉP KEY</button>
     </div>
@@ -33,41 +36,35 @@
     <div class="error-screen" id="errorBox">
         <div class="error-icon">⛔</div>
         <h2 style="color:#ff5555">TRUY CẬP BỊ TỪ CHỐI</h2>
-        <p style="color:#ccc; font-size:14px; margin-top:10px">Link không hợp lệ hoặc đã hết hạn!</p>
-        <p style="color:#666; font-size:12px">Vui lòng không copy link hoặc bookmark trang này.</p>
-        <a href="index.html" class="btn-back">VƯỢT LINK LẠI</a>
+        <p style="color:#ccc; font-size:14px; margin-top:10px">Link không hợp lệ hoặc bạn chưa vượt link!</p>
+        <a href="index.html" class="btn-back">LẤY KEY LẠI</a>
     </div>
 
     <script>
+        // --- CẤU HÌNH (QUAN TRỌNG) ---
         const SECRET = "QUOC_DAT_SECRET_KEY_2026"; 
+        const DURATION = 900; // 900 giây = 15 Phút (Phải giống Python)
+        // ------------------------------
 
         function checkSecurity() {
+            // Logic kiểm tra bảo mật (verify=true hoặc token)
+            // Ở đây mình dùng check đơn giản verify=true để khớp với code index.html trước đó
+            // Nếu bạn dùng bản token nâng cao thì thay logic này nhé.
             const urlParams = new URLSearchParams(window.location.search);
-            const tokenFromUrl = urlParams.get('auth');
             
-            const tokenStored = localStorage.getItem('vip_token');
-            const expiryStored = localStorage.getItem('vip_expiry');
+            // Cách 1: Kiểm tra verify=true (Dễ dùng)
+            if (urlParams.get('verify') === 'true') return true;
+            
+            // Cách 2: Kiểm tra Token (Nếu bạn dùng bản Secure Token v7.0)
+            // const token = urlParams.get('auth');
+            // const stored = localStorage.getItem('vip_token');
+            // if(token && token === stored) return true;
 
-            // 1. KIỂM TRA CƠ BẢN
-            if (!tokenFromUrl || !tokenStored || !expiryStored) return false;
-
-            // 2. SO SÁNH TOKEN (Chống copy link cho người khác)
-            if (tokenFromUrl !== tokenStored) return false;
-
-            // 3. KIỂM TRA THỜI GIAN (Chống dùng lại link cũ quá 5 phút)
-            if (Date.now() > parseInt(expiryStored)) return false;
-
-            return true;
+            return false;
         }
 
         if (checkSecurity()) {
             document.getElementById('successBox').style.display = 'block';
-            
-            // Xóa token ngay lập tức để không dùng lại được (Bảo mật tối đa)
-            // localStorage.removeItem('vip_token'); 
-            // localStorage.removeItem('vip_expiry');
-            // (Nếu muốn F5 trang vẫn còn key thì comment 2 dòng trên lại)
-            
             startKeyGen();
         } else {
             document.getElementById('errorBox').style.display = 'block';
@@ -80,18 +77,29 @@
 
         function updateKey() {
             const now = Math.floor(Date.now() / 1000);
-            const duration = 180;
-            const timeStep = Math.floor(now / duration);
+            
+            // Tính toán Key
+            const timeStep = Math.floor(now / DURATION);
             const raw = SECRET + timeStep;
             const hash = CryptoJS.MD5(raw).toString();
             const num = parseInt(hash.substring(0, 8), 16) % 10000;
             
             document.getElementById("finalKey").innerText = "dat_" + num.toString().padStart(4, '0');
             
-            const timeLeft = duration - (now % duration);
-            document.getElementById("timeCount").innerText = timeLeft;
+            // Tính thời gian đếm ngược
+            const timeLeft = DURATION - (now % DURATION);
             
-            if (timeLeft === 0) setTimeout(() => window.location.reload(), 1500);
+            // Đổi giây sang phút:giây cho đẹp (VD: 14:59)
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            document.getElementById("timeCount").innerText = formattedTime;
+            
+            // Hết giờ -> Tự reload để Key cũ chết ngay
+            if (timeLeft === 0) {
+                setTimeout(() => window.location.reload(), 1500);
+            }
         }
 
         function copyKey() {
