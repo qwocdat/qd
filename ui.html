@@ -5,29 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QUOCDAT - Trang Chủ</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Inter:wght@300;600&display=swap" rel="stylesheet">
-    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.ripples/0.5.3/jquery.ripples.min.js"></script>
-
+    
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
         body {
             background: #000 url('https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?q=80&w=2574&auto=format&fit=crop') center/cover no-repeat fixed;
-            color: #fff; font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden;
+            color: #fff; font-family: 'Inter', sans-serif; min-height: 100vh;
         }
-        /* Lớp phủ tối */
-        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 0; pointer-events: none; }
-
-        /* HEADER GLASS */
-        header {
-            position: fixed; top: 0; left: 0; width: 100%; padding: 20px 40px;
-            display: flex; justify-content: space-between; align-items: center; z-index: 100;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            background: rgba(255,255,255,0.02); backdrop-filter: blur(10px);
-        }
-        .logo { font-family: 'Orbitron'; font-weight: 900; font-size: 22px; letter-spacing: 1px; color: #fff; }
-
-        /* HAMBURGER ICON */
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 0; pointer-events: none; }
+        
+        /* HEADER & MENU */
+        header { position: fixed; top: 0; left: 0; width: 100%; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; z-index: 100; background: rgba(255,255,255,0.02); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .logo { font-family: 'Orbitron'; font-weight: 900; font-size: 22px; color: #fff; }
         .hamburger { cursor: pointer; z-index: 102; width: 30px; height: 20px; position: relative; }
         .hamburger span { display: block; position: absolute; height: 2px; width: 100%; background: #fff; border-radius: 9px; transition: .25s; }
         .hamburger span:nth-child(1) { top: 0px; } .hamburger span:nth-child(2) { top: 9px; } .hamburger span:nth-child(3) { top: 18px; }
@@ -35,34 +26,28 @@
         .hamburger.open span:nth-child(2) { opacity: 0; left: -60px; }
         .hamburger.open span:nth-child(3) { top: 9px; transform: rotate(-135deg); background: #ff5555; }
 
-        /* MENU FULLSCREEN */
-        .nav-overlay {
-            position: fixed; top: 0; right: -100%; width: 100%; height: 100%;
-            background: rgba(5,5,5,0.95); backdrop-filter: blur(20px); z-index: 101;
-            display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.5s;
-        }
+        .nav-overlay { position: fixed; top: 0; right: -100%; width: 100%; height: 100%; background: rgba(5,5,5,0.95); backdrop-filter: blur(20px); z-index: 101; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.5s; }
         .nav-overlay.active { right: 0; }
         .nav-menu li { list-style: none; margin: 25px 0; text-align: center; }
         .nav-menu a { font-family: 'Orbitron'; font-size: 26px; text-decoration: none; color: #888; transition: 0.3s; }
         .nav-menu a:hover, .nav-menu a.active { color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
 
-        /* MAIN CONTENT */
-        .container { position: relative; z-index: 10; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; pointer-events: none; }
-        .container * { pointer-events: auto; }
-        
+        /* HERO SECTION */
+        section { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; z-index: 10; padding: 100px 20px; }
         h1 { font-size: 60px; font-weight: 900; margin-bottom: 10px; text-shadow: 0 10px 30px rgba(0,0,0,0.5); letter-spacing: -2px; }
-        p { color: #aaa; margin-bottom: 40px; font-size: 16px; max-width: 500px; }
-
-        .btn-main {
-            padding: 15px 45px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.2);
-            background: rgba(255,255,255,0.1); color: #fff; font-weight: bold; font-size: 16px;
-            backdrop-filter: blur(5px); cursor: pointer; transition: 0.3s;
-        }
+        p.sub { color: #aaa; margin-bottom: 40px; font-size: 16px; max-width: 500px; }
+        .btn-main { padding: 15px 45px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: #fff; font-weight: bold; font-size: 16px; backdrop-filter: blur(5px); cursor: pointer; transition: 0.3s; }
         .btn-main:hover { background: #fff; color: #000; box-shadow: 0 0 30px rgba(255,255,255,0.3); }
 
-        /* Footer */
-        footer { position: absolute; bottom: 20px; width: 100%; text-align: center; color: rgba(255,255,255,0.3); font-size: 11px; z-index: 10; }
-        @media(max-width: 768px) { h1 { font-size: 40px; } }
+        /* FEATURES SECTION */
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; max-width: 1000px; width: 100%; margin-top: 50px; }
+        .feat-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 30px; border-radius: 20px; transition: 0.3s; }
+        .feat-card:hover { transform: translateY(-10px); background: rgba(255,255,255,0.1); border-color: #00ff88; }
+        .feat-card h3 { color: #00ff88; margin-bottom: 10px; font-family: 'Orbitron'; }
+        .feat-card p { color: #aaa; font-size: 14px; line-height: 1.6; }
+
+        /* FOOTER */
+        footer { text-align: center; padding: 30px; color: rgba(255,255,255,0.3); font-size: 11px; z-index: 10; position: relative; border-top: 1px solid rgba(255,255,255,0.05); }
     </style>
 </head>
 <body>
@@ -70,9 +55,7 @@
 
     <header>
         <div class="logo">QUOCDAT.UI</div>
-        <div class="hamburger" onclick="toggleMenu()">
-            <span></span><span></span><span></span>
-        </div>
+        <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
     </header>
 
     <div class="nav-overlay" id="navOverlay">
@@ -80,30 +63,36 @@
             <li><a href="ui.html" class="active">Trang Chủ</a></li>
             <li><a href="shop.html">Tổng Hợp (Shop)</a></li>
             <li><a href="https://t.me/quocdadv" target="_blank">Liên Hệ Admin</a></li>
-            <li style="margin-top: 30px;">
-                <a href="index.html" style="color:#00ff88; border:1px solid #00ff88; padding:10px 30px; border-radius:30px;">LẤY KEY VIP</a>
-            </li>
+            <li style="margin-top: 30px;"><a href="index.html" style="color:#00ff88; border:1px solid #00ff88; padding:10px 30px; border-radius:30px;">LẤY KEY VIP</a></li>
         </ul>
     </div>
 
-    <div class="container">
+    <section>
         <h1>UNLIMITED.<br>POWER.</h1>
-        <p>Hệ thống Tool Python tối ưu hóa.<br>Bảo mật Token - Key 15 Phút.</p>
-        
+        <p class="sub">Hệ thống Tool Python tối ưu hóa.<br>Bảo mật Token - Key 15 Phút.</p>
         <a href="index.html"><button class="btn-main">GET KEY NOW</button></a>
-    </div>
+
+        <div class="features-grid">
+            <div class="feat-card">
+                <h3>🔒 Bảo Mật</h3>
+                <p>Hệ thống Token 15 phút, tự động hết hạn, chống chia sẻ link tuyệt đối.</p>
+            </div>
+            <div class="feat-card">
+                <h3>⚡ Tốc Độ</h3>
+                <p>Server Proxy đa luồng, đảm bảo việc lấy Key và tải file luôn nhanh nhất.</p>
+            </div>
+            <div class="feat-card">
+                <h3>💎 Tối Giản</h3>
+                <p>Giao diện Liquid Glass hiện đại, mượt mà trên cả PC và Mobile.</p>
+            </div>
+        </div>
+    </section>
 
     <footer>© 2026 QuocDat. Liquid Glass Design.</footer>
 
     <script>
-        function toggleMenu() {
-            $('.hamburger').toggleClass('open');
-            $('.nav-overlay').toggleClass('active');
-        }
-        // Kích hoạt hiệu ứng nước
-        $(document).ready(function() {
-            try { $('body').ripples({ resolution: 512, dropRadius: 20, perturbance: 0.04 }); } catch(e){}
-        });
+        function toggleMenu() { $('.hamburger').toggleClass('open'); $('.nav-overlay').toggleClass('active'); }
+        $(document).ready(function() { try { $('body').ripples({ resolution: 512, dropRadius: 20, perturbance: 0.04 }); } catch(e){} });
     </script>
 </body>
 </html>
