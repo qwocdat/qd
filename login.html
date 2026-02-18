@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUOCDAT ID - Đăng Nhập</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.ripples/0.5.3/jquery.ripples.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #000 url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat fixed;
+            color: #fff; font-family: 'Inter', sans-serif; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden;
+        }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); pointer-events: none; z-index: 0; }
+        
+        /* HEADER */
+        header { position: fixed; top: 0; left: 0; width: 100%; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; z-index: 100; background: rgba(255,255,255,0.02); backdrop-filter: blur(10px); }
+        .logo { font-family: 'Orbitron'; font-weight: 900; font-size: 20px; color: #fff; }
+        .back-link { color: #aaa; text-decoration: none; font-size: 14px; transition: 0.3s; }
+        .back-link:hover { color: #fff; }
+
+        /* BOX FORM */
+        .auth-box {
+            position: relative; z-index: 10; width: 400px; padding: 40px;
+            background: rgba(255,255,255,0.05); backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 20px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
+        h2 { font-family: 'Orbitron'; text-align: center; margin-bottom: 5px; font-size: 28px; }
+        p.sub { text-align: center; color: #888; font-size: 13px; margin-bottom: 30px; }
+        
+        .input-group { margin-bottom: 15px; }
+        input { width: 100%; padding: 12px 20px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 50px; color: #fff; outline: none; transition: 0.3s; }
+        input:focus { border-color: #00ff88; box-shadow: 0 0 10px rgba(0,255,136,0.2); }
+        
+        .btn { width: 100%; padding: 12px; background: linear-gradient(90deg, #00ff88, #00b8ff); border: none; border-radius: 50px; color: #000; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .btn:hover { transform: scale(1.02); }
+
+        .switch { text-align: center; margin-top: 20px; font-size: 13px; color: #aaa; }
+        .switch span { color: #00ff88; cursor: pointer; font-weight: bold; }
+        .msg { margin-top: 10px; text-align: center; font-size: 12px; display: none; }
+        .error { color: #ff5555; } .success { color: #00ff88; }
+        
+        .form-content { display: none; animation: fade 0.5s; }
+        .form-content.active { display: block; }
+        @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <header>
+        <div class="logo">QUOCDAT.ID</div>
+        <a href="ui.html" class="back-link">← Trang Chủ</a>
+    </header>
+
+    <div class="auth-box">
+        <div id="loginForm" class="form-content active">
+            <h2>ĐĂNG NHẬP</h2>
+            <p class="sub">Chào mừng trở lại!</p>
+            <div class="input-group"><input type="text" id="lUser" placeholder="Tên tài khoản"></div>
+            <div class="input-group"><input type="password" id="lPass" placeholder="Mật khẩu"></div>
+            <button class="btn" onclick="login()">VÀO HỆ THỐNG</button>
+            <div id="lMsg" class="msg"></div>
+            <p class="switch">Chưa có tài khoản? <span onclick="toggleForm('reg')">Đăng ký ngay</span></p>
+        </div>
+
+        <div id="regForm" class="form-content">
+            <h2>ĐĂNG KÝ</h2>
+            <p class="sub">Tạo tài khoản miễn phí</p>
+            <div class="input-group"><input type="text" id="rUser" placeholder="Tên tài khoản mới"></div>
+            <div class="input-group"><input type="password" id="rPass" placeholder="Mật khẩu"></div>
+            <div class="input-group"><input type="password" id="rPass2" placeholder="Nhập lại mật khẩu"></div>
+            <button class="btn" style="background: linear-gradient(90deg, #ff5555, #ffaa00);" onclick="register()">TẠO TÀI KHOẢN</button>
+            <div id="rMsg" class="msg"></div>
+            <p class="switch">Đã có tài khoản? <span onclick="toggleForm('login')">Đăng nhập</span></p>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() { try { $('body').ripples({ resolution: 512, dropRadius: 20, perturbance: 0.04 }); } catch(e){} });
+
+        function toggleForm(type) {
+            $('.form-content').removeClass('active');
+            $('#' + (type === 'reg' ? 'regForm' : 'loginForm')).addClass('active');
+            $('.msg').hide();
+        }
+
+        function register() {
+            const u = $('#rUser').val().trim(), p = $('#rPass').val().trim(), p2 = $('#rPass2').val().trim();
+            const msg = $('#rMsg');
+            if(!u || !p || !p2) return showMsg(msg, "Vui lòng nhập đủ!", "error");
+            if(p !== p2) return showMsg(msg, "Mật khẩu không khớp!", "error");
+            if(localStorage.getItem('u_' + u)) return showMsg(msg, "Tài khoản đã tồn tại!", "error");
+            
+            localStorage.setItem('u_' + u, p);
+            showMsg(msg, "Đăng ký thành công! Chuyển trang...", "success");
+            setTimeout(() => { toggleForm('login'); $('#lUser').val(u); }, 1500);
+        }
+
+        function login() {
+            const u = $('#lUser').val().trim(), p = $('#lPass').val().trim();
+            const msg = $('#lMsg');
+            if(!u || !p) return showMsg(msg, "Vui lòng nhập đủ!", "error");
+            
+            if(localStorage.getItem('u_' + u) === p) {
+                showMsg(msg, "Đăng nhập thành công!", "success");
+                sessionStorage.setItem('isLogged', 'true');
+                sessionStorage.setItem('user', u);
+                setTimeout(() => window.location.href = "ui.html", 1000);
+            } else {
+                showMsg(msg, "Sai tài khoản hoặc mật khẩu!", "error");
+            }
+        }
+
+        function showMsg(el, txt, type) { el.text(txt).removeClass('error success').addClass(type).show(); }
+    </script>
+</body>
+</html>
+  
