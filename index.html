@@ -5,125 +5,116 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>QUOCDAT TOOL | Hệ Thống Bảo Mật Python</title>
     
+    <script>
+        const currentUser = localStorage.getItem('vip_username');
+        if(!currentUser) { window.location.href = "login.html"; }
+        if(!localStorage.getItem('vip_balance_' + currentUser)) { 
+            localStorage.setItem('vip_balance_' + currentUser, 0); 
+        }
+    </script>
+
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.ripples/0.5.3/jquery.ripples.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
     <style>
-        /* --- CẤU HÌNH GIAO DIỆN --- */
+        /* ================= CẤU HÌNH GIAO DIỆN CHUNG ================= */
         :root { --primary: #00ff88; --bg: #050505; --glass: rgba(255,255,255,0.03); --border: rgba(255,255,255,0.1); }
         * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
-        
-        body {
-            background: var(--bg) url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop') center/cover no-repeat fixed;
-            color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; line-height: 1.6;
-        }
+        body { background: var(--bg) url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop') center/cover no-repeat fixed; color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; line-height: 1.6; }
         .overlay-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: -1; pointer-events: none; }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 10; }
 
-        /* --- HEADER --- */
-        header {
-            position: fixed; top: 0; left: 0; width: 100%; padding: 15px 0; z-index: 1000;
-            background: rgba(10,10,10,0.9); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border);
-        }
+        /* ================= HEADER & MENU ================= */
+        header { position: fixed; top: 0; left: 0; width: 100%; padding: 15px 0; z-index: 2000; background: rgba(10,10,10,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
         .nav-flex { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
-        .logo { font-family: 'Orbitron'; font-size: 22px; font-weight: 900; color: #fff; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
+        .logo { font-family: 'Orbitron'; font-size: 22px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 8px; cursor: pointer; }
         .logo i { color: var(--primary); }
-        
         .desktop-menu { display: flex; gap: 30px; }
-        .desktop-menu a { color: #aaa; text-decoration: none; font-size: 14px; font-weight: 500; transition: 0.3s; }
+        .desktop-menu a { color: #aaa; text-decoration: none; font-size: 14px; font-weight: 600; transition: 0.3s; cursor: pointer; }
         .desktop-menu a:hover { color: #fff; }
-
-        /* Nút 3 gạch trên Mobile */
         .hamburger { display: none; font-size: 26px; cursor: pointer; color: #fff; z-index: 2000; padding: 5px 10px; }
-        
-        /* Menu trượt Mobile */
-        .mobile-nav { 
-            position: fixed; top: 0; right: -100%; width: 85%; max-width: 320px; height: 100vh; 
-            background: #111; z-index: 1500; padding: 80px 30px; transition: 0.4s ease-in-out; 
-            border-left: 1px solid var(--border); display: flex; flex-direction: column; 
-            box-shadow: -10px 0 30px rgba(0,0,0,0.8); overflow-y: auto;
-        }
+        .mobile-nav { position: fixed; top: 0; right: -100%; width: 85%; max-width: 320px; height: 100vh; background: #111; z-index: 2500; padding: 80px 30px; transition: 0.4s ease-in-out; border-left: 1px solid var(--border); display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.8); overflow-y: auto; }
         .mobile-nav.active { right: 0; }
-        .mobile-nav a.menu-link { color: #fff; text-decoration: none; font-size: 16px; margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 15px; display: block; font-weight: 600; }
+        .mobile-nav a.menu-link { color: #fff; text-decoration: none; font-size: 16px; margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 15px; display: block; font-weight: 600; cursor: pointer; }
 
-        /* --- HERO SECTION --- */
+        /* ================= KHU VỰC TRANG CHỦ (MAIN VIEW) ================= */
+        #main-view { width: 100%; display: block; animation: fadeIn 0.5s; }
         .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; padding-top: 80px; }
         .badge { background: rgba(0,255,136,0.1); color: var(--primary); border: 1px solid var(--primary); padding: 6px 15px; border-radius: 30px; font-size: 12px; font-weight: bold; margin-bottom: 25px; display: inline-block; }
         .hero h1 { font-size: 60px; font-family: 'Orbitron'; font-weight: 900; line-height: 1.15; margin-bottom: 20px; }
         .hero span { background: linear-gradient(to right, #fff, #888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .hero p { font-size: 16px; color: #ccc; max-width: 700px; margin: 0 auto 40px; }
-        
         .btn-group { display: flex; gap: 15px; justify-content: center; }
-        .btn-lg { padding: 16px 40px; border-radius: 50px; font-weight: bold; text-decoration: none; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 15px; }
+        .btn-lg { padding: 16px 40px; border-radius: 50px; font-weight: bold; text-decoration: none; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 15px; cursor: pointer; }
         .btn-primary { background: var(--primary); color: #000; box-shadow: 0 0 20px rgba(0,255,136,0.3); border: 1px solid var(--primary); }
         .btn-outline { border: 1px solid rgba(255,255,255,0.3); color: #fff; background: rgba(255,255,255,0.05); backdrop-filter: blur(5px); }
 
-        /* --- STATS BAR --- */
+        /* Thống kê & Layout */
         .stats-bar { display: flex; justify-content: center; gap: 40px; margin-top: 60px; padding: 25px 20px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); flex-wrap: wrap; border-radius: 15px; }
         .stat-item { text-align: center; }
         .stat-num { font-family: 'Orbitron'; font-size: 26px; color: #fff; font-weight: bold; }
-        .stat-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; }
-
-        /* --- CARDS & GRID --- */
+        .stat-label { font-size: 11px; color: #888; text-transform: uppercase; margin-top: 5px; }
         .section-padding { padding: 80px 0; }
-        .section-title { text-align: center; margin-bottom: 50px; }
-        .section-title h2 { font-size: 32px; font-family: 'Orbitron'; margin-bottom: 10px; color: var(--primary); }
-        .section-title p { color: #888; font-size: 14px; }
-        
-        .glass-card { background: var(--glass); border: 1px solid var(--border); border-radius: 20px; padding: 30px; backdrop-filter: blur(12px); position: relative; }
+        .glass-card { background: var(--glass); border: 1px solid var(--border); border-radius: 20px; padding: 30px; backdrop-filter: blur(12px); }
         .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
         .icon-box { width: 50px; height: 50px; background: rgba(0,255,136,0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--primary); margin-bottom: 15px; }
+        footer { background: #080808; padding: 60px 0 30px; border-top: 1px solid var(--border); font-size: 14px; color: #888; text-align: center; }
 
-        .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
-        .code-box { background: #0a0a0a; border: 1px solid #333; border-radius: 15px; padding: 20px; font-family: monospace; color: #0f0; font-size: 13px; overflow-x: auto; }
+        /* ================= KHU VỰC NẠP TIỀN (PAYMENT VIEW) ================= */
+        #payment-view { display: none; min-height: 100vh; padding: 120px 20px 60px; justify-content: center; align-items: flex-start; animation: fadeIn 0.4s; }
+        .pay-box { width: 100%; max-width: 480px; background: #111; border: 1px solid #333; border-radius: 20px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); position: relative; }
+        .pay-header { text-align: center; margin-bottom: 25px; }
+        .pay-header h2 { font-family: 'Orbitron'; color: var(--primary); font-size: 26px; margin-bottom: 5px; }
+        .user-panel { background: rgba(0,255,136,0.05); border: 1px dashed var(--primary); padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .user-panel div { font-size: 13px; color: #aaa; }
+        .user-panel .username { color: #fff; font-weight: bold; font-family: 'Orbitron'; font-size: 16px; display: block; margin-top: 3px; }
+        .user-panel .balance { color: var(--primary); font-weight: bold; font-family: monospace; font-size: 22px; text-align: right; }
 
-        /* --- QUY TRÌNH (STEPS) --- */
-        .step-container { display: flex; gap: 20px; justify-content: space-between; }
-        .step-item { flex: 1; text-align: center; background: rgba(255,255,255,0.02); padding: 20px; border-radius: 15px; border: 1px solid var(--border); }
-        .step-num { width: 40px; height: 40px; background: var(--primary); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-weight: bold; font-family: 'Orbitron'; font-size: 18px; }
+        /* Nạp Tiền Tabs */
+        .pay-tabs { display: flex; background: #000; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333; overflow: hidden; }
+        .pay-tab-btn { flex: 1; padding: 14px 0; text-align: center; font-weight: bold; font-size: 14px; cursor: pointer; color: #888; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .pay-tab-btn.active { background: #222; color: var(--primary); }
+        .pay-tab-content { display: none; animation: fadeIn 0.3s; }
+        .pay-tab-content.active { display: block; }
 
-        /* --- FOOTER --- */
-        footer { background: #080808; padding: 60px 0 30px; border-top: 1px solid var(--border); font-size: 14px; color: #888; }
-        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
-        .footer h4 { color: #fff; margin-bottom: 20px; font-family: 'Orbitron'; font-size: 15px; }
-        .footer-links a { display: block; color: #888; text-decoration: none; margin-bottom: 12px; }
+        /* Form Nạp Tiền */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 13px; color: #aaa; margin-bottom: 8px; font-weight: 600; }
+        select, input { width: 100%; padding: 14px; background: #1a1a1a; border: 1px solid #444; border-radius: 10px; color: #fff; font-size: 15px; outline: none; transition: 0.3s; }
+        select:focus, input:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(0,255,136,0.2); }
+        .btn-pay { width: 100%; padding: 16px; background: var(--primary); color: #000; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 10px; text-decoration: none; }
+        .btn-pay:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0,255,136,0.3); }
+        .btn-tele { background: #0088cc; color: #fff; margin-top: 15px; }
+        .btn-tele:hover { background: #00aaff; }
 
-        /* =========================================
-           ĐOẠN NÀY DÀNH RIÊNG ĐỂ TỐI ƯU MOBILE 
-           ========================================= */
-        @media (max-width: 900px) { 
-            .about-grid { grid-template-columns: 1fr; } 
-            .footer-grid { grid-template-columns: 1fr 1fr; }
-        }
+        /* Khung QR Code */
+        .qr-box { text-align: center; margin-top: 20px; display: none; background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,255,136,0.2); }
+        .qr-box img { width: 100%; max-width: 250px; border-radius: 10px; }
+        .qr-instruction { color: #000; font-weight: bold; margin-top: 10px; font-size: 15px; }
+        .qr-note { background: rgba(255,85,85,0.1); border: 1px dashed #ff5555; color: #ff5555; padding: 10px; border-radius: 8px; font-size: 13px; margin-top: 15px; text-align: center; font-weight: bold; display: none; }
+
+        /* Nút quay lại & Loader */
+        .btn-back-home { display: block; text-align: center; color: #888; text-decoration: none; font-size: 15px; margin-top: 25px; transition: 0.3s; cursor: pointer; font-weight: bold; padding: 10px; border: 1px solid #333; border-radius: 10px; }
+        .btn-back-home:hover { background: #222; color: #fff; }
+        .status-box { padding: 15px; border-radius: 10px; margin-top: 15px; font-size: 13px; text-align: center; display: none; font-weight: bold; }
+        .loader { width: 20px; height: 20px; border: 3px solid rgba(0,0,0,0.3); border-top: 3px solid #000; border-radius: 50%; animation: spin 1s linear infinite; display: none; }
         
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ================= RESPONSIVE ĐIỆN THOẠI ================= */
         @media (max-width: 768px) {
-            /* Ẩn Menu PC, Hiện 3 gạch */
             .desktop-menu, #desktopAuth { display: none !important; }
             .hamburger { display: block; }
-            
-            /* Tối ưu Header & Hero */
-            .logo { font-size: 18px; }
             .hero h1 { font-size: 38px; }
-            .hero p { font-size: 14px; padding: 0 10px; }
-            
-            /* Nút bấm dài tràn viền trên Mobile */
             .btn-group { flex-direction: column; width: 100%; padding: 0 20px; }
-            .btn-lg { width: 100%; justify-content: center; padding: 18px; }
-            
-            /* Thanh Stats biến thành ô 2x2 vuông vức */
-            .stats-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px; border-radius: 0; border-left: none; border-right: none; }
-            .stat-num { font-size: 22px; }
-            
-            /* Lưới hiển thị 1 cột */
-            .grid-3 { grid-template-columns: 1fr; }
-            .step-container { flex-direction: column; }
-            .footer-grid { grid-template-columns: 1fr; text-align: center; }
-            
-            .section-title h2 { font-size: 28px; }
-            .glass-card { padding: 25px 20px; }
+            .btn-lg { width: 100%; padding: 18px; }
+            .stats-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; border-radius: 0; border-left: none; border-right: none; }
+            .pay-box { padding: 20px; border-radius: 15px; }
         }
     </style>
 </head>
@@ -133,16 +124,14 @@
 
     <header>
         <div class="nav-flex container">
-            <div class="logo"><i class="fas fa-shield-alt"></i> QUOCDAT.SEC</div>
-
+            <div class="logo" onclick="showMainView()"><i class="fas fa-shield-alt"></i> QUOCDAT.SEC</div>
             <nav class="desktop-menu">
-                <a href="#about">Hệ Thống</a>
-                <a href="#features">Tính Năng</a>
-                <a href="shop.html">Kho File</a>
+                <a onclick="showMainView()">Trang Chủ</a>
+                <a href="shop.html">Kho Tài Liệu</a>
+                <a href="getkey.html">Lấy Key VIP</a>
+                <a href="https://t.me/quocdadv" target="_blank">Hỗ Trợ</a>
             </nav>
-
             <div id="desktopAuth"></div>
-
             <div class="hamburger" onclick="openMenu()"><i class="fas fa-bars"></i></div>
         </div>
     </header>
@@ -151,188 +140,154 @@
         <div style="text-align: right; margin-bottom: 20px; margin-top: -40px;">
             <i class="fas fa-times" style="font-size:28px; color:#ff5555; cursor:pointer; padding:10px;" onclick="closeMenu()"></i>
         </div>
-
         <div id="mobileUserArea"></div>
-
-        <a href="#about" class="menu-link" onclick="closeMenu()">Giới Thiệu</a>
-        <a href="#features" class="menu-link" onclick="closeMenu()">Tính Năng</a>
-        <a href="shop.html" class="menu-link">Kho Tài Liệu</a>
-        <a href="#" id="mobileGetKeyBtn" class="menu-link" style="color:var(--primary)"><i class="fas fa-key"></i> Lấy Key VIP</a>
+        <a onclick="showMainView(); closeMenu()" class="menu-link"><i class="fas fa-home"></i> Trang Chủ</a>
+        <a href="shop.html" class="menu-link"><i class="fas fa-download"></i> Kho Tài Liệu</a>
+        <a href="getkey.html" class="menu-link" style="color:var(--primary)"><i class="fas fa-key"></i> Lấy Key VIP</a>
+        <a onclick="showPaymentView(); closeMenu()" class="menu-link" style="color:#00b8ff"><i class="fas fa-wallet"></i> Nạp Tiền</a>
     </div>
 
-    <section class="hero">
-        <div class="container">
-            <div class="badge">🚀 HỆ THỐNG OBFUSCATE V5.0</div>
-            <h1>BẢO MẬT MÃ NGUỒN<br><span>PYTHON TOÀN DIỆN</span></h1>
-            <p>Bảo vệ Script Game, Tool MMO khỏi Decompile. Tích hợp Key 15 Phút tự động, an toàn và tối ưu doanh thu.</p>
-            
-            <div class="btn-group">
-                <a href="#" id="mainKeyBtn" class="btn-lg btn-primary"><i class="fas fa-key"></i> LẤY KEY KÍCH HOẠT</a>
-                <a href="shop.html" class="btn-lg btn-outline"><i class="fas fa-download"></i> KHO TÀI LIỆU</a>
-            </div>
-
-            <div class="stats-bar">
-                <div class="stat-item"><div class="stat-num">15K+</div><div class="stat-label">Lượt Tải</div></div>
-                <div class="stat-item"><div class="stat-num">99.9%</div><div class="stat-label">Uptime</div></div>
-                <div class="stat-item"><div class="stat-num">24/7</div><div class="stat-label">Bảo Mật</div></div>
-                <div class="stat-item"><div class="stat-num">V5.0</div><div class="stat-label">Phiên Bản</div></div>
-            </div>
-        </div>
-    </section>
-
-    <section id="about" class="section-padding">
-        <div class="container">
-            <div class="glass-card about-grid">
-                <div>
-                    <h2 style="font-family:'Orbitron'; color:var(--primary); margin-bottom:15px; font-size:28px;">BẢO VỆ CHẤT XÁM CỦA BẠN</h2>
-                    <p style="color:#ccc; margin-bottom:20px; font-size:15px;">
-                        Việc viết Code tốn rất nhiều thời gian, đừng để người khác dễ dàng đánh cắp. 
-                        Thuật toán AST kết hợp AES-256 của chúng tôi sẽ biến mã nguồn của bạn thành bức tường thành vững chắc.
-                    </p>
-                    <ul style="list-style:none; color:#aaa; font-size:14px; line-height:2;">
-                        <li><i class="fas fa-check-circle" style="color:var(--primary);"></i> Chống dịch ngược (Anti-Decompile)</li>
-                        <li><i class="fas fa-check-circle" style="color:var(--primary);"></i> Chống chỉnh sửa bản quyền</li>
-                        <li><i class="fas fa-check-circle" style="color:var(--primary);"></i> Khóa Script bằng Key Online</li>
-                    </ul>
+    <div id="main-view">
+        <section class="hero">
+            <div class="container">
+                <div class="badge">🚀 HỆ THỐNG ĐÃ XÁC THỰC TÀI KHOẢN</div>
+                <h1>BẢO MẬT MÃ NGUỒN<br><span>PYTHON TOÀN DIỆN</span></h1>
+                <p>Bảo vệ Script Game, Tool MMO khỏi Decompile. Tích hợp Key 15 Phút tự động, an toàn và tối ưu doanh thu.</p>
+                <div class="btn-group">
+                    <a href="getkey.html" class="btn-lg btn-primary"><i class="fas fa-key"></i> LẤY KEY KÍCH HOẠT</a>
+                    <a onclick="showPaymentView()" class="btn-lg btn-outline" style="background:#00b8ff; color:#fff; border:none;"><i class="fas fa-wallet"></i> NẠP TIỀN VIP</a>
                 </div>
-                <div class="code-box">
-                    <div style="display:flex; gap:5px; margin-bottom:10px;">
-                        <div style="width:10px; height:10px; border-radius:50%; background:#ff5f56;"></div>
-                        <div style="width:10px; height:10px; border-radius:50%; background:#ffbd2e;"></div>
-                        <div style="width:10px; height:10px; border-radius:50%; background:#27c93f;"></div>
+                <div class="stats-bar">
+                    <div class="stat-item"><div class="stat-num">15K+</div><div class="stat-label">Lượt Tải</div></div>
+                    <div class="stat-item"><div class="stat-num">99.9%</div><div class="stat-label">Uptime</div></div>
+                    <div class="stat-item"><div class="stat-num">24/7</div><div class="stat-label">Bảo Mật</div></div>
+                    <div class="stat-item"><div class="stat-num">V7.0</div><div class="stat-label">Phiên Bản</div></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-padding">
+            <div class="container">
+                <h2 style="text-align:center; font-family:'Orbitron'; color:var(--primary); margin-bottom:40px;">TÍNH NĂNG ĐỘC QUYỀN</h2>
+                <div class="grid-3">
+                    <div class="glass-card">
+                        <div class="icon-box"><i class="fas fa-user-secret"></i></div>
+                        <h3>Anti-Share Token</h3>
+                        <p style="color:#aaa; font-size:14px; margin-top:10px;">Khóa key ngay lập tức nếu phát hiện người dùng chia sẻ link cho thiết bị khác.</p>
                     </div>
-                    <p style="color:#888"># Before Obfuscation</p>
-                    <p>def VIP_Hack():</p>
-                    <p>&nbsp;&nbsp;print("Hacking...")</p>
-                    <p style="color:#888; margin-top:10px;"># After QuocDat Security</p>
-                    <p style="color:#ff5555;">exec(eval(b"\\x6f\\x62..."))</p>
+                    <div class="glass-card">
+                        <div class="icon-box"><i class="fas fa-money-bill-wave"></i></div>
+                        <h3>Auto Payment</h3>
+                        <p style="color:#aaa; font-size:14px; margin-top:10px;">Tích hợp hệ thống Nạp thẻ cào và Quét mã VietQR tự động định danh người dùng.</p>
+                    </div>
+                    <div class="glass-card">
+                        <div class="icon-box"><i class="fas fa-mobile-alt"></i></div>
+                        <h3>Tương Thích Termux</h3>
+                        <p style="color:#aaa; font-size:14px; margin-top:10px;">Giao diện Web và Tool hoạt động hoàn hảo trên mọi giả lập Android.</p>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section id="features" class="section-padding">
-        <div class="container">
-            <div class="section-title">
-                <h2>TÍNH NĂNG ĐỘC QUYỀN</h2>
-                <p>Mọi thứ bạn cần để vận hành Tool chuyên nghiệp.</p>
-            </div>
-            <div class="grid-3">
-                <div class="glass-card">
-                    <div class="icon-box"><i class="fas fa-user-secret"></i></div>
-                    <h3>Anti-Share Token</h3>
-                    <p style="color:#aaa; font-size:14px;">Hệ thống nhận diện thiết bị. Nếu người dùng share link lấy Key cho người khác, link sẽ tự hủy.</p>
-                </div>
-                <div class="glass-card">
-                    <div class="icon-box"><i class="fas fa-hourglass-half"></i></div>
-                    <h3>Key 15 Phút</h3>
-                    <p style="color:#aaa; font-size:14px;">Mỗi Key chỉ có tuổi thọ 15 phút. Người dùng buộc phải vượt link nhiều lần -> Tăng doanh thu cho bạn.</p>
-                </div>
-                <div class="glass-card">
-                    <div class="icon-box"><i class="fas fa-mobile-alt"></i></div>
-                    <h3>Tương Thích Termux</h3>
-                    <p style="color:#aaa; font-size:14px;">Không chỉ Windows, tool được thiết kế chuẩn để chạy siêu mượt trên điện thoại Android (Termux).</p>
-                </div>
-            </div>
-        </div>
-    </section>
+        <footer>
+            <div class="container">© 2026 QuocDat Team. All rights reserved.</div>
+        </footer>
+    </div>
 
-    <footer>
-        <div class="container">
-            <div class="footer-grid">
-                <div>
-                    <div style="font-family:'Orbitron'; font-size:20px; color:#fff; margin-bottom:15px;"><i class="fas fa-shield-alt"></i> QUOCDAT.SEC</div>
-                    <p style="margin-bottom:15px; font-size:13px;">Giải pháp phần mềm an toàn, nhanh chóng và bảo mật tuyệt đối.</p>
-                </div>
-                <div class="footer-links">
-                    <h4>HỆ THỐNG</h4>
-                    <a href="shop.html">Kho Tài Liệu</a>
-                    <a id="ftKey" href="#">Lấy Key VIP</a>
-                </div>
-                <div class="footer-links">
-                    <h4>LIÊN HỆ</h4>
-                    <a href="https://t.me/quocdadv"><i class="fab fa-telegram"></i> @quocdadv</a>
-                    <a href="mailto:admin@quocdat.vip"><i class="fas fa-envelope"></i> admin@quocdat</a>
-                </div>
+    <div id="payment-view">
+        <div class="pay-box">
+            <div class="pay-header">
+                <h2>NẠP TIỀN HỆ THỐNG</h2>
+                <p>Nâng cấp VIP - Mua Tool Bản Quyền</p>
             </div>
-            <div style="text-align:center; padding-top:20px; border-top:1px solid #222; font-size:12px;">
-                © 2026 QuocDat Team.
+
+            <div class="user-panel">
+                <div>Tài khoản<span class="username" id="payUsername">Loading...</span></div>
+                <div>Số dư hiện tại<div class="balance"><span id="payBalance">0</span> đ</div></div>
+            </div>
+
+            <div class="pay-tabs">
+                <div class="pay-tab-btn active" id="btn-bank" onclick="switchPayTab('bank')"><i class="fas fa-qrcode"></i> CHUYỂN KHOẢN</div>
+                <div class="pay-tab-btn" id="btn-card" onclick="switchPayTab('card')"><i class="fas fa-ticket-alt"></i> THẺ CÀO (Auto)</div>
+            </div>
+
+            <div id="tab-bank" class="pay-tab-content active">
+                <div class="form-group">
+                    <label>Nhập số tiền muốn nạp (Tối thiểu 10.000đ)</label>
+                    <input type="number" id="bankAmount" placeholder="Ví dụ: 50000">
+                </div>
+                
+                <button class="btn-pay" style="background:#fff; color:#000" onclick="generateQR()">
+                    <i class="fas fa-qrcode"></i> TẠO MÃ THANH TOÁN
+                </button>
+
+                <div id="qrResult" class="qr-box">
+                    <img id="qrImage" src="" alt="QR Code">
+                    <div class="qr-instruction">Mở App Ngân hàng hoặc Momo để quét mã</div>
+                </div>
+                
+                <div id="qrNote" class="qr-note">
+                    Đã tạo mã với nội dung: "NAP <span id="syntaxName"></span>".<br>Tuyệt đối KHÔNG ĐƯỢC sửa nội dung này!
+                </div>
+
+                <a href="https://t.me/quocdadv" target="_blank" class="btn-pay btn-tele">
+                    <i class="fab fa-telegram-plane"></i> ĐÃ CHUYỂN KHOẢN (GỬI BILL)
+                </a>
+            </div>
+
+            <div id="tab-card" class="pay-tab-content">
+                <div class="form-group">
+                    <label>Loại thẻ</label>
+                    <select id="telco">
+                        <option value="VIETTEL">Viettel</option>
+                        <option value="VINAPHONE">Vinaphone</option>
+                        <option value="MOBIFONE">Mobifone</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Mệnh giá</label>
+                    <select id="amount">
+                        <option value="10000">10,000 VNĐ</option>
+                        <option value="20000">20,000 VNĐ</option>
+                        <option value="50000">50,000 VNĐ</option>
+                        <option value="100000">100,000 VNĐ</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Số Seri</label><input type="text" id="serial" placeholder="Nhập Seri in trên thẻ"></div>
+                <div class="form-group"><label>Mã Thẻ (Mã PIN)</label><input type="text" id="pin" placeholder="Nhập Mã thẻ cào dưới lớp bạc"></div>
+                
+                <button id="btnSubmitCard" class="btn-pay" onclick="processCard()">
+                    <span id="btnTextCard">NẠP THẺ NGAY</span>
+                    <div id="btnLoader" class="loader"></div>
+                </button>
+                <div id="statusBox" class="status-box"></div>
+            </div>
+
+            <div class="btn-back-home" onclick="showMainView()">
+                <i class="fas fa-arrow-left"></i> QUAY LẠI TRANG CHỦ
             </div>
         </div>
-    </footer>
+    </div>
 
     <script>
-        // Điều khiển Menu
-        function openMenu() { document.getElementById('mobileNav').classList.add('active'); }
-        function closeMenu() { document.getElementById('mobileNav').classList.remove('active'); }
+        // ----------------- CẤU HÌNH NGÂN HÀNG -----------------
+        const MY_BANK_ID = "VPB"; // Mã VPBank
+        const MY_ACCOUNT_NO = "0989249990"; // Số tài khoản của bạn
+        const MY_ACCOUNT_NAME = "NGUYEN DAI QUOC DAT"; // Tên chủ thẻ
+        // ------------------------------------------------------
 
+        // Hiệu ứng nước
         $(document).ready(function() {
             try { $('body').ripples({ resolution: 512, dropRadius: 20, perturbance: 0.04 }); } catch(e){}
-
-            // LOGIC KIỂM TRA ĐĂNG NHẬP
-            const user = localStorage.getItem('vip_username');
-            
-            // Xử lý nút Lấy Key chính ở giữa màn hình
-            const mainBtn = document.getElementById('mainKeyBtn');
-            const mobKeyBtn = document.getElementById('mobileGetKeyBtn');
-            const ftKeyBtn = document.getElementById('ftKey');
-
-            if (user) {
-                // NẾU ĐÃ ĐĂNG NHẬP
-                
-                // 1. Dẫn link tới trang tạo key
-                mainBtn.href = "index.html";
-                mobKeyBtn.href = "index.html";
-                ftKeyBtn.href = "index.html";
-
-                // 2. Cập nhật Header PC
-                $('#desktopAuth').html(`
-                    <div style="display:flex; align-items:center; gap:15px; background:rgba(255,255,255,0.1); padding:6px 20px; border-radius:30px; border:1px solid rgba(255,255,255,0.2);">
-                        <div style="color:#00ff88; font-weight:bold; font-family:'Orbitron'; font-size:14px;"><i class="fas fa-user-check"></i> ${user}</div>
-                        <button onclick="logout()" style="background:none; border:none; color:#ff5555; cursor:pointer;"><i class="fas fa-sign-out-alt"></i></button>
-                    </div>
-                `);
-
-                // 3. Cập nhật Menu Mobile
-                $('#mobileUserArea').html(`
-                    <div style="text-align:center; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:20px;">
-                        <div style="width:60px; height:60px; background:#00ff88; color:#000; border-radius:50%; font-size:24px; font-weight:bold; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;">${user.charAt(0).toUpperCase()}</div>
-                        <div style="color:#fff; font-size:18px; font-weight:bold; font-family:'Orbitron'">${user}</div>
-                        <div style="color:#aaa; font-size:12px; margin-bottom:15px;">Thành viên VIP</div>
-                        <button onclick="logout()" style="width:100%; background:#222; color:#ff5555; border:1px solid #ff5555; padding:10px; border-radius:10px; font-weight:bold; cursor:pointer;">ĐĂNG XUẤT</button>
-                    </div>
-                `);
-
-            } else {
-                // NẾU CHƯA ĐĂNG NHẬP
-                
-                // 1. Nút lấy key sẽ dẫn sang trang đăng nhập
-                mainBtn.href = "login.html";
-                mobKeyBtn.href = "login.html";
-                ftKeyBtn.href = "login.html";
-
-                // 2. Hiện nút Đăng Nhập ở PC
-                $('#desktopAuth').html(`
-                    <a href="login.html" style="padding:10px 25px; background:#00ff88; color:#000; font-weight:bold; border-radius:50px; text-decoration:none; font-size:14px;">ĐĂNG NHẬP</a>
-                `);
-
-                // 3. Hiện vùng nhắc nhở đăng nhập ở Mobile
-                $('#mobileUserArea').html(`
-                    <div style="text-align:center; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:20px;">
-                        <i class="fas fa-user-circle" style="font-size:50px; color:#555; margin-bottom:10px;"></i>
-                        <p style="color:#aaa; font-size:13px; margin-bottom:15px;">Vui lòng đăng nhập</p>
-                        <a href="login.html" style="display:block; background:#00ff88; color:#000; padding:12px; border-radius:10px; font-weight:bold; text-decoration:none; font-size:15px;">ĐĂNG NHẬP / ĐĂNG KÝ</a>
-                    </div>
-                `);
-            }
+            updateUserUI(); // Load UI ngay khi web xong
         });
 
-        function logout() {
-            if(confirm("Đăng xuất khỏi hệ thống?")) {
-                localStorage.removeItem('vip_username');
-                window.location.reload();
-            }
-        }
-    </script>
-</body>
-</html>
+        // Hàm cập nhật tất cả giao diện User & Số dư
+        function updateUserUI() {
+            const user = localStorage.getItem('vip_username');
+            const balance = parseInt(localStorage.getItem('vip_balance_' + user)) || 0;
+            const formatMoney = balance.toLocaleString('vi-VN') + "đ";
+
+            // Cập nhật Header PC
+            $('#desktopAuth').html(`
+                <div style="display:flex; align-items:center; gap:15px; background:rgba(255,255,255,0.1); padding:6px 15px; border-ra
