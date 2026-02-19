@@ -2,104 +2,67 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>XÁC MINH</title>
+    <title>YOUR KEY</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
         body { background: #050505; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .box { padding: 40px; border: 1px solid #333; border-radius: 20px; background: #111; text-align: center; width: 90%; max-width: 400px; display: none; }
-        .key-display { font-size: 32px; color: #fff; border: 2px dashed #00ff88; padding: 15px; margin: 20px 0; font-family: 'Orbitron'; letter-spacing: 2px; border-radius: 10px; word-break: break-all; }
-        .btn-copy { background: #00ff88; border: none; padding: 12px 30px; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 16px; }
+        .box { padding: 30px; border: 1px solid #333; border-radius: 20px; background: #111; text-align: center; width: 90%; max-width: 400px; display: none; }
+        .key-code { font-size: 24px; padding: 15px; border: 2px dashed #555; margin: 20px 0; font-family: 'Orbitron'; border-radius: 10px; word-break: break-all; }
+        .btn-copy { padding: 12px 30px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
         
-        .error-screen { text-align: center; display: none; }
-        .error-msg { color: #ff5555; font-size: 14px; margin-top: 10px; background: rgba(255,0,0,0.1); padding: 10px; border-radius: 5px; }
-        .btn-back { background: #fff; color: #000; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 20px; display: inline-block; }
+        .style-tool .key-code { color: #00ff88; border-color: #00ff88; }
+        .style-tool .btn-copy { background: #00ff88; color: #000; }
+        
+        .style-down .key-code { color: #00b8ff; border-color: #00b8ff; }
+        .style-down .btn-copy { background: #00b8ff; color: #fff; }
     </style>
 </head>
 <body>
-
-    <div class="box" id="successBox">
-        <h2 style="color:#00ff88; font-family:'Orbitron'">THÀNH CÔNG</h2>
-        <p style="color:#aaa; font-size:13px">Key 15 phút của bạn:</p>
-        <div class="key-display" id="finalKey">LOADING...</div>
-        <div style="color:#ffff00; font-family:'Orbitron'">Hết hạn sau: <span id="timeCount" style="color:#fff">--:--</span></div>
-        <br>
-        <button class="btn-copy" onclick="copyKey()">SAO CHÉP</button>
+    <div id="validBox" class="box">
+        <h2 id="title" style="font-family:'Orbitron'">KEY SUCCESS</h2>
+        <div id="keyTxt" class="key-code">...</div>
+        <p style="font-size:12px; color:#888">Hết hạn sau: <span id="time" style="color:#fff">--:--</span></p>
+        <button id="btn" class="btn-copy" onclick="copy()">COPY</button>
     </div>
-
-    <div class="error-screen" id="errorBox">
-        <h2 style="color:#ff5555; font-family:'Orbitron'">TỪ CHỐI</h2>
-        <div class="error-msg" id="reason">Lỗi không xác định</div>
-        <a href="index.html" class="btn-back">LẤY KEY LẠI TỪ ĐẦU</a>
-    </div>
+    <div id="errBox" style="display:none; color:#ff5555; text-align:center;">Link Lỗi hoặc Hết Hạn!<br><a href="index.html" style="color:#fff">Làm lại</a></div>
 
     <script>
-        const SECRET = "QUOC_DAT_SECRET_KEY_2026"; 
-        const DURATION = 900; // 15 Phút
-
-        function check() {
-            // Lấy token trên URL
-            const p = new URLSearchParams(window.location.search);
-            const tUrl = p.get('t');
-            const eUrl = p.get('e');
-            
-            // Lấy token trong máy
-            const tLoc = localStorage.getItem('secure_token');
-
-            // 1. Kiểm tra thiếu
-            if(!tUrl || !eUrl) { 
-                showError("Link thiếu mã xác thực. Vui lòng không sửa link."); 
-                return false; 
+        const SECRET = "QUOC_DAT_SECRET_2026";
+        const p = new URLSearchParams(window.location.search);
+        const type = p.get('ktype') || 'tool';
+        
+        // Anti-Share Check
+        const t = p.get('t'), e = p.get('e'), tLoc = localStorage.getItem('secure_token');
+        if(!t || !e || t !== tLoc || Date.now() > parseInt(e)) {
+            document.getElementById('errBox').style.display = 'block';
+        } else {
+            const box = document.getElementById('validBox');
+            box.style.display = 'block';
+            if(type === 'down') {
+                box.className = 'box style-down';
+                document.getElementById('title').innerText = "DOWNLOAD KEY";
+            } else {
+                box.className = 'box style-tool';
+                document.getElementById('title').innerText = "TOOL KEY";
             }
-
-            // 2. Kiểm tra khớp lệnh (Anti-Share)
-            // Nếu token trên link KHÁC token trong máy -> Đang dùng máy khác hoặc trình duyệt khác
-            if(tUrl !== tLoc) { 
-                showError("Token không khớp! Bạn đang dùng link của người khác hoặc đã đổi trình duyệt. Vui lòng lấy key lại trên thiết bị này."); 
-                return false; 
-            }
-
-            // 3. Kiểm tra thời gian
-            if(Date.now() > parseInt(eUrl)) { 
-                showError("Link này đã hết hạn (Quá 15 phút). Vui lòng lấy link mới."); 
-                return false; 
-            }
-
-            return true;
+            update(); setInterval(update, 1000);
         }
 
-        function showError(msg) {
-            document.getElementById('reason').innerText = msg;
-            document.getElementById('errorBox').style.display = 'block';
-        }
-
-        if(check()) {
-            document.getElementById('successBox').style.display = 'block';
-            updateKey(); 
-            setInterval(updateKey, 1000);
-        }
-
-        function updateKey() {
-            const now = Math.floor(Date.now() / 1000);
-            const timeStep = Math.floor(now / DURATION);
-            const raw = SECRET + timeStep;
-            const hash = CryptoJS.MD5(raw).toString();
-            const num = parseInt(hash.substring(0, 8), 16) % 10000;
-            document.getElementById("finalKey").innerText = "dat_" + num.toString().padStart(4, '0');
+        function update() {
+            const now = Math.floor(Date.now()/1000);
+            const step = Math.floor(now/900); // 15 phút
+            const hash = CryptoJS.MD5(SECRET + step).toString();
             
-            const left = DURATION - (now % DURATION);
-            const m = Math.floor(left / 60);
-            const s = left % 60;
-            document.getElementById("timeCount").innerText = `${m}:${s.toString().padStart(2, '0')}`;
+            // Logic tạo key
+            if(type === 'down') document.getElementById('keyTxt').innerText = "quocdat_" + hash.substring(0,12);
+            else document.getElementById('keyTxt').innerText = "dat_" + (parseInt(hash.substring(0,8),16)%10000).toString().padStart(4,'0');
             
-            if(left === 0) setTimeout(() => window.location.reload(), 1500);
+            const left = 900 - (now % 900);
+            document.getElementById('time').innerText = `${Math.floor(left/60)}:${(left%60).toString().padStart(2,'0')}`;
         }
-
-        function copyKey() {
-            navigator.clipboard.writeText(document.getElementById("finalKey").innerText);
-            alert("Đã sao chép!");
-        }
+        function copy() { navigator.clipboard.writeText(document.getElementById('keyTxt').innerText); alert("Copied!"); }
     </script>
 </body>
 </html>
