@@ -2,75 +2,54 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>QUOCDAT ID | Login</title>
+    <title>LOGIN</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.ripples/0.5.3/jquery.ripples.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #000 url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat fixed; color: #fff; font-family: 'Inter', sans-serif; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-        
-        .auth-box { width: 380px; padding: 40px; background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; box-shadow: 0 0 40px rgba(0,0,0,0.5); position: relative; z-index: 10; }
-        h2 { font-family: 'Orbitron'; text-align: center; margin-bottom: 30px; font-size: 26px; }
-        input { width: 100%; padding: 14px; background: rgba(0,0,0,0.4); border: 1px solid #444; border-radius: 10px; color: #fff; margin-bottom: 15px; outline: none; }
-        input:focus { border-color: #00ff88; }
-        .btn { width: 100%; padding: 14px; background: #00ff88; border: none; border-radius: 10px; color: #000; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
-        .switch { text-align: center; margin-top: 20px; font-size: 13px; color: #aaa; cursor: pointer; }
-        .msg { text-align: center; margin-top: 15px; font-size: 13px; color: #ff5555; display: none; }
-        .form-section { display: none; }
-        .form-section.active { display: block; animation: fadeIn 0.5s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .box { width: 350px; padding: 30px; background: #111; border-radius: 20px; border: 1px solid #333; }
+        input { width: 100%; padding: 12px; margin-bottom: 10px; background: #222; border: 1px solid #444; color: #fff; border-radius: 5px; }
+        .btn { width: 100%; padding: 12px; background: #00ff88; border: none; font-weight: bold; cursor: pointer; border-radius: 5px; }
+        .switch { text-align: center; margin-top: 15px; font-size: 13px; cursor: pointer; color: #888; }
+        h2 { font-family: 'Orbitron'; text-align: center; margin-bottom: 20px; }
     </style>
 </head>
 <body>
-    <div class="auth-box">
-        <div id="loginForm" class="form-section active">
-            <h2>ĐĂNG NHẬP</h2>
-            <input type="text" id="lUser" placeholder="Tên tài khoản">
+    <div class="box">
+        <h2 id="title">ĐĂNG NHẬP</h2>
+        <div id="formLogin">
+            <input type="text" id="lUser" placeholder="Tài khoản">
             <input type="password" id="lPass" placeholder="Mật khẩu">
-            <button class="btn" onclick="login()">VÀO HỆ THỐNG</button>
-            <div class="switch" onclick="toggle('reg')">Chưa có tài khoản? Đăng ký ngay</div>
+            <button class="btn" onclick="login()">VÀO</button>
+            <div class="switch" onclick="mode('reg')">Chưa có nick? Đăng ký</div>
         </div>
-
-        <div id="regForm" class="form-section">
-            <h2>ĐĂNG KÝ</h2>
-            <input type="text" id="rUser" placeholder="Tên tài khoản mới">
+        <div id="formReg" style="display:none">
+            <input type="text" id="rUser" placeholder="Tên mới">
             <input type="password" id="rPass" placeholder="Mật khẩu">
-            <input type="password" id="rPass2" placeholder="Nhập lại mật khẩu">
-            <button class="btn" style="background:#00b8ff; color:#fff;" onclick="register()">TẠO TÀI KHOẢN</button>
-            <div class="switch" onclick="toggle('login')">Đã có tài khoản? Đăng nhập</div>
+            <button class="btn" style="background:#00b8ff; color:#fff" onclick="reg()">TẠO NICK</button>
+            <div class="switch" onclick="mode('login')">Quay lại đăng nhập</div>
         </div>
-        <div id="msg" class="msg"></div>
     </div>
-
     <script>
-        $(document).ready(function() { try { $('body').ripples({ resolution: 512, dropRadius: 20, perturbance: 0.04 }); } catch(e){} });
-        function toggle(type) { $('.form-section').removeClass('active'); $('#'+(type==='reg'?'regForm':'loginForm')).addClass('active'); $('#msg').hide(); }
-        
-        function register() {
-            const u = $('#rUser').val().trim(), p = $('#rPass').val().trim(), p2 = $('#rPass2').val().trim();
-            if(!u || !p) return showMsg("Vui lòng nhập đủ thông tin!");
-            if(p !== p2) return showMsg("Mật khẩu không khớp!");
-            if(localStorage.getItem('acc_'+u)) return showMsg("Tài khoản đã tồn tại!");
-            
+        function mode(m) {
+            document.getElementById('formLogin').style.display = (m==='login'?'block':'none');
+            document.getElementById('formReg').style.display = (m==='reg'?'block':'none');
+            document.getElementById('title').innerText = (m==='login'?'ĐĂNG NHẬP':'ĐĂNG KÝ');
+        }
+        function reg() {
+            const u = document.getElementById('rUser').value, p = document.getElementById('rPass').value;
+            if(!u || !p) return alert("Nhập đủ!");
+            if(localStorage.getItem('acc_'+u)) return alert("Tên trùng!");
             localStorage.setItem('acc_'+u, p);
-            alert("Đăng ký thành công! Vui lòng đăng nhập.");
-            toggle('login'); $('#lUser').val(u);
+            alert("Đăng ký xong!"); mode('login');
         }
-
         function login() {
-            const u = $('#lUser').val().trim(), p = $('#lPass').val().trim();
-            if(!u || !p) return showMsg("Vui lòng nhập đủ thông tin!");
-            
+            const u = document.getElementById('lUser').value, p = document.getElementById('lPass').value;
             if(localStorage.getItem('acc_'+u) === p) {
-                localStorage.setItem('vip_username', u); // Lưu user chuẩn
+                localStorage.setItem('vip_username', u);
                 window.location.href = "ui.html";
-            } else {
-                showMsg("Sai tài khoản hoặc mật khẩu!");
-            }
+            } else alert("Sai thông tin!");
         }
-        function showMsg(txt) { $('#msg').text(txt).show(); }
     </script>
 </body>
 </html>
