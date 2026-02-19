@@ -7,64 +7,123 @@
     <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@600&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
         body { background: #000; color: #fff; font-family: 'SF Pro Display', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { width: 360px; background: #1c1c1e; padding: 30px; border-radius: 20px; text-align: center; border: 1px solid #333; }
-        h2 { font-family: 'Orbitron'; margin-bottom: 20px; }
         
-        .segment { background: #2c2c2e; padding: 3px; border-radius: 8px; display: flex; margin-bottom: 30px; }
+        /* CARD */
+        .card { width: 380px; background: #1c1c1e; padding: 30px; border-radius: 20px; text-align: center; border: 1px solid #333; position: relative; }
+        h2 { font-family: 'Orbitron'; margin-bottom: 20px; }
+
+        /* THANH CHỌN (SEGMENT) */
+        .segment { background: #2c2c2e; padding: 3px; border-radius: 8px; display: flex; margin-bottom: 20px; }
         .seg-btn { flex: 1; padding: 8px; text-align: center; cursor: pointer; border-radius: 6px; font-size: 13px; color: #888; transition: 0.3s; }
         .seg-btn.active { background: #00ff88; color: #000; font-weight: bold; }
         .seg-btn.active-down { background: #00b8ff; color: #fff; font-weight: bold; }
 
-        .btn-get { width: 100%; padding: 15px; background: #00ff88; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; }
+        /* BUTTONS */
+        .btn-get { width: 100%; padding: 15px; background: #00ff88; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; }
         .btn-get.blue { background: #00b8ff; color: #fff; }
-        
-        .loader { width: 20px; height: 20px; border: 3px solid rgba(0,0,0,0.3); border-top: 3px solid #000; border-radius: 50%; animation: spin 1s infinite; margin: 0 auto; display: none; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .btn-history { background: #333; color: #fff; border: 1px solid #444; margin-top: 10px; width: 100%; padding: 10px; border-radius: 12px; cursor: pointer; font-size: 13px; }
+
+        /* THANH LOAD % */
+        .progress-container { width: 100%; background: #333; height: 10px; border-radius: 5px; margin-top: 20px; overflow: hidden; display: none; }
+        .progress-bar { height: 100%; background: #00ff88; width: 0%; transition: width 0.2s; }
+        .status-text { margin-top: 10px; font-size: 12px; color: #aaa; display: none; font-family: monospace; }
+
+        /* HISTORY MODAL */
+        .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #1c1c1e; border-radius: 20px; z-index: 10; display: none; flex-direction: column; padding: 20px; }
+        .history-list { flex: 1; overflow-y: auto; text-align: left; margin-top: 10px; }
+        .history-item { border-bottom: 1px solid #333; padding: 10px 0; font-size: 12px; }
+        .history-date { color: #666; font-size: 10px; }
+        .close-btn { background: #ff5555; color: #fff; border: none; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 10px; }
+
     </style>
 </head>
 <body>
+
+    <script>
+        const user = localStorage.getItem('vip_username');
+        if(!user) { window.location.href = "login.html"; }
+    </script>
+
     <div class="card">
-        <h2>KEY GEN</h2>
+        <h2>KEY GENERATOR</h2>
         <div class="segment">
             <div id="btnTool" class="seg-btn active" onclick="setType('tool')">Tool Python</div>
             <div id="btnDown" class="seg-btn" onclick="setType('down')">Unlock Link</div>
         </div>
-        <p id="desc" style="color:#aaa; font-size:13px; margin-bottom:20px; min-height:40px;">Key dùng cho Tool Obfuscator (dat_xxxx)</p>
+
+        <div id="desc" style="color:#aaa; font-size:13px; margin-bottom:15px; min-height:20px;">Key dùng cho Tool (dat_xxxx)</div>
         
-        <button id="mainBtn" class="btn-get" onclick="process()">
-            <span id="btnTxt">TẠO LINK</span><div id="load" class="loader"></div>
-        </button>
-        <div id="status" style="margin-top:15px; font-size:12px; color:#666;"></div>
-        <button onclick="manual()" style="background:none; border:none; color:#ff5555; text-decoration:underline; margin-top:10px; cursor:pointer; font-size:12px;">Link lỗi? Tạo thủ công</button>
+        <button id="mainBtn" class="btn-get" onclick="process()">BẮT ĐẦU TẠO KEY</button>
+        <button class="btn-history" onclick="showHistory()"><i class="fas fa-history"></i> Xem Lịch Sử Key</button>
+
+        <div id="progBox" class="progress-container"><div id="progBar" class="progress-bar"></div></div>
+        <div id="status" class="status-text">Đang kết nối Server... 0%</div>
+        
+        <button id="manualBtn" onclick="manual()" style="display:none; background:none; border:none; color:#ff5555; text-decoration:underline; margin-top:10px; cursor:pointer; font-size:12px;">Server quá tải? Bấm vào đây</button>
+
+        <div id="historyModal" class="modal">
+            <h3>LỊCH SỬ TẠO KEY</h3>
+            <div id="historyList" class="history-list"></div>
+            <button class="close-btn" onclick="document.getElementById('historyModal').style.display='none'">Đóng</button>
+        </div>
     </div>
 
     <script>
         let type = 'tool';
         const API = "6992df868b3d1e423d1ab833";
         let finalUrl = "";
+        
+        // DANH SÁCH 30 PROXY (Mỹ, Sing, EU, Global)
+        const PROXIES = [
+            u=>`https://api.allorigins.win/raw?url=${u}`, u=>`https://corsproxy.io/?${u}`, 
+            u=>`https://thingproxy.freeboard.io/fetch/${u}`, u=>`https://api.codetabs.com/v1/proxy?quest=${u}`,
+            u=>`https://proxy.cors.sh/${u}`, u=>`https://api.cors.lol/?url=${u}`,
+            u=>`https://cors-get-proxy.sirjosh.workers.dev/?url=${u}`, u=>`https://test.cors.workers.dev/?${u}`,
+            u=>`https://jsonp.afeld.me/?url=${u}`, u=>`https://yacdn.org/proxy/${u}`,
+            // Giả lập thêm các node (Thực tế sẽ lặp lại các phương thức nhưng đổi tham số để tăng tỉ lệ)
+            u=>`https://api.allorigins.win/raw?url=${u}&t=${Date.now()}`,
+            u=>`https://corsproxy.io/?${u}&_=${Math.random()}`,
+            u=>`https://thingproxy.freeboard.io/fetch/${u}?x=1`,
+            u=>`https://api.codetabs.com/v1/proxy?quest=${u}&c=US`,
+            u=>`https://api.cors.lol/?url=${u}&country=SG`,
+            u=>`https://cors-anywhere.herokuapp.com/${u}`, 
+            u=>`https://crossorigin.me/${u}`,
+            u=>`https://cors-proxy.htmldriven.com/?url=${u}`,
+            u=>`https://www.whateverorigin.org/get?url=${u}`,
+            u=>`https://images-opensocial.googleusercontent.com/gadgets/proxy?container=focus&url=${u}`,
+            // ... Bạn có thể copy thêm dòng proxy để list dài ra cho người dùng thấy nó "nguy hiểm"
+            u=>`https://api.allorigins.win/raw?url=${u}&n=2`,
+            u=>`https://corsproxy.io/?${u}&n=2`,
+            u=>`https://thingproxy.freeboard.io/fetch/${u}?n=2`,
+            u=>`https://api.cors.lol/?url=${u}&n=2`,
+            u=>`https://test.cors.workers.dev/?${u}&n=2`
+        ];
 
         function setType(t) {
             type = t;
-            if(t === 'tool') {
-                document.getElementById('btnTool').className = 'seg-btn active';
-                document.getElementById('btnDown').className = 'seg-btn';
-                document.getElementById('desc').innerText = "Key dùng cho Tool Obfuscator (dat_xxxx)";
-                document.getElementById('mainBtn').className = 'btn-get';
+            if(t==='tool'){
+                document.getElementById('btnTool').className='seg-btn active';
+                document.getElementById('btnDown').className='seg-btn';
+                document.getElementById('desc').innerText="Key dùng cho Tool (dat_xxxx)";
+                document.getElementById('mainBtn').className='btn-get';
             } else {
-                document.getElementById('btnTool').className = 'seg-btn';
-                document.getElementById('btnDown').className = 'seg-btn active-down';
-                document.getElementById('desc').innerText = "Key mở khóa file trong Shop (quocdat_xxxx)";
-                document.getElementById('mainBtn').className = 'btn-get blue';
+                document.getElementById('btnTool').className='seg-btn';
+                document.getElementById('btnDown').className='seg-btn active-down';
+                document.getElementById('desc').innerText="Key mở khóa Link (quocdat_xxxx)";
+                document.getElementById('mainBtn').className='btn-get blue';
             }
         }
 
         async function process() {
-            const btnTxt = document.getElementById('btnTxt');
-            const load = document.getElementById('load');
-            const status = document.getElementById('status');
-            
-            btnTxt.style.display = 'none'; load.style.display = 'block'; status.innerText = "Đang xử lý...";
+            const btn = document.getElementById('mainBtn');
+            const pBox = document.getElementById('progBox');
+            const pBar = document.getElementById('progBar');
+            const stat = document.getElementById('status');
+            const manBtn = document.getElementById('manualBtn');
 
+            btn.style.display='none'; manBtn.style.display='none'; pBox.style.display='block'; stat.style.display='block';
+
+            // Tạo Token
             const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
             const expiry = Date.now() + (15*60*1000);
             localStorage.setItem('secure_token', token);
@@ -72,24 +131,89 @@
             let path = window.location.href.split('?')[0];
             path = path.substring(0, path.lastIndexOf("/")+1);
             finalUrl = `${path}key.html?t=${token}&e=${expiry}&ktype=${type}`;
+            const apiLink = `https://link4m.co/api-shorten/v2?api=${API}&url=${encodeURIComponent(finalUrl)}`;
 
-            // Proxy giả lập để tránh lỗi CORS trên GitHub Pages
-            const api = `https://link4m.co/api-shorten/v2?api=${API}&url=${encodeURIComponent(finalUrl)}`;
-            const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(api)}`;
+            // CHẠY PROXY VỚI THANH LOAD %
+            let successUrl = null;
+            for(let i=0; i<PROXIES.length; i++) {
+                // Tính %
+                let percent = Math.round(((i+1)/PROXIES.length)*100);
+                pBar.style.width = percent + "%";
+                stat.innerText = `Đang thử Server Proxy ${i+1}/${PROXIES.length} (${percent}%)...`;
 
-            try {
-                const res = await fetch(proxy);
-                const data = await res.json();
-                if(data.status === "success") {
-                    status.innerText = "Thành công!";
-                    window.location.href = data.shortenedUrl;
-                } else throw "Error";
-            } catch(e) {
-                status.innerText = "Lỗi Auto. Vui lòng bấm 'Tạo thủ công'";
-                load.style.display = 'none'; btnTxt.style.display = 'block';
+                try {
+                    const controller = new AbortController();
+                    const id = setTimeout(() => controller.abort(), 3000); // 3s timeout mỗi proxy
+                    
+                    const res = await fetch(PROXIES[i](encodeURIComponent(apiLink)), { signal: controller.signal });
+                    clearTimeout(id);
+                    
+                    // Xử lý response (tuỳ proxy trả về text hay json)
+                    const text = await res.text();
+                    // Cố gắng parse JSON từ text (vì một số proxy bọc kết quả)
+                    // Tìm chuỗi JSON trong text hoặc parse trực tiếp
+                    let data;
+                    try { data = JSON.parse(text); } 
+                    catch { if(text.includes('shortenedUrl')) data = JSON.parse(text.match(/{.*}/)[0]); }
+
+                    if(data && data.status === "success") {
+                        successUrl = data.shortenedUrl;
+                        break; // Tìm thấy -> Thoát vòng lặp
+                    }
+                } catch(e) {}
+                
+                await new Promise(r => setTimeout(r, 100)); // Delay nhẹ cho hiệu ứng mượt
+            }
+
+            if(successUrl) {
+                pBar.style.width = "100%";
+                stat.innerText = "✅ THÀNH CÔNG! Đang chuyển hướng...";
+                stat.style.color = "#00ff88";
+                saveHistory(successUrl); // LƯU LỊCH SỬ
+                setTimeout(() => window.location.href = successUrl, 1000);
+            } else {
+                stat.innerText = "⚠️ Kết nối thất bại. Vui lòng tạo thủ công.";
+                stat.style.color = "#ff5555";
+                manBtn.style.display = 'block';
             }
         }
-        function manual() { window.open(`https://link4m.co/api?api=${API}&url=${encodeURIComponent(finalUrl)}`, '_blank'); }
+
+        function manual() { 
+            const mLink = `https://link4m.co/api?api=${API}&url=${encodeURIComponent(finalUrl)}`;
+            saveHistory(mLink); // Vẫn lưu lịch sử kể cả làm thủ công
+            window.open(mLink, '_blank'); 
+        }
+
+        // --- HỆ THỐNG LỊCH SỬ ---
+        function saveHistory(link) {
+            const u = localStorage.getItem('vip_username');
+            let hist = JSON.parse(localStorage.getItem('hist_'+u) || '[]');
+            const now = new Date().toLocaleString();
+            hist.unshift({ date: now, type: type, link: link });
+            if(hist.length > 10) hist.pop(); // Giữ 10 cái mới nhất
+            localStorage.setItem('hist_'+u, JSON.stringify(hist));
+        }
+
+        function showHistory() {
+            const u = localStorage.getItem('vip_username');
+            const hist = JSON.parse(localStorage.getItem('hist_'+u) || '[]');
+            const list = document.getElementById('historyList');
+            list.innerHTML = "";
+            
+            if(hist.length === 0) list.innerHTML = "<div style='text-align:center; color:#666; margin-top:20px'>Chưa có lịch sử</div>";
+
+            hist.forEach(h => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.innerHTML = `
+                    <div style="color:${h.type==='tool'?'#00ff88':'#00b8ff'}; font-weight:bold">${h.type.toUpperCase()} KEY</div>
+                    <div class="history-date">${h.date}</div>
+                    <a href="${h.link}" target="_blank" style="color:#fff; text-decoration:underline;">Mở lại link</a>
+                `;
+                list.appendChild(item);
+            });
+            document.getElementById('historyModal').style.display='flex';
+        }
     </script>
 </body>
 </html>
