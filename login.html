@@ -2,32 +2,32 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>QUOCDAT SEC | Đăng Nhập & Đăng Ký</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <title>QUOCDAT SEC | Đăng Nhập & Đăng Ký</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #050505; color: #fff; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .box { width: 90%; max-width: 400px; background: #111; border-radius: 20px; border: 1px solid #333; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-        .tabs { display: flex; border-bottom: 1px solid #333; }
-        .tab { flex: 1; padding: 20px 0; text-align: center; font-weight: bold; cursor: pointer; color: #888; background: #0a0a0a; transition: 0.3s; }
-        .tab.active { background: #111; color: #00ff88; border-bottom: 2px solid #00ff88; }
+        body { background: #050505; color: #fff; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .box { width: 90%; max-width: 400px; background: #111; border-radius: 20px; border: 1px solid #333; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+        .tabs { display: flex; background: #0a0a0a; border-bottom: 1px solid #333; }
+        .tab { flex: 1; padding: 20px 0; text-align: center; font-weight: bold; cursor: pointer; color: #888; transition: 0.3s; }
+        .tab.active { background: #111; color: #00ff88; border-bottom: 3px solid #00ff88; }
         .form-area { padding: 30px; display: none; }
-        .form-area.active { display: block; animation: fade 0.3s; }
-        @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
-        h2 { font-family: 'Orbitron'; margin-bottom: 20px; text-align: center; font-size: 24px; }
-        input { width: 100%; padding: 15px; background: #222; border: 1px solid #444; border-radius: 10px; color: #fff; margin-bottom: 15px; outline: none; font-size: 14px; }
-        input:focus { border-color: #00ff88; }
-        .btn { width: 100%; padding: 15px; background: #00ff88; border: none; border-radius: 10px; color: #000; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; transition: 0.3s; }
-        .btn:hover { background: #fff; }
+        .form-area.active { display: block; animation: fadeIn 0.4s; }
+        h2 { font-family: 'Orbitron'; margin-bottom: 25px; text-align: center; font-size: 22px; color: #fff; }
+        input { width: 100%; padding: 15px; background: #1a1a1a; border: 1px solid #333; border-radius: 12px; color: #fff; margin-bottom: 15px; outline: none; font-size: 14px; transition: 0.3s; }
+        input:focus { border-color: #00ff88; background: #222; }
+        .btn { width: 100%; padding: 16px; background: #00ff88; border: none; border-radius: 12px; color: #000; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; margin-top: 10px; }
+        .btn:hover { background: #fff; transform: translateY(-2px); }
         .btn-reg { background: #00b8ff; color: #fff; }
         .btn-reg:hover { background: #0088cc; }
-        .back-home { display: block; text-align: center; margin-top: 20px; color: #666; text-decoration: none; font-size: 13px; }
-        .loading-text { text-align: center; color: yellow; font-size: 13px; display: none; margin-top: 10px; }
+        .back { display: block; text-align: center; margin-top: 25px; color: #666; text-decoration: none; font-size: 13px; font-weight: 600; }
+        .loading { text-align: center; color: #00ff88; font-size: 13px; display: none; margin-top: 15px; font-weight: bold; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -38,26 +38,27 @@
         </div>
 
         <div id="area-login" class="form-area active">
-            <h2>LOGIN</h2>
+            <h2>HỆ THỐNG VIP</h2>
             <input type="text" id="lUser" placeholder="Tên tài khoản">
             <input type="password" id="lPass" placeholder="Mật khẩu">
-            <button class="btn" id="btnLogin" onclick="processLogin()">ĐĂNG NHẬP</button>
-            <div id="loadLogin" class="loading-text">Đang kết nối Server...</div>
-            <a href="index.html" class="back-home">← Trở về Trang Chủ</a>
+            <button class="btn" id="btnLogin" onclick="processLogin()">ĐĂNG NHẬP NGAY</button>
+            <div id="loadLogin" class="loading">Đang xác thực dữ liệu...</div>
+            <a href="index.html" class="back">← Quay lại Trang Chủ</a>
         </div>
 
         <div id="area-reg" class="form-area">
-            <h2 style="color:#00b8ff">REGISTER</h2>
+            <h2 style="color:#00b8ff">TẠO TÀI KHOẢN</h2>
             <input type="text" id="rUser" placeholder="Tên tài khoản mới">
             <input type="password" id="rPass" placeholder="Mật khẩu">
-            <input type="password" id="rPass2" placeholder="Nhập lại mật khẩu">
-            <button class="btn btn-reg" id="btnReg" onclick="processRegister()">TẠO TÀI KHOẢN</button>
-            <div id="loadReg" class="loading-text">Đang lưu lên máy chủ Google...</div>
-            <a href="index.html" class="back-home">← Trở về Trang Chủ</a>
+            <input type="password" id="rPass2" placeholder="Xác nhận mật khẩu">
+            <button class="btn btn-reg" id="btnReg" onclick="processRegister()">HOÀN TẤT ĐĂNG KÝ</button>
+            <div id="loadReg" class="loading" style="color:#00b8ff">Đang khởi tạo trên Server...</div>
+            <a href="index.html" class="back">← Quay lại Trang Chủ</a>
         </div>
     </div>
 
     <script>
+        // CẤU HÌNH FIREBASE CHUẨN CỦA QUỐC ĐẠT
         const firebaseConfig = {
             apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc",
             authDomain: "quocdat-b80c2.firebaseapp.com",
@@ -68,39 +69,33 @@
             appId: "1:988520495087:web:97c1b46fc0f6d1f3aaa81a"
         };
         firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        const db = firebase.database();
 
-        function switchTab(type) {
-            document.getElementById('tab-login').classList.remove('active');
-            document.getElementById('tab-reg').classList.remove('active');
-            document.getElementById('area-login').classList.remove('active');
-            document.getElementById('area-reg').classList.remove('active');
-            document.getElementById('tab-' + type).classList.add('active');
-            document.getElementById('area-' + type).classList.add('active');
+        function switchTab(t) {
+            document.querySelectorAll('.tab, .form-area').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + t).classList.add('active');
+            document.getElementById('area-' + t).classList.add('active');
         }
 
         function processRegister() {
             const u = document.getElementById('rUser').value.trim();
             const p = document.getElementById('rPass').value.trim();
             const p2 = document.getElementById('rPass2').value.trim();
-            if(!u || !p) return alert("Điền đủ thông tin!");
+            if(!u || !p) return alert("Vui lòng nhập đầy đủ!");
             if(p !== p2) return alert("Mật khẩu không khớp!");
 
             document.getElementById('btnReg').style.display = 'none';
             document.getElementById('loadReg').style.display = 'block';
 
-            database.ref('users/' + u).once('value').then((snapshot) => {
-                if(snapshot.exists()) {
+            db.ref('users/' + u).once('value').then(s => {
+                if(s.exists()) {
                     alert("Tài khoản đã tồn tại!");
                     document.getElementById('btnReg').style.display = 'block';
                     document.getElementById('loadReg').style.display = 'none';
                 } else {
-                    database.ref('users/' + u).set({
-                        password: p,
-                        balance: 0,
-                        created_at: new Date().toLocaleString()
-                    }).then(() => {
-                        alert("Đăng ký thành công! Hãy đăng nhập.");
+                    db.ref('users/' + u).set({ password: p, balance: 0, created_at: new Date().toLocaleString() })
+                    .then(() => {
+                        alert("Đăng ký thành công! Mời bạn đăng nhập.");
                         switchTab('login');
                         document.getElementById('btnReg').style.display = 'block';
                         document.getElementById('loadReg').style.display = 'none';
@@ -117,16 +112,15 @@
             document.getElementById('btnLogin').style.display = 'none';
             document.getElementById('loadLogin').style.display = 'block';
 
-            database.ref('users/' + u).once('value').then((snapshot) => {
-                if(snapshot.exists()) {
-                    const data = snapshot.val();
-                    if(data.password === p) {
-                        localStorage.setItem('vip_username', u);
-                        window.location.href = "index.html"; 
-                    } else { alert("Sai mật khẩu!"); }
-                } else { alert("Tài khoản không tồn tại!"); }
-                document.getElementById('btnLogin').style.display = 'block';
-                document.getElementById('loadLogin').style.display = 'none';
+            db.ref('users/' + u).once('value').then(s => {
+                if(s.exists() && s.val().password === p) {
+                    localStorage.setItem('vip_username', u);
+                    window.location.href = "index.html";
+                } else {
+                    alert("Sai tài khoản hoặc mật khẩu!");
+                    document.getElementById('btnLogin').style.display = 'block';
+                    document.getElementById('loadLogin').style.display = 'none';
+                }
             });
         }
     </script>
