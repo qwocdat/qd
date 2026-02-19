@@ -2,165 +2,94 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>HỆ THỐNG VIP KEY</title>
+    <title>KEY GENERATOR</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@600&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #050505; color: #fff; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        body { background: #000; color: #fff; font-family: 'SF Pro Display', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { width: 360px; background: #1c1c1e; padding: 30px; border-radius: 20px; text-align: center; border: 1px solid #333; }
+        h2 { font-family: 'Orbitron'; margin-bottom: 20px; }
         
-        .box { width: 380px; padding: 30px; border: 1px solid #333; border-radius: 20px; background: #111; text-align: center; box-shadow: 0 0 50px rgba(0,255,136,0.1); }
-        h2 { color: #00ff88; font-family: 'Orbitron'; margin-bottom: 5px; }
+        .segment { background: #2c2c2e; padding: 3px; border-radius: 8px; display: flex; margin-bottom: 30px; }
+        .seg-btn { flex: 1; padding: 8px; text-align: center; cursor: pointer; border-radius: 6px; font-size: 13px; color: #888; transition: 0.3s; }
+        .seg-btn.active { background: #00ff88; color: #000; font-weight: bold; }
+        .seg-btn.active-down { background: #00b8ff; color: #fff; font-weight: bold; }
+
+        .btn-get { width: 100%; padding: 15px; background: #00ff88; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; }
+        .btn-get.blue { background: #00b8ff; color: #fff; }
         
-        .btn { width: 100%; padding: 15px; background: #fff; color: #000; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; }
-        .btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(255,255,255,0.4); }
-        .btn-manual { background: #ff5555; color: #fff; display: none; margin-top: 15px; } /* Nút dự phòng */
-
-        /* Thanh tiến trình Proxy */
-        .progress-box { width: 100%; height: 6px; background: #333; border-radius: 3px; margin-top: 20px; overflow: hidden; display: none; }
-        .progress-bar { width: 0%; height: 100%; background: #00ff88; transition: width 0.3s; }
-
-        .status { color: #ffff00; font-size: 12px; margin-top: 10px; display: none; font-family: monospace; }
-        .server-name { color: #888; font-size: 10px; margin-top: 5px; display: none; }
+        .loader { width: 20px; height: 20px; border: 3px solid rgba(0,0,0,0.3); border-top: 3px solid #000; border-radius: 50%; animation: spin 1s infinite; margin: 0 auto; display: none; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h2>VIP SYSTEM</h2>
-        <p style="color:#666; font-size:12px">Multi-Proxy System (15 Server)</p>
+    <div class="card">
+        <h2>KEY GEN</h2>
+        <div class="segment">
+            <div id="btnTool" class="seg-btn active" onclick="setType('tool')">Tool Python</div>
+            <div id="btnDown" class="seg-btn" onclick="setType('down')">Unlock Link</div>
+        </div>
+        <p id="desc" style="color:#aaa; font-size:13px; margin-bottom:20px; min-height:40px;">Key dùng cho Tool Obfuscator (dat_xxxx)</p>
         
-        <button id="btnGet" class="btn" onclick="processKey()">🚀 LẤY LINK (AUTO PROXY)</button>
-        
-        <div id="pBox" class="progress-box"><div id="pBar" class="progress-bar"></div></div>
-        
-        <div id="status" class="status">Đang khởi tạo...</div>
-        <div id="serverName" class="server-name">...</div>
-
-        <button id="btnManual" class="btn btn-manual" onclick="manualLink()">🛠️ BẤM ĐỂ TẠO THỦ CÔNG</button>
+        <button id="mainBtn" class="btn-get" onclick="process()">
+            <span id="btnTxt">TẠO LINK</span><div id="load" class="loader"></div>
+        </button>
+        <div id="status" style="margin-top:15px; font-size:12px; color:#666;"></div>
+        <button onclick="manual()" style="background:none; border:none; color:#ff5555; text-decoration:underline; margin-top:10px; cursor:pointer; font-size:12px;">Link lỗi? Tạo thủ công</button>
     </div>
 
     <script>
-        const API_TOKEN = "6992df868b3d1e423d1ab833"; 
-        const TARGET_FILE = "key.html"; 
-        
-        let finalTargetUrl = "";
+        let type = 'tool';
+        const API = "6992df868b3d1e423d1ab833";
+        let finalUrl = "";
 
-        // --- DANH SÁCH 15 PROXY MẠNH NHẤT (Cập nhật 2026) ---
-        // Hệ thống sẽ thử lần lượt từ trên xuống dưới
-        const PROXY_LIST = [
-            u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`, // 1. AllOrigins (Rất ổn định)
-            u => `https://corsproxy.io/?${encodeURIComponent(u)}`,             // 2. CorsProxy.io (Nhanh)
-            u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`, // 3. CodeTabs (Châu Âu)
-            u => `https://thingproxy.freeboard.io/fetch/${u}`,                  // 4. ThingProxy
-            u => `https://api.cors.lol/?url=${encodeURIComponent(u)}`,          // 5. Cors.lol
-            u => `https://proxy.cors.sh/${u}`,                                  // 6. Cors.sh
-            u => `https://cors-anywhere.herokuapp.com/${u}`,                    // 7. Heroku (Cần demo nhưng cứ thử)
-            u => `https://api.incolumitas.com/?url=${encodeURIComponent(u)}`,   // 8. Incolumitas
-            u => `https://cors.eu.org/${u}`,                                    // 9. EU Org
-            u => `https://test.cors.workers.dev/?${encodeURIComponent(u)}`,     // 10. Cloudflare Worker Test
-            u => `https://cors-get-proxy.sirjosh.workers.dev/?url=${encodeURIComponent(u)}`, // 11. SirJosh Worker
-            u => `https://jsonp.afeld.me/?url=${encodeURIComponent(u)}`,        // 12. JSONP
-            u => `https://yacdn.org/proxy/${u}`,                                // 13. YACDN
-            u => `https://api.scraperapi.com/?api_key=your_key&url=${encodeURIComponent(u)}`, // 14. (Placeholder)
-            u => u // 15. Thử kết nối trực tiếp (Nếu mạng người dùng cho phép)
-        ];
-
-        async function processKey() {
-            if (window.location.protocol === 'file:') return alert("Lỗi: Hãy upload lên GitHub Pages!");
-
-            const btn = document.getElementById('btnGet');
-            const pBox = document.getElementById('pBox');
-            const pBar = document.getElementById('pBar');
-            const status = document.getElementById('status');
-            const sName = document.getElementById('serverName');
-            const btnManual = document.getElementById('btnManual');
-
-            // Reset giao diện
-            btn.style.display = 'none';
-            btnManual.style.display = 'none';
-            pBox.style.display = 'block';
-            status.style.display = 'block';
-            sName.style.display = 'block';
-            status.innerText = "Đang sinh mã bảo mật...";
-            pBar.style.width = "5%";
-
-            try {
-                // 1. Tạo Token bảo mật
-                const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
-                const expiry = Date.now() + (15 * 60 * 1000); // 15 phút
-                
-                localStorage.setItem('secure_token', token);
-                localStorage.setItem('secure_expiry', expiry);
-
-                // 2. Tạo Link Đích
-                let path = window.location.href.split('?')[0];
-                if (path.endsWith("index.html")) path = path.substring(0, path.lastIndexOf("index.html"));
-                if (!path.endsWith("/")) path += "/";
-                
-                finalTargetUrl = `${path}${TARGET_FILE}?t=${token}&e=${expiry}`;
-
-                // 3. CHẠY VÒNG LẶP THỬ PROXY
-                const api = `https://link4m.co/api-shorten/v2?api=${API_TOKEN}&url=${encodeURIComponent(finalTargetUrl)}`;
-                let shortLink = null;
-
-                for (let i = 0; i < PROXY_LIST.length; i++) {
-                    const progress = Math.round(((i + 1) / PROXY_LIST.length) * 100);
-                    pBar.style.width = `${progress}%`;
-                    
-                    status.innerText = `Đang thử Server ${i + 1}/${PROXY_LIST.length}...`;
-                    sName.innerText = `Connecting: Proxy Node ${i+1}`;
-                    
-                    try {
-                        // Timeout 3 giây mỗi server để không đợi lâu
-                        const controller = new AbortController();
-                        const id = setTimeout(() => controller.abort(), 3500);
-                        
-                        const res = await fetch(PROXY_LIST[i](api), { signal: controller.signal });
-                        clearTimeout(id);
-
-                        if (res.ok) {
-                            // Cố gắng parse JSON
-                            const text = await res.text();
-                            try {
-                                const data = JSON.parse(text);
-                                if (data.status === "success") {
-                                    shortLink = data.shortenedUrl;
-                                    break; // THÀNH CÔNG -> THOÁT VÒNG LẶP NGAY
-                                }
-                            } catch(e) {}
-                        }
-                    } catch (e) {
-                        console.log(`Server ${i+1} fail.`);
-                    }
-                    // Nghỉ 100ms giữa các lần thử để mượt
-                    await new Promise(r => setTimeout(r, 100));
-                }
-
-                if (shortLink) {
-                    pBar.style.width = "100%";
-                    pBar.style.background = "#00ff88";
-                    status.innerText = "✅ THÀNH CÔNG! ĐANG CHUYỂN HƯỚNG...";
-                    status.style.color = "#00ff88";
-                    setTimeout(() => window.location.href = shortLink, 1000);
-                } else {
-                    throw new Error("Tất cả Server đều bận");
-                }
-
-            } catch (err) {
-                // --- CHẾ ĐỘ DỰ PHÒNG ---
-                pBox.style.display = 'none';
-                status.innerText = "⚠️ Server quá tải. Vui lòng tạo thủ công.";
-                status.style.color = "#ff5555";
-                sName.style.display = 'none';
-                
-                btnManual.style.display = 'block';
+        function setType(t) {
+            type = t;
+            if(t === 'tool') {
+                document.getElementById('btnTool').className = 'seg-btn active';
+                document.getElementById('btnDown').className = 'seg-btn';
+                document.getElementById('desc').innerText = "Key dùng cho Tool Obfuscator (dat_xxxx)";
+                document.getElementById('mainBtn').className = 'btn-get';
+            } else {
+                document.getElementById('btnTool').className = 'seg-btn';
+                document.getElementById('btnDown').className = 'seg-btn active-down';
+                document.getElementById('desc').innerText = "Key mở khóa file trong Shop (quocdat_xxxx)";
+                document.getElementById('mainBtn').className = 'btn-get blue';
             }
         }
 
-        function manualLink() {
-            const manualUrl = `https://link4m.co/api?api=${API_TOKEN}&url=${encodeURIComponent(finalTargetUrl)}`;
-            window.open(manualUrl, '_blank');
+        async function process() {
+            const btnTxt = document.getElementById('btnTxt');
+            const load = document.getElementById('load');
+            const status = document.getElementById('status');
+            
+            btnTxt.style.display = 'none'; load.style.display = 'block'; status.innerText = "Đang xử lý...";
+
+            const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
+            const expiry = Date.now() + (15*60*1000);
+            localStorage.setItem('secure_token', token);
+
+            let path = window.location.href.split('?')[0];
+            path = path.substring(0, path.lastIndexOf("/")+1);
+            finalUrl = `${path}key.html?t=${token}&e=${expiry}&ktype=${type}`;
+
+            // Proxy giả lập để tránh lỗi CORS trên GitHub Pages
+            const api = `https://link4m.co/api-shorten/v2?api=${API}&url=${encodeURIComponent(finalUrl)}`;
+            const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(api)}`;
+
+            try {
+                const res = await fetch(proxy);
+                const data = await res.json();
+                if(data.status === "success") {
+                    status.innerText = "Thành công!";
+                    window.location.href = data.shortenedUrl;
+                } else throw "Error";
+            } catch(e) {
+                status.innerText = "Lỗi Auto. Vui lòng bấm 'Tạo thủ công'";
+                load.style.display = 'none'; btnTxt.style.display = 'block';
+            }
         }
+        function manual() { window.open(`https://link4m.co/api?api=${API}&url=${encodeURIComponent(finalUrl)}`, '_blank'); }
     </script>
 </body>
 </html>
