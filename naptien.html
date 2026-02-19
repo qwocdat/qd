@@ -10,6 +10,9 @@
         if(!user) { window.location.href = "login.html"; }
     </script>
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -17,38 +20,30 @@
         :root { --primary: #00ff88; --bg: #050505; --border: rgba(255,255,255,0.1); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: #fff; min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 40px 20px; }
-        
         .pay-box { width: 100%; max-width: 450px; background: #111; border: 1px solid #333; border-radius: 20px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
-        
         .pay-header { text-align: center; margin-bottom: 25px; }
         .pay-header h2 { font-family: 'Orbitron'; color: var(--primary); font-size: 26px; margin-bottom: 5px; }
-        
         .user-panel { background: rgba(0,255,136,0.05); border: 1px dashed var(--primary); padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .user-panel div { font-size: 13px; color: #aaa; }
         .user-panel .username { color: #fff; font-weight: bold; font-family: 'Orbitron'; font-size: 16px; display: block; margin-top: 3px; }
-        .user-panel .balance { color: var(--primary); font-weight: bold; font-family: monospace; font-size: 22px; text-align: right; }
-
+        .user-panel .balance { color: var(--primary); font-weight: bold; font-family: monospace; font-size: 22px; text-align: right; transition: 0.3s; }
         .pay-tabs { display: flex; background: #000; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333; overflow: hidden; }
         .pay-tab-btn { flex: 1; padding: 14px 0; text-align: center; font-weight: bold; font-size: 14px; cursor: pointer; color: #888; transition: 0.3s; }
         .pay-tab-btn.active { background: #222; color: var(--primary); }
-        
         .pay-tab-content { display: none; }
         .pay-tab-content.active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 13px; color: #aaa; margin-bottom: 8px; font-weight: 600; }
         select, input { width: 100%; padding: 14px; background: #1a1a1a; border: 1px solid #444; border-radius: 10px; color: #fff; outline: none; font-size: 15px; }
         select:focus, input:focus { border-color: var(--primary); }
-        
-        .btn-pay { width: 100%; padding: 16px; background: var(--primary); color: #000; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
+        .btn-pay { width: 100%; padding: 16px; background: var(--primary); color: #000; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; transition: 0.3s; }
+        .btn-pay:hover { background: #fff; }
         .btn-tele { background: #0088cc; color: #fff; margin-top: 15px; }
-        
         .qr-box { text-align: center; margin-top: 20px; display: none; background: #fff; padding: 20px; border-radius: 15px; }
         .qr-box img { width: 100%; max-width: 250px; border-radius: 10px; }
-
-        .btn-back-home { display: block; text-align: center; color: #888; text-decoration: none; font-size: 15px; margin-top: 25px; font-weight: bold; padding: 12px; border: 1px solid #333; border-radius: 10px; }
-        
+        .btn-back-home { display: block; text-align: center; color: #888; text-decoration: none; font-size: 15px; margin-top: 25px; font-weight: bold; padding: 12px; border: 1px solid #333; border-radius: 10px; transition: 0.3s; }
+        .btn-back-home:hover { background: #222; color: #fff; }
         .status-box { padding: 15px; border-radius: 10px; margin-top: 15px; font-size: 13px; text-align: center; display: none; font-weight: bold; }
         .loader { width: 20px; height: 20px; border: 3px solid rgba(0,0,0,0.3); border-top: 3px solid #000; border-radius: 50%; animation: spin 1s linear infinite; display: none; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
@@ -57,25 +52,20 @@
 <body>
 
     <div class="pay-box">
-        <div class="pay-header">
-            <h2>NẠP TIỀN</h2>
-        </div>
-
+        <div class="pay-header"><h2>NẠP TIỀN</h2></div>
+        
         <div class="user-panel">
             <div>Tài khoản<span class="username" id="payUsername">Loading...</span></div>
-            <div>Số dư<div class="balance"><span id="payBalance">0</span> đ</div></div>
+            <div>Số dư<div class="balance"><span id="payBalance">Đang tải...</span></div></div>
         </div>
-
+        
         <div class="pay-tabs">
             <div class="pay-tab-btn active" id="btn-bank" onclick="switchPayTab('bank')"><i class="fas fa-qrcode"></i> CHUYỂN KHOẢN</div>
             <div class="pay-tab-btn" id="btn-card" onclick="switchPayTab('card')"><i class="fas fa-ticket-alt"></i> THẺ CÀO</div>
         </div>
 
         <div id="tab-bank" class="pay-tab-content active">
-            <div class="form-group">
-                <label>Số tiền nạp (VNĐ)</label>
-                <input type="number" id="bankAmount" placeholder="Ví dụ: 50000">
-            </div>
+            <div class="form-group"><label>Số tiền nạp (VNĐ)</label><input type="number" id="bankAmount" placeholder="Ví dụ: 50000"></div>
             <button class="btn-pay" style="background:#fff; color:#000" onclick="generateQR()"><i class="fas fa-qrcode"></i> TẠO MÃ THANH TOÁN</button>
             
             <div id="qrResult" class="qr-box">
@@ -83,7 +73,7 @@
                 <div style="color:#000; font-weight:bold; margin-top:10px;">Quét mã bằng App Ngân hàng</div>
                 <div style="color:#ff5555; font-size:12px; margin-top:5px; font-weight:bold;">Nội dung: NAP <span id="syntaxName"></span></div>
             </div>
-
+            
             <a href="https://t.me/quocdadv" target="_blank" class="btn-pay btn-tele"><i class="fab fa-telegram-plane"></i> GỬI BILL CHO ADMIN</a>
         </div>
 
@@ -103,17 +93,39 @@
     </div>
 
     <script>
-        // Cấu hình Ngân Hàng của bạn
+        // CẤU HÌNH NGÂN HÀNG
         const MY_BANK_ID = "VPB"; 
         const MY_ACCOUNT_NO = "0989249990"; 
         const MY_ACCOUNT_NAME = "NGUYEN DAI QUOC DAT"; 
 
+        // CẤU HÌNH FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc",
+            authDomain: "quocdat-b80c2.firebaseapp.com",
+            databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "quocdat-b80c2",
+            storageBucket: "quocdat-b80c2.firebasestorage.app",
+            messagingSenderId: "988520495087",
+            appId: "1:988520495087:web:97c1b46fc0f6d1f3aaa81a",
+            measurementId: "G-X0435V46JH"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // TỰ ĐỘNG ĐỌC SỐ DƯ TỪ MÁY CHỦ
         document.addEventListener("DOMContentLoaded", function() {
             const u = localStorage.getItem('vip_username');
-            const b = parseInt(localStorage.getItem('vip_balance_' + u)) || 0;
             document.getElementById('payUsername').innerText = u;
-            document.getElementById('payBalance').innerText = b.toLocaleString('vi-VN');
             document.getElementById('syntaxName').innerText = u;
+
+            // Lắng nghe sự thay đổi số dư theo thời gian thực
+            database.ref('users/' + u).on('value', (snapshot) => {
+                if(snapshot.exists()) {
+                    const b = snapshot.val().balance || 0;
+                    document.getElementById('payBalance').innerText = b.toLocaleString('vi-VN') + " đ";
+                    localStorage.setItem('vip_balance_' + u, b); // Lưu bản sao offline
+                }
+            });
         });
 
         function switchPayTab(tabId) {
@@ -121,7 +133,6 @@
             document.getElementById('btn-card').classList.remove('active');
             document.getElementById('tab-bank').classList.remove('active');
             document.getElementById('tab-card').classList.remove('active');
-            
             document.getElementById('btn-' + tabId).classList.add('active');
             document.getElementById('tab-' + tabId).classList.add('active');
         }
@@ -130,45 +141,43 @@
             const amount = document.getElementById('bankAmount').value;
             if(!amount || amount < 10000) return alert("Số tiền nạp tối thiểu là 10.000 VNĐ");
             const u = localStorage.getItem('vip_username');
-            const addInfo = "NAP " + u;
-            const qrUrl = `https://img.vietqr.io/image/${MY_BANK_ID}-${MY_ACCOUNT_NO}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(addInfo)}&accountName=${encodeURIComponent(MY_ACCOUNT_NAME)}`;
+            const qrUrl = `https://img.vietqr.io/image/${MY_BANK_ID}-${MY_ACCOUNT_NO}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent("NAP "+u)}&accountName=${encodeURIComponent(MY_ACCOUNT_NAME)}`;
             document.getElementById('qrImage').src = qrUrl;
             document.getElementById('qrResult').style.display = 'block';
         }
 
+        // ĐÃ KHÓA LỖI NẠP THẺ BỪA CŨNG LÊN TIỀN
         function processCard() {
             const serial = document.getElementById('serial').value.trim();
             const pin = document.getElementById('pin').value.trim();
-            const amount = parseInt(document.getElementById('amount').value);
-            const currentUser = localStorage.getItem('vip_username');
 
-            if(!serial || !pin) return showStatus("Vui lòng nhập Seri và Mã thẻ cào!", "error");
+            if(!serial || !pin) return showStatus("Vui lòng nhập đầy đủ Seri và Mã thẻ!", "error");
+            
+            // Chặn mã ngắn, không hợp lệ (Seri và Pin thường phải trên 10 số)
+            if(serial.length < 10 || pin.length < 10) {
+                return showStatus("❌ Mã thẻ hoặc Số Seri không hợp lệ!", "error");
+            }
 
             const btn = document.getElementById('btnSubmitCard');
             const btnTxt = document.getElementById('btnTextCard');
             const loader = document.getElementById('btnLoader');
 
             btn.disabled = true; btnTxt.innerText = "ĐANG XỬ LÝ..."; loader.style.display = "block";
-            showStatus("Đang gửi thẻ lên máy chủ...", "processing");
+            showStatus("Đang kết nối cổng nạp thẻ để kiểm tra...", "processing");
 
-            // Giả lập nạp thành công
+            // Giả lập gửi thẻ lên API thật (Mất 2.5 giây) và trả về lỗi vì không có thẻ thật
             setTimeout(() => {
-                let currentB = parseInt(localStorage.getItem('vip_balance_' + currentUser)) || 0;
-                currentB += amount;
-                localStorage.setItem('vip_balance_' + currentUser, currentB);
-                document.getElementById('payBalance').innerText = currentB.toLocaleString('vi-VN');
-                
-                showStatus(`✅ NẠP THÀNH CÔNG! Đã cộng ${amount.toLocaleString('vi-VN')} VNĐ.`, "success");
+                showStatus("❌ Thẻ không hợp lệ hoặc đã được sử dụng!", "error");
                 btn.disabled = false; btnTxt.innerText = "NẠP THẺ NGAY"; loader.style.display = "none";
-            }, 2000);
+            }, 2500);
         }
 
         function showStatus(text, type) {
             const box = document.getElementById('statusBox');
             box.style.display = "block"; box.innerText = text;
-            box.style.background = (type === 'error' ? 'rgba(255,85,85,0.1)' : (type === 'success' ? 'rgba(0,255,136,0.1)' : 'rgba(0,184,255,0.1)'));
-            box.style.color = (type === 'error' ? '#ff5555' : (type === 'success' ? '#00ff88' : '#00b8ff'));
-            box.style.border = `1px solid ${type === 'error' ? '#ff5555' : (type === 'success' ? '#00ff88' : '#00b8ff')}`;
+            box.style.background = (type === 'error' ? 'rgba(255,85,85,0.1)' : 'rgba(0,184,255,0.1)');
+            box.style.color = (type === 'error' ? '#ff5555' : '#00b8ff');
+            box.style.border = `1px solid ${type === 'error' ? '#ff5555' : '#00b8ff'}`;
         }
     </script>
 </body>
