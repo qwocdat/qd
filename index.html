@@ -20,30 +20,39 @@
         /* ================= CSS CHUẨN ================= */
         :root { --primary: #00ff88; --bg: #050505; --glass: rgba(255,255,255,0.03); --border: rgba(255,255,255,0.1); }
         * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
-        body { background: var(--bg) url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop') center/cover no-repeat fixed; color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; line-height: 1.6; }
+        
+        /* Đã gỡ bỏ hiệu ứng nước gây lỗi, dùng hình nền tĩnh chuẩn xịn */
+        body { 
+            background: var(--bg) url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop') center/cover no-repeat fixed; 
+            color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; line-height: 1.6; 
+        }
+        
         .overlay-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: -1; }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 10; }
 
         /* HEADER */
         header { position: fixed; top: 0; left: 0; width: 100%; padding: 15px 0; z-index: 2000; background: rgba(10,10,10,0.9); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
         .nav-flex { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
-        .logo { font-family: 'Orbitron'; font-size: 22px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .logo { font-family: 'Orbitron'; font-size: 22px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 8px; cursor: pointer; position: relative; z-index: 2005; }
+        .logo i { color: var(--primary); }
+        
         .desktop-menu { display: flex; gap: 30px; }
         .desktop-menu a { color: #aaa; text-decoration: none; font-size: 14px; font-weight: 600; transition: 0.3s; cursor: pointer; }
         .desktop-menu a:hover { color: #fff; }
         
-        /* MENU MOBILE (ĐƯỢC NÂNG CẤP Z-INDEX) */
-        .hamburger { display: none; font-size: 28px; cursor: pointer; color: #fff; z-index: 9999; padding: 10px; }
+        /* MENU MOBILE - Căn chỉnh Z-index cực cao để không bị đè */
+        .hamburger { display: none; font-size: 28px; cursor: pointer; color: #fff; z-index: 9999; padding: 10px; position: relative; }
         .mobile-nav { position: fixed; top: 0; right: -350px; width: 85%; max-width: 320px; height: 100vh; background: #111; z-index: 9998; padding: 80px 30px; transition: 0.4s ease-in-out; border-left: 1px solid var(--border); display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.9); overflow-y: auto; }
         .mobile-nav a.menu-link { color: #fff; text-decoration: none; font-size: 16px; margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 15px; display: block; font-weight: 600; cursor: pointer; }
 
         /* ================= GIAO DIỆN TRANG CHỦ ================= */
-        #main-view { width: 100%; display: block; animation: fadeIn 0.5s; }
+        #main-view { width: 100%; display: block; animation: fadeIn 0.5s; position: relative; z-index: 1; }
         .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; padding-top: 80px; }
         .badge { background: rgba(0,255,136,0.1); color: var(--primary); border: 1px solid var(--primary); padding: 6px 15px; border-radius: 30px; font-size: 12px; font-weight: bold; margin-bottom: 25px; display: inline-block; }
         .hero h1 { font-size: 60px; font-family: 'Orbitron'; font-weight: 900; line-height: 1.15; margin-bottom: 20px; }
         .hero p { font-size: 16px; color: #ccc; max-width: 700px; margin: 0 auto 40px; }
-        .btn-group { display: flex; gap: 15px; justify-content: center; }
+        
+        .btn-group { display: flex; gap: 15px; justify-content: center; position: relative; z-index: 20; }
         .btn-lg { padding: 16px 40px; border-radius: 50px; font-weight: bold; text-decoration: none; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 15px; cursor: pointer; }
         .btn-primary { background: var(--primary); color: #000; box-shadow: 0 0 20px rgba(0,255,136,0.3); border: 1px solid var(--primary); }
         .btn-outline { border: 1px solid rgba(255,255,255,0.3); color: #fff; background: rgba(255,255,255,0.05); }
@@ -72,18 +81,24 @@
         .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
 
         /* ================= GIAO DIỆN NẠP TIỀN ================= */
-        #payment-view { display: none; min-height: 100vh; padding: 100px 20px 60px; justify-content: center; align-items: flex-start; animation: fadeIn 0.4s; }
+        #payment-view { display: none; min-height: 100vh; padding: 100px 20px 60px; justify-content: center; align-items: flex-start; animation: fadeIn 0.4s; position: relative; z-index: 10; }
         .pay-box { width: 100%; max-width: 450px; background: #111; border: 1px solid #333; border-radius: 20px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
         .user-panel { background: rgba(0,255,136,0.05); border: 1px dashed var(--primary); padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .user-panel div { font-size: 13px; color: #aaa; }
+        .user-panel .username { color: #fff; font-weight: bold; font-family: 'Orbitron'; font-size: 16px; display: block; margin-top: 3px; }
+        .user-panel .balance { color: var(--primary); font-weight: bold; font-family: monospace; font-size: 22px; text-align: right; }
+
         .pay-tabs { display: flex; background: #000; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333; overflow: hidden; }
         .pay-tab-btn { flex: 1; padding: 14px 0; text-align: center; font-weight: bold; font-size: 14px; cursor: pointer; color: #888; transition: 0.3s; }
         .pay-tab-btn.active { background: #222; color: var(--primary); }
         .pay-tab-content { display: none; animation: fadeIn 0.3s; }
         .pay-tab-content.active { display: block; }
+        
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 13px; color: #aaa; margin-bottom: 8px; font-weight: 600; }
         select, input { width: 100%; padding: 14px; background: #1a1a1a; border: 1px solid #444; border-radius: 10px; color: #fff; outline: none; }
-        .btn-pay { width: 100%; padding: 16px; background: var(--primary); color: #000; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-pay { width: 100%; padding: 16px; background: var(--primary); color: #000; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 10px; text-decoration: none; }
+        
         .qr-box { text-align: center; margin-top: 20px; display: none; background: #fff; padding: 20px; border-radius: 15px; }
         .qr-box img { width: 100%; max-width: 250px; border-radius: 10px; }
 
@@ -108,27 +123,27 @@
 
     <header>
         <div class="nav-flex container">
-            <div class="logo" onclick="showMainView()"><i class="fas fa-shield-alt"></i> QUOCDAT.SEC</div>
+            <a href="javascript:void(0)" class="logo" onclick="showMainView()" style="text-decoration: none;"><i class="fas fa-shield-alt"></i> QUOCDAT.SEC</a>
             <nav class="desktop-menu">
-                <a onclick="showMainView()">Trang Chủ</a>
-                <a href="#about" onclick="showMainView()">Giới Thiệu</a>
+                <a href="javascript:void(0)" onclick="showMainView()">Trang Chủ</a>
                 <a href="shop.html">Kho Tài Liệu</a>
                 <a href="getkey.html">Lấy Key VIP</a>
+                <a href="javascript:void(0)" onclick="showPaymentView()" style="color:#00b8ff">Nạp Tiền</a>
             </nav>
             <div id="desktopAuth"></div>
-            <div class="hamburger" onclick="openMenu()"><i class="fas fa-bars"></i></div>
+            <a href="javascript:void(0)" class="hamburger" onclick="openMenu()"><i class="fas fa-bars"></i></a>
         </div>
     </header>
 
     <div class="mobile-nav" id="mobileNav">
         <div style="text-align: right; margin-bottom: 20px; margin-top: -40px;">
-            <i class="fas fa-times" style="font-size:30px; color:#ff5555; cursor:pointer;" onclick="closeMenu()"></i>
+            <a href="javascript:void(0)" onclick="closeMenu()" style="color:#ff5555; font-size:30px; padding:10px;"><i class="fas fa-times"></i></a>
         </div>
         <div id="mobileUserArea"></div>
-        <a onclick="showMainView(); closeMenu()" class="menu-link"><i class="fas fa-home"></i> Trang Chủ</a>
+        <a href="javascript:void(0)" onclick="showMainView(); closeMenu()" class="menu-link"><i class="fas fa-home"></i> Trang Chủ</a>
         <a href="shop.html" class="menu-link"><i class="fas fa-download"></i> Kho Tài Liệu</a>
         <a href="getkey.html" class="menu-link"><i class="fas fa-key"></i> Lấy Key VIP</a>
-        <a onclick="showPaymentView(); closeMenu()" class="menu-link" style="color:#00b8ff"><i class="fas fa-wallet"></i> Nạp Tiền</a>
+        <a href="javascript:void(0)" onclick="showPaymentView(); closeMenu()" class="menu-link" style="color:#00b8ff"><i class="fas fa-wallet"></i> Nạp Tiền</a>
     </div>
 
     <div id="main-view">
@@ -139,7 +154,7 @@
                 <p>Giải pháp Obfuscate chuyên nghiệp dành cho Developer và Game Cheater. Tích hợp hệ thống Key System 15 phút chống Crack tuyệt đối.</p>
                 <div class="btn-group">
                     <a href="getkey.html" class="btn-lg btn-primary"><i class="fas fa-key"></i> LẤY KEY KÍCH HOẠT</a>
-                    <a onclick="showPaymentView()" class="btn-lg btn-outline" style="background:#00b8ff; color:#fff; border:none;"><i class="fas fa-wallet"></i> NẠP TIỀN HỆ THỐNG</a>
+                    <a href="javascript:void(0)" onclick="showPaymentView()" class="btn-lg btn-outline" style="background:#00b8ff; color:#fff; border:none;"><i class="fas fa-wallet"></i> NẠP TIỀN HỆ THỐNG</a>
                 </div>
                 <div class="stats-bar">
                     <div class="stat-item"><div class="stat-num">15K+</div><div class="stat-label">Lượt Tải</div></div>
@@ -208,7 +223,7 @@
                     <div>
                         <h4>HỖ TRỢ</h4>
                         <a href="getkey.html" style="color:#888; text-decoration:none; display:block; margin-bottom:10px;">Lấy Key Kích Hoạt</a>
-                        <a onclick="showPaymentView()" style="color:#888; text-decoration:none; display:block; cursor:pointer;">Nạp Tiền Vào Web</a>
+                        <a href="javascript:void(0)" onclick="showPaymentView()" style="color:#888; text-decoration:none; display:block;">Nạp Tiền Vào Web</a>
                     </div>
                     <div>
                         <h4>LIÊN HỆ</h4>
@@ -236,38 +251,17 @@
 
             <div id="tab-bank" class="pay-tab-content active">
                 <div class="form-group"><label>Số tiền muốn nạp (VNĐ)</label><input type="number" id="bankAmount" placeholder="Ví dụ: 50000"></div>
-                <button class="btn-pay" style="background:#fff; color:#000" onclick="generateQR()"><i class="fas fa-qrcode"></i> TẠO MÃ THANH TOÁN</button>
-                <div id="qrResult" class="qr-box"><img id="qrImage" src="" alt="QR"><div style="color:#000; font-weight:bold; margin-top:10px;">Quét mã bằng App Ngân hàng</div></div>
+                <a href="javascript:void(0)" class="btn-pay" style="background:#fff; color:#000" onclick="generateQR()"><i class="fas fa-qrcode"></i> TẠO MÃ THANH TOÁN</a>
+                
+                <div id="qrResult" class="qr-box">
+                    <img id="qrImage" src="" alt="QR">
+                    <div style="color:#000; font-weight:bold; margin-top:10px;">Quét mã bằng App Ngân hàng</div>
+                    <div style="color:#ff5555; font-size:12px; margin-top:5px; font-weight:bold;">KHÔNG ĐƯỢC sửa nội dung chuyển khoản!</div>
+                </div>
+
+                <a href="https://t.me/quocdadv" target="_blank" class="btn-pay btn-tele"><i class="fab fa-telegram-plane"></i> ĐÃ CHUYỂN KHOẢN (GỬI BILL)</a>
             </div>
 
             <div id="tab-card" class="pay-tab-content">
                 <div class="form-group"><label>Nhà mạng</label><select id="telco"><option>Viettel</option><option>Vinaphone</option><option>Mobifone</option></select></div>
-                <div class="form-group"><label>Mệnh giá</label><select id="amount"><option value="10000">10,000</option><option value="50000">50,000</option></select></div>
-                <div class="form-group"><label>Số Seri</label><input type="text" id="serial" placeholder="Nhập Seri"></div>
-                <div class="form-group"><label>Mã Thẻ</label><input type="text" id="pin" placeholder="Nhập Mã thẻ"></div>
-                <button class="btn-pay" onclick="alert('Đang bảo trì cổng thẻ. Vui lòng chuyển khoản!')">NẠP THẺ NGAY</button>
-            </div>
-
-            <div onclick="showMainView()" style="text-align:center; color:#888; font-weight:bold; cursor:pointer; margin-top:25px; padding:10px; border:1px solid #333; border-radius:10px;">← QUAY LẠI TRANG CHỦ</div>
-        </div>
-    </div>
-
-    <script>
-        // Cấu hình Ngân Hàng
-        const MY_BANK_ID = "VPB"; 
-        const MY_ACCOUNT_NO = "0989249990"; 
-        const MY_ACCOUNT_NAME = "NGUYEN DAI QUOC DAT"; 
-
-        // ĐIỀU KHIỂN MENU MOBILE (Javascript thuần túy, fix lỗi đơ menu)
-        function openMenu() { document.getElementById('mobileNav').style.right = '0'; }
-        function closeMenu() { document.getElementById('mobileNav').style.right = '-350px'; }
-
-        // Cập nhật UI lúc load web
-        document.addEventListener("DOMContentLoaded", function() {
-            updateUserUI();
-        });
-
-        function updateUserUI() {
-            const user = localStorage.getItem('vip_username');
-            const balance = parseInt(localStorage.getItem('vip_balance_' + user)) || 0;
-            const formatMoney = balance
+                <div class="form-group"><label>Mệnh giá</label><select id="amount"><option value="10000">10,000</option><option value="50000">50,000</option>
