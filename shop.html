@@ -2,65 +2,68 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <title>KHO TÀI LIỆU</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KHO TỔNG HỢP - QUOCDAT</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Inter:wght@300;600&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.ripples/0.5.3/jquery.ripples.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #050505 url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop') center/cover no-repeat fixed; color: #fff; font-family: 'Inter', sans-serif; min-height: 100vh; }
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); pointer-events: none; z-index: 0; }
+        body { background: #050505; color: #fff; font-family: 'Inter', sans-serif; text-align: center; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 50px; max-width: 1000px; margin: 0 auto; }
+        .card { background: #111; padding: 20px; border: 1px solid #333; border-radius: 15px; }
+        .btn-down { background: #00ff88; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
         
-        header { position: fixed; top: 0; left: 0; width: 100%; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; z-index: 100; background: rgba(5,5,5,0.8); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .logo { font-family: 'Orbitron'; font-weight: 900; font-size: 20px; color: #fff; }
-        .hamburger { cursor: pointer; width: 30px; height: 20px; position: relative; z-index: 102; }
-        .hamburger span { display: block; position: absolute; height: 2px; width: 100%; background: #fff; border-radius: 9px; transition: .25s; }
-        .hamburger span:nth-child(1) { top: 0px; } .hamburger span:nth-child(2) { top: 9px; } .hamburger span:nth-child(3) { top: 18px; }
-        .hamburger.open span:nth-child(1) { top: 9px; transform: rotate(135deg); background: #ff5555; }
-        .hamburger.open span:nth-child(2) { opacity: 0; left: -60px; }
-        .hamburger.open span:nth-child(3) { top: 9px; transform: rotate(-135deg); background: #ff5555; }
-
-        .nav-overlay { position: fixed; top: 0; right: -100%; width: 100%; height: 100%; background: rgba(5,5,5,0.98); backdrop-filter: blur(20px); z-index: 101; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.5s; }
-        .nav-overlay.active { right: 0; }
-        .nav-menu li { list-style: none; margin: 25px 0; text-align: center; }
-        .nav-menu a { font-family: 'Orbitron'; font-size: 24px; text-decoration: none; color: #888; transition: 0.3s; }
-        .nav-menu a:hover { color: #fff; }
-
-        .shop-container { position: relative; z-index: 10; padding: 120px 20px 50px; max-width: 1200px; margin: 0 auto; }
-        .shop-title { text-align: center; margin-bottom: 40px; font-family: 'Orbitron'; font-size: 36px; text-shadow: 0 0 20px rgba(0,255,136,0.3); }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; }
-        .card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 25px; transition: 0.3s; position: relative; }
-        .card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.1); border-color: rgba(0,255,136,0.5); }
-        .tag { position: absolute; top: 15px; right: 15px; font-size: 10px; font-weight: bold; padding: 4px 10px; border-radius: 20px; background: rgba(0,255,136,0.2); color: #00ff88; }
-        .card h3 { font-size: 18px; margin-bottom: 10px; color: #fff; }
-        .card p { font-size: 13px; color: #aaa; margin-bottom: 20px; line-height: 1.5; }
-        .btn-down { width: 100%; padding: 10px; background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; cursor: pointer; transition: 0.3s; }
-        .btn-down:hover { background: #fff; color: #000; }
+        /* Modal iOS */
+        .modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; }
+        .alert { width: 300px; background: #222; border-radius: 14px; overflow: hidden; border: 1px solid #444; }
+        .inp { width: 90%; padding: 10px; margin: 10px 0; background: #000; border: 1px solid #444; color: #fff; text-align: center; }
+        .acts { display: flex; border-top: 1px solid #444; }
+        .act { flex: 1; padding: 12px; cursor: pointer; color: #0a84ff; border-left: 1px solid #444; }
     </style>
 </head>
 <body>
-    <div class="overlay"></div>
-    <header>
-        <div class="logo">QUOCDAT.SHOP</div>
-        <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
-    </header>
-    <div class="nav-overlay" id="navOverlay">
-        <ul class="nav-menu">
-            <li><a href="ui.html">Trang Chủ</a></li>
-            <li><a href="#" class="active" style="color:#fff">Tổng Hợp (Shop)</a></li>
-            <li><a href="https://t.me/quocdadv">Liên Hệ Admin</a></li>
-            <li style="margin-top: 30px;"><a href="index.html" style="color:#00ff88; border:1px solid #00ff88; padding:10px 30px; border-radius:30px;">LẤY KEY VIP</a></li>
-        </ul>
-    </div>
-    <div class="shop-container">
-        <h1 class="shop-title">KHO TÀI LIỆU</h1>
-        <div class="grid">
-            <div class="card"><span class="tag">FREE</span><h3>Hack Blox Fruit</h3><p>Script Auto Farm mới nhất. Fix lỗi Anti-Ban.</p><a href="#"><button class="btn-down">TẢI XUỐNG</button></a></div>
-            <div class="card"><span class="tag" style="color:#ff5555; background:rgba(255,85,85,0.2)">VIP</span><h3>Tool Obfuscate</h3><p>Tool khóa code Python 3 lớp. Key hệ thống 15 phút.</p><a href="#"><button class="btn-down">TẢI XUỐNG</button></a></div>
-            <div class="card"><span class="tag">v2.0</span><h3>Fix Lag Robox</h3><p>File xóa texture, giảm đồ họa giúp máy yếu chơi game mượt mà.</p><a href="#"><button class="btn-down">TẢI XUỐNG</button></a></div>
+    <h1 style="margin-top:50px; font-family:'Orbitron'">KHO TỔNG HỢP</h1>
+    <a href="ui.html" style="color:#aaa;">Quay lại Trang Chủ</a>
+    
+    <div class="grid">
+        <div class="card">
+            <h3>Hack Blox Fruit</h3>
+            <button class="btn-down" onclick="req('https://google.com')">TẢI XUỐNG</button>
+        </div>
+        <div class="card">
+            <h3>Fix Lag V2</h3>
+            <button class="btn-down" onclick="req('https://youtube.com')">TẢI XUỐNG</button>
         </div>
     </div>
-    <script>function toggleMenu() { $('.hamburger').toggleClass('open'); $('.nav-overlay').toggleClass('active'); } $(document).ready(function() { try { $('body').ripples({ resolution: 512, dropRadius: 20, perturbance: 0.04 }); } catch(e){} });</script>
+
+    <div class="modal" id="modal">
+        <div class="alert">
+            <div style="padding:20px;">
+                <h3>Yêu cầu Key</h3>
+                <p style="font-size:13px; color:#aaa; margin-bottom:10px;">Nhập Key Unlock (quocdat_xxxx)</p>
+                <input type="text" id="kInp" class="inp" placeholder="quocdat_...">
+                <div id="err" style="color:#ff453a; font-size:12px; display:none;">Key sai!</div>
+            </div>
+            <div class="acts">
+                <div class="act" style="color:#ff453a" onclick="$('#modal').hide()">Hủy</div>
+                <div class="act" onclick="verify()">Mở Khóa</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let link = "";
+        const SECRET = "QUOC_DAT_SECRET_2026";
+        function req(l) { link=l; $('#modal').css('display','flex'); $('#kInp').val(''); $('#err').hide(); }
+        
+        function verify() {
+            const uK = $('#kInp').val().trim();
+            const step = Math.floor(Date.now()/1000/900);
+            const hash = CryptoJS.MD5(SECRET + step).toString();
+            if(uK === "quocdat_" + hash.substring(0,12)) {
+                alert("Key Đúng! Đang tải..."); window.location.href = link;
+            } else $('#err').show();
+        }
+    </script>
 </body>
 </html>
