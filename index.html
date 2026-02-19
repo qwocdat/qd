@@ -39,12 +39,24 @@
         .desktop-menu a { color: #aaa; text-decoration: none; font-size: 14px; font-weight: 600; transition: 0.3s; }
         .desktop-menu a:hover { color: #fff; }
         
-        /* ================= MENU MOBILE ================= */
-        .hamburger { display: none; font-size: 26px; cursor: pointer; color: #fff; padding: 10px; z-index: 9999; }
-        .mobile-nav { position: fixed; top: 0; right: -100%; width: 85%; max-width: 320px; height: 100vh; background: #111; z-index: 9998; padding: 80px 30px; transition: 0.4s ease-in-out; border-left: 1px solid var(--border); display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.9); overflow-y: auto; }
-        .mobile-nav.active { right: 0; }
-        .mobile-nav a.menu-link { color: #fff; text-decoration: none; font-size: 16px; margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 15px; display: block; font-weight: 600; }
+        /* ================= MENU MOBILE (ĐÃ FIX LỖI SIÊU MƯỢT) ================= */
+        .hamburger { display: none; font-size: 28px; cursor: pointer; color: #fff; padding: 10px; z-index: 9999; }
         
+        /* Sử dụng transform thay vì right để đảm bảo phần cứng điện thoại xử lý mượt */
+        .mobile-nav { 
+            position: fixed; top: 0; right: 0; width: 85%; max-width: 320px; height: 100vh; 
+            background: #111; z-index: 9998; padding: 80px 30px; 
+            border-left: 1px solid var(--border); display: flex; flex-direction: column; 
+            box-shadow: -10px 0 30px rgba(0,0,0,0.9); overflow-y: auto;
+            transform: translateX(100%); /* Ẩn sang bên phải */
+            transition: transform 0.4s ease-in-out; 
+        }
+        .mobile-nav.open { transform: translateX(0); /* Trượt ra ngoài */ }
+        
+        .mobile-nav a.menu-link { color: #fff; text-decoration: none; font-size: 16px; margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 15px; display: block; font-weight: 600; }
+        .close-btn { text-align: right; margin-bottom: 20px; margin-top: -40px; }
+        .close-btn i { font-size: 30px; color: #ff5555; cursor: pointer; padding: 10px; }
+
         /* ================= HERO SECTION ================= */
         .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; padding-top: 80px; }
         .badge { background: rgba(0,255,136,0.1); color: var(--primary); border: 1px solid var(--primary); padding: 6px 15px; border-radius: 30px; font-size: 12px; font-weight: bold; margin-bottom: 25px; display: inline-block; }
@@ -116,13 +128,13 @@
                 <a href="naptien.html" style="color:#00b8ff"><i class="fas fa-wallet"></i> Nạp Tiền</a>
             </nav>
             <div id="desktopAuth"></div>
-            <a href="javascript:void(0)" class="hamburger" onclick="openMenu()"><i class="fas fa-bars"></i></a>
+            <div class="hamburger" onclick="openMobileMenu()"><i class="fas fa-bars"></i></div>
         </div>
     </header>
 
     <div class="mobile-nav" id="mobileNav">
-        <div style="text-align: right; margin-bottom: 20px; margin-top: -40px;">
-            <a href="javascript:void(0)" onclick="closeMenu()" style="color:#ff5555; font-size:30px; padding:10px;"><i class="fas fa-times"></i></a>
+        <div class="close-btn">
+            <i class="fas fa-times" onclick="closeMobileMenu()"></i>
         </div>
         <div id="mobileUserArea"></div>
         <a href="index.html" class="menu-link"><i class="fas fa-home"></i> Trang Chủ</a>
@@ -246,6 +258,23 @@
     </footer>
 
     <script>
+        function openMobileMenu() { 
+            document.getElementById('mobileNav').classList.add('open'); 
+        }
+        function closeMobileMenu() { 
+            document.getElementById('mobileNav').classList.remove('open'); 
+        }
+        
+        // Thoát tài khoản
+        function logout() {
+            if(confirm("Bạn có chắc chắn muốn thoát tài khoản không?")) {
+                localStorage.removeItem('vip_username'); 
+                window.location.href = "login.html";
+            }
+        }
+    </script>
+
+    <script>
         // CẤU HÌNH FIREBASE REALTIME CỦA BẠN
         const firebaseConfig = {
             apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc",
@@ -257,43 +286,31 @@
             appId: "1:988520495087:web:97c1b46fc0f6d1f3aaa81a",
             measurementId: "G-X0435V46JH"
         };
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        
+        // Chạy Firebase trong Try-Catch để nếu mạng lỗi cũng không chết giao diện
+        try {
+            firebase.initializeApp(firebaseConfig);
+            const database = firebase.database();
+            
+            document.addEventListener("DOMContentLoaded", function() {
+                const user = localStorage.getItem('vip_username');
+                if(!user) return;
 
-        // ĐIỀU KHIỂN MENU ĐIỆN THOẠI
-        function openMenu() { document.getElementById('mobileNav').style.right = '0px'; }
-        function closeMenu() { document.getElementById('mobileNav').style.right = '-100%'; }
-
-        // ĐỒNG BỘ DỮ LIỆU REAL-TIME TỪ MÁY CHỦ GOOGLE LÚC TẢI TRANG
-        document.addEventListener("DOMContentLoaded", function() {
-            const user = localStorage.getItem('vip_username');
-
-            // Lắng nghe sự thay đổi số dư từ mục 'users/tên_đăng_nhập' trên Firebase
-            database.ref('users/' + user).on('value', (snapshot) => {
-                let balance = 0;
-                
-                // Nếu tìm thấy tài khoản trên máy chủ
-                if(snapshot.exists()) {
-                    balance = snapshot.val().balance || 0;
+                // Lắng nghe sự thay đổi số dư từ Firebase
+                database.ref('users/' + user).on('value', (snapshot) => {
+                    let balance = 0;
+                    if(snapshot.exists()) {
+                        balance = snapshot.val().balance || 0;
+                        localStorage.setItem('vip_balance_' + user, balance); 
+                    }
                     
-                    // Lưu một bản sao lưu offline xuống máy điện thoại
-                    localStorage.setItem('vip_balance_' + user, balance); 
-                }
-                
-                const formatMoney = balance.toLocaleString('vi-VN') + " đ";
+                    const formatMoney = balance.toLocaleString('vi-VN') + " đ";
 
-                // ĐỔ DỮ LIỆU SỐ DƯ RA THANH HEADER PC
-                document.getElementById('desktopAuth').innerHTML = `
-                    <div style="display:flex; align-items:center; gap:15px; background:rgba(255,255,255,0.1); padding:6px 15px; border-radius:30px; border:1px solid rgba(255,255,255,0.2);">
-                        <div style="color:#00ff88; font-weight:bold; font-family:'Orbitron'; font-size:14px; padding-right:15px; border-right:1px solid #444;"><i class="fas fa-wallet"></i> ${formatMoney}</div>
-                        <div style="color:#fff; font-weight:bold; font-size:14px;"><i class="fas fa-user-circle"></i> ${user}</div>
-                        <a href="javascript:void(0)" onclick="logout()" style="color:#ff5555; font-size:16px; margin-left:5px;" title="Đăng Xuất"><i class="fas fa-sign-out-alt"></i></a>
-                    </div>
-                `;
-
-                // ĐỔ DỮ LIỆU SỐ DƯ RA MENU ĐIỆN THOẠI
-                document.getElementById('mobileUserArea').innerHTML = `
-                    <div style="text-align:center; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:20px;">
-                        <div style="width:60px; height:60px; background:#00ff88; color:#000; border-radius:50%; font-size:24px; font-weight:bold; display:flex; align-items:center; justify-content:center; margin:0 auto 10px;">${user.charAt(0).toUpperCase()}</div>
-                        <div style="color:#fff; font-size:18px; font-weight:bold; font-family:'Orbitron'">${user}</div>
-                    
+                    // Ghi số dư lên PC
+                    const desktopAuth = document.getElementById('desktopAuth');
+                    if(desktopAuth) {
+                        desktopAuth.innerHTML = `
+                            <div style="display:flex; align-items:center; gap:15px; background:rgba(255,255,255,0.1); padding:6px 15px; border-radius:30px; border:1px solid rgba(255,255,255,0.2);">
+                                <div style="color:#00ff88; font-weight:bold; font-family:'Orbitron'; font-size:14px; padding-right:15px; border-right:1px solid #444;"><i class="fas fa-wallet"></i> ${formatMoney}</div>
+                                <div style="color:#fff; font-weight:bold; font-size:14px;"><i class="fas fa-user-circle"></i> ${user}</div>
+                                <a href="javascript:void(0)" onclick="logout()" style="color:#ff5555; font-size:16px; margin-left:5px;" title="Đăng Xuất"><i class="fas fa-sign-out-alt"></i><
