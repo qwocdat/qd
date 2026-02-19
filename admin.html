@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>ADMIN PANEL | QuocDat Sec</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        body { background: #050505; color: #fff; font-family: 'Inter', sans-serif; padding: 20px; margin: 0; }
+        h1 { font-family: 'Orbitron'; color: #ff5555; text-align: center; margin-bottom: 5px; }
+        .sub-title { text-align: center; color: #00ff88; font-size: 14px; margin-bottom: 30px; }
+        
+        .alert { background: rgba(0, 255, 136, 0.1); border: 1px solid #00ff88; color: #00ff88; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 14px; text-align: center; max-width: 800px; margin: 0 auto 20px; }
+        
+        .table-container { width: 100%; max-width: 800px; margin: 0 auto; overflow-x: auto; background: #111; border-radius: 10px; border: 1px solid #333; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #333; white-space: nowrap; }
+        th { background: #222; color: #00ff88; font-family: 'Orbitron'; font-size: 14px; }
+        td { font-size: 14px; }
+        
+        .btn-edit { background: #00b8ff; border: none; padding: 8px 12px; color: #fff; border-radius: 5px; cursor: pointer; font-weight: bold; margin-right: 5px; transition: 0.3s; }
+        .btn-edit:hover { background: #0088cc; }
+        
+        .btn-del { background: #ff5555; border: none; padding: 8px 12px; color: #fff; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-del:hover { background: #cc0000; }
+        
+        .back { display: block; text-align: center; margin-top: 30px; color: #888; text-decoration: none; font-size: 15px; font-weight: bold; }
+        .back:hover { color: #fff; }
+        .loading { text-align: center; padding: 30px; color: yellow; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1><i class="fas fa-server"></i> SERVER ADMIN PANEL</h1>
+    <div class="sub-title">Kết nối trực tiếp: Firebase Realtime Database</div>
+    
+    <div class="alert">
+        <b>Đã đồng bộ Đám Mây:</b> Mọi thay đổi về Số dư ở đây sẽ lập tức được cập nhật sang thiết bị của người dùng (Real-time).
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Tên Tài Khoản</th>
+                    <th>Mật Khẩu</th>
+                    <th>Số Dư (VNĐ)</th>
+                    <th>Ngày Tạo</th>
+                    <th>Hành Động</th>
+                </tr>
+            </thead>
+            <tbody id="userList">
+                <tr><td colspan="5" class="loading">Đang tải dữ liệu từ máy chủ Google...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <a href="index.html" class="back">← Quay về Trang Chủ</a>
+
+    <script>
+        // CẤU HÌNH FIREBASE CỦA BẠN
+        const firebaseConfig = {
+            apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc",
+            authDomain: "quocdat-b80c2.firebaseapp.com",
+            databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "quocdat-b80c2",
+            storageBucket: "quocdat-b80c2.firebasestorage.app",
+            messagingSenderId: "988520495087",
+            appId: "1:988520495087:web:97c1b46fc0f6d1f3aaa81a",
+            measurementId: "G-X0435V46JH"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // TẢI DỮ LIỆU TỰ ĐỘNG (Lắng nghe sự thay đổi)
+        database.ref('users').on('value', (snapshot) => {
+            const tbody = document.getElementById('userList');
+            tbody.innerHTML = ''; // Xóa chữ loading
+
+            if (snapshot.exists()) {
+                snapshot.forEach((childSnapshot) => {
+                    const username = childSnapshot.key;
+                    const userData = childSnapshot.val();
+                    const balance = parseInt(userData.balance) || 0;
+                    const pass = userData.password || "N/A";
+                    const createdAt = userData.created_at || "Không rõ";
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="font-weight:bold; color:#fff;">${username}</td>
+                        <td style="color:#aaa">${pass}</td>
+                        <td style="color:#00ff88; font-family:monospace; font-size:16px; font-weight:bold;">${balance.toLocaleString('vi-VN')} đ</td>
+                        <td style="color:#888; font-size:12px;">${createdAt}</td>
+                        <td>
+                            <button class="btn-edit" onclick="editBalance('${username}', ${balance})">Cộng Tiền</button>
+                            <button class="btn-del" onclick="deleteUser('${username}')">Xóa User</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#888; padding:30px;">Chưa có tài khoản nào trên hệ thống!</td></tr>';
+            }
+        });
+
+        // HÀM CỘNG TIỀN VÀO FIREBASE
+        function editBalance(username, currentB) {
+            const amount = prompt(`Nhập số tiền muốn CỘNG THÊM cho [${username}]:\n(Số tiền hiện tại: ${currentB.toLocaleString('vi-VN')} đ)`, "50000");
+            
+            if (amount && !isNaN(amount)) {
+                const newBalance = currentB + parseInt(amount);
+                
+                // Cập nhật thẳng lên Firebase
+                database.ref('users/' + username).update({
+                    balance: newBalance
+                }).then(() => {
+                    alert(`✅ Đã cộng thành công! Số dư mới của ${username} là: ${newBalance.toLocaleString('vi-VN')} đ`);
+                }).catch((error) => {
+                    alert("Lỗi khi cập nhật: " + error.message);
+                });
+            }
+        }
+
+        // HÀM XÓA USER KHỎI FIREBASE
+        function deleteUser(username) {
+            if(confirm(`⚠️ CẢNH BÁO: Bạn có chắc chắn muốn XÓA VĨNH VIỄN tài khoản [${username}] khỏi máy chủ không?`)) {
+                database.ref('users/' + username).remove().then(() => {
+                    alert(`Đã xóa tài khoản ${username}!`);
+                }).catch((error) => {
+                    alert("Lỗi khi xóa: " + error.message);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
