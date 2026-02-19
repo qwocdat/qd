@@ -5,6 +5,10 @@
     <title>QUOCDAT SEC | Đăng Nhập & Đăng Ký</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: #050505; color: #fff; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
@@ -23,7 +27,7 @@
         .btn-reg { background: #00b8ff; color: #fff; }
         .btn-reg:hover { background: #0088cc; }
         .back-home { display: block; text-align: center; margin-top: 20px; color: #666; text-decoration: none; font-size: 13px; }
-        .back-home:hover { color: #fff; }
+        .loading-text { text-align: center; color: yellow; font-size: 13px; display: none; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -34,24 +38,38 @@
         </div>
 
         <div id="area-login" class="form-area active">
-            <h2>WELCOME BACK</h2>
+            <h2>LOGIN</h2>
             <input type="text" id="lUser" placeholder="Tên tài khoản">
             <input type="password" id="lPass" placeholder="Mật khẩu">
-            <button class="btn" onclick="processLogin()">ĐĂNG NHẬP HỆ THỐNG</button>
+            <button class="btn" id="btnLogin" onclick="processLogin()">ĐĂNG NHẬP</button>
+            <div id="loadLogin" class="loading-text">Đang kết nối Server...</div>
             <a href="index.html" class="back-home">← Trở về Trang Chủ</a>
         </div>
 
         <div id="area-reg" class="form-area">
-            <h2 style="color:#00b8ff">CREATE VIP</h2>
-            <input type="text" id="rUser" placeholder="Tạo Tên tài khoản">
-            <input type="password" id="rPass" placeholder="Tạo Mật khẩu">
-            <input type="password" id="rPass2" placeholder="Nhập lại Mật khẩu">
-            <button class="btn btn-reg" onclick="processRegister()">HOÀN TẤT ĐĂNG KÝ</button>
+            <h2 style="color:#00b8ff">REGISTER</h2>
+            <input type="text" id="rUser" placeholder="Tên tài khoản mới">
+            <input type="password" id="rPass" placeholder="Mật khẩu">
+            <input type="password" id="rPass2" placeholder="Nhập lại mật khẩu">
+            <button class="btn btn-reg" id="btnReg" onclick="processRegister()">TẠO TÀI KHOẢN</button>
+            <div id="loadReg" class="loading-text">Đang lưu lên máy chủ Google...</div>
             <a href="index.html" class="back-home">← Trở về Trang Chủ</a>
         </div>
     </div>
 
     <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc",
+            authDomain: "quocdat-b80c2.firebaseapp.com",
+            databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "quocdat-b80c2",
+            storageBucket: "quocdat-b80c2.firebasestorage.app",
+            messagingSenderId: "988520495087",
+            appId: "1:988520495087:web:97c1b46fc0f6d1f3aaa81a"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
         function switchTab(type) {
             document.getElementById('tab-login').classList.remove('active');
             document.getElementById('tab-reg').classList.remove('active');
@@ -65,28 +83,51 @@
             const u = document.getElementById('rUser').value.trim();
             const p = document.getElementById('rPass').value.trim();
             const p2 = document.getElementById('rPass2').value.trim();
-            if(!u || !p) return alert("Vui lòng điền đủ tên và mật khẩu!");
+            if(!u || !p) return alert("Điền đủ thông tin!");
             if(p !== p2) return alert("Mật khẩu không khớp!");
-            if(localStorage.getItem('acc_' + u)) return alert("Tài khoản đã tồn tại!");
-            
-            localStorage.setItem('acc_' + u, p);
-            alert("ĐĂNG KÝ THÀNH CÔNG!\nHãy dùng tài khoản vừa tạo để Đăng nhập.");
-            switchTab('login');
-            document.getElementById('lUser').value = u;
+
+            document.getElementById('btnReg').style.display = 'none';
+            document.getElementById('loadReg').style.display = 'block';
+
+            database.ref('users/' + u).once('value').then((snapshot) => {
+                if(snapshot.exists()) {
+                    alert("Tài khoản đã tồn tại!");
+                    document.getElementById('btnReg').style.display = 'block';
+                    document.getElementById('loadReg').style.display = 'none';
+                } else {
+                    database.ref('users/' + u).set({
+                        password: p,
+                        balance: 0,
+                        created_at: new Date().toLocaleString()
+                    }).then(() => {
+                        alert("Đăng ký thành công! Hãy đăng nhập.");
+                        switchTab('login');
+                        document.getElementById('btnReg').style.display = 'block';
+                        document.getElementById('loadReg').style.display = 'none';
+                    });
+                }
+            });
         }
 
         function processLogin() {
             const u = document.getElementById('lUser').value.trim();
             const p = document.getElementById('lPass').value.trim();
-            if(!u || !p) return alert("Vui lòng điền tài khoản và mật khẩu!");
-            
-            if(localStorage.getItem('acc_' + u) === p) {
-                localStorage.setItem('vip_username', u);
-                // ĐÃ FIX LỖI Ở ĐÂY: Trỏ thẳng về index.html
-                window.location.href = "index.html"; 
-            } else {
-                alert("❌ Sai Tên tài khoản hoặc Mật khẩu!");
-            }
+            if(!u || !p) return alert("Nhập tài khoản & mật khẩu!");
+
+            document.getElementById('btnLogin').style.display = 'none';
+            document.getElementById('loadLogin').style.display = 'block';
+
+            database.ref('users/' + u).once('value').then((snapshot) => {
+                if(snapshot.exists()) {
+                    const data = snapshot.val();
+                    if(data.password === p) {
+                        localStorage.setItem('vip_username', u);
+                        window.location.href = "index.html"; 
+                    } else { alert("Sai mật khẩu!"); }
+                } else { alert("Tài khoản không tồn tại!"); }
+                document.getElementById('btnLogin').style.display = 'block';
+                document.getElementById('loadLogin').style.display = 'none';
+            });
         }
     </script>
 </body>
