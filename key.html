@@ -2,67 +2,178 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>YOUR KEY</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>XÁC MINH BẢO MẬT | QUOCDAT SEC</title>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        body { background: #050505; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .box { padding: 30px; border: 1px solid #333; border-radius: 20px; background: #111; text-align: center; width: 90%; max-width: 400px; display: none; }
-        .key-code { font-size: 24px; padding: 15px; border: 2px dashed #555; margin: 20px 0; font-family: 'Orbitron'; border-radius: 10px; word-break: break-all; }
-        .btn-copy { padding: 12px 30px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        body { background: #050505; color: #00ff88; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; overflow: hidden; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, rgba(0,255,136,0.05) 0%, rgba(0,0,0,0.9) 100%); z-index: -1; }
         
-        .style-tool .key-code { color: #00ff88; border-color: #00ff88; }
-        .style-tool .btn-copy { background: #00ff88; color: #000; }
+        .terminal-container { width: 100%; max-width: 600px; background: #0a0a0a; border: 1px solid #333; border-radius: 10px; box-shadow: 0 0 30px rgba(0,255,136,0.1); overflow: hidden; }
+        .terminal-header { background: #111; padding: 10px 15px; border-bottom: 1px solid #333; display: flex; gap: 8px; align-items: center; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .dot.red { background: #ff5555; } .dot.yellow { background: #ffb86c; } .dot.green { background: #50fa7b; }
+        .term-title { color: #888; font-size: 12px; margin-left: 10px; font-family: monospace; }
         
-        .style-down .key-code { color: #00b8ff; border-color: #00b8ff; }
-        .style-down .btn-copy { background: #00b8ff; color: #fff; }
+        .terminal-body { padding: 25px; font-family: monospace; font-size: 14px; line-height: 1.6; height: 350px; position: relative; }
+        
+        /* TEXT LOG */
+        .log-area { height: 180px; overflow: hidden; margin-bottom: 20px; opacity: 0.8; }
+        .log-line { margin: 2px 0; }
+        .error-msg { color: #ff5555; font-weight: bold; font-size: 18px; text-align: center; margin-top: 50px; font-family: 'Orbitron'; }
+        
+        /* PROGRESS BAR */
+        .progress-box { display: none; }
+        .progress-text { margin-bottom: 8px; color: #fff; }
+        .bar-bg { width: 100%; height: 15px; background: #222; border-radius: 5px; overflow: hidden; border: 1px solid #444; }
+        .bar-fill { width: 0%; height: 100%; background: #00ff88; box-shadow: 0 0 10px #00ff88; transition: width 0.1s linear; }
+        
+        /* KẾT QUẢ KEY */
+        .final-result { display: none; text-align: center; margin-top: 20px; animation: popUp 0.5s; }
+        .key-text { font-size: 26px; font-weight: bold; color: #fff; background: #111; border: 1px dashed #00ff88; padding: 15px; border-radius: 10px; margin: 15px 0; letter-spacing: 2px; }
+        .btn-copy { background: #00ff88; color: #000; border: none; padding: 12px 30px; font-weight: bold; border-radius: 8px; cursor: pointer; font-family: 'Orbitron'; transition: 0.3s; }
+        .btn-copy:hover { background: #fff; box-shadow: 0 0 15px rgba(0,255,136,0.5); }
+        .btn-back { display: block; text-align: center; color: #888; text-decoration: none; margin-top: 20px; font-size: 12px; }
+
+        @keyframes popUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
-    <div id="validBox" class="box">
-        <h2 id="title" style="font-family:'Orbitron'">KEY SUCCESS</h2>
-        <div id="keyTxt" class="key-code">...</div>
-        <p style="font-size:12px; color:#888">Hết hạn sau: <span id="time" style="color:#fff">--:--</span></p>
-        <button id="btn" class="btn-copy" onclick="copy()">COPY</button>
+
+    <div class="overlay"></div>
+
+    <div class="terminal-container">
+        <div class="terminal-header">
+            <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
+            <div class="term-title">root@quocdat-sec:~/system/auth</div>
+        </div>
+        
+        <div class="terminal-body">
+            <div id="errorBox" class="error-msg" style="display:none;">
+                <i class="fas fa-exclamation-triangle" style="font-size:40px; margin-bottom:15px;"></i><br>
+                <span id="errText">TỪ CHỐI TRUY CẬP</span>
+                <a href="shop.html" class="btn-back" style="color:#ff5555; margin-top:30px; border:1px solid #ff5555; padding:10px; border-radius:5px;">← QUAY LẠI CỬA HÀNG</a>
+            </div>
+
+            <div id="workingBox">
+                <div class="log-area" id="logArea">
+                    <div class="log-line">> Initiating secure connection...</div>
+                    <div class="log-line">> Validating Link4M token... OK</div>
+                </div>
+
+                <div class="progress-box" id="pBox">
+                    <div class="progress-text">Injecting 100 Proxy Nodes: <span id="pNum">0</span>%</div>
+                    <div class="bar-bg"><div class="bar-fill" id="pBar"></div></div>
+                </div>
+
+                <div class="final-result" id="resBox">
+                    <div style="color:#fff;">HỆ THỐNG ĐÃ TẠO KEY THÀNH CÔNG</div>
+                    <div class="key-text" id="finalKey">...</div>
+                    <button class="btn-copy" onclick="copyKey()"><i class="fas fa-copy"></i> SAO CHÉP MÃ</button>
+                    <a href="shop.html" class="btn-back">← Trở về Kho File VIP để nhập Key</a>
+                </div>
+            </div>
+        </div>
     </div>
-    <div id="errBox" style="display:none; color:#ff5555; text-align:center;">Link Lỗi hoặc Hết Hạn!<br><a href="index.html" style="color:#fff">Làm lại</a></div>
 
     <script>
-        const SECRET = "QUOC_DAT_SECRET_2026";
-        const p = new URLSearchParams(window.location.search);
-        const type = p.get('ktype') || 'tool';
-        
-        // Anti-Share Check
-        const t = p.get('t'), e = p.get('e'), tLoc = localStorage.getItem('secure_token');
-        if(!t || !e || t !== tLoc || Date.now() > parseInt(e)) {
-            document.getElementById('errBox').style.display = 'block';
-        } else {
-            const box = document.getElementById('validBox');
-            box.style.display = 'block';
-            if(type === 'down') {
-                box.className = 'box style-down';
-                document.getElementById('title').innerText = "DOWNLOAD KEY";
-            } else {
-                box.className = 'box style-tool';
-                document.getElementById('title').innerText = "TOOL KEY";
+        // 1. KIỂM TRA ĐIỀU KIỆN ANTI-SHARE NGAY LÚC MỞ WEB
+        document.addEventListener("DOMContentLoaded", function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const uTool = urlParams.get('tool');
+            const uToken = urlParams.get('token');
+            const uTime = parseInt(urlParams.get('t'));
+
+            const localToken = localStorage.getItem('anti_share_token');
+            const localTime = parseInt(localStorage.getItem('anti_share_time'));
+            const now = Math.floor(Date.now() / 1000);
+
+            // A. Vào thẳng không qua rút gọn link
+            if(!uTool || !uToken || !uTime) {
+                return showError("CẤM TRUY CẬP! BẠN CHƯA VƯỢT LINK.");
             }
-            update(); setInterval(update, 1000);
+
+            // B. Mã Vân Tay không khớp (Khách share link cho người khác)
+            if(uToken !== localToken) {
+                return showError("PHÁT HIỆN SHARE LINK! MÃ XÁC NHẬN KHÔNG KHỚP VỚI THIẾT BỊ NÀY.");
+            }
+
+            // C. Quá hạn 15 phút (900 giây)
+            if(now - uTime > 900) {
+                return showError("LINK RÚT GỌN NÀY ĐÀ HẾT HẠN! VUI LÒNG TẠO LẠI.");
+            }
+
+            // ĐÚNG LUẬT -> XÓA TOKEN Ở BỘ NHỚ (ĐỂ KHÔNG DÙNG LẠI ĐƯỢC) VÀ CHẠY HACKER ANIMATION
+            localStorage.removeItem('anti_share_token');
+            startHackerAnimation(uTool);
+        });
+
+        function showError(msg) {
+            document.getElementById('workingBox').style.display = 'none';
+            document.getElementById('errorBox').style.display = 'block';
+            document.getElementById('errText').innerText = msg;
         }
 
-        function update() {
-            const now = Math.floor(Date.now()/1000);
-            const step = Math.floor(now/900); // 15 phút
-            const hash = CryptoJS.MD5(SECRET + step).toString();
+        // 2. HIỆU ỨNG TERMINAL CHẠY 100 PROXY
+        function startHackerAnimation(toolId) {
+            const logArea = document.getElementById('logArea');
+            document.getElementById('pBox').style.display = 'block';
+            const pBar = document.getElementById('pBar');
+            const pNum = document.getElementById('pNum');
             
-            // Logic tạo key
-            if(type === 'down') document.getElementById('keyTxt').innerText = "quocdat_" + hash.substring(0,12);
-            else document.getElementById('keyTxt').innerText = "dat_" + (parseInt(hash.substring(0,8),16)%10000).toString().padStart(4,'0');
-            
-            const left = 900 - (now % 900);
-            document.getElementById('time').innerText = `${Math.floor(left/60)}:${(left%60).toString().padStart(2,'0')}`;
+            const countries = ['US', 'UK', 'VN', 'JP', 'RU', 'DE', 'FR', 'BR', 'CA'];
+            let progress = 0;
+
+            let interval = setInterval(() => {
+                progress += Math.floor(Math.random() * 3) + 1; // Chạy random 1-3% mỗi nhịp
+                if(progress > 100) progress = 100;
+                
+                pBar.style.width = progress + '%';
+                pNum.innerText = progress;
+
+                // In dòng log ảo
+                let ip = Math.floor(Math.random()*255) + "." + Math.floor(Math.random()*255) + ".x.x";
+                let ctry = countries[Math.floor(Math.random() * countries.length)];
+                logArea.innerHTML += `<div class="log-line">> Routing via Proxy ${ip} [${ctry}]... Success</div>`;
+                logArea.scrollTop = logArea.scrollHeight; // Tự cuộn xuống
+
+                if(progress === 100) {
+                    clearInterval(interval);
+                    logArea.innerHTML += `<div class="log-line" style="color:#fff">> All nodes connected. Generating MD5 Decryption Key...</div>`;
+                    logArea.scrollTop = logArea.scrollHeight;
+                    
+                    // CHỜ 1 GIÂY RỒI HIỆN KEY
+                    setTimeout(() => {
+                        showFinalKey(toolId);
+                    }, 1000);
+                }
+            }, 50); // Tốc độ chạy (50ms)
         }
-        function copy() { navigator.clipboard.writeText(document.getElementById('keyTxt').innerText); alert("Copied!"); }
+
+        // 3. THUẬT TOÁN TẠO KEY (ĐỒNG BỘ 100% VỚI SHOP.HTML)
+        function showFinalKey(toolId) {
+            let now = Math.floor(Date.now() / 1000);
+            let timeStep = Math.floor(now / 900); // Đổi sau mỗi 15p
+            
+            let hash = CryptoJS.MD5("QUOC_DAT_SECRET_2026" + timeStep + toolId).toString();
+            let finalKey = "quocdat_" + hash.substring(0, 10);
+
+            document.getElementById('logArea').style.display = 'none';
+            document.getElementById('pBox').style.display = 'none';
+            
+            document.getElementById('finalKey').innerText = finalKey;
+            document.getElementById('resBox').style.display = 'block';
+        }
+
+        function copyKey() {
+            navigator.clipboard.writeText(document.getElementById('finalKey').innerText).then(() => {
+                alert("✅ Đã chép mã thành công!");
+            });
+        }
     </script>
 </body>
 </html>
