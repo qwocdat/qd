@@ -6,11 +6,10 @@
     <title>QUOCDAT SEC | Hệ Thống Tài Nguyên MMO VIP</title>
     
     <script>
-        // KIỂM TRA ĐĂNG NHẬP NGAY LẬP TỨC
         var currentUser = localStorage.getItem('vip_username');
         if(!currentUser || currentUser.trim() === "") { window.location.href = "login.html"; }
 
-        // CÁC HÀM ĐIỀU KHIỂN BẤT TỬ (ĐẶT Ở ĐẦU TRANG)
+        // HÀM ĐIỀU KHIỂN CƠ BẢN (ĐẶT ĐẦU TRANG ĐỂ KHÔNG BỊ LIỆT)
         window.openNav = function() { document.getElementById('mobileNav').style.right = '0px'; }
         window.closeNav = function() { document.getElementById('mobileNav').style.right = '-100%'; }
         window.logout = function() { localStorage.removeItem('vip_username'); window.location.href = "login.html"; }
@@ -18,7 +17,6 @@
         window.closeModal = function(id) { document.getElementById(id).style.display = 'none'; }
         window.closeOutside = function(event, id) { if(event.target.id === id) window.closeModal(id); }
         window.goToPage = function(url) {
-            window.closeNav();
             document.body.style.opacity = '0';
             setTimeout(() => { window.location.href = url; }, 300);
         }
@@ -32,68 +30,80 @@
     <style>
         :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg) url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop') center/cover no-repeat fixed; color: #fff; overflow-x: hidden; padding-top: 70px; padding-bottom: 80px; transition: opacity 0.4s; }
+        body { background: var(--bg) url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop') center/cover no-repeat fixed; color: #fff; overflow-x: hidden; padding-top: 70px; padding-bottom: 80px; }
         .overlay-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,10,15,0.85); z-index: -1; }
         
-        /* MÀN HÌNH CHỜ (CỐ ĐỊNH 3 GIÂY) */
-        #preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050508; z-index: 9999999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        /* ================= MÀN HÌNH CHỜ (3 GIÂY) ================= */
+        #preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050508; z-index: 9999999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.5s; }
         .loader-box { width: 80%; max-width: 300px; text-align: center; }
         .loader-logo { font-family: 'Orbitron'; font-size: 26px; color: #fff; margin-bottom: 20px; font-weight: 900; letter-spacing: 2px; }
-        .loader-logo span { color: var(--primary); }
-        .loader-bar-bg { width: 100%; height: 8px; background: #222; border-radius: 10px; overflow: hidden; border: 1px solid #333; }
-        .loader-bar-fill { width: 0%; height: 100%; background: var(--primary); box-shadow: 0 0 15px var(--primary); }
-        .loader-text { font-family: 'Orbitron'; color: var(--primary); font-size: 16px; margin-top: 15px; font-weight: bold; }
+        .loader-bar-bg { width: 100%; height: 6px; background: #222; border-radius: 10px; overflow: hidden; border: 1px solid #333; }
+        #lFill { width: 0%; height: 100%; background: var(--primary); box-shadow: 0 0 15px var(--primary); }
+        #lTxt { font-family: 'Orbitron'; color: var(--primary); font-size: 16px; margin-top: 15px; font-weight: bold; }
+
+        /* ================= HIỆU ỨNG XUẤT HIỆN (ENTRY ANIMATION) ================= */
+        .entry-anim { opacity: 0; transform: translateY(30px); transition: 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        body.loaded .entry-anim { opacity: 1; transform: translateY(0); }
+        .delay-1 { transition-delay: 0.1s; }
+        .delay-2 { transition-delay: 0.3s; }
+        .delay-3 { transition-delay: 0.5s; }
 
         /* HEADER */
         header { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(10,10,15,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 1000; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
-        .logo { font-family: 'Orbitron'; font-size: 20px; font-weight: 900; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 8px; cursor: pointer; }
-        .logo i { color: var(--primary); }
+        .logo { font-family: 'Orbitron'; font-size: 20px; font-weight: 900; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 8px; }
         .user-wallet { background: rgba(0,255,136,0.1); border: 1px solid var(--primary); color: var(--primary); padding: 6px 15px; border-radius: 20px; font-weight: 700; font-size: 13px; font-family: 'Orbitron'; display: none; }
         .hamburger { font-size: 28px; color: #fff; cursor: pointer; padding: 5px; }
 
-        /* MENU MOBILE */
-        .mobile-nav { position: fixed; top: 0; right: -100%; width: 85%; max-width: 320px; height: 100vh; background: #0a0a0f; z-index: 3000; transition: right 0.4s ease; border-left: 1px solid var(--border); overflow-y: auto; }
-        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 30px; color: #ff5555; cursor: pointer; }
+        /* MENU MOBILE TRƯỢT */
+        .mobile-nav { position: fixed; top: 0; right: -100%; width: 85%; max-width: 320px; height: 100vh; background: #0a0a0f; z-index: 3000; transition: 0.4s; border-left: 1px solid var(--border); overflow-y: auto; }
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 30px; color: #ff5555; }
         .nav-profile { background: #15151e; padding: 40px 20px 20px; text-align: center; border-bottom: 1px solid var(--border); }
         .avatar { width: 60px; height: 60px; background: var(--primary); color: #000; font-size: 28px; font-weight: bold; display: flex; justify-content: center; align-items: center; border-radius: 50%; margin: 0 auto 10px; font-family: 'Orbitron'; border: 3px solid #fff; }
         .nav-username { font-size: 18px; font-weight: bold; color: #fff; font-family: 'Orbitron'; }
         .nav-balance-amount { font-size: 22px; color: var(--primary); font-family: monospace; font-weight: bold; margin: 10px 0; }
         .btn-profile-info { background: #222; color: #fff; border: 1px solid #444; width: 100%; padding: 10px; border-radius: 8px; font-size: 13px; cursor: pointer; }
         .nav-links { padding: 20px; }
-        .menu-link { display: flex; align-items: center; gap: 15px; color: #fff; text-decoration: none; font-size: 15px; padding: 15px; border-radius: 10px; font-weight: 600; margin-bottom: 5px; cursor: pointer; }
+        .menu-link { display: flex; align-items: center; gap: 15px; color: #fff; text-decoration: none; font-size: 15px; padding: 15px; border-radius: 10px; font-weight: 600; margin-bottom: 5px; }
         .menu-link.highlight { background: rgba(30,144,255,0.1); color: #1e90ff; }
 
-        /* NỘI DUNG CHÍNH (ĐÃ FIX LỖI TÀNG HÌNH) */
-        .main-content { opacity: 1 !important; transform: none !important; }
-        .hero { min-height: 80vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 40px 20px; }
-        .hero h1 { font-size: 38px; font-family: 'Orbitron'; font-weight: 900; color: #fff; text-transform: uppercase; margin-bottom: 20px; }
+        /* NỘI DUNG */
+        .hero { min-height: 70vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 40px 20px; }
+        .hero h1 { font-size: 36px; font-family: 'Orbitron'; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; }
         .hero h1 span { color: var(--primary); }
-        .hero p { color: #aaa; margin-bottom: 30px; line-height: 1.6; }
-        .btn-lg { padding: 15px 30px; border-radius: 12px; font-weight: bold; font-family: 'Orbitron'; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; transition: 0.3s; }
+        .hero p { color: #aaa; font-size: 14px; line-height: 1.6; margin-bottom: 25px; max-width: 500px; }
+        .btn-lg { padding: 14px 28px; border-radius: 12px; font-weight: bold; font-family: 'Orbitron'; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
         .btn-main { background: var(--primary); color: #000; box-shadow: 0 0 15px rgba(0,255,136,0.3); }
         .btn-sub { background: #111; color: #fff; border: 1px solid #444; margin-left: 10px; }
 
+        .section { padding: 40px 20px; max-width: 1000px; margin: 0 auto; }
+        .sec-title { text-align: center; font-family: 'Orbitron'; font-size: 22px; margin-bottom: 30px; }
+        .grid-features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+        .feat-card { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid var(--border); }
+        .feat-icon { font-size: 25px; color: var(--primary); margin-bottom: 10px; }
+
         /* KỸ NĂNG */
-        .skills-container { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 30px 20px; margin: 20px; }
+        .skills-container { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 25px; margin: 0 20px; }
         .skill-item { margin-bottom: 15px; }
         .progress-bg { width: 100%; height: 8px; background: #1a1a24; border-radius: 10px; overflow: hidden; border: 1px solid #333; margin-top: 5px; }
         .progress-fill { height: 100%; background: linear-gradient(90deg, #00b8ff, #00ff88); border-radius: 10px; width: 0; transition: width 2s ease-in-out; }
+
+        /* FOOTER */
+        footer { background: #050508; border-top: 1px solid var(--border); padding: 40px 20px; margin-top: 50px; text-align: left; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; }
+        .footer-title { font-family: 'Orbitron'; color: #fff; margin-bottom: 15px; font-size: 16px; }
+        .footer-contact li { list-style: none; font-size: 13px; color: #888; margin-bottom: 8px; }
+        .business-cert { display: inline-flex; align-items: center; gap: 10px; padding: 10px; background: rgba(0,255,136,0.05); border: 1px dashed var(--primary); border-radius: 8px; margin-top: 10px; }
+
+        /* MODAL */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 99999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .ios-modal { width: 310px; background: #1c1c1e; border-radius: 15px; padding: 25px; text-align: center; border: 1px solid #333; box-shadow: 0 10px 40px #000; }
+        .ios-list { text-align: left; background: #000; padding: 15px; border-radius: 10px; margin: 15px 0; font-size: 14px; color: #aaa; }
+        .ios-list strong { color: var(--primary); float: right; }
 
         /* FLOAT MENU */
         .floating-menu { position: fixed; bottom: 20px; right: 20px; z-index: 500; display: flex; flex-direction: column; gap: 10px; }
         .float-btn { width: 45px; height: 45px; border-radius: 50%; background: #111; border: 1px solid #333; color: #fff !important; display: flex; justify-content: center; align-items: center; font-size: 18px; text-decoration: none; }
         .float-btn.naptien { background: #1e90ff; border: none; }
-
-        /* FOOTER */
-        footer { background: #050508; border-top: 1px solid var(--border); padding: 40px 20px; margin-top: 50px; text-align: center; }
-        .footer-title { font-family: 'Orbitron'; color: #fff; margin-bottom: 15px; font-size: 18px; }
-        .footer-desc { color: #888; font-size: 13px; line-height: 1.6; margin-bottom: 20px; }
-        
-        /* MODAL */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 99999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .ios-modal { width: 310px; background: #1c1c1e; border-radius: 15px; padding: 25px; text-align: center; border: 1px solid #333; }
-        .ios-list { text-align: left; background: #000; padding: 15px; border-radius: 10px; margin: 15px 0; font-size: 14px; color: #aaa; }
-        .ios-list strong { color: var(--primary); float: right; }
 
         @media (min-width: 992px) { .user-wallet { display: block; } .hamburger { display: none; } }
     </style>
@@ -102,14 +112,16 @@
 
     <div id="preloader">
         <div class="loader-box">
-            <div class="loader-logo">QUOCDAT<span>.SEC</span></div>
-            <div class="loader-bar-bg"><div class="loader-bar-fill" id="lFill" style="width:0%;"></div></div>
-            <div class="loader-text" id="lTxt">0%</div>
+            <div class="loader-logo">QUOCDAT<span style="color:#00ff88;">.SEC</span></div>
+            <div class="loader-bar-bg"><div id="lFill"></div></div>
+            <div id="lTxt">0%</div>
         </div>
     </div>
 
+    <div class="overlay-bg"></div>
+
     <header>
-        <div class="logo" onclick="window.goToPage('index.html')"><i class="fas fa-shield-alt"></i> QUOCDAT.SEC</div>
+        <div class="logo" onclick="window.goToPage('index.html')"><i class="fas fa-shield-alt" style="color:var(--primary)"></i> QUOCDAT.SEC</div>
         <div class="header-right">
             <div class="user-wallet" id="pcBalance">Đang tải...</div>
             <i class="fas fa-bars hamburger" onclick="window.openNav()"></i>
@@ -126,7 +138,7 @@
         <i class="fas fa-times close-btn" onclick="window.closeNav()"></i>
         <div class="nav-profile">
             <div class="avatar" id="navAva">?</div>
-            <div class="nav-username" id="navUser">Đang tải...</div>
+            <div class="nav-username" id="navUser">User</div>
             <div class="nav-balance-amount" id="navBal">0 đ</div>
             <button class="btn-profile-info" onclick="window.openModal('infoModal')">Chi tiết tài khoản</button>
         </div>
@@ -141,96 +153,141 @@
 
     <div class="modal-overlay" id="infoModal" onclick="window.closeOutside(event, 'infoModal')">
         <div class="ios-modal">
-            <div class="ios-title" style="color:#fff; font-weight:bold;">Thông Tin Tài Khoản</div>
+            <div class="ios-title">Tài Khoản Của Bạn</div>
             <div class="ios-list">
-                <div>👤 Tài khoản: <strong id="mUser">...</strong></div>
+                <div>👤 Tên User: <strong id="mUser">Đang tải...</strong></div>
                 <div>💰 Số dư: <strong id="mBal">0 đ</strong></div>
                 <div>💎 Cấp độ: <strong>Thành Viên VIP</strong></div>
             </div>
-            <button style="background:var(--primary); color:#000; border:none; padding:12px 30px; border-radius:10px; font-weight:bold; cursor:pointer;" onclick="window.closeModal('infoModal')">ĐÓNG</button>
+            <button class="btn-profile-info" style="background:var(--primary); color:#000;" onclick="window.closeModal('infoModal')">ĐÓNG</button>
         </div>
     </div>
 
     <div class="modal-overlay" id="historyModal" onclick="window.closeOutside(event, 'historyModal')">
         <div class="ios-modal">
-            <div class="ios-title" style="color:#ffb86c; font-weight:bold;">Lịch Sử Mua Hàng</div>
-            <div class="ios-list" style="text-align:center;">
+            <div class="ios-title" style="color:#ffb86c;">Lịch Sử Mua Hàng</div>
+            <div class="ios-list" style="text-align:center; padding:30px 10px;">
                 <i class="fas fa-box-open" style="font-size:30px; color:#444; margin-bottom:10px;"></i><br>
                 Chưa có giao dịch nào được ghi nhận.
             </div>
-            <button style="background:#333; color:#fff; border:none; padding:12px 30px; border-radius:10px; font-weight:bold; cursor:pointer;" onclick="window.closeModal('historyModal')">QUAY LẠI</button>
+            <button class="btn-profile-info" onclick="window.closeModal('historyModal')">QUAY LẠI</button>
         </div>
     </div>
 
-    <div class="main-content">
-        <section class="hero">
-            <h1>TỔNG KHO TÀI NGUYÊN<br><span>MMO & SCRIPT VIP</span></h1>
-            <p>Nền tảng cung cấp mã nguồn web, Script Game, Tool Auto uy tín hàng đầu. Giao dịch tự động 24/7.</p>
+    <div id="mainWrap">
+        <section class="hero entry-anim delay-1">
+            <h1>TỔNG KHO TÀI NGUYÊN<br><span>MMO & SCRIPT ĐA NỀN TẢNG</span></h1>
+            <p>Cung cấp mã nguồn Web, Script Game, Tool Auto uy tín, chất lượng nhất dành cho cộng đồng. Giao dịch tự động 24/7.</p>
             <div>
-                <a onclick="window.goToPage('shop.html')" class="btn-lg btn-main" style="cursor:pointer;">CỬA HÀNG TOOL</a>
-                <a onclick="window.goToPage('getkey.html')" class="btn-lg btn-sub" style="cursor:pointer;">LẤY KEY FREE</a>
+                <a onclick="window.goToPage('shop.html')" class="btn-lg btn-main" style="cursor:pointer;"><i class="fas fa-shopping-cart"></i> CỬA HÀNG VIP</a>
+                <a onclick="window.goToPage('getkey.html')" class="btn-lg btn-sub" style="cursor:pointer;"><i class="fas fa-key"></i> LẤY KEY FREE</a>
             </div>
         </section>
 
-        <div class="skills-container">
-            <h2 style="font-family:'Orbitron'; font-size:18px; text-align:center; margin-bottom:20px;">KỸ NĂNG CHUYÊN MÔN</h2>
-            <div class="skill-item">
-                <div style="display:flex; justify-content:space-between; font-size:12px;"><span>HTML/CSS</span><span>77%</span></div>
-                <div class="progress-bg"><div class="progress-fill" id="s1" style="width:0%;"></div></div>
+        <section class="section entry-anim delay-2">
+            <h2 class="sec-title">DỊCH VỤ <span>CHUYÊN NGHIỆP</span></h2>
+            <div class="grid-features">
+                <div class="feat-card"><i class="fas fa-robot feat-icon"></i><div style="font-weight:bold; margin-bottom:5px;">Tool Auto MMO</div><div style="font-size:12px; color:#888;">Tự động hóa mọi thao tác trên Web và Giả lập.</div></div>
+                <div class="feat-card"><i class="fas fa-code feat-icon"></i><div style="font-weight:bold; margin-bottom:5px;">Source Web VIP</div><div style="font-size:12px; color:#888;">Mã nguồn web bán acc, nạp thẻ chuyên nghiệp.</div></div>
+                <div class="feat-card"><i class="fas fa-shield-alt feat-icon"></i><div style="font-weight:bold; margin-bottom:5px;">Mã Hóa Script</div><div style="font-size:12px; color:#888;">Bảo mật tuyệt đối, chống dịch ngược mã nguồn.</div></div>
+                <div class="feat-card"><i class="fas fa-bolt feat-icon"></i><div style="font-weight:bold; margin-bottom:5px;">Giao Dịch Tự Động</div><div style="font-size:12px; color:#888;">Thanh toán và nhận hàng chỉ trong vài giây.</div></div>
             </div>
-            <div class="skill-item">
-                <div style="display:flex; justify-content:space-between; font-size:12px;"><span>JavaScript</span><span>50%</span></div>
-                <div class="progress-bg"><div class="progress-fill" id="s2" style="width:0%;"></div></div>
-            </div>
-            <div class="skill-item">
-                <div style="display:flex; justify-content:space-between; font-size:12px;"><span>Python</span><span>36%</span></div>
-                <div class="progress-bg"><div class="progress-fill" id="s3" style="width:0%;"></div></div>
-            </div>
-        </div>
+        </section>
 
-        <footer>
-            <div class="footer-title">QUOCDAT.SEC SYSTEM</div>
-            <p class="footer-desc">Đơn vị cung cấp giải pháp phần mềm tự động hóa hàng đầu dành cho cộng đồng MMO Việt Nam.</p>
-            <div style="font-size:11px; color:#555;">© 2026 QuocDat SEC. All rights reserved.</div>
+        <section class="section entry-anim delay-3">
+            <h2 class="sec-title">KỸ NĂNG <span>CODE</span></h2>
+            <div class="skills-container">
+                <div class="skill-item">
+                    <div style="display:flex; justify-content:space-between; font-size:12px;"><span>HTML/CSS/UI</span><span>77%</span></div>
+                    <div class="progress-bg"><div class="progress-fill" id="s1"></div></div>
+                </div>
+                <div class="skill-item">
+                    <div style="display:flex; justify-content:space-between; font-size:12px;"><span>JavaScript / Node.js</span><span>50%</span></div>
+                    <div class="progress-bg"><div class="progress-fill" id="s2"></div></div>
+                </div>
+                <div class="skill-item">
+                    <div style="display:flex; justify-content:space-between; font-size:12px;"><span>PHP / Laravel</span><span>40%</span></div>
+                    <div class="progress-bg"><div class="progress-fill" id="s3"></div></div>
+                </div>
+                <div class="skill-item">
+                    <div style="display:flex; justify-content:space-between; font-size:12px;"><span>Python / Auto Tool</span><span>36%</span></div>
+                    <div class="progress-bg"><div class="progress-fill" id="s4"></div></div>
+                </div>
+                <div class="skill-item">
+                    <div style="display:flex; justify-content:space-between; font-size:12px;"><span>Lua / Script Game</span><span>20%</span></div>
+                    <div class="progress-bg"><div class="progress-fill" id="s5"></div></div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="entry-anim delay-3">
+            <div class="footer-grid">
+                <div>
+                    <div class="footer-title">QUOCDAT.SEC</div>
+                    <p style="font-size:13px; color:#888;">Đơn vị cung cấp giải pháp phần mềm hàng đầu Việt Nam.</p>
+                    <div class="business-cert">
+                        <i class="fas fa-certificate" style="color:var(--primary)"></i>
+                        <div style="font-size:11px;">
+                            <strong style="display:block;">Đăng ký doanh nghiệp</strong>
+                            <span>Số: 0316829xxx - Bộ KH&ĐT</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="footer-title">Liên Hệ</div>
+                    <ul class="footer-contact">
+                        <li><i class="fas fa-map-marker-alt"></i> Innovation Bldg, Q1, TP. HCM</li>
+                        <li><i class="fas fa-envelope"></i> contact@quocdatsec.vn</li>
+                        <li><i class="fab fa-telegram"></i> Telegram: @quocdatsec</li>
+                    </ul>
+                </div>
+            </div>
+            <div style="text-align:center; margin-top:30px; font-size:11px; color:#444;">© 2026 QuocDat SEC System. All rights reserved.</div>
         </footer>
     </div>
 
     <script>
-        // 1. CHẠY THANH LOAD TRƯỚC
-        let p = 0;
-        let t = setInterval(() => {
-            p += 2; if(p > 100) p = 100;
-            document.getElementById('lFill').style.width = p + '%';
-            document.getElementById('lTxt').innerText = p + '%';
-            if(p >= 100) {
-                clearInterval(t);
-                document.getElementById('preloader').style.display = 'none';
-                // Chạy thanh skill
-                document.getElementById('s1').style.width = '77%';
-                document.getElementById('s2').style.width = '50%';
-                document.getElementById('s3').style.width = '36%';
+        // 1. CHẠY LOADER (CỐ ĐỊNH 3 GIÂY)
+        (function() {
+            let p = 0;
+            let f = document.getElementById('lFill');
+            let t = document.getElementById('lTxt');
+            let s = document.getElementById('preloader');
+
+            let timer = setInterval(() => {
+                p += 2; if(p > 100) p = 100;
+                if(f) f.style.width = p + '%';
+                if(t) t.innerText = p + '%';
+                
+                if(p >= 100) {
+                    clearInterval(timer);
+                    setTimeout(() => {
+                        s.style.opacity = '0';
+                        setTimeout(() => { 
+                            s.style.display = 'none';
+                            // Kích hoạt hiệu ứng Entry Animations
+                            document.body.classList.add('loaded');
+                            // Chạy thanh skill
+                            document.getElementById('s1').style.width = '77%';
+                            document.getElementById('s2').style.width = '50%';
+                            document.getElementById('s3').style.width = '40%';
+                            document.getElementById('s4').style.width = '36%';
+                            document.getElementById('s5').style.width = '20%';
+                        }, 400);
+                    }, 200);
+                }
+            }, 30);
+        })();
+
+        // 2. ƯU TIÊN GÁN TÊN NGƯỜI DÙNG TRƯỚC KHI LOAD XONG
+        try {
+            if(currentUser) {
+                document.getElementById('navUser').innerText = currentUser;
+                document.getElementById('mUser').innerText = currentUser;
+                document.getElementById('navAva').innerText = currentUser.charAt(0).toUpperCase();
             }
-        }, 30);
-
-        // 2. GÁN TÊN USER (NGAY LẬP TỨC)
-        try {
-            document.getElementById('navUser').innerText = currentUser;
-            document.getElementById('mUser').innerText = currentUser;
-            document.getElementById('navAva').innerText = currentUser.charAt(0).toUpperCase();
         } catch(e) {}
 
-        // 3. KẾT NỐI FIREBASE (ĐẢM BẢO KHÔNG CHẶN LOAD)
+        // 3. ĐỒNG BỘ FIREBASE (CHẠY NGẦM)
         try {
-            const cfg = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
-            if (!firebase.apps.length) firebase.initializeApp(cfg);
-            firebase.database().ref('users/' + currentUser).on('value', (s) => {
-                let b = s.exists() ? (s.val().balance || 0) : 0;
-                let f = b.toLocaleString('vi-VN') + " đ";
-                document.getElementById('navBal').innerText = f;
-                document.getElementById('pcBalance').innerText = f;
-                document.getElementById('mBal').innerText = f;
-            });
-        } catch(e) {}
-    </script>
-</body>
-</html>
+            const config = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8L
