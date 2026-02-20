@@ -12,7 +12,6 @@
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -22,14 +21,14 @@
         body { background: var(--bg) url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop') center/cover no-repeat fixed; color: #fff; overflow-x: hidden; padding-top: 70px; padding-bottom: 80px; }
         .overlay-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,10,15,0.85); z-index: -1; }
         
-        /* ================= MÀN HÌNH CHỜ ÉP BUỘC 3 GIÂY ================= */
-        .preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050508; z-index: 9999999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease, visibility 0.5s; }
-        .preloader.loaded { opacity: 0; visibility: hidden; }
+        /* ================= MÀN HÌNH CHỜ ƯU TIÊN CAO NHẤT ================= */
+        .preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050508; z-index: 9999999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.4s ease, visibility 0.4s; }
+        .preloader.loaded { opacity: 0; visibility: hidden; pointer-events: none; }
         .loader-box { width: 80%; max-width: 300px; text-align: center; }
         .loader-logo { font-family: 'Orbitron'; font-size: 26px; color: #fff; margin-bottom: 20px; font-weight: 900; letter-spacing: 2px; }
         .loader-logo span { color: var(--primary); }
         .loader-bar-bg { width: 100%; height: 8px; background: #222; border-radius: 10px; overflow: hidden; border: 1px solid #333; }
-        .loader-bar-fill { width: 0%; height: 100%; background: var(--primary); box-shadow: 0 0 15px var(--primary); transition: width 0.03s linear; }
+        .loader-bar-fill { width: 0%; height: 100%; background: var(--primary); box-shadow: 0 0 15px var(--primary); transition: width 0.05s linear; }
         .loader-text { font-family: 'Orbitron'; color: var(--primary); font-size: 16px; margin-top: 15px; font-weight: bold; }
         .loader-desc { font-family: monospace; color: #888; font-size: 10px; margin-top: 5px; }
 
@@ -145,6 +144,38 @@
         </div>
     </div>
 
+    <script>
+        (function runLoader() {
+            let progress = 0;
+            let barFill = document.getElementById('loaderFill');
+            let loaderText = document.getElementById('loaderText');
+            let preloader = document.getElementById('preloader');
+
+            // Chạy 1.5 giây để đạt 100%
+            let loadingInterval = setInterval(() => {
+                progress += 2; 
+                if(progress > 100) progress = 100;
+                
+                if(barFill) barFill.style.width = progress + '%';
+                if(loaderText) loaderText.innerText = progress + '%';
+
+                if (progress >= 100) {
+                    clearInterval(loadingInterval);
+                    // Dừng 0.2s khi đạt 100 rồi biến mất
+                    setTimeout(() => {
+                        if(preloader) preloader.classList.add('loaded');
+                        
+                        // Kích hoạt thanh kỹ năng chạy ra
+                        setTimeout(() => {
+                            document.querySelectorAll('.progress-fill').forEach(bar => {
+                                bar.style.width = bar.getAttribute('data-width');
+                            });
+                        }, 300);
+                    }, 200);
+                }
+            }, 30);
+        })();
+    </script>
     <div class="overlay-bg"></div>
 
     <script>
@@ -155,7 +186,6 @@
         window.closeModal = function(id) { document.getElementById(id).style.display = 'none'; }
         window.closeOutside = function(event, id) { if(event.target.id === id) window.closeModal(id); }
         
-        // Hiệu ứng mờ khi chuyển trang
         window.navigateWithAnimation = function(url) {
             window.closeNav();
             document.body.style.opacity = '0';
@@ -178,6 +208,12 @@
             <i class="fas fa-bars hamburger" onclick="window.openNav()"></i>
         </div>
     </header>
+
+    <div class="floating-menu">
+        <a href="javascript:void(0)" onclick="window.navigateWithAnimation('naptien.html')" class="float-btn naptien"><i class="fas fa-wallet"></i></a>
+        <a href="javascript:void(0)" onclick="window.navigateWithAnimation('getkey.html')" class="float-btn"><i class="fas fa-key"></i></a>
+        <a href="javascript:void(0)" onclick="window.navigateWithAnimation('shop.html')" class="float-btn"><i class="fas fa-store"></i></a>
+    </div>
 
     <div class="mobile-nav" id="mobileNav">
         <i class="fas fa-times close-btn" onclick="window.closeNav()"></i>
@@ -230,32 +266,4 @@
             <div class="ios-content">
                 <div class="ios-title" style="color:#ffb86c; margin-bottom:15px;"><i class="fas fa-file-invoice-dollar"></i> Lịch Sử Mua Hàng</div>
                 <div class="ios-list" style="text-align: center; padding: 30px 10px;">
-                    <i class="fas fa-box-open" style="font-size:35px; color:#444; margin-bottom:10px;"></i>
-                    <div style="color:#888;">Chưa có giao dịch nào được ghi nhận.</div>
-                    <div style="font-size:11px; margin-top:10px; color:#555;">Hệ thống lưu lịch sử vừa được kích hoạt cho V8.0</div>
-                </div>
-            </div>
-            <div class="ios-actions"><button class="ios-btn" onclick="window.closeModal('historyModal')">Đóng Lịch Sử</button></div>
-        </div>
-    </div>
-
-    <section class="hero reveal">
-        <div class="hero-badge"><i class="fas fa-rocket"></i> PHIÊN BẢN HỆ THỐNG V8.0</div>
-        <h1>TỔNG KHO TÀI NGUYÊN<br><span>MMO & SCRIPT ĐA NỀN TẢNG</span></h1>
-        <p>Nền tảng tự động cung cấp mã nguồn web, Script Game, Tool Auto và các giải pháp phần mềm tối ưu nhất cho cộng đồng MMO. Giao dịch tự động 24/7.</p>
-        
-        <div class="btn-group">
-            <a href="javascript:void(0)" onclick="window.navigateWithAnimation('shop.html')" class="btn-lg btn-main"><i class="fas fa-shopping-cart"></i> ĐẾN CỬA HÀNG TOOL</a>
-            <a href="javascript:void(0)" onclick="window.navigateWithAnimation('getkey.html')" class="btn-lg btn-sub"><i class="fas fa-unlock"></i> LẤY KEY MỞ KHÓA</a>
-        </div>
-
-        <div class="stats-box">
-            <div class="stat-item"><div class="stat-num">30+</div><div class="stat-label">Sản Phẩm</div></div>
-            <div class="stat-item"><div class="stat-num">15K</div><div class="stat-label">Người Dùng</div></div>
-            <div class="stat-item"><div class="stat-num">24/7</div><div class="stat-label">Tự Động</div></div>
-        </div>
-    </section>
-
-    <section class="section reveal">
-        <h2 class="sec-title">DỊCH VỤ <span>HÀNG ĐẦU</span></h2>
-        
+          
