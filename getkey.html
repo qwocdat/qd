@@ -45,7 +45,7 @@
         .btn-generate { width: 100%; padding: 16px; background: var(--primary); color: #000; font-weight: bold; font-size: 15px; border: none; border-radius: 12px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; font-family: 'Orbitron'; transition: 0.3s; margin-top: 10px; }
         .btn-generate:hover { background: #fff; box-shadow: 0 5px 15px rgba(0,255,136,0.3); }
 
-        /* HACKER TERMINAL - 200 ASIAN PROXIES */
+        /* HACKER TERMINAL - 200 PROXY CHÂU Á */
         .terminal-box { display: none; text-align: left; background: #000; border: 1px solid #333; border-radius: 10px; padding: 20px; margin-top: 10px; box-shadow: inset 0 0 20px rgba(0,255,136,0.1); }
         .progress-container { width: 100%; background: #222; border-radius: 5px; height: 12px; margin-bottom: 15px; overflow: hidden; border: 1px solid #444; }
         .progress-bar { width: 0%; height: 100%; background: var(--primary); transition: width 0.05s linear; box-shadow: 0 0 10px var(--primary); }
@@ -168,7 +168,7 @@
             closeSheet();
         }
 
-        // ================= XỬ LÝ: CHẠY 200 PROXY & BẮT LINK CHUẨN =================
+        // ================= XỬ LÝ CHÍNH: CHẠY THANH 200 PROXY ĐỒNG BỘ =================
         function startProcess() {
             if(!selectedToolId) { 
                 alert("⚠️ Bạn chưa chọn Tool nào!"); 
@@ -183,8 +183,8 @@
             const pPercent = document.getElementById('pPercent');
             const pLog = document.getElementById('pLog');
             
-            // DANH SÁCH MÃ QUỐC GIA CHÂU Á
-            const asianCountries = ['VN', 'SG', 'JP', 'KR', 'TH', 'MY', 'ID', 'PH', 'IN', 'TW', 'HK'];
+            // DANH SÁCH MÃ QUỐC GIA CHÂU Á CHUẨN XÁC
+            const asianCountries = ['VN', 'SG', 'JP', 'KR', 'TH', 'MY', 'ID', 'PH', 'TW', 'HK'];
             
             let proxyCount = 0;
             const maxProxies = 200;
@@ -192,7 +192,7 @@
             let isApiFailed = false;
             let errorMsg = "";
 
-            // NGẦM GỌI API LẤY LINK
+            // 1. KÍCH HOẠT HÀM FETCH NGẦM NGAY LẬP TỨC
             fetchLink4MData().then(res => {
                 if(res.success) {
                     finalLink = res.url;
@@ -202,19 +202,23 @@
                 }
             });
 
-            // VÒNG LẶP CHẠY ĐỦ 200 PROXY CỰC NHANH
+            // 2. VÒNG LẶP CHẠY THANH TIẾN TRÌNH VÀ IP ẢO
             let interval = setInterval(() => {
-                proxyCount += Math.floor(Math.random() * 5) + 1; // Nhảy 1-5 proxy mỗi nhịp
+                proxyCount += Math.floor(Math.random() * 4) + 2; // Nhảy 2-5 proxy mỗi nhịp
                 if(proxyCount > maxProxies) proxyCount = maxProxies;
 
-                // Tính toán phần trăm (Chỉ cho tối đa 99% nếu API chưa về)
+                // Tính toán phần trăm
                 let progress = Math.floor((proxyCount / maxProxies) * 100);
-                if (progress > 99 && !finalLink && !isApiFailed) progress = 99;
+                
+                // NẾU API CHƯA CÓ KẾT QUẢ, KHÓA CHẶT THANH Ở MỨC 99% KHÔNG CHO LÊN 100%
+                if (progress > 99 && !finalLink && !isApiFailed) {
+                    progress = 99;
+                }
                 
                 pBar.style.width = progress + '%';
                 pPercent.innerText = progress + '%';
 
-                // In IP Châu Á
+                // Render IP Châu Á liên tục
                 if (proxyCount % 3 === 0 || proxyCount === maxProxies) {
                     let ip = "1" + Math.floor(Math.random()*9) + "." + Math.floor(Math.random()*255) + "." + Math.floor(Math.random()*255) + ".x";
                     let ctry = asianCountries[Math.floor(Math.random() * asianCountries.length)];
@@ -222,15 +226,22 @@
                     pLog.scrollTop = pLog.scrollHeight;
                 }
 
-                // KIỂM TRA ĐIỀU KIỆN CHUYỂN TRANG
+                // 3. XỬ LÝ ĐIỀU KIỆN KHI ĐẠT 99% HOẶC CÓ KẾT QUẢ
                 if(progress >= 99) {
+                    // NẾU ĐÃ CÓ LINK -> ĐÁP 100% VÀ BAY NGAY LẬP TỨC
                     if (finalLink) {
                         clearInterval(interval);
                         pBar.style.width = '100%';
                         pPercent.innerText = '100%';
-                        // CHẠM 100% LÀ BAY NGAY LẬP TỨC KHÔNG CHỜ ĐỢI
+                        
+                        pLog.innerHTML += `<div style="color:#00ff88; font-weight:bold; margin-top:5px;">> [SUCCESS] Cloudflare Bypassed!</div>`;
+                        pLog.innerHTML += `<div style="color:#fff; font-weight:bold;">> BẮT ĐẦU CHUYỂN TRANG...</div>`;
+                        pLog.scrollTop = pLog.scrollHeight;
+                        
+                        // Lệnh redirect dứt khoát không có setTimeout
                         window.location.replace(finalLink);
                     } 
+                    // NẾU LỖI (CHẠY HẾT 5 CỔNG ĐỀU CHẾT)
                     else if (isApiFailed) {
                         clearInterval(interval);
                         pBar.style.background = '#ff4757';
@@ -240,10 +251,10 @@
                         pLog.scrollTop = pLog.scrollHeight;
                     }
                 }
-            }, 30); // Tốc độ quét cực nhanh (30ms)
+            }, 40); // 40ms = Chạy rất mượt và nhanh
         }
 
-        // HÀM FETCH BẢO MẬT XUYÊN CLOUDFLARE
+        // ================= HÀM FETCH "ĐỤC THỦNG" CLOUDFLARE =================
         async function fetchLink4MData() {
             let timestamp = Math.floor(Date.now() / 1000);
             let fingerprint = CryptoJS.MD5("SECURE" + timestamp + selectedToolId).toString();
@@ -258,44 +269,63 @@
             
             let returnUrl = `${keyPageUrl}?tool=${selectedToolId}&token=${fingerprint}&t=${timestamp}`; 
             
-            // Thử cổng API chính của Link4M
-            let directApiUrl = `https://link4m.co/api?api=${LINK4M_API_KEY}&url=${encodeURIComponent(returnUrl)}`;
+            // Link API gốc của Link4M
+            let directApiUrl = `https://link4m.co/api-shorten/v2?api=${LINK4M_API_KEY}&url=${encodeURIComponent(returnUrl)}`;
 
-            // VÒNG LẶP CHỐNG CHẶN CORS (Bypass Cloudflare)
-            const proxyServers = [
-                `https://api.allorigins.win/get?url=${encodeURIComponent(directApiUrl)}`, // Ưu tiên 1 vì trả JSON bọc kín
-                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(directApiUrl)}`, // Ưu tiên 2
-                directApiUrl // Gọi trực tiếp nếu mạng khách cho phép
+            // DANH SÁCH 5 CỔNG PROXY VIP ĐỂ LÁCH CLOUDFLARE
+            const proxies = [
+                `https://corsproxy.io/?${encodeURIComponent(directApiUrl)}`,
+                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(directApiUrl)}`,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(directApiUrl)}`,
+                `https://cors-proxy.htmldriven.com/?url=${encodeURIComponent(directApiUrl)}`
             ];
 
-            for(let i = 0; i < proxyServers.length; i++) {
+            let pLog = document.getElementById('pLog');
+
+            // BƯỚC 1: THỬ GỌI TRỰC TIẾP (Phòng trường hợp mạng khách tự qua được)
+            try {
+                let res = await fetch(directApiUrl);
+                let json = await res.json();
+                if(json.shortenedUrl) return { success: true, url: json.shortenedUrl };
+            } catch(e) { 
+                // Gọi trực tiếp bị CORS chặn, bắt đầu dùng Proxy
+            }
+
+            // BƯỚC 2: QUÉT QUA TỪNG CỔNG PROXY. CỔNG NÀO SỐNG THÌ NHẶT LINK RỒI DỪNG LẠI.
+            for (let i = 0; i < proxies.length; i++) {
                 try {
-                    let res = await fetch(proxyServers[i]);
+                    let res = await fetch(proxies[i]);
                     let text = await res.text();
-                    
-                    // Xử lý gói AllOrigins
-                    if(proxyServers[i].includes('allorigins')) {
-                        let parsed = JSON.parse(text);
-                        let innerData = JSON.parse(parsed.contents);
-                        if(innerData.shortenedUrl) return { success: true, url: innerData.shortenedUrl };
-                    } 
-                    // Xử lý gói thường
-                    else {
-                        try {
-                            let data = JSON.parse(text);
-                            if (data.status === 'success' || data.shortenedUrl) {
-                                return { success: true, url: data.shortenedUrl };
-                            }
-                        } catch(e) {
-                            if(text.includes("http")) return { success: true, url: text.trim() };
+
+                    // Nếu CF trả về trang chặn (có chữ cloudflare hoặc Just a moment) -> Bỏ qua cổng này
+                    if (text.toLowerCase().includes('cloudflare') || text.toLowerCase().includes('just a moment')) {
+                        pLog.innerHTML += `<div style="color:#ffb86c">> Route ${i+1} Blocked by CF. Redirecting...</div>`;
+                        pLog.scrollTop = pLog.scrollHeight;
+                        continue; 
+                    }
+
+                    // Thử Parse JSON
+                    try {
+                        let data = JSON.parse(text);
+                        if (data.status === 'success' || data.shortenedUrl) {
+                            return { success: true, url: data.shortenedUrl };
+                        } else if (data.status === 'error') {
+                            return { success: false, message: data.message }; // Báo lỗi nếu API Key sai
+                        }
+                    } catch(jsonErr) {
+                        // Nếu Link4M trả về text link thô (không phải JSON)
+                        if (text.includes("http")) {
+                            return { success: true, url: text.trim() };
                         }
                     }
                 } catch(error) {
-                    console.log("Proxy " + i + " failed, switching...");
-                    continue; // Lỗi thì tự động nhảy sang proxy tiếp theo
+                    pLog.innerHTML += `<div style="color:#444">> Route ${i+1} timeout. Switching...</div>`;
+                    continue;
                 }
             }
-            return { success: false, message: "Hệ thống bảo mật mạng của bạn hoặc Cloudflare đang chặn kết nối API." };
+
+            // Nếu chạy hết 5 cổng mà vẫn chết
+            return { success: false, message: "Hệ thống bảo mật mạng của bạn hoặc Cloudflare đang chặn toàn bộ cổng kết nối API. Vui lòng thử dùng mạng 4G." };
         }
 
         // FIREBASE ĐỒNG BỘ
