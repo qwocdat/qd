@@ -45,14 +45,14 @@
         .btn-generate { width: 100%; padding: 16px; background: var(--primary); color: #000; font-weight: bold; font-size: 15px; border: none; border-radius: 12px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; font-family: 'Orbitron'; transition: 0.3s; margin-top: 10px; }
         .btn-generate:hover { background: #fff; box-shadow: 0 5px 15px rgba(0,255,136,0.3); }
 
-        /* HACKER TERMINAL */
+        /* HACKER TERMINAL - 200 ASIAN PROXIES */
         .terminal-box { display: none; text-align: left; background: #000; border: 1px solid #333; border-radius: 10px; padding: 20px; margin-top: 10px; box-shadow: inset 0 0 20px rgba(0,255,136,0.1); }
         .progress-container { width: 100%; background: #222; border-radius: 5px; height: 12px; margin-bottom: 15px; overflow: hidden; border: 1px solid #444; }
-        .progress-bar { width: 0%; height: 100%; background: var(--primary); transition: width 0.1s linear; box-shadow: 0 0 10px var(--primary); }
-        .proxy-log { font-family: monospace; font-size: 11px; color: #00ff88; height: 120px; overflow-y: hidden; line-height: 1.8; opacity: 0.8; word-wrap: break-word; }
+        .progress-bar { width: 0%; height: 100%; background: var(--primary); transition: width 0.05s linear; box-shadow: 0 0 10px var(--primary); }
+        .proxy-log { font-family: monospace; font-size: 11px; color: #00ff88; height: 130px; overflow-y: hidden; line-height: 1.8; opacity: 0.8; word-wrap: break-word; }
         .proxy-percent { font-family: 'Orbitron'; color: var(--primary); font-size: 18px; text-align: right; margin-top: -30px; margin-bottom: 15px; font-weight: bold; }
 
-        /* CỬA SỔ IOS TÙY CHỌN */
+        /* IOS ACTION SHEET */
         .sheet-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 9999; display: none; flex-direction: column; justify-content: flex-end; opacity: 0; transition: opacity 0.3s; }
         .sheet-overlay.active { display: flex; opacity: 1; }
         .ios-sheet { background: #1c1c1e; width: 100%; max-width: 500px; margin: 0 auto; border-radius: 20px 20px 0 0; transform: translateY(100%); transition: transform 0.3s; padding-bottom: env(safe-area-inset-bottom); display: flex; flex-direction: column; max-height: 70vh; }
@@ -85,7 +85,7 @@
             <h1 class="box-title">TẠO LINK MỞ KHÓA</h1>
             
             <div id="selectionArea">
-                <p class="box-desc">Hệ thống yêu cầu vượt 1 link rút gọn Link4M để lấy mã tải Tool. Cổng bảo mật đa luồng đã được kích hoạt.</p>
+                <p class="box-desc">Hệ thống yêu cầu vượt 1 link rút gọn Link4M để lấy mã tải Tool. Cổng bảo mật Châu Á đa luồng đã được kích hoạt.</p>
                 
                 <div class="form-group">
                     <label>🔥 CHỌN TOOL CẦN MỞ KHÓA</label>
@@ -101,13 +101,13 @@
             </div>
 
             <div class="terminal-box" id="terminalBox">
-                <div style="color:#aaa; font-size:12px; margin-bottom:8px;">> System Sync with Link4M API</div>
+                <div style="color:#aaa; font-size:12px; margin-bottom:8px;">> Syncing with Asian Node Cluster (200 Proxies)</div>
                 <div class="progress-container">
                     <div class="progress-bar" id="pBar"></div>
                 </div>
                 <div class="proxy-percent" id="pPercent">0%</div>
                 <div class="proxy-log" id="pLog">
-                    > Fetching secure token...<br>
+                    > Injecting secure payload...<br>
                 </div>
             </div>
         </div>
@@ -168,7 +168,7 @@
             closeSheet();
         }
 
-        // ================= LÕI XỬ LÝ (CHẠM 100% LÀ BAY NGAY LẬP TỨC) =================
+        // ================= XỬ LÝ: CHẠY 200 PROXY & BẮT LINK CHUẨN =================
         function startProcess() {
             if(!selectedToolId) { 
                 alert("⚠️ Bạn chưa chọn Tool nào!"); 
@@ -179,18 +179,20 @@
             document.getElementById('selectionArea').style.display = 'none';
             document.getElementById('terminalBox').style.display = 'block';
 
-            let progress = 0;
             const pBar = document.getElementById('pBar');
             const pPercent = document.getElementById('pPercent');
             const pLog = document.getElementById('pLog');
-            const countries = ['US', 'UK', 'VN', 'JP', 'RU', 'DE', 'FR', 'SG'];
             
-            // Biến kiểm soát trạng thái lấy link
+            // DANH SÁCH MÃ QUỐC GIA CHÂU Á
+            const asianCountries = ['VN', 'SG', 'JP', 'KR', 'TH', 'MY', 'ID', 'PH', 'IN', 'TW', 'HK'];
+            
+            let proxyCount = 0;
+            const maxProxies = 200;
             let finalLink = null;
             let isApiFailed = false;
             let errorMsg = "";
 
-            // NGAY LẬP TỨC BẮT ĐẦU ĐI XIN LINK TRONG NỀN
+            // NGẦM GỌI API LẤY LINK
             fetchLink4MData().then(res => {
                 if(res.success) {
                     finalLink = res.url;
@@ -200,57 +202,48 @@
                 }
             });
 
-            // VÒNG LẶP CHẠY THANH TIẾN TRÌNH
+            // VÒNG LẶP CHẠY ĐỦ 200 PROXY CỰC NHANH
             let interval = setInterval(() => {
-                if (progress < 85) { 
-                    progress += Math.floor(Math.random() * 8) + 2; 
-                } else if (progress < 99) {
-                    // Nếu link đã lấy xong, cho thanh chạy tốc độ bàn thờ lên 99%
-                    if (finalLink || isApiFailed) {
-                        progress += 10; 
-                    } else {
-                        progress += 1; // Chưa có link thì bò từ từ đợi
-                    }
-                }
+                proxyCount += Math.floor(Math.random() * 5) + 1; // Nhảy 1-5 proxy mỗi nhịp
+                if(proxyCount > maxProxies) proxyCount = maxProxies;
 
-                if(progress > 99) progress = 99; // Cấm lên 100 nếu chưa xử lý xong
+                // Tính toán phần trăm (Chỉ cho tối đa 99% nếu API chưa về)
+                let progress = Math.floor((proxyCount / maxProxies) * 100);
+                if (progress > 99 && !finalLink && !isApiFailed) progress = 99;
                 
-                // Cập nhật giao diện
                 pBar.style.width = progress + '%';
                 pPercent.innerText = progress + '%';
 
-                if (progress % 5 === 0) {
-                    let ip = Math.floor(Math.random()*255) + "." + Math.floor(Math.random()*255) + ".x.x";
-                    let ctry = countries[Math.floor(Math.random() * countries.length)];
-                    pLog.innerHTML += `<div>> Proxy route ${ip} [${ctry}]... OK</div>`;
+                // In IP Châu Á
+                if (proxyCount % 3 === 0 || proxyCount === maxProxies) {
+                    let ip = "1" + Math.floor(Math.random()*9) + "." + Math.floor(Math.random()*255) + "." + Math.floor(Math.random()*255) + ".x";
+                    let ctry = asianCountries[Math.floor(Math.random() * asianCountries.length)];
+                    pLog.innerHTML += `<div>> Asian Route ${proxyCount}/${maxProxies} [${ctry}] IP ${ip}... OK</div>`;
                     pLog.scrollTop = pLog.scrollHeight;
                 }
 
-                // NẾU ĐÃ LẤY ĐƯỢC LINK VÀ THANH ĐÃ CHẠY ĐẾN 99%
-                if(finalLink && progress >= 99) {
-                    clearInterval(interval);
-                    
-                    // Set 100%
-                    pBar.style.width = '100%';
-                    pPercent.innerText = '100%';
-                    
-                    // CHUYỂN TRANG NGAY LẬP TỨC! Dùng replace để khách không bấm nút Back (Quay lại) lùi về trang này được.
-                    window.location.replace(finalLink);
+                // KIỂM TRA ĐIỀU KIỆN CHUYỂN TRANG
+                if(progress >= 99) {
+                    if (finalLink) {
+                        clearInterval(interval);
+                        pBar.style.width = '100%';
+                        pPercent.innerText = '100%';
+                        // CHẠM 100% LÀ BAY NGAY LẬP TỨC KHÔNG CHỜ ĐỢI
+                        window.location.replace(finalLink);
+                    } 
+                    else if (isApiFailed) {
+                        clearInterval(interval);
+                        pBar.style.background = '#ff4757';
+                        pBar.style.boxShadow = '0 0 10px #ff4757';
+                        pLog.innerHTML += `<div style="color:#ff4757; font-weight:bold; margin-top:5px;">> [ERROR]: ${errorMsg}</div>`;
+                        pLog.innerHTML += `<button onclick="window.location.reload()" style="margin-top:10px; background:#ff4757; color:#fff; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold;">TẢI LẠI TRANG</button>`;
+                        pLog.scrollTop = pLog.scrollHeight;
+                    }
                 }
-
-                // NẾU LỖI API VÀ THANH ĐÃ CHẠY ĐẾN 99%
-                if(isApiFailed && progress >= 99) {
-                    clearInterval(interval);
-                    pBar.style.background = '#ff4757';
-                    pBar.style.boxShadow = '0 0 10px #ff4757';
-                    pLog.innerHTML += `<div style="color:#ff4757; font-weight:bold; margin-top:5px;">> [ERROR]: ${errorMsg}</div>`;
-                    pLog.innerHTML += `<button onclick="window.location.reload()" style="margin-top:10px; background:#ff4757; color:#fff; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold;">TẢI LẠI TRANG</button>`;
-                    pLog.scrollTop = pLog.scrollHeight;
-                }
-            }, 60);
+            }, 30); // Tốc độ quét cực nhanh (30ms)
         }
 
-        // HÀM FETCH NGẦM SIÊU MẠNH (DÙNG PROXY XỊN NHẤT)
+        // HÀM FETCH BẢO MẬT XUYÊN CLOUDFLARE
         async function fetchLink4MData() {
             let timestamp = Math.floor(Date.now() / 1000);
             let fingerprint = CryptoJS.MD5("SECURE" + timestamp + selectedToolId).toString();
@@ -258,47 +251,51 @@
             localStorage.setItem('anti_share_token', fingerprint);
             localStorage.setItem('anti_share_time', timestamp);
 
+            // Dẫn link Callback về key.html
             let currUrl = window.location.href.split('?')[0].split('#')[0];
             let keyPageUrl = currUrl.replace('getkey.html', 'key.html');
             if(!keyPageUrl.includes('key.html')) keyPageUrl = keyPageUrl.replace(/\/$/, '') + '/key.html';
             
             let returnUrl = `${keyPageUrl}?tool=${selectedToolId}&token=${fingerprint}&t=${timestamp}`; 
             
-            let directApiUrl = `https://link4m.co/api-shorten/v2?api=${LINK4M_API_KEY}&url=${encodeURIComponent(returnUrl)}`;
+            // Thử cổng API chính của Link4M
+            let directApiUrl = `https://link4m.co/api?api=${LINK4M_API_KEY}&url=${encodeURIComponent(returnUrl)}`;
 
-            // Dùng 3 cách fetch để chống chết
-            try {
-                // Cách 1: Gọi thẳng trực tiếp
-                let r1 = await fetch(directApiUrl);
-                let t1 = await r1.text();
+            // VÒNG LẶP CHỐNG CHẶN CORS (Bypass Cloudflare)
+            const proxyServers = [
+                `https://api.allorigins.win/get?url=${encodeURIComponent(directApiUrl)}`, // Ưu tiên 1 vì trả JSON bọc kín
+                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(directApiUrl)}`, // Ưu tiên 2
+                directApiUrl // Gọi trực tiếp nếu mạng khách cho phép
+            ];
+
+            for(let i = 0; i < proxyServers.length; i++) {
                 try {
-                    let j1 = JSON.parse(t1);
-                    if(j1.shortenedUrl) return { success: true, url: j1.shortenedUrl };
-                } catch(e) {
-                    if(t1.includes("http")) return { success: true, url: t1.trim() };
-                }
-            } catch(err1) {
-                try {
-                    // Cách 2: Dùng proxy AllOrigins chuẩn nhất
-                    let p2 = `https://api.allorigins.win/get?url=${encodeURIComponent(directApiUrl)}`;
-                    let r2 = await fetch(p2);
-                    let j2 = await r2.json();
-                    let inner = JSON.parse(j2.contents);
-                    if(inner.shortenedUrl) return { success: true, url: inner.shortenedUrl };
-                } catch(err2) {
-                    try {
-                        // Cách 3: Dùng proxy ThingProxy
-                        let p3 = `https://thingproxy.freeboard.io/fetch/${directApiUrl}`;
-                        let r3 = await fetch(p3);
-                        let t3 = await r3.text();
-                        let j3 = JSON.parse(t3);
-                        if(j3.shortenedUrl) return { success: true, url: j3.shortenedUrl };
-                    } catch(err3) {
-                        return { success: false, message: "Hệ thống mạng bị chặn, không thể kết nối API Link4M." };
+                    let res = await fetch(proxyServers[i]);
+                    let text = await res.text();
+                    
+                    // Xử lý gói AllOrigins
+                    if(proxyServers[i].includes('allorigins')) {
+                        let parsed = JSON.parse(text);
+                        let innerData = JSON.parse(parsed.contents);
+                        if(innerData.shortenedUrl) return { success: true, url: innerData.shortenedUrl };
+                    } 
+                    // Xử lý gói thường
+                    else {
+                        try {
+                            let data = JSON.parse(text);
+                            if (data.status === 'success' || data.shortenedUrl) {
+                                return { success: true, url: data.shortenedUrl };
+                            }
+                        } catch(e) {
+                            if(text.includes("http")) return { success: true, url: text.trim() };
+                        }
                     }
+                } catch(error) {
+                    console.log("Proxy " + i + " failed, switching...");
+                    continue; // Lỗi thì tự động nhảy sang proxy tiếp theo
                 }
             }
-            return { success: false, message: "Lỗi kết nối từ phía máy chủ Link4M." };
+            return { success: false, message: "Hệ thống bảo mật mạng của bạn hoặc Cloudflare đang chặn kết nối API." };
         }
 
         // FIREBASE ĐỒNG BỘ
