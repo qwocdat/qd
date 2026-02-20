@@ -18,107 +18,116 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --primary: #00ff88; --bg: #050505; --glass: rgba(255,255,255,0.03); --border: rgba(255,255,255,0.1); }
+        :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg); color: #fff; overflow-x: hidden; }
-        header { position: fixed; top: 0; left: 0; width: 100%; padding: 15px 0; z-index: 2000; background: rgba(10,10,10,0.95); border-bottom: 1px solid var(--border); }
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-        .nav-flex { display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-family: 'Orbitron'; font-size: 22px; font-weight: 900; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        body { background: var(--bg); color: #fff; padding-top: 70px; }
+        
+        /* HEADER */
+        header { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(10,10,15,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 1000; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+        .logo { font-family: 'Orbitron'; font-size: 20px; font-weight: 900; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 8px; }
         .logo i { color: var(--primary); }
-        .desktop-menu { display: flex; gap: 25px; }
-        .desktop-menu a { color: #aaa; text-decoration: none; font-size: 14px; font-weight: 600; }
-        .desktop-menu a.active { color: var(--primary); }
-        .hamburger { display: none; font-size: 26px; color: #fff; padding: 10px; cursor: pointer; }
+        .user-wallet { background: rgba(0,255,136,0.1); border: 1px solid var(--primary); color: var(--primary); padding: 6px 12px; border-radius: 20px; font-weight: 700; font-size: 13px; font-family: 'Orbitron'; }
         
-        .mobile-nav { position: fixed; top: 0; right: -100%; width: 85%; max-width: 300px; height: 100vh; background: #0a0a0a; z-index: 3000; padding: 80px 30px; transition: right 0.3s; border-left: 1px solid var(--border); }
-        .mobile-nav a.menu-link { display: block; color: #fff; text-decoration: none; font-size: 16px; padding: 15px 0; border-bottom: 1px solid #1a1a1a; font-weight: 600; }
-        .close-btn { position: absolute; top: 20px; right: 20px; font-size: 30px; color: #ff5555; cursor: pointer; }
+        /* NÚT ĐIỀU HƯỚNG MỚI */
+        .floating-menu { position: fixed; bottom: 20px; right: 20px; z-index: 500; display: flex; flex-direction: column; gap: 10px; }
+        .float-btn { width: 45px; height: 45px; border-radius: 50%; background: #111; border: 1px solid #333; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 18px; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .float-btn.naptien { background: #1e90ff; color: #fff; border: none; }
 
-        .key-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 120px 20px 60px; }
-        .key-box { width: 100%; max-width: 500px; background: var(--glass); border: 1px solid var(--border); border-radius: 20px; padding: 40px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); backdrop-filter: blur(10px); }
-        .box-icon { font-size: 50px; color: var(--primary); margin-bottom: 20px; }
-        .box-title { font-family: 'Orbitron'; font-size: 28px; color: #fff; margin-bottom: 10px; }
-        .box-desc { color: #aaa; font-size: 14px; margin-bottom: 30px; line-height: 1.6; }
-
-        .form-group { text-align: left; margin-bottom: 25px; }
-        .form-group label { display: block; font-size: 13px; color: var(--primary); font-weight: bold; margin-bottom: 8px; }
-        .form-select { width: 100%; padding: 15px; background: #111; border: 1px solid #444; border-radius: 12px; color: #fff; font-size: 15px; outline: none; cursor: pointer; }
+        /* KHU VỰC LẤY KEY */
+        .key-container { min-height: calc(100vh - 70px); display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .key-box { width: 100%; max-width: 500px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 30px 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         
-        .btn-generate { width: 100%; padding: 18px; background: var(--primary); color: #000; font-weight: bold; font-size: 16px; border: none; border-radius: 12px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; font-family: 'Orbitron'; transition: 0.3s; }
-        .btn-generate:hover { background: #fff; }
+        .box-icon { font-size: 45px; color: var(--primary); margin-bottom: 15px; text-shadow: 0 0 15px rgba(0,255,136,0.5); }
+        .box-title { font-family: 'Orbitron'; font-size: 22px; color: #fff; margin-bottom: 10px; font-weight: 900; }
+        .box-desc { color: #aaa; font-size: 13px; margin-bottom: 25px; line-height: 1.5; }
 
-        .loader { display: none; width: 20px; height: 20px; border: 3px solid rgba(0,0,0,0.3); border-top: 3px solid #000; border-radius: 50%; animation: spin 1s linear infinite; }
+        .form-group { text-align: left; margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 12px; color: var(--primary); font-weight: bold; margin-bottom: 8px; text-transform: uppercase; }
+        .form-select { width: 100%; padding: 14px; background: #0a0a0f; border: 1px solid #333; border-radius: 10px; color: #00b8ff; font-size: 14px; outline: none; cursor: pointer; font-weight: bold; }
+        .form-select:focus { border-color: #1e90ff; box-shadow: 0 0 10px rgba(30,144,255,0.2); }
+        
+        .btn-generate { width: 100%; padding: 16px; background: var(--primary); color: #000; font-weight: bold; font-size: 15px; border: none; border-radius: 10px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; font-family: 'Orbitron'; transition: 0.3s; position: relative; z-index: 10; }
+        .btn-generate:hover { background: #fff; box-shadow: 0 5px 15px rgba(0,255,136,0.3); }
+        .btn-generate:disabled { background: #444; color: #888; cursor: not-allowed; box-shadow: none; }
+
+        .loader { display: none; width: 18px; height: 18px; border: 3px solid rgba(0,0,0,0.3); border-top: 3px solid #000; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        @media (max-width: 768px) { .desktop-menu, #desktopAuth { display: none; } .hamburger { display: block; } .key-box { padding: 30px 20px; } .box-title { font-size: 24px; } }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="container nav-flex">
-            <a href="index.html" class="logo"><i class="fas fa-shield-alt"></i> QUOCDAT.SEC</a>
-            <nav class="desktop-menu"><a href="index.html">Trang Chủ</a><a href="shop.html">Kho File VIP</a><a href="getkey.html" class="active">Lấy Key</a><a href="naptien.html" style="color:#00b8ff">Nạp Tiền</a></nav>
-            <div id="desktopAuth"></div>
-            <i class="fas fa-bars hamburger" onclick="document.getElementById('mobileNav').style.right = '0px'"></i>
-        </div>
+        <a href="index.html" class="logo"><i class="fas fa-shield-alt"></i> QUOCDAT.SEC</a>
+        <div class="user-wallet" id="topBalance">Đang tải...</div>
     </header>
 
-    <div class="mobile-nav" id="mobileNav">
-        <i class="fas fa-times close-btn" onclick="document.getElementById('mobileNav').style.right = '-100%'"></i>
-        <div id="mobileUserArea"></div>
-        <a href="index.html" class="menu-link"><i class="fas fa-home"></i> Trang Chủ</a>
-        <a href="shop.html" class="menu-link"><i class="fas fa-download"></i> Kho Tài Liệu VIP</a>
-        <a href="getkey.html" class="menu-link" style="color:var(--primary)"><i class="fas fa-key"></i> Lấy Key</a>
-        <a href="naptien.html" class="menu-link" style="color:#00b8ff"><i class="fas fa-wallet"></i> Nạp Tiền Hệ Thống</a>
-        <a href="javascript:void(0)" onclick="logout()" class="menu-link" style="color:#ff5555;border:none">Đăng Xuất</a>
+    <div class="floating-menu">
+        <a href="naptien.html" class="float-btn naptien"><i class="fas fa-wallet"></i></a>
+        <a href="shop.html" class="float-btn"><i class="fas fa-store"></i></a>
+        <a href="index.html" class="float-btn"><i class="fas fa-home"></i></a>
     </div>
 
     <div class="key-container">
-        <div class="key-box">
+        <div class="key-box" id="selectionArea">
             <i class="fas fa-link box-icon"></i>
-            <h1 class="box-title">TẠO LINK RÚT GỌN</h1>
-            <p class="box-desc">Chọn Tool bạn muốn mở khóa. Hệ thống sẽ tạo link Link4M. Vượt xong bạn sẽ được chuyển đến trang lấy Key mã hóa.</p>
+            <h1 class="box-title">TẠO LINK MỞ KHÓA</h1>
+            <p class="box-desc">Hệ thống yêu cầu bạn vượt 1 link rút gọn Link4M để duy trì máy chủ. Hoàn thành xong bạn sẽ được chuyển đến Terminal để lấy Key.</p>
             
             <div class="form-group">
-                <label>🔥 CHỌN TOOL CẦN MỞ KHÓA</label>
+                <label>🔥 CHỌN TOOL MIỄN PHÍ CẦN LẤY KEY</label>
                 <select id="toolSelect" class="form-select">
                     <option value="" disabled selected>-- Bấm để chọn Tool --</option>
-                    <option value="tool03">Script Blox Fruit Auto Farm</option>
-                    <option value="tool05">Code HTML Landing Page Đẹp</option>
-                    <option value="tool07">Fix Lag Roblox Chống Văng</option>
-                    <option value="tool10">Python Basic Obfuscator</option>
-                    <option value="tool12">Tool Spam SMS/Zalo Call Troll</option>
-                    <option value="tool15">Script Get Token FB Full Quyền</option>
-                    <option value="tool18">Auto Clicker PC Siêu Nhẹ 1MB</option>
-                    <option value="tool20">Script Report FB Xóa Kênh</option>
-                    <option value="tool23">Script Hack Map Moba Hiện Địch</option>
-                    <option value="tool25">Phần Mềm Lọc SĐT/Email Siêu Tốc</option>
-                    <option value="tool28">Bộ 50 Template CV Xin Việc Coder</option>
-                </select>
+                    </select>
             </div>
 
             <button class="btn-generate" id="btnGen" onclick="startLink4m()">
-                <span id="btnText">TIẾN HÀNH VƯỢT LINK</span>
+                <span id="btnText">TẠO LINK RÚT GỌN LINK4M</span>
                 <div class="loader" id="loadingSpinner"></div>
             </button>
         </div>
     </div>
 
     <script>
-        // API LINK4M THẬT CỦA BẠN ĐÂY
+        // MÃ API LINK4M CỦA BẠN (CẬP NHẬT CHÍNH XÁC)
         const LINK4M_API_KEY = "6992df868b3d1e423d1ab833"; 
 
-        function logout() { localStorage.removeItem('vip_username'); window.location.href = "login.html"; }
+        // TỰ ĐỘNG IN DANH SÁCH TOOL MIỄN PHÍ KHỚP 100% VỚI SHOP.HTML
+        const freeTools = [
+            { id: 'tool03', title: 'Script Blox Fruit Auto Farm' },
+            { id: 'tool05', title: 'Code HTML Landing Page Đẹp' },
+            { id: 'tool07', title: 'Fix Lag Roblox Chống Văng iOS' },
+            { id: 'tool10', title: 'Python Basic Obfuscator V1' },
+            { id: 'tool12', title: 'Tool Spam SMS/Zalo Call Troll' },
+            { id: 'tool15', title: 'Script Get Token FB Full Quyền' },
+            { id: 'tool18', title: 'Auto Clicker PC Siêu Nhẹ 1MB' },
+            { id: 'tool20', title: 'Script Report FB Xóa Kênh Die' },
+            { id: 'tool23', title: 'Script Hack Map Moba Hiện Địch' },
+            { id: 'tool25', title: 'Phần Mềm Lọc SĐT/Email Siêu Tốc' },
+            { id: 'tool28', title: 'Bộ 50 Template CV Xin Việc Coder' }
+        ];
 
+        document.addEventListener("DOMContentLoaded", function() {
+            const selectBox = document.getElementById('toolSelect');
+            freeTools.forEach(tool => {
+                let option = document.createElement("option");
+                option.value = tool.id;
+                option.text = tool.title;
+                selectBox.appendChild(option);
+            });
+        });
+
+        // XỬ LÝ GỌI API LINK4M CHUẨN XÁC
         function startLink4m() {
             let toolId = document.getElementById('toolSelect').value;
-            if(!toolId) { alert("⚠️ Vui lòng chọn 1 Tool!"); return; }
+            if(!toolId) { alert("⚠️ Vui lòng chọn 1 Tool trong danh sách trước!"); return; }
 
-            document.getElementById('btnText').innerText = "ĐANG KẾT NỐI API...";
-            document.getElementById('loadingSpinner').style.display = 'block';
-            document.getElementById('btnGen').style.pointerEvents = 'none';
+            const btn = document.getElementById('btnGen');
+            const btnTxt = document.getElementById('btnText');
+            const spinner = document.getElementById('loadingSpinner');
+
+            btnTxt.innerText = "ĐANG TẠO LINK4M...";
+            spinner.style.display = 'block';
+            btn.disabled = true;
 
             // 1. TẠO DẤU VÂN TAY ANTI-SHARE VÀ LƯU VÀO ĐIỆN THOẠI KHÁCH
             let timestamp = Math.floor(Date.now() / 1000);
@@ -127,48 +136,72 @@
             localStorage.setItem('anti_share_token', fingerprint);
             localStorage.setItem('anti_share_time', timestamp);
 
-            // 2. TẠO LINK CALLBACK ĐÁ VỀ TRANG KEY.HTML MỚI
+            // 2. TẠO LINK CALLBACK ĐÁ VỀ TRANG KEY.HTML
             let cleanUrl = window.location.href.split('?')[0].split('#')[0]; 
+            // Thay đổi URL từ getkey.html sang key.html
             let keyPageUrl = cleanUrl.replace('getkey.html', 'key.html'); 
             
-            // Link Callback kèm bằng chứng để key.html check lại
+            // Link để Link4M chuyển khách về sau khi vượt xong
             let returnUrl = `${keyPageUrl}?tool=${toolId}&token=${fingerprint}&t=${timestamp}`; 
             
-            // 3. GỌI API LINK4M
-            let apiUrl = `https://link4m.co/api-shorten/v2?api=${LINK4M_API_KEY}&url=${encodeURIComponent(returnUrl)}`;
+            // 3. GỌI API LINK4M (CHUẨN ĐƯỜNG DẪN /api)
+            // Lưu ý: Rất nhiều trang chặn CORS. Nếu bị trình duyệt chặn, phải gọi thông qua CORS proxy.
+            let apiUrl = `https://link4m.co/api?api=${LINK4M_API_KEY}&url=${encodeURIComponent(returnUrl)}`;
 
+            // Thử gọi API trực tiếp
             fetch(apiUrl)
             .then(res => res.json())
             .then(data => {
                 if(data.status === 'error') {
                     alert("Lỗi Link4M: " + data.message);
                     resetBtn();
-                } else {
-                    // Đá thẳng khách sang Link4M
+                } else if(data.shortenedUrl) {
+                    // THÀNH CÔNG: Đá khách sang Link4M
                     window.location.href = data.shortenedUrl; 
+                } else {
+                    alert("API Link4M không trả về link!");
+                    resetBtn();
                 }
             })
             .catch(err => {
-                alert("Mạng lỗi! Nhưng hệ thống sẽ chuyển thẳng để bạn Test trước.");
-                setTimeout(() => { window.location.href = returnUrl; }, 1000);
+                console.log("Fetch lỗi (CORS), sử dụng Proxy dự phòng...");
+                // Dùng Proxy nếu trình duyệt điện thoại chặn CORS của Link4M
+                let proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
+                fetch(proxyUrl)
+                .then(res => res.json())
+                .then(data => {
+                    let parsedData = JSON.parse(data.contents);
+                    if(parsedData.shortenedUrl) {
+                        window.location.href = parsedData.shortenedUrl;
+                    } else {
+                        alert("Lỗi hệ thống máy chủ API Link4M.");
+                        resetBtn();
+                    }
+                })
+                .catch(err2 => {
+                    alert("Không thể kết nối máy chủ API do rào cản trình duyệt.");
+                    resetBtn();
+                });
             });
+
+            function resetBtn() {
+                btnTxt.innerText = "TẠO LINK RÚT GỌN LINK4M";
+                spinner.style.display = 'none';
+                btn.disabled = false;
+            }
         }
 
-        function resetBtn() {
-            document.getElementById('btnText').innerText = "TIẾN HÀNH VƯỢT LINK";
-            document.getElementById('loadingSpinner').style.display = 'none';
-            document.getElementById('btnGen').style.pointerEvents = 'auto';
-        }
-
-        // FIREBASE UI (Chỉ để hiện số dư Header)
+        // ================= FIREBASE ĐỒNG BỘ SỐ DƯ LÊN MENU =================
         try {
-            const config = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
+            const config = {
+                apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc",
+                databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app",
+                projectId: "quocdat-b80c2"
+            };
             firebase.initializeApp(config);
             firebase.database().ref('users/' + currentUser).on('value', (s) => {
                 let bal = s.exists() ? (s.val().balance || 0) : 0;
-                let fm = bal.toLocaleString('vi-VN') + " đ";
-                let dA = document.getElementById('desktopAuth');
-                if(dA) dA.innerHTML = `<div style="display:flex;align-items:center;gap:15px;background:rgba(255,255,255,0.1);padding:6px 15px;border-radius:30px;border:1px solid rgba(255,255,255,0.2);"><div style="color:#00ff88;font-weight:bold;font-family:'Orbitron';font-size:14px;padding-right:15px;border-right:1px solid #444;">${fm}</div><div style="color:#fff;font-weight:bold;font-size:14px;">${currentUser}</div></div>`;
+                document.getElementById('topBalance').innerText = bal.toLocaleString('vi-VN') + " đ";
             });
         } catch(e) {}
     </script>
