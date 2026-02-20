@@ -2,217 +2,226 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>KEY GENERATOR</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@600&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LẤY KEY VIP | QUOCDAT SEC</title>
+    
+    <script>
+        var currentUser = localStorage.getItem('vip_username');
+        if(!currentUser) { window.location.href = "login.html"; }
+    </script>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        body { background: #000; color: #fff; font-family: 'SF Pro Display', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        :root { --primary: #00ff88; --bg: #050505; --glass: rgba(255,255,255,0.03); --border: rgba(255,255,255,0.1); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        body { background: var(--bg) url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop') center/cover no-repeat fixed; color: #fff; overflow-x: hidden; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: -1; }
         
-        /* CARD */
-        .card { width: 380px; background: #1c1c1e; padding: 30px; border-radius: 20px; text-align: center; border: 1px solid #333; position: relative; }
-        h2 { font-family: 'Orbitron'; margin-bottom: 20px; }
+        /* HEADER */
+        header { position: fixed; top: 0; left: 0; width: 100%; padding: 15px 0; z-index: 2000; background: rgba(10,10,10,0.95); border-bottom: 1px solid var(--border); }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .nav-flex { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-family: 'Orbitron'; font-size: 22px; font-weight: 900; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+        .logo i { color: var(--primary); }
+        .desktop-menu { display: flex; gap: 25px; }
+        .desktop-menu a { color: #aaa; text-decoration: none; font-size: 14px; font-weight: 600; transition:0.3s; }
+        .desktop-menu a:hover, .desktop-menu a.active { color: var(--primary); }
+        
+        .hamburger { display: none; font-size: 26px; color: #fff; padding: 10px; cursor: pointer; }
+        
+        /* MENU MOBILE */
+        .mobile-nav { position: fixed; top: 0; right: -100%; width: 85%; max-width: 300px; height: 100vh; background: #0a0a0a; z-index: 3000; padding: 80px 30px; transition: right 0.4s ease; border-left: 1px solid var(--border); overflow-y: auto; box-shadow: -10px 0 30px rgba(0,0,0,0.8); }
+        .mobile-nav a.menu-link { display: block; color: #fff; text-decoration: none; font-size: 16px; padding: 15px 0; border-bottom: 1px solid #1a1a1a; font-weight: 600; }
+        .close-btn { position: absolute; top: 20px; right: 20px; font-size: 30px; color: #ff5555; cursor: pointer; }
 
-        /* THANH CHỌN (SEGMENT) */
-        .segment { background: #2c2c2e; padding: 3px; border-radius: 8px; display: flex; margin-bottom: 20px; }
-        .seg-btn { flex: 1; padding: 8px; text-align: center; cursor: pointer; border-radius: 6px; font-size: 13px; color: #888; transition: 0.3s; }
-        .seg-btn.active { background: #00ff88; color: #000; font-weight: bold; }
-        .seg-btn.active-down { background: #00b8ff; color: #fff; font-weight: bold; }
+        /* BỐ CỤC GET KEY */
+        .key-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 120px 20px 60px; }
+        .key-box { width: 100%; max-width: 600px; background: var(--glass); border: 1px solid var(--border); border-radius: 20px; padding: 40px; backdrop-filter: blur(15px); text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        
+        .box-icon { font-size: 50px; color: var(--primary); margin-bottom: 20px; }
+        .box-title { font-family: 'Orbitron'; font-size: 28px; color: #fff; margin-bottom: 10px; }
+        .box-desc { color: #aaa; font-size: 14px; margin-bottom: 30px; line-height: 1.6; }
 
-        /* BUTTONS */
-        .btn-get { width: 100%; padding: 15px; background: #00ff88; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; }
-        .btn-get.blue { background: #00b8ff; color: #fff; }
-        .btn-history { background: #333; color: #fff; border: 1px solid #444; margin-top: 10px; width: 100%; padding: 10px; border-radius: 12px; cursor: pointer; font-size: 13px; }
+        /* FORM CHỌN TOOL */
+        .form-group { text-align: left; margin-bottom: 25px; }
+        .form-group label { display: block; font-size: 13px; color: var(--primary); font-weight: bold; margin-bottom: 8px; text-transform: uppercase; }
+        .form-select { width: 100%; padding: 15px 20px; background: rgba(0,0,0,0.5); border: 1px solid #333; border-radius: 12px; color: #fff; font-size: 15px; outline: none; cursor: pointer; transition: 0.3s; appearance: none; }
+        .form-select:focus { border-color: var(--primary); }
+        
+        .btn-generate { width: 100%; padding: 18px; background: var(--primary); color: #000; font-weight: bold; font-size: 16px; border: none; border-radius: 12px; cursor: pointer; transition: 0.3s; font-family: 'Orbitron'; }
+        .btn-generate:hover { background: #fff; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,255,136,0.2); }
+        .btn-generate:disabled { background: #333; color: #666; cursor: not-allowed; transform: none; box-shadow: none; }
 
-        /* THANH LOAD % */
-        .progress-container { width: 100%; background: #333; height: 10px; border-radius: 5px; margin-top: 20px; overflow: hidden; display: none; }
-        .progress-bar { height: 100%; background: #00ff88; width: 0%; transition: width 0.2s; }
-        .status-text { margin-top: 10px; font-size: 12px; color: #aaa; display: none; font-family: monospace; }
+        /* KHUNG HIỂN THỊ KEY (MẶC ĐỊNH ẨN) */
+        .result-box { display: none; margin-top: 30px; padding: 25px; background: rgba(0,255,136,0.05); border: 1px dashed var(--primary); border-radius: 15px; animation: fadeIn 0.5s; }
+        .result-title { color: var(--primary); font-weight: bold; font-size: 14px; margin-bottom: 10px; text-transform: uppercase; }
+        .key-display { font-family: monospace; font-size: 24px; color: #fff; font-weight: bold; background: #000; padding: 15px; border-radius: 10px; letter-spacing: 2px; border: 1px solid #333; word-break: break-all; }
+        .btn-copy { margin-top: 15px; background: #00b8ff; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-copy:hover { background: #0088cc; }
+        .time-warning { font-size: 12px; color: #ff5555; margin-top: 10px; font-weight: bold; }
 
-        /* HISTORY MODAL */
-        .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #1c1c1e; border-radius: 20px; z-index: 10; display: none; flex-direction: column; padding: 20px; }
-        .history-list { flex: 1; overflow-y: auto; text-align: left; margin-top: 10px; }
-        .history-item { border-bottom: 1px solid #333; padding: 10px 0; font-size: 12px; }
-        .history-date { color: #666; font-size: 10px; }
-        .close-btn { background: #ff5555; color: #fff; border: none; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 10px; }
+        /* LOADING GIẢ LẬP VƯỢT LINK */
+        .loader { display: none; margin: 20px auto; width: 40px; height: 40px; border: 4px solid rgba(0,255,136,0.2); border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+        @media (max-width: 768px) {
+            .desktop-menu, #desktopAuth { display: none; }
+            .hamburger { display: block; }
+            .key-box { padding: 30px 20px; }
+            .box-title { font-size: 24px; }
+            .key-display { font-size: 18px; }
+        }
     </style>
 </head>
 <body>
 
-    <script>
-        const user = localStorage.getItem('vip_username');
-        if(!user) { window.location.href = "login.html"; }
-    </script>
+    <div class="overlay"></div>
 
-    <div class="card">
-        <h2>KEY GENERATOR</h2>
-        <div class="segment">
-            <div id="btnTool" class="seg-btn active" onclick="setType('tool')">Tool Python</div>
-            <div id="btnDown" class="seg-btn" onclick="setType('down')">Unlock Link</div>
+    <header>
+        <div class="container nav-flex">
+            <a href="index.html" class="logo"><i class="fas fa-shield-alt"></i> QUOCDAT.SEC</a>
+            <nav class="desktop-menu">
+                <a href="index.html">Trang Chủ</a>
+                <a href="shop.html">Kho File VIP</a>
+                <a href="getkey.html" class="active">Lấy Key</a>
+                <a href="naptien.html" style="color:#00b8ff">Nạp Tiền</a>
+            </nav>
+            <div id="desktopAuth"></div>
+            <i class="fas fa-bars hamburger" onclick="document.getElementById('mobileNav').style.right = '0px'"></i>
         </div>
+    </header>
 
-        <div id="desc" style="color:#aaa; font-size:13px; margin-bottom:15px; min-height:20px;">Key dùng cho Tool (dat_xxxx)</div>
-        
-        <button id="mainBtn" class="btn-get" onclick="process()">BẮT ĐẦU TẠO KEY</button>
-        <button class="btn-history" onclick="showHistory()"><i class="fas fa-history"></i> Xem Lịch Sử Key</button>
+    <div class="mobile-nav" id="mobileNav">
+        <i class="fas fa-times close-btn" onclick="document.getElementById('mobileNav').style.right = '-100%'"></i>
+        <div id="mobileUserArea"></div>
+        <a href="index.html" class="menu-link"><i class="fas fa-home"></i> Trang Chủ</a>
+        <a href="shop.html" class="menu-link"><i class="fas fa-download"></i> Kho Tài Liệu VIP</a>
+        <a href="getkey.html" class="menu-link" style="color:var(--primary)"><i class="fas fa-key"></i> Lấy Key</a>
+        <a href="naptien.html" class="menu-link" style="color:#00b8ff"><i class="fas fa-wallet"></i> Nạp Tiền Hệ Thống</a>
+        <a href="javascript:void(0)" onclick="logout()" class="menu-link" style="color:#ff5555;margin-top:20px;border:none">Đăng Xuất</a>
+    </div>
 
-        <div id="progBox" class="progress-container"><div id="progBar" class="progress-bar"></div></div>
-        <div id="status" class="status-text">Đang kết nối Server... 0%</div>
-        
-        <button id="manualBtn" onclick="manual()" style="display:none; background:none; border:none; color:#ff5555; text-decoration:underline; margin-top:10px; cursor:pointer; font-size:12px;">Server quá tải? Bấm vào đây</button>
+    <div class="key-container">
+        <div class="key-box">
+            <i class="fas fa-key box-icon"></i>
+            <h1 class="box-title">HỆ THỐNG GET KEY VIP</h1>
+            <p class="box-desc">Chọn đúng phần mềm/tool bạn muốn tải. Mỗi sản phẩm có một mã bảo mật riêng biệt và chỉ có hiệu lực trong vòng <b>15 phút</b> kể từ lúc tạo.</p>
+            
+            <div class="form-group">
+                <label>🔥 Chọn Tool Miễn Phí Cần Lấy Key</label>
+                <select id="toolSelect" class="form-select">
+                    <option value="" disabled selected>-- Bấm để chọn Tool --</option>
+                    <option value="tool03">Script Blox Fruit Auto Farm</option>
+                    <option value="tool05">Code HTML Landing Page Đẹp</option>
+                    <option value="tool07">Fix Lag Roblox Chống Văng</option>
+                    <option value="tool10">Python Basic Obfuscator</option>
+                    <option value="tool12">Tool Spam SMS/Zalo Call Troll</option>
+                    <option value="tool15">Script Get Token FB Full Quyền</option>
+                    <option value="tool18">Auto Clicker PC Siêu Nhẹ 1MB</option>
+                    <option value="tool20">Script Report FB Xóa Kênh</option>
+                    <option value="tool23">Script Hack Map Moba Hiện Địch</option>
+                    <option value="tool25">Phần Mềm Lọc SĐT/Email Siêu Tốc</option>
+                    <option value="tool28">Bộ 50 Template CV Xin Việc Coder</option>
+                </select>
+            </div>
 
-        <div id="historyModal" class="modal">
-            <h3>LỊCH SỬ TẠO KEY</h3>
-            <div id="historyList" class="history-list"></div>
-            <button class="close-btn" onclick="document.getElementById('historyModal').style.display='none'">Đóng</button>
+            <button class="btn-generate" id="btnGen" onclick="startGenerate()">VƯỢT LINK LẤY KEY</button>
+            <div class="loader" id="loadingSpinner"></div>
+            <div style="color:var(--primary); font-size:13px; font-weight:bold; margin-top:15px; display:none;" id="loadingText">Đang giả lập hệ thống vượt link... Vui lòng chờ 3s</div>
+
+            <div class="result-box" id="resultBox">
+                <div class="result-title">🔑 KEY CỦA BẠN ĐÃ SẴN SÀNG</div>
+                <div class="key-display" id="finalKey">quocdat_XXXXXX</div>
+                <button class="btn-copy" onclick="copyKey()"><i class="fas fa-copy"></i> Copy Key</button>
+                <div class="time-warning">⚠️ Chú ý: Key này sẽ tự hủy sau 15 phút! Mang sang trang Shop để tải ngay.</div>
+            </div>
         </div>
     </div>
 
     <script>
-        let type = 'tool';
-        const API = "6992df868b3d1e423d1ab833";
-        let finalUrl = "";
-        
-        // DANH SÁCH 30 PROXY (Mỹ, Sing, EU, Global)
-        const PROXIES = [
-            u=>`https://api.allorigins.win/raw?url=${u}`, u=>`https://corsproxy.io/?${u}`, 
-            u=>`https://thingproxy.freeboard.io/fetch/${u}`, u=>`https://api.codetabs.com/v1/proxy?quest=${u}`,
-            u=>`https://proxy.cors.sh/${u}`, u=>`https://api.cors.lol/?url=${u}`,
-            u=>`https://cors-get-proxy.sirjosh.workers.dev/?url=${u}`, u=>`https://test.cors.workers.dev/?${u}`,
-            u=>`https://jsonp.afeld.me/?url=${u}`, u=>`https://yacdn.org/proxy/${u}`,
-            // Giả lập thêm các node (Thực tế sẽ lặp lại các phương thức nhưng đổi tham số để tăng tỉ lệ)
-            u=>`https://api.allorigins.win/raw?url=${u}&t=${Date.now()}`,
-            u=>`https://corsproxy.io/?${u}&_=${Math.random()}`,
-            u=>`https://thingproxy.freeboard.io/fetch/${u}?x=1`,
-            u=>`https://api.codetabs.com/v1/proxy?quest=${u}&c=US`,
-            u=>`https://api.cors.lol/?url=${u}&country=SG`,
-            u=>`https://cors-anywhere.herokuapp.com/${u}`, 
-            u=>`https://crossorigin.me/${u}`,
-            u=>`https://cors-proxy.htmldriven.com/?url=${u}`,
-            u=>`https://www.whateverorigin.org/get?url=${u}`,
-            u=>`https://images-opensocial.googleusercontent.com/gadgets/proxy?container=focus&url=${u}`,
-            // ... Bạn có thể copy thêm dòng proxy để list dài ra cho người dùng thấy nó "nguy hiểm"
-            u=>`https://api.allorigins.win/raw?url=${u}&n=2`,
-            u=>`https://corsproxy.io/?${u}&n=2`,
-            u=>`https://thingproxy.freeboard.io/fetch/${u}?n=2`,
-            u=>`https://api.cors.lol/?url=${u}&n=2`,
-            u=>`https://test.cors.workers.dev/?${u}&n=2`
-        ];
+        function logout() { localStorage.removeItem('vip_username'); window.location.href = "login.html"; }
 
-        function setType(t) {
-            type = t;
-            if(t==='tool'){
-                document.getElementById('btnTool').className='seg-btn active';
-                document.getElementById('btnDown').className='seg-btn';
-                document.getElementById('desc').innerText="Key dùng cho Tool (dat_xxxx)";
-                document.getElementById('mainBtn').className='btn-get';
-            } else {
-                document.getElementById('btnTool').className='seg-btn';
-                document.getElementById('btnDown').className='seg-btn active-down';
-                document.getElementById('desc').innerText="Key mở khóa Link (quocdat_xxxx)";
-                document.getElementById('mainBtn').className='btn-get blue';
-            }
-        }
+        // ================= KẾT NỐI FIREBASE ĐỒNG BỘ SỐ DƯ =================
+        try {
+            const config = {
+                apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc",
+                authDomain: "quocdat-b80c2.firebaseapp.com",
+                databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app",
+                projectId: "quocdat-b80c2",
+                storageBucket: "quocdat-b80c2.firebasestorage.app",
+                messagingSenderId: "988520495087",
+                appId: "1:988520495087:web:97c1b46fc0f6d1f3aaa81a"
+            };
+            firebase.initializeApp(config);
+            const db = firebase.database();
 
-        async function process() {
-            const btn = document.getElementById('mainBtn');
-            const pBox = document.getElementById('progBox');
-            const pBar = document.getElementById('progBar');
-            const stat = document.getElementById('status');
-            const manBtn = document.getElementById('manualBtn');
-
-            btn.style.display='none'; manBtn.style.display='none'; pBox.style.display='block'; stat.style.display='block';
-
-            // Tạo Token
-            const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
-            const expiry = Date.now() + (15*60*1000);
-            localStorage.setItem('secure_token', token);
-
-            let path = window.location.href.split('?')[0];
-            path = path.substring(0, path.lastIndexOf("/")+1);
-            finalUrl = `${path}key.html?t=${token}&e=${expiry}&ktype=${type}`;
-            const apiLink = `https://link4m.co/api-shorten/v2?api=${API}&url=${encodeURIComponent(finalUrl)}`;
-
-            // CHẠY PROXY VỚI THANH LOAD %
-            let successUrl = null;
-            for(let i=0; i<PROXIES.length; i++) {
-                // Tính %
-                let percent = Math.round(((i+1)/PROXIES.length)*100);
-                pBar.style.width = percent + "%";
-                stat.innerText = `Đang thử Server Proxy ${i+1}/${PROXIES.length} (${percent}%)...`;
-
-                try {
-                    const controller = new AbortController();
-                    const id = setTimeout(() => controller.abort(), 3000); // 3s timeout mỗi proxy
+            document.addEventListener("DOMContentLoaded", function() {
+                db.ref('users/' + currentUser).on('value', (s) => {
+                    let userBalance = s.exists() ? (s.val().balance || 0) : 0;
+                    let formatMoney = userBalance.toLocaleString('vi-VN') + " đ";
                     
-                    const res = await fetch(PROXIES[i](encodeURIComponent(apiLink)), { signal: controller.signal });
-                    clearTimeout(id);
+                    let dAuth = document.getElementById('desktopAuth');
+                    if(dAuth) dAuth.innerHTML = `<div style="display:flex; align-items:center; gap:15px; background:rgba(255,255,255,0.1); padding:6px 15px; border-radius:30px; border:1px solid rgba(255,255,255,0.2);"><div style="color:#00ff88; font-weight:bold; font-family:'Orbitron'; font-size:14px; padding-right:15px; border-right:1px solid #444;">${formatMoney}</div><div style="color:#fff; font-weight:bold; font-size:14px;">${currentUser}</div></div>`;
                     
-                    // Xử lý response (tuỳ proxy trả về text hay json)
-                    const text = await res.text();
-                    // Cố gắng parse JSON từ text (vì một số proxy bọc kết quả)
-                    // Tìm chuỗi JSON trong text hoặc parse trực tiếp
-                    let data;
-                    try { data = JSON.parse(text); } 
-                    catch { if(text.includes('shortenedUrl')) data = JSON.parse(text.match(/{.*}/)[0]); }
-
-                    if(data && data.status === "success") {
-                        successUrl = data.shortenedUrl;
-                        break; // Tìm thấy -> Thoát vòng lặp
-                    }
-                } catch(e) {}
-                
-                await new Promise(r => setTimeout(r, 100)); // Delay nhẹ cho hiệu ứng mượt
-            }
-
-            if(successUrl) {
-                pBar.style.width = "100%";
-                stat.innerText = "✅ THÀNH CÔNG! Đang chuyển hướng...";
-                stat.style.color = "#00ff88";
-                saveHistory(successUrl); // LƯU LỊCH SỬ
-                setTimeout(() => window.location.href = successUrl, 1000);
-            } else {
-                stat.innerText = "⚠️ Kết nối thất bại. Vui lòng tạo thủ công.";
-                stat.style.color = "#ff5555";
-                manBtn.style.display = 'block';
-            }
-        }
-
-        function manual() { 
-            const mLink = `https://link4m.co/api?api=${API}&url=${encodeURIComponent(finalUrl)}`;
-            saveHistory(mLink); // Vẫn lưu lịch sử kể cả làm thủ công
-            window.open(mLink, '_blank'); 
-        }
-
-        // --- HỆ THỐNG LỊCH SỬ ---
-        function saveHistory(link) {
-            const u = localStorage.getItem('vip_username');
-            let hist = JSON.parse(localStorage.getItem('hist_'+u) || '[]');
-            const now = new Date().toLocaleString();
-            hist.unshift({ date: now, type: type, link: link });
-            if(hist.length > 10) hist.pop(); // Giữ 10 cái mới nhất
-            localStorage.setItem('hist_'+u, JSON.stringify(hist));
-        }
-
-        function showHistory() {
-            const u = localStorage.getItem('vip_username');
-            const hist = JSON.parse(localStorage.getItem('hist_'+u) || '[]');
-            const list = document.getElementById('historyList');
-            list.innerHTML = "";
-            
-            if(hist.length === 0) list.innerHTML = "<div style='text-align:center; color:#666; margin-top:20px'>Chưa có lịch sử</div>";
-
-            hist.forEach(h => {
-                const item = document.createElement('div');
-                item.className = 'history-item';
-                item.innerHTML = `
-                    <div style="color:${h.type==='tool'?'#00ff88':'#00b8ff'}; font-weight:bold">${h.type.toUpperCase()} KEY</div>
-                    <div class="history-date">${h.date}</div>
-                    <a href="${h.link}" target="_blank" style="color:#fff; text-decoration:underline;">Mở lại link</a>
-                `;
-                list.appendChild(item);
+                    let mAuth = document.getElementById('mobileUserArea');
+                    if(mAuth) mAuth.innerHTML = `<div style="text-align:center; padding-bottom:20px; border-bottom:1px solid #333; margin-bottom:20px;"><div style="font-size:24px; color:var(--primary); font-weight:bold; font-family:monospace">${formatMoney}</div><div style="font-size:13px; color:#666; margin-top:5px">Xin chào, ${currentUser}</div></div>`;
+                });
             });
-            document.getElementById('historyModal').style.display='flex';
+        } catch(e) { console.log("Lỗi Firebase hiển thị"); }
+
+        // ================= THUẬT TOÁN TẠO KEY BẢO MẬT ĐỘC QUYỀN =================
+        function startGenerate() {
+            const toolId = document.getElementById('toolSelect').value;
+            if(!toolId) {
+                alert("Vui lòng chọn một Tool từ danh sách trước khi lấy Key!");
+                return;
+            }
+
+            // Ẩn nút, hiện Loading giả lập vượt link 3 giây
+            const btn = document.getElementById('btnGen');
+            const spinner = document.getElementById('loadingSpinner');
+            const text = document.getElementById('loadingText');
+            const result = document.getElementById('resultBox');
+            
+            btn.style.display = 'none';
+            result.style.display = 'none';
+            spinner.style.display = 'block';
+            text.style.display = 'block';
+
+            setTimeout(() => {
+                // Tạo Key thực sự
+                const now = Math.floor(Date.now() / 1000);
+                const timeStep = Math.floor(now / 900); // Khớp 100% với file shop.html
+                const hash = CryptoJS.MD5("QUOC_DAT_SECRET_2026" + timeStep + toolId).toString();
+                const finalKey = "quocdat_" + hash.substring(0, 10);
+
+                // Hiển thị kết quả
+                document.getElementById('finalKey').innerText = finalKey;
+                
+                spinner.style.display = 'none';
+                text.style.display = 'none';
+                btn.style.display = 'block';
+                result.style.display = 'block';
+                btn.innerText = "TẠO KEY MỚI";
+                
+            }, 2500); // 2.5 giây cho cảm giác "đang xử lý"
+        }
+
+        // ================= COPY KEY =================
+        function copyKey() {
+            const keyText = document.getElementById('finalKey').innerText;
+            navigator.clipboard.writeText(keyText).then(() => {
+                alert("✅ Đã copy Key: " + keyText + "\nBây giờ hãy quay lại trang Shop để tải file nhé!");
+            }).catch(err => {
+                alert("Lỗi copy. Vui lòng copy thủ công.");
+            });
         }
     </script>
 </body>
