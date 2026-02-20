@@ -48,7 +48,7 @@
         /* HACKER TERMINAL */
         .terminal-box { display: none; text-align: left; background: #000; border: 1px solid #333; border-radius: 10px; padding: 20px; margin-top: 10px; box-shadow: inset 0 0 20px rgba(0,255,136,0.1); }
         .progress-container { width: 100%; background: #222; border-radius: 5px; height: 12px; margin-bottom: 15px; overflow: hidden; border: 1px solid #444; }
-        .progress-bar { width: 0%; height: 100%; background: var(--primary); transition: width 0.3s ease-out; box-shadow: 0 0 10px var(--primary); }
+        .progress-bar { width: 0%; height: 100%; background: var(--primary); transition: width 0.1s linear; box-shadow: 0 0 10px var(--primary); }
         .proxy-log { font-family: monospace; font-size: 11px; color: #00ff88; height: 120px; overflow-y: hidden; line-height: 1.8; opacity: 0.8; word-wrap: break-word; }
         .proxy-percent { font-family: 'Orbitron'; color: var(--primary); font-size: 18px; text-align: right; margin-top: -30px; margin-bottom: 15px; font-weight: bold; }
 
@@ -95,7 +95,7 @@
                     </div>
                 </div>
 
-                <button class="btn-generate" id="btnGen" onclick="initiateSyncProcess()">
+                <button class="btn-generate" id="btnGen" onclick="startProcess()">
                     <span id="btnText">TIẾN HÀNH LẤY LINK</span>
                 </button>
             </div>
@@ -107,10 +107,9 @@
                 </div>
                 <div class="proxy-percent" id="pPercent">0%</div>
                 <div class="proxy-log" id="pLog">
-                    > Preparing connection nodes...<br>
+                    > Fetching secure token...<br>
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -143,7 +142,6 @@
         ];
 
         let selectedToolId = "";
-        let animationInterval;
 
         document.addEventListener("DOMContentLoaded", function() {
             const sheetBody = document.getElementById('sheetBody');
@@ -170,8 +168,8 @@
             closeSheet();
         }
 
-        // ================= CƠ CHẾ ĐỒNG BỘ TIẾN TRÌNH =================
-        function initiateSyncProcess() {
+        // ================= LÕI XỬ LÝ (CHẠM 100% LÀ BAY NGAY LẬP TỨC) =================
+        function startProcess() {
             if(!selectedToolId) { 
                 alert("⚠️ Bạn chưa chọn Tool nào!"); 
                 openSheet(); 
@@ -185,16 +183,39 @@
             const pBar = document.getElementById('pBar');
             const pPercent = document.getElementById('pPercent');
             const pLog = document.getElementById('pLog');
-            const countries = ['US', 'UK', 'VN', 'JP', 'RU', 'DE', 'FR', 'BR', 'CA', 'SG'];
+            const countries = ['US', 'UK', 'VN', 'JP', 'RU', 'DE', 'FR', 'SG'];
             
-            // GỌI HÀM FETCH BẠCH TUỘC ĐA LUỒNG NGAY LẬP TỨC
-            triggerAPI_Link4M();
+            // Biến kiểm soát trạng thái lấy link
+            let finalLink = null;
+            let isApiFailed = false;
+            let errorMsg = "";
 
-            animationInterval = setInterval(() => {
-                if (progress < 85) { progress += Math.floor(Math.random() * 8) + 2; } 
-                else if (progress < 95) { progress += 1; }
+            // NGAY LẬP TỨC BẮT ĐẦU ĐI XIN LINK TRONG NỀN
+            fetchLink4MData().then(res => {
+                if(res.success) {
+                    finalLink = res.url;
+                } else {
+                    isApiFailed = true;
+                    errorMsg = res.message;
+                }
+            });
 
-                if(progress > 95) progress = 95; 
+            // VÒNG LẶP CHẠY THANH TIẾN TRÌNH
+            let interval = setInterval(() => {
+                if (progress < 85) { 
+                    progress += Math.floor(Math.random() * 8) + 2; 
+                } else if (progress < 99) {
+                    // Nếu link đã lấy xong, cho thanh chạy tốc độ bàn thờ lên 99%
+                    if (finalLink || isApiFailed) {
+                        progress += 10; 
+                    } else {
+                        progress += 1; // Chưa có link thì bò từ từ đợi
+                    }
+                }
+
+                if(progress > 99) progress = 99; // Cấm lên 100 nếu chưa xử lý xong
+                
+                // Cập nhật giao diện
                 pBar.style.width = progress + '%';
                 pPercent.innerText = progress + '%';
 
@@ -204,14 +225,33 @@
                     pLog.innerHTML += `<div>> Proxy route ${ip} [${ctry}]... OK</div>`;
                     pLog.scrollTop = pLog.scrollHeight;
                 }
-            }, 100);
+
+                // NẾU ĐÃ LẤY ĐƯỢC LINK VÀ THANH ĐÃ CHẠY ĐẾN 99%
+                if(finalLink && progress >= 99) {
+                    clearInterval(interval);
+                    
+                    // Set 100%
+                    pBar.style.width = '100%';
+                    pPercent.innerText = '100%';
+                    
+                    // CHUYỂN TRANG NGAY LẬP TỨC! Dùng replace để khách không bấm nút Back (Quay lại) lùi về trang này được.
+                    window.location.replace(finalLink);
+                }
+
+                // NẾU LỖI API VÀ THANH ĐÃ CHẠY ĐẾN 99%
+                if(isApiFailed && progress >= 99) {
+                    clearInterval(interval);
+                    pBar.style.background = '#ff4757';
+                    pBar.style.boxShadow = '0 0 10px #ff4757';
+                    pLog.innerHTML += `<div style="color:#ff4757; font-weight:bold; margin-top:5px;">> [ERROR]: ${errorMsg}</div>`;
+                    pLog.innerHTML += `<button onclick="window.location.reload()" style="margin-top:10px; background:#ff4757; color:#fff; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold;">TẢI LẠI TRANG</button>`;
+                    pLog.scrollTop = pLog.scrollHeight;
+                }
+            }, 60);
         }
 
-        // ================= HÀM FETCH BẠCH TUỘC (ĐA LUỒNG CHỐNG LIỆT) =================
-        async function triggerAPI_Link4M() {
-            let pLog = document.getElementById('pLog');
-            
-            // 1. CHUẨN BỊ MÃ BẢO MẬT & URL
+        // HÀM FETCH NGẦM SIÊU MẠNH (DÙNG PROXY XỊN NHẤT)
+        async function fetchLink4MData() {
             let timestamp = Math.floor(Date.now() / 1000);
             let fingerprint = CryptoJS.MD5("SECURE" + timestamp + selectedToolId).toString();
             
@@ -224,78 +264,44 @@
             
             let returnUrl = `${keyPageUrl}?tool=${selectedToolId}&token=${fingerprint}&t=${timestamp}`; 
             
-            let directApiUrl = `https://link4m.co/api?api=${LINK4M_API_KEY}&url=${encodeURIComponent(returnUrl)}`;
+            let directApiUrl = `https://link4m.co/api-shorten/v2?api=${LINK4M_API_KEY}&url=${encodeURIComponent(returnUrl)}`;
 
-            // 2. MA TRẬN 4 CỔNG API DỰ PHÒNG
-            const endpoints = [
-                directApiUrl, // Cổng trực tiếp
-                `https://corsproxy.io/?${encodeURIComponent(directApiUrl)}`, // Cổng VIP 1
-                `https://api.allorigins.win/raw?url=${encodeURIComponent(directApiUrl)}`, // Cổng VIP 2
-                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(directApiUrl)}` // Cổng Cứu Viện
-            ];
-
-            let success = false;
-
-            // Chạy vòng lặp qua từng cổng, lỗi cổng nào vứt cổng đó, chuyển cổng tiếp theo
-            for(let i = 0; i < endpoints.length; i++) {
-                if(success) break;
-                
+            // Dùng 3 cách fetch để chống chết
+            try {
+                // Cách 1: Gọi thẳng trực tiếp
+                let r1 = await fetch(directApiUrl);
+                let t1 = await r1.text();
                 try {
-                    pLog.innerHTML += `<div style="color:#ffb86c">> Testing Route ${i+1}...</div>`;
-                    pLog.scrollTop = pLog.scrollHeight;
-
-                    let res = await fetch(endpoints[i]);
-                    let text = await res.text();
-
+                    let j1 = JSON.parse(t1);
+                    if(j1.shortenedUrl) return { success: true, url: j1.shortenedUrl };
+                } catch(e) {
+                    if(t1.includes("http")) return { success: true, url: t1.trim() };
+                }
+            } catch(err1) {
+                try {
+                    // Cách 2: Dùng proxy AllOrigins chuẩn nhất
+                    let p2 = `https://api.allorigins.win/get?url=${encodeURIComponent(directApiUrl)}`;
+                    let r2 = await fetch(p2);
+                    let j2 = await r2.json();
+                    let inner = JSON.parse(j2.contents);
+                    if(inner.shortenedUrl) return { success: true, url: inner.shortenedUrl };
+                } catch(err2) {
                     try {
-                        let data = JSON.parse(text);
-                        if (data.status === 'success' || data.shortenedUrl) {
-                            apiSuccess(data.shortenedUrl);
-                            success = true;
-                            break;
-                        }
-                    } catch(e) {
-                        // Nếu API Link4M trả về text thường
-                        if (text.includes("http")) {
-                            apiSuccess(text.trim());
-                            success = true;
-                            break;
-                        }
+                        // Cách 3: Dùng proxy ThingProxy
+                        let p3 = `https://thingproxy.freeboard.io/fetch/${directApiUrl}`;
+                        let r3 = await fetch(p3);
+                        let t3 = await r3.text();
+                        let j3 = JSON.parse(t3);
+                        if(j3.shortenedUrl) return { success: true, url: j3.shortenedUrl };
+                    } catch(err3) {
+                        return { success: false, message: "Hệ thống mạng bị chặn, không thể kết nối API Link4M." };
                     }
-                } catch(error) {
-                    pLog.innerHTML += `<div style="color:#444">> Route ${i+1} blocked. Switching...</div>`;
                 }
             }
-
-            // Nếu chạy hết 4 cổng mà vẫn lỗi thì do rớt mạng cục bộ
-            if(!success) {
-                apiFailed("Hệ thống mạng của bạn chặn toàn bộ kết nối. Vui lòng tắt VPN/AdBlock hoặc đổi sang mạng 4G/Wifi khác!");
-            }
+            return { success: false, message: "Lỗi kết nối từ phía máy chủ Link4M." };
         }
 
-        function apiSuccess(shortUrl) {
-            clearInterval(animationInterval);
-            document.getElementById('pBar').style.width = '100%';
-            document.getElementById('pPercent').innerText = '100%';
-            
-            let pLog = document.getElementById('pLog');
-            pLog.innerHTML += `<div style="color:#00ff88; font-weight:bold; margin-top:5px;">> [SUCCESS] Link4M Generated!</div>`;
-            pLog.innerHTML += `<div style="color:#fff; font-weight:bold;">> BẮT ĐẦU CHUYỂN HƯỚNG SANG TRANG RÚT GỌN...</div>`;
-            pLog.scrollTop = pLog.scrollHeight;
-
-            setTimeout(() => { window.location.href = shortUrl; }, 1000);
-        }
-
-        function apiFailed(msg) {
-            clearInterval(animationInterval);
-            document.getElementById('pBar').style.background = '#ff4757';
-            document.getElementById('pBar').style.boxShadow = '0 0 10px #ff4757';
-            let pLog = document.getElementById('pLog');
-            pLog.innerHTML += `<div style="color:#ff4757; font-weight:bold; margin-top:5px;">> [ERROR]: ${msg}</div>`;
-            pLog.innerHTML += `<button onclick="window.location.reload()" style="margin-top:10px; background:#ff4757; color:#fff; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold;">TẢI LẠI TRANG</button>`;
-            pLog.scrollTop = pLog.scrollHeight;
-        }
-
+        // FIREBASE ĐỒNG BỘ
         try {
             const config = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
             firebase.initializeApp(config);
