@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>QUOCDAT SEC | TỔNG KHO TÀI NGUYÊN MMO VÀ SCRIPT VIP</title>
+    <title>QUOCDAT SEC | HỆ THỐNG GIẢI PHÁP MMO CHUYÊN NGHIỆP</title>
     
     <script>
         var currentUser = localStorage.getItem('vip_username');
         if(!currentUser) { window.location.href = "login.html"; }
 
-        // HÀM ĐIỀU KHIỂN (BẤT TỬ)
+        // HÀM ĐIỀU KHIỂN HỆ THỐNG (BẤT TỬ)
         window.openNav = function() { document.getElementById('mobileNav').style.right = '0px'; }
         window.closeNav = function() { document.getElementById('mobileNav').style.right = '-100%'; }
         window.logout = function() { localStorage.clear(); window.location.href = "login.html"; }
@@ -24,90 +24,105 @@
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --accent: #00b8ff; }
+        :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --text-dim: #888; --accent: #00b8ff; }
+        
+        /* RESET & BASE */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg) url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop') center/cover no-repeat fixed; color: #fff; overflow-x: hidden; padding-top: 70px; padding-bottom: 50px; transition: opacity 0.4s; }
-        .overlay-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,10,15,0.92); z-index: -1; }
+        body { background: var(--bg) url('https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat fixed; color: #fff; overflow-x: hidden; line-height: 1.6; padding-top: 70px; padding-bottom: 30px; transition: opacity 0.4s; }
+        .overlay-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,10,15,0.94); z-index: -1; }
         
-        /* PRELOADER 3S */
+        /* 1. LOADER 3S - ÉP BUỘC HIỂN THỊ */
         #preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050508; z-index: 9999999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.5s; }
-        .loader-bar { width: 220px; height: 4px; background: #222; border-radius: 10px; overflow: hidden; margin: 20px 0; border: 1px solid #333; }
+        .loader-logo { font-family: 'Orbitron'; font-size: 28px; color: #fff; font-weight: 900; margin-bottom: 25px; letter-spacing: 3px; }
+        .loader-bar { width: 220px; height: 3px; background: #222; border-radius: 10px; overflow: hidden; border: 1px solid #333; }
         #lFill { width: 0%; height: 100%; background: var(--primary); box-shadow: 0 0 15px var(--primary); }
+        #lTxt { font-family: 'Orbitron'; color: var(--primary); font-size: 14px; font-weight: bold; margin-top: 15px; letter-spacing: 2px; }
 
-        /* HEADER */
-        header { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(10,10,15,0.98); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); z-index: 1000; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
-        .logo { font-family: 'Orbitron'; font-size: 18px; font-weight: 900; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 8px; }
-        .user-wallet { background: rgba(0,255,136,0.1); border: 1px solid var(--primary); color: var(--primary); padding: 8px 15px; border-radius: 30px; font-weight: 700; font-size: 12px; font-family: 'Orbitron'; display: none; }
-        .hamburger { font-size: 26px; color: #fff; cursor: pointer; }
+        /* 2. HEADER - CĂN CHỈNH QUY CỦ */
+        header { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(10,10,15,0.98); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); z-index: 1000; display: flex; align-items: center; justify-content: space-between; padding: 0 25px; }
+        .logo { font-family: 'Orbitron'; font-size: 18px; font-weight: 900; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .pc-wallet { background: rgba(0,255,136,0.1); border: 1px solid var(--primary); color: var(--primary); padding: 7px 15px; border-radius: 30px; font-size: 12px; font-family: 'Orbitron'; font-weight: 700; display: none; }
+        .hamburger { font-size: 24px; color: #fff; cursor: pointer; }
 
-        /* HERO - NÚT PHONG CÁCH CŨ */
-        .hero { min-height: 75vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 40px 20px; }
-        .hero h1 { font-size: 38px; font-family: 'Orbitron'; font-weight: 900; line-height: 1.2; text-transform: uppercase; margin-bottom: 20px; }
-        .hero h1 span { color: var(--primary); text-shadow: 0 0 15px rgba(0,255,136,0.3); }
-        .btn-group { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
+        /* 3. HERO SECTION - NÚT BẤM CYBERPUNK */
+        .hero { min-height: 70vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 40px 20px; }
+        .badge { background: rgba(0,255,136,0.15); color: var(--primary); padding: 6px 18px; border-radius: 30px; font-size: 10px; font-weight: 900; border: 1px solid var(--primary); margin-bottom: 25px; letter-spacing: 1px; text-transform: uppercase; }
+        .hero h1 { font-size: clamp(30px, 8vw, 45px); font-family: 'Orbitron'; font-weight: 900; line-height: 1.1; margin-bottom: 20px; }
+        .hero h1 span { color: var(--primary); text-shadow: 0 0 20px rgba(0,255,136,0.4); }
+        .hero p { max-width: 650px; color: var(--text-dim); font-size: 15px; margin-bottom: 40px; }
         
-        .btn-lg { padding: 18px 35px; border-radius: 14px; font-weight: 900; font-family: 'Orbitron'; text-decoration: none; font-size: 14px; display: inline-flex; align-items: center; gap: 10px; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; }
-        .btn-main { background: var(--primary); color: #000; box-shadow: 0 5px 25px rgba(0,255,136,0.4); border: none; }
-        .btn-main:active { transform: scale(0.95); box-shadow: 0 2px 10px rgba(0,255,136,0.2); }
+        .btn-group { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
+        .btn-lg { padding: 18px 35px; border-radius: 14px; font-weight: 900; font-family: 'Orbitron'; text-decoration: none; font-size: 14px; display: inline-flex; align-items: center; gap: 10px; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; border: none; }
+        .btn-main { background: var(--primary); color: #000; box-shadow: 0 5px 25px rgba(0,255,136,0.4); }
         .btn-sub { background: #0a0a0f; color: #fff; border: 2px solid var(--border); }
-        .btn-sub:active { border-color: var(--primary); color: var(--primary); }
+        .btn-lg:hover { transform: translateY(-3px); filter: brightness(1.2); }
 
-        /* CÁC PHẦN BỔ SUNG CHUYÊN NGHIỆP */
-        .section { padding: 50px 20px; max-width: 1200px; margin: 0 auto; }
-        .sec-title { text-align: center; font-family: 'Orbitron'; font-size: 24px; margin-bottom: 40px; text-transform: uppercase; }
-        .sec-title span { color: var(--primary); }
+        /* 4. SECTION LAYOUT */
+        .section { padding: 60px 25px; max-width: 1200px; margin: 0 auto; }
+        .sec-title { text-align: center; font-family: 'Orbitron'; font-size: 26px; margin-bottom: 50px; text-transform: uppercase; position: relative; }
+        .sec-title::after { content: ''; position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); width: 50px; height: 3px; background: var(--primary); }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .card { background: var(--card-bg); padding: 30px; border-radius: 20px; border: 1px solid var(--border); transition: 0.4s; }
-        .card:hover { border-color: var(--primary); transform: translateY(-5px); }
-        .card i.icon-lg { color: var(--primary); font-size: 35px; margin-bottom: 20px; display: block; }
-        
-        /* QUY TRÌNH HƯỚNG DẪN */
-        .step-grid { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-top: 30px; }
-        .step-item { flex: 1; min-width: 250px; background: rgba(255,255,255,0.03); padding: 25px; border-radius: 15px; position: relative; border: 1px solid #1a1a24; }
-        .step-num { position: absolute; top: -15px; left: 20px; background: var(--accent); color: #fff; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 900; font-family: 'Orbitron'; box-shadow: 0 0 15px var(--accent); }
+        /* GRID HỆ THỐNG */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; }
+        .card { background: var(--card-bg); padding: 35px; border-radius: 20px; border: 1px solid var(--border); transition: 0.4s; }
+        .card:hover { border-color: var(--primary); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .card i.main-icon { color: var(--primary); font-size: 38px; margin-bottom: 25px; display: block; }
+        .card h3 { font-family: 'Orbitron'; font-size: 20px; margin-bottom: 15px; color: #fff; }
+        .card p { color: var(--text-dim); font-size: 14px; line-height: 1.7; text-align: justify; }
 
-        /* ĐÁNH GIÁ CHI TIẾT */
-        .review-box { background: #111; padding: 25px; border-radius: 18px; border: 1px solid #222; height: 100%; }
-        .stars { color: #f1c40f; font-size: 11px; margin-bottom: 10px; }
-        .review-user { display: flex; align-items: center; gap: 12px; margin-top: 20px; border-top: 1px solid #222; padding-top: 15px; }
-        .user-ava { width: 40px; height: 40px; background: var(--card-bg); border-radius: 50%; border: 2px solid var(--primary); display: flex; justify-content: center; align-items: center; font-weight: bold; }
+        /* 5. KHỐI SẢN PHẨM TIÊU BIỂU (NEW) */
+        .product-strip { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 20px; scrollbar-width: none; }
+        .product-strip::-webkit-scrollbar { display: none; }
+        .p-item { min-width: 180px; background: #111; padding: 15px; border-radius: 12px; border: 1px solid #222; text-align: center; }
+        .p-item i { font-size: 24px; color: var(--accent); margin-bottom: 10px; }
+        .p-item span { display: block; font-size: 12px; font-weight: bold; color: #fff; }
 
-        /* KỸ NĂNG CHUYÊN MÔN */
-        .skills-container { background: var(--card-bg); border-radius: 24px; padding: 35px; border: 1px solid var(--border); }
-        .skill-item { margin-bottom: 22px; }
-        .skill-info { display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; margin-bottom: 8px; color: #ddd; }
+        /* 6. TRÌNH ĐỘ CODE (SKILLS) */
+        .skills-container { background: rgba(21,21,30,0.7); border-radius: 24px; padding: 40px; border: 1px solid var(--border); }
+        .skill-item { margin-bottom: 25px; }
+        .skill-info { display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; margin-bottom: 10px; color: #ddd; font-family: 'Orbitron'; }
         .progress-bg { width: 100%; height: 10px; background: #050508; border-radius: 10px; overflow: hidden; border: 1px solid #222; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--primary)); border-radius: 10px; width: 0; transition: width 2s cubic-bezier(0.1, 0.5, 0.1, 1); }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--primary)); width: 0; transition: width 2s cubic-bezier(0.1, 0.5, 0.1, 1); }
 
-        /* MENU MOBILE */
-        .mobile-nav { position: fixed; top: 0; right: -100%; width: 300px; height: 100vh; background: #0c0c12; z-index: 3000; transition: 0.4s; border-left: 1px solid var(--border); overflow-y: auto; }
-        .nav-profile { background: #1a1a24; padding: 45px 25px; text-align: center; border-bottom: 1px solid var(--border); }
-        .avatar { width: 70px; height: 70px; background: var(--primary); color: #000; font-size: 30px; font-weight: bold; border-radius: 50%; margin: 0 auto 15px; display: flex; justify-content: center; align-items: center; border: 4px solid #000; font-family: 'Orbitron'; }
+        /* 7. PHÁP LÝ & CÔNG TY (QUY CỦ 100%) */
+        .legal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-top: 40px; }
+        .legal-box { background: rgba(255,255,255,0.02); padding: 30px; border-radius: 20px; border: 1px solid #1a1a24; position: relative; }
+        .legal-title { font-family: 'Orbitron'; font-size: 15px; color: var(--primary); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #1a1a24; padding-bottom: 15px; }
+        .legal-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 12px; }
+        .legal-row span:first-child { color: #555; font-weight: 600; }
+        .legal-row span:last-child { color: #aaa; text-align: right; }
+        .stamp-verify { position: absolute; bottom: 20px; right: 20px; opacity: 0.2; font-size: 40px; color: var(--primary); transform: rotate(-15deg); }
 
-        /* FOOTER CHUYÊN NGHIỆP */
-        footer { background: #050508; border-top: 1px solid var(--border); padding: 70px 20px 40px; }
-        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 50px; }
-        .footer-brand { font-family: 'Orbitron'; font-size: 22px; font-weight: 900; color: #fff; margin-bottom: 20px; }
+        /* FOOTER */
+        footer { background: #050508; border-top: 1px solid var(--border); padding: 60px 25px 30px; }
+        .footer-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 50px; max-width: 1200px; margin: 0 auto; }
+        .footer-brand { font-family: 'Orbitron'; font-size: 24px; font-weight: 900; margin-bottom: 20px; }
         .footer-links li { list-style: none; margin-bottom: 12px; }
         .footer-links a { color: #666; text-decoration: none; font-size: 14px; transition: 0.3s; }
-        .footer-links a:hover { color: var(--primary); }
-        
-        .legal-box { background: rgba(255,255,255,0.02); padding: 25px; border-radius: 15px; border: 1px solid #1a1a24; }
-        .legal-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 12px; border-bottom: 1px solid #15151e; padding-bottom: 10px; }
-        .legal-row span:first-child { color: #555; font-weight: bold; }
-        .legal-row span:last-child { color: #aaa; text-align: right; }
+        .footer-links a:hover { color: var(--primary); padding-left: 5px; }
+
+        /* DASHBOARD MENU */
+        .mobile-nav { position: fixed; top: 0; right: -100%; width: 300px; height: 100vh; background: #0c0c12; z-index: 3000; transition: 0.4s ease-out; border-left: 1px solid var(--border); overflow-y: auto; }
+        .nav-profile { background: #1a1a24; padding: 50px 25px; text-align: center; border-bottom: 1px solid var(--border); }
+        .avatar { width: 75px; height: 75px; background: var(--primary); color: #000; font-size: 32px; font-weight: bold; border-radius: 50%; margin: 0 auto 15px; display: flex; justify-content: center; align-items: center; border: 4px solid #000; font-family: 'Orbitron'; }
+        .nav-links { padding: 20px; }
+        .menu-link { display: flex; align-items: center; gap: 15px; color: #fff; text-decoration: none; padding: 15px; border-radius: 12px; font-weight: 600; margin-bottom: 8px; }
+        .menu-link.active { background: rgba(0,255,136,0.1); color: var(--primary); border: 1px solid rgba(0,255,136,0.2); }
 
         /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 99999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
-        .ios-modal { width: 320px; background: #1c1c1e; border-radius: 20px; padding: 35px 25px; text-align: center; border: 1px solid #333; box-shadow: 0 20px 50px #000; }
+        .ios-modal { width: 320px; background: #1c1c1e; border-radius: 24px; padding: 35px 25px; text-align: center; border: 1px solid #333; }
 
-        @media (min-width: 992px) { .user-wallet { display: block; } .hamburger { display: none; } }
-        @media (max-width: 768px) { .hero h1 { font-size: 28px; } .btn-lg { width: 100%; justify-content: center; } }
+        /* FLOATING MENU */
+        .floating-menu { position: fixed; bottom: 25px; right: 25px; z-index: 500; display: flex; flex-direction: column; gap: 12px; }
+        .float-btn { width: 52px; height: 52px; border-radius: 50%; background: #111; border: 1px solid #333; color: #fff !important; display: flex; justify-content: center; align-items: center; font-size: 22px; text-decoration: none; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .float-btn.naptien { background: var(--accent); border: none; }
+
+        @media (min-width: 992px) { .pc-wallet { display: block; } .hamburger { display: none; } }
     </style>
 </head>
 <body>
@@ -116,8 +131,8 @@
         <div class="loader-box">
             <div class="loader-logo">QUOCDAT<span style="color:var(--primary);">.SEC</span></div>
             <div class="loader-bar"><div id="lFill"></div></div>
-            <div id="lTxt" style="font-family:'Orbitron'; color:var(--primary); font-weight:bold;">0%</div>
-            <div style="font-family:monospace; font-size:10px; color:#444; margin-top:15px;">> System Booting...</div>
+            <div id="lTxt">0%</div>
+            <div style="font-family:monospace; font-size:11px; color:#444; margin-top:20px;">> Synchronizing Enterprise API...</div>
         </div>
     </div>
 
@@ -126,7 +141,6 @@
             let p = 0;
             let bar = document.getElementById('lFill');
             let txt = document.getElementById('lTxt');
-            let screen = document.getElementById('preloader');
             let timer = setInterval(() => {
                 p += 2; if(p > 100) p = 100;
                 if(bar) bar.style.width = p + '%';
@@ -134,15 +148,16 @@
                 if(p >= 100) {
                     clearInterval(timer);
                     setTimeout(() => {
-                        screen.style.opacity = '0';
+                        document.getElementById('preloader').style.opacity = '0';
                         setTimeout(() => { 
-                            screen.style.display = 'none';
+                            document.getElementById('preloader').style.display = 'none'; 
+                            // Kích hoạt skill bar
                             document.getElementById('s1').style.width = '77%';
                             document.getElementById('s2').style.width = '50%';
                             document.getElementById('s3').style.width = '40%';
                             document.getElementById('s4').style.width = '36%';
                             document.getElementById('s5').style.width = '20%';
-                        }, 400);
+                        }, 500);
                     }, 200);
                 }
             }, 30);
@@ -152,9 +167,11 @@
     <div class="overlay-bg"></div>
 
     <header>
-        <div class="logo" onclick="window.goToPage('index.html')"><i class="fas fa-shield-halved" style="color:var(--primary)"></i> QUOCDAT.SEC</div>
+        <div class="logo" onclick="window.goToPage('index.html')">
+            <i class="fas fa-shield-halved" style="color:var(--primary)"></i> QUOCDAT.SEC
+        </div>
         <div class="header-right">
-            <div class="user-wallet" id="pcBal">0 đ</div>
+            <div class="pc-wallet" id="pcBal">Đang tải...</div>
             <i class="fas fa-bars-staggered hamburger" onclick="window.openNav()"></i>
         </div>
     </header>
@@ -166,107 +183,96 @@
     </div>
 
     <div class="mobile-nav" id="mobileNav">
-        <div style="padding:20px; text-align:right;"><i class="fas fa-xmark" style="font-size:30px; color:#333;" onclick="window.closeNav()"></i></div>
+        <div style="padding:25px; text-align:right;"><i class="fas fa-xmark" style="font-size:30px; color:#444;" onclick="window.closeNav()"></i></div>
         <div class="nav-profile">
             <div class="avatar" id="nA">?</div>
             <div class="nav-username" id="nU">Loading...</div>
-            <div id="nB" style="font-size:22px; color:var(--primary); font-weight:900; margin:10px 0; font-family:monospace;">0 đ</div>
-            <button class="btn-profile-info" style="background:#222; color:#fff; border:1px solid #444; width:100%; padding:10px; border-radius:8px; font-size:13px;" onclick="window.openModal('infoModal')">Hồ sơ VIP</button>
+            <div id="nB" style="font-size:24px; color:var(--primary); font-weight:900; margin:15px 0; font-family:monospace;">0 đ</div>
+            <button style="background:rgba(255,255,255,0.05); color:#fff; border:1px solid #333; padding:10px 20px; border-radius:10px; font-size:13px;" onclick="window.openModal('infoModal')">Chi tiết tài khoản</button>
         </div>
         <div class="nav-links">
-            <a onclick="window.goToPage('index.html')" class="menu-link highlight"><i class="fas fa-house"></i> Trang Chủ</a>
+            <a onclick="window.goToPage('index.html')" class="menu-link active"><i class="fas fa-house"></i> Trang Chủ</a>
             <a onclick="window.goToPage('shop.html')" class="menu-link"><i class="fas fa-cart-shopping"></i> Cửa Hàng Tài Nguyên</a>
-            <a onclick="window.goToPage('getkey.html')" class="menu-link"><i class="fas fa-unlock-keyhole"></i> Lấy Key Truy Cập</a>
+            <a onclick="window.goToPage('getkey.html')" class="menu-link"><i class="fas fa-unlock-keyhole"></i> Lấy Key VIP</a>
             <a onclick="window.goToPage('naptien.html')" class="menu-link" style="color:var(--accent);"><i class="fas fa-credit-card"></i> Nạp Tiền Tự Động</a>
-            <div class="menu-link" style="color:#ffb86c;" onclick="window.openModal('historyModal')"><i class="fas fa-clock-rotate-left"></i> Lịch Sử Mua Hàng</div>
+            <div class="menu-link" style="color:#ffb86c;" onclick="window.openModal('historyModal')"><i class="fas fa-clock-rotate-left"></i> Lịch Sử Giao Dịch</div>
             <div class="menu-link" style="color:#ff4757; margin-top:30px; border-top: 1px solid #1a1a24;" onclick="window.logout()"><i class="fas fa-power-off"></i> Đăng Xuất</div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="infoModal" onclick="window.closeOutside(event, 'infoModal')">
-        <div class="ios-modal">
-            <i class="fas fa-circle-user" style="font-size:45px; color:var(--primary); margin-bottom:15px;"></i>
-            <div style="font-weight:bold; color:#fff; font-size:18px; margin-bottom:5px;">THÔNG TIN TÀI KHOẢN</div>
-            <div style="text-align:left; background:#000; padding:15px; border-radius:12px; margin:20px 0; font-size:13px; border:1px solid #222;">
-                <div style="margin-bottom:10px;">👤 Tài khoản: <strong id="mU" style="float:right; color:var(--primary);">...</strong></div>
-                <div style="margin-bottom:10px;">💰 Số dư: <strong id="mB" style="float:right; color:var(--primary);">0 đ</strong></div>
-                <div>💎 Cấp bậc: <strong style="float:right; color:var(--accent);">Premium Member</strong></div>
-            </div>
-            <button style="background:var(--primary); color:#000; border:none; width:100%; padding:15px; border-radius:15px; font-weight:900;" onclick="window.closeModal('infoModal')">HOÀN TẤT</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="historyModal" onclick="window.closeOutside(event, 'historyModal')">
-        <div class="ios-modal">
-            <div style="font-weight:bold; color:#ffb86c; font-size:18px; margin-bottom:15px;">LỊCH SỬ HOẠT ĐỘNG</div>
-            <div style="background:#000; padding:40px 10px; border-radius:15px; margin-bottom:20px; border:1px solid #222;">
-                <i class="fas fa-database" style="font-size:35px; color:#333; margin-bottom:15px;"></i><br>
-                <span style="color:#555; font-size:12px;">Hệ thống chưa ghi nhận giao dịch mới của bạn.</span>
-            </div>
-            <button style="background:#333; color:#fff; border:none; width:100%; padding:15px; border-radius:15px; font-weight:bold;" onclick="window.closeModal('historyModal')">QUAY LẠI</button>
         </div>
     </div>
 
     <main>
         <section class="hero">
-            <div style="background:rgba(0,255,136,0.1); color:var(--primary); padding:6px 20px; border-radius:40px; font-size:10px; font-weight:900; margin-bottom:20px; border:1px solid var(--primary); letter-spacing:1px;">V11.0 OFFICIAL ENTERPRISE</div>
-            <h1>TỔNG KHO TÀI NGUYÊN<br><span>MMO & SCRIPT VIP</span></h1>
-            <p style="color:#aaa; line-height:1.8; margin-bottom:30px; max-width:600px;">Hệ thống cung cấp giải pháp tự động hóa và mã nguồn Web tối ưu nhất Việt Nam. Được tin dùng bởi hơn 15.000 khách hàng.</p>
-            
+            <div class="badge">Enterprise Version 12.0</div>
+            <h1>GIẢI PHÁP <span>TỰ ĐỘNG HÓA</span><br>VÀ TÀI NGUYÊN SCRIPT VIP</h1>
+            <p>Hệ thống phân phối mã nguồn Web, Tool Auto MMO và Script Game chất lượng hàng đầu Việt Nam. Cam kết bảo mật, uy tín và hỗ trợ trọn đời.</p>
             <div class="btn-group">
-                <a onclick="window.goToPage('shop.html')" class="btn-lg btn-main" style="cursor:pointer;"><i class="fas fa-shopping-bag"></i> KHÁM PHÁ CỬA HÀNG</a>
-                <a onclick="window.goToPage('getkey.html')" class="btn-lg btn-sub" style="cursor:pointer;"><i class="fas fa-bolt"></i> LẤY KEY TRUY CẬP</a>
+                <button class="btn-lg btn-main" onclick="window.goToPage('shop.html')"><i class="fas fa-shopping-bag"></i> KHÁM PHÁ CỬA HÀNG</button>
+                <button class="btn-lg btn-sub" onclick="window.goToPage('getkey.html')"><i class="fas fa-bolt"></i> LẤY KEY TRUY CẬP</button>
             </div>
         </section>
 
         <section class="section">
-            <h2 class="sec-title">TẠI SAO NÊN CHỌN <span>QUOCDAT.SEC</span></h2>
+            <h2 class="sec-title">DỊCH VỤ <span>CHUYÊN NGHIỆP</span></h2>
             <div class="grid">
                 <div class="card">
-                    <i class="fas fa-fire-alt icon-lg"></i>
-                    <h3>Tự động 100%</h3>
-                    <p>Hệ thống xử lý đơn hàng và cấp phát Key/Source Code hoàn toàn tự động 24/7, không cần Admin duyệt tay.</p>
+                    <i class="fas fa-robot main-icon"></i>
+                    <h3>Tool Automation</h3>
+                    <p>Phần mềm tự động hóa đa nền tảng, giúp bạn tối ưu hóa công việc MMO, cày thuê hoặc quản lý hệ thống tài khoản hàng loạt mà không cần can thiệp thủ công.</p>
                 </div>
                 <div class="card">
-                    <i class="fas fa-fingerprint icon-lg"></i>
-                    <h3>Bảo mật mã nguồn</h3>
-                    <p>Mọi Script đều được mã hóa qua các lớp Obfuscator độc quyền, đảm bảo an toàn tuyệt đối cho người sử dụng.</p>
+                    <i class="fas fa-code-branch main-icon"></i>
+                    <h3>Mã Nguồn Web</h3>
+                    <p>Cung cấp các bộ Source Code Web Bán Acc, Web Nạp Thẻ, Landing Page chuẩn SEO với giao diện hiện đại, tích hợp sẵn các cổng thanh toán tự động uy tín.</p>
                 </div>
                 <div class="card">
-                    <i class="fas fa-headset icon-lg"></i>
-                    <h3>Hỗ trợ kỹ thuật</h3>
-                    <p>Đội ngũ kỹ thuật viên giàu kinh nghiệm luôn sẵn sàng giải đáp và xử lý mọi yêu cầu của khách hàng qua Telegram.</p>
+                    <i class="fas fa-user-shield main-icon"></i>
+                    <h3>Mã Hóa Script</h3>
+                    <p>Dịch vụ Obfuscator cao cấp dành cho Python và Lua. Bảo vệ chất xám của bạn trước mọi hành vi dịch ngược, bẻ khóa và chia sẻ trái phép mã nguồn.</p>
                 </div>
             </div>
         </section>
 
         <section class="section">
-            <h2 class="sec-title">QUY TRÌNH <span>GIAO DỊCH</span></h2>
-            <div class="step-grid">
-                <div class="step-item">
-                    <div class="step-num">1</div>
-                    <div style="font-weight:bold; margin-bottom:10px; color:var(--primary);">Nạp Tiền</div>
-                    <div style="font-size:13px; color:#777;">Sử dụng Thẻ cào hoặc Chuyển khoản để cộng số dư vào tài khoản.</div>
+            <h2 class="sec-title">SẢN PHẨM <span>TIÊU BIỂU</span></h2>
+            <div class="product-strip">
+                <div class="p-item"><i class="fas fa-gamepad"></i><span>Blox Fruit Auto</span></div>
+                <div class="p-item"><i class="fas fa-globe"></i><span>Web Bán Acc V3</span></div>
+                <div class="p-item"><i class="fas fa-shield-virus"></i><span>Python Protect</span></div>
+                <div class="p-item"><i class="fas fa-bug"></i><span>Report Tool FB</span></div>
+                <div class="p-item"><i class="fas fa-envelope"></i><span>Auto Mailer</span></div>
+                <div class="p-item"><i class="fas fa-mobile-screen"></i><span>Lag Fix Roblox</span></div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="sec-title">NĂNG LỰC <span>CÔNG NGHỆ</span></h2>
+            <div class="skills-container">
+                <div class="skill-item">
+                    <div class="skill-info"><span>HTML / CSS / UI-UX DESIGN</span><span>77%</span></div>
+                    <div class="progress-bg"><div class="progress-fill" id="s1"></div></div>
                 </div>
-                <div class="step-item">
-                    <div class="step-num">2</div>
-                    <div style="font-weight:bold; margin-bottom:10px; color:var(--primary);">Mua Script</div>
-                    <div style="font-size:13px; color:#777;">Lựa chọn sản phẩm ưng ý tại Cửa hàng và tiến hành thanh toán.</div>
+                <div class="skill-item">
+                    <div class="skill-info"><span>JAVASCRIPT / NODE.JS / REACT</span><span>50%</span></div>
+                    <div class="progress-bg"><div class="progress-fill" id="s2"></div></div>
                 </div>
-                <div class="step-item">
-                    <div class="step-num">3</div>
-                    <div style="font-weight:bold; margin-bottom:10px; color:var(--primary);">Nhận Hàng</div>
-                    <div style="font-size:13px; color:#777;">Hệ thống sẽ cung cấp Link tải và Key kích hoạt ngay lập tức.</div>
+                <div class="skill-item">
+                    <div class="skill-info"><span>PHP / LARAVEL / BACKEND</span><span>40%</span></div>
+                    <div class="progress-bg"><div class="progress-fill" id="s3"></div></div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-info"><span>PYTHON / AUTO / AI LOGIC</span><span>36%</span></div>
+                    <div class="progress-bg"><div class="progress-fill" id="s4"></div></div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-info"><span>LUA / GAME SCRIPTING</span><span>20%</span></div>
+                    <div class="progress-bg"><div class="progress-fill" id="s5"></div></div>
                 </div>
             </div>
         </section>
 
         <section class="section">
-            <h2 class="sec-title">PHẢN HỒI <span>KHÁCH HÀNG</span></h2>
-            <div class="grid">
-                <div class="review-box">
-                    <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                    <p style="font-size:13px; color:#aaa; font-style:italic;">"Mình đã mua Source Web bán acc tại đây, code cực kỳ sạch và dễ tùy biến. Giao diện mobile rất mượt. Xứng đáng 5 sao cho chất lượng dịch vụ của Admin!"</p>
-                    <div class="review-user">
-                        <div class="user-ava">T</div>
-                        <div style="font-size:13px;"><b>Trần Minh Quân</b><br><span style="font-size:10px; color:#555;">MMO Developer</span></div
+            <h2 class="sec-title">XÁC THỰC <span>DOANH NGHIỆP</span></h2>
+            <div class="legal-grid">
+                <div class="legal-box">
+                    <div class="legal-title"><i class="fas fa-building"></i> THÔNG TIN PHÁP LÝ</div>
+                    
