@@ -49,7 +49,7 @@
         .terminal-box { display: none; text-align: left; background: #000; border: 1px solid #333; border-radius: 10px; padding: 20px; margin-top: 10px; box-shadow: inset 0 0 20px rgba(0,255,136,0.1); }
         .progress-container { width: 100%; background: #222; border-radius: 5px; height: 12px; margin-bottom: 15px; overflow: hidden; border: 1px solid #444; }
         .progress-bar { width: 0%; height: 100%; background: var(--primary); transition: width 0.3s ease-out; box-shadow: 0 0 10px var(--primary); }
-        .proxy-log { font-family: monospace; font-size: 11px; color: #00ff88; height: 120px; overflow-y: hidden; line-height: 1.8; opacity: 0.8; }
+        .proxy-log { font-family: monospace; font-size: 11px; color: #00ff88; height: 120px; overflow-y: hidden; line-height: 1.8; opacity: 0.8; word-wrap: break-word; }
         .proxy-percent { font-family: 'Orbitron'; color: var(--primary); font-size: 18px; text-align: right; margin-top: -30px; margin-bottom: 15px; font-weight: bold; }
 
         /* IOS ACTION SHEET */
@@ -85,7 +85,7 @@
             <h1 class="box-title">TẠO LINK MỞ KHÓA</h1>
             
             <div id="selectionArea">
-                <p class="box-desc">Hệ thống yêu cầu vượt 1 link rút gọn Link4M để lấy mã tải Tool. Quá trình lấy link sẽ được mã hóa an toàn.</p>
+                <p class="box-desc">Hệ thống yêu cầu vượt 1 link rút gọn Link4M để lấy mã tải Tool. Quá trình vượt tường lửa sẽ đồng bộ với API.</p>
                 
                 <div class="form-group">
                     <label>🔥 CHỌN TOOL CẦN MỞ KHÓA</label>
@@ -125,7 +125,7 @@
     </div>
 
     <script>
-        // API LINK4M CỦA BẠN (GIỮ NGUYÊN)
+        // API LINK4M CỦA BẠN CHÍNH XÁC 100%
         const LINK4M_API_KEY = "6992df868b3d1e423d1ab833"; 
 
         const freeTools = [
@@ -213,7 +213,7 @@
             }, 100);
         }
 
-        // GỌI API LINK4M
+        // HÀM GỌI API MA TRẬN 3 LỚP (BẤT TỬ)
         function triggerAPI_Link4M() {
             let timestamp = Math.floor(Date.now() / 1000);
             let fingerprint = CryptoJS.MD5("SECURE" + timestamp + selectedToolId).toString();
@@ -221,33 +221,62 @@
             localStorage.setItem('anti_share_token', fingerprint);
             localStorage.setItem('anti_share_time', timestamp);
 
-            // Dẫn link Callback về trang key.html của bạn
+            // Xử lý tạo link Callback an toàn (tránh lỗi url)
             let currUrl = window.location.href.split('?')[0].split('#')[0];
-            let basePath = currUrl.substring(0, currUrl.lastIndexOf('/'));
-            let returnUrl = basePath + "/key.html?tool=" + selectedToolId + "&token=" + fingerprint + "&t=" + timestamp;
+            let keyPageUrl = currUrl.replace('getkey.html', 'key.html');
+            if(!keyPageUrl.includes('key.html')) keyPageUrl = keyPageUrl.replace(/\/$/, '') + '/key.html';
             
-            let link4mApi = `https://link4m.co/api?api=${LINK4M_API_KEY}&url=${encodeURIComponent(returnUrl)}`;
-            let proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(link4mApi)}`;
+            let returnUrl = `${keyPageUrl}?tool=${selectedToolId}&token=${fingerprint}&t=${timestamp}`; 
+            
+            // Lớp 1: Gọi API trực tiếp bằng Endpoint chuẩn v2
+            let apiUrl = `https://link4m.co/api-shorten/v2?api=${LINK4M_API_KEY}&url=${encodeURIComponent(returnUrl)}`;
 
-            fetch(proxyUrl)
-            .then(res => res.json())
-            .then(data => {
-                if(data.status === 'error') {
-                    apiFailed(data.message);
-                } else if(data.shortenedUrl) {
-                    // API TRẢ VỀ THÀNH CÔNG -> ÉP THANH LOAD LÊN 100% VÀ ĐÁ THẲNG SANG LINK4M!
-                    apiSuccess(data.shortenedUrl);
-                } else {
-                    apiFailed("Không nhận được dữ liệu từ Link4M");
+            fetch(apiUrl)
+            .then(res => res.text()) // Đọc Text trước để tránh sập JSON
+            .then(text => {
+                try {
+                    let data = JSON.parse(text);
+                    if (data.status === 'success' || data.shortenedUrl) {
+                        apiSuccess(data.shortenedUrl);
+                    } else {
+                        apiFailed(data.message || "Key API Link4M bị từ chối.");
+                    }
+                } catch(e) {
+                    // Lớp 2: Nếu Link4M trả về Text thô
+                    if(text.includes("http")) {
+                        apiSuccess(text.trim());
+                    } else {
+                        apiFailed("Định dạng dữ liệu Link4M thay đổi: " + text.substring(0, 30));
+                    }
                 }
             })
             .catch(err => {
-                // ĐÃ XÓA CỬA SAU: NẾU MẤT MẠNG THÌ BÁO LỖI CHỨ KHÔNG CHO VÀO NHẬN KEY NỮA
-                apiFailed("Mất kết nối với máy chủ Link4M. Vui lòng thử lại!");
+                // Lớp 3: Bị CORS chặn -> Bẻ lái sang Proxy trung chuyển
+                let pLog = document.getElementById('pLog');
+                pLog.innerHTML += `<div style="color:#ffb86c">> Trình duyệt chặn bảo mật. Đang gọi Proxy Bypass...</div>`;
+                pLog.scrollTop = pLog.scrollHeight;
+
+                let proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
+                fetch(proxyUrl)
+                .then(res => res.json())
+                .then(data => {
+                    let txt = data.contents;
+                    try {
+                        let parsed = JSON.parse(txt);
+                        if(parsed.shortenedUrl) apiSuccess(parsed.shortenedUrl);
+                        else apiFailed(parsed.message || "Lỗi Proxy API");
+                    } catch(e2) {
+                        if (txt && txt.includes("http")) apiSuccess(txt.trim());
+                        else apiFailed("Không thể phân giải Proxy.");
+                    }
+                })
+                .catch(err2 => {
+                    apiFailed("Kết nối thất bại hoàn toàn. Vui lòng tắt chặn quảng cáo (AdBlock) hoặc thử mạng khác.");
+                });
             });
         }
 
-        // NẾU LẤY ĐƯỢC LINK RÚT GỌN TỪ LINK4M
+        // XỬ LÝ KHI THÀNH CÔNG
         function apiSuccess(shortUrl) {
             clearInterval(animationInterval);
             document.getElementById('pBar').style.width = '100%';
@@ -255,21 +284,21 @@
             
             let pLog = document.getElementById('pLog');
             pLog.innerHTML += `<div style="color:#00ff88; font-weight:bold; margin-top:5px;">> Link4M API CONNECTED SUCCESSFULLY!</div>`;
-            pLog.innerHTML += `<div style="color:#fff">> Đang chuyển hướng sang Link4M...</div>`;
+            pLog.innerHTML += `<div>> Trích xuất link: ${shortUrl}</div>`;
+            pLog.innerHTML += `<div style="color:#fff; font-weight:bold;">> ĐANG CHUYỂN HƯỚNG TỚI LINK4M... VUI LÒNG ĐỢI!</div>`;
             pLog.scrollTop = pLog.scrollHeight;
 
-            // ĐÁ THẲNG SANG WEB LINK4M ĐỂ KHÁCH LÀM NHIỆM VỤ
-            setTimeout(() => { window.location.href = shortUrl; }, 1000);
+            setTimeout(() => { window.location.href = shortUrl; }, 1200);
         }
 
-        // NẾU LỖI (SAI API, RỚT MẠNG) - CẤM VƯỢT RÀO
+        // XỬ LÝ KHI THẤT BẠI (CHẶN ĐI CỬA SAU)
         function apiFailed(msg) {
             clearInterval(animationInterval);
             document.getElementById('pBar').style.background = '#ff4757';
             document.getElementById('pBar').style.boxShadow = '0 0 10px #ff4757';
             let pLog = document.getElementById('pLog');
             pLog.innerHTML += `<div style="color:#ff4757; font-weight:bold; margin-top:5px;">> API ERROR: ${msg}</div>`;
-            pLog.innerHTML += `<button onclick="window.location.reload()" style="margin-top:10px; background:#ff4757; color:#fff; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">THỬ LẠI</button>`;
+            pLog.innerHTML += `<button onclick="window.location.reload()" style="margin-top:10px; background:#ff4757; color:#fff; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold;">THỬ LẠI</button>`;
             pLog.scrollTop = pLog.scrollHeight;
         }
 
@@ -284,4 +313,5 @@
         } catch(e) {}
     </script>
 </body>
-</html>
+    </html>
+    
