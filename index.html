@@ -18,21 +18,26 @@
     
     <style>
         :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg) url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop') center/cover no-repeat fixed; color: #fff; overflow-x: hidden; padding-top: 70px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
+        body { background: var(--bg) url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop') center/cover no-repeat fixed; color: #fff; overflow-x: hidden; padding-top: 70px; padding-bottom: 80px; }
         .overlay-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,10,15,0.85); z-index: -1; }
         
-        /* 1. HIỆU ỨNG CHUYỂN TRANG (PAGE TRANSITION) */
-        .page-transition { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050508; z-index: 9999999; display: flex; justify-content: center; align-items: center; transition: opacity 0.6s ease-in-out, visibility 0.6s; }
-        .page-transition.loaded { opacity: 0; visibility: hidden; }
-        .page-transition i { font-size: 50px; color: var(--primary); animation: pulse 1s infinite alternate; }
-        @keyframes pulse { from { transform: scale(0.9); opacity: 0.7; } to { transform: scale(1.1); opacity: 1; } }
+        /* ================= MÀN HÌNH CHỜ ÉP BUỘC 3 GIÂY ================= */
+        .preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050508; z-index: 9999999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease, visibility 0.5s; }
+        .preloader.loaded { opacity: 0; visibility: hidden; }
+        .loader-box { width: 80%; max-width: 300px; text-align: center; }
+        .loader-logo { font-family: 'Orbitron'; font-size: 26px; color: #fff; margin-bottom: 20px; font-weight: 900; letter-spacing: 2px; }
+        .loader-logo span { color: var(--primary); }
+        .loader-bar-bg { width: 100%; height: 8px; background: #222; border-radius: 10px; overflow: hidden; border: 1px solid #333; }
+        .loader-bar-fill { width: 0%; height: 100%; background: var(--primary); box-shadow: 0 0 15px var(--primary); transition: width 0.03s linear; }
+        .loader-text { font-family: 'Orbitron'; color: var(--primary); font-size: 16px; margin-top: 15px; font-weight: bold; }
+        .loader-desc { font-family: monospace; color: #888; font-size: 10px; margin-top: 5px; }
 
-        /* 2. HIỆU ỨNG CUỘN TRƯỢT (SCROLL REVEAL) */
-        .reveal { opacity: 0; transform: translateY(60px); transition: all 0.8s cubic-bezier(0.5, 0, 0, 1); }
+        /* HIỆU ỨNG CUỘN TRƯỢT (SCROLL REVEAL) */
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.5, 0, 0, 1); }
         .reveal.active { opacity: 1; transform: translateY(0); }
 
-        /* HEADER & MENU NỔI */
+        /* HEADER */
         header { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(10,10,15,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 1000; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
         .logo { font-family: 'Orbitron'; font-size: 20px; font-weight: 900; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 8px; }
         .logo i { color: var(--primary); }
@@ -100,18 +105,16 @@
         .feat-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #fff; }
         .feat-desc { font-size: 13px; color: #888; line-height: 1.5; }
 
-        /* KỸ NĂNG */
+        /* KỸ NĂNG CÓ HIỆU ỨNG CHẠY */
         .skills-container { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 40px 30px; }
         .skill-item { margin-bottom: 20px; }
         .skill-item:last-child { margin-bottom: 0; }
         .skill-info { display: flex; justify-content: space-between; font-size: 14px; font-weight: bold; margin-bottom: 8px; color: #ddd; }
         .skill-percent { font-family: 'Orbitron'; color: var(--primary); }
         .progress-bg { width: 100%; height: 10px; background: #1a1a24; border-radius: 10px; overflow: hidden; border: 1px solid #333; }
-        
-        /* Hiệu ứng thanh chạy cho skill */
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #00b8ff, #00ff88); border-radius: 10px; width: 0; transition: width 1.5s ease-in-out; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #00b8ff, #00ff88); border-radius: 10px; width: 0; transition: width 1.5s ease-out; }
 
-        /* FOOTER DOANH NGHIỆP ĐẦY ĐỦ */
+        /* FOOTER DOANH NGHIỆP */
         footer { background: #050508; border-top: 1px solid var(--border); padding: 50px 20px 30px; margin-top: 50px; }
         .footer-grid { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-bottom: 40px; }
         .footer-title { font-family: 'Orbitron'; font-size: 18px; color: #fff; margin-bottom: 15px; }
@@ -131,8 +134,15 @@
 </head>
 <body>
 
-    <div class="page-transition" id="pageTransition">
-        <i class="fas fa-shield-alt"></i>
+    <div class="preloader" id="preloader">
+        <div class="loader-box">
+            <div class="loader-logo">QUOCDAT<span>.SEC</span></div>
+            <div class="loader-bar-bg">
+                <div class="loader-bar-fill" id="loaderFill"></div>
+            </div>
+            <div class="loader-text" id="loaderText">0%</div>
+            <div class="loader-desc">> Loading system UI assets...</div>
+        </div>
     </div>
 
     <div class="overlay-bg"></div>
@@ -145,10 +155,11 @@
         window.closeModal = function(id) { document.getElementById(id).style.display = 'none'; }
         window.closeOutside = function(event, id) { if(event.target.id === id) window.closeModal(id); }
         
-        // Hiệu ứng mượt khi bấm link sang trang khác
+        // Hiệu ứng mờ khi chuyển trang
         window.navigateWithAnimation = function(url) {
             window.closeNav();
-            document.getElementById('pageTransition').classList.remove('loaded');
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.5s';
             setTimeout(() => { window.location.href = url; }, 500);
         }
     </script>
@@ -247,9 +258,4 @@
 
     <section class="section reveal">
         <h2 class="sec-title">DỊCH VỤ <span>HÀNG ĐẦU</span></h2>
-        <div class="grid-features">
-            <div class="feat-card"><i class="fas fa-robot feat-icon"></i><div class="feat-title">Tool Auto Đa Nền Tảng</div><div class="feat-desc">Cung cấp phần mềm tự động hóa tối ưu năng suất MMO.</div></div>
-            <div class="feat-card"><i class="fas fa-code feat-icon"></i><div class="feat-title">Source Code Website</div><div class="feat-desc">Mã nguồn tạo web nạp thẻ, bán acc hoạt động trơn tru.</div></div>
-            <div class="feat-card"><i class="fas fa-shield-alt feat-icon"></i><div class="feat-title">Mã Hóa & Chống Dịch Ngược</div><div class="feat-desc">Công nghệ mã hóa chống lại mọi tool decompile.</div></div>
-            <div class="feat-card"><i class="fas fa-bolt feat-icon"></i><div class="feat-title">Thanh Toán & Lấy Key Tự Động</div><div class="feat-desc">Hệ thống xử lý giao dịch tự động trong 1 giây.</div></div>
-        </div
+        
