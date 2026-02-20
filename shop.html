@@ -6,7 +6,8 @@
     <title>KHO TÀI LIỆU VIP | QUOCDAT SEC</title>
     
     <script>
-        if(!localStorage.getItem('vip_username')) { window.location.href = "login.html"; }
+        var currentUser = localStorage.getItem('vip_username');
+        if(!currentUser) { window.location.href = "login.html"; }
     </script>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -17,8 +18,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
+        /* === PHONG CÁCH TỐI MÀU CYBERPUNK === */
         :root { --primary: #00ff88; --bg: #050505; --glass: rgba(255,255,255,0.03); --border: rgba(255,255,255,0.1); }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
         body { background: var(--bg) url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop') center/cover no-repeat fixed; color: #fff; overflow-x: hidden; }
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: -1; }
         
@@ -32,17 +34,17 @@
         .desktop-menu a { color: #aaa; text-decoration: none; font-size: 14px; font-weight: 600; transition:0.3s; }
         .desktop-menu a:hover, .desktop-menu a.active { color: var(--primary); }
         
-        /* NÚT BẤM MENU CHUẨN HTML (KHÔNG CẦN JS) */
+        /* NÚT BẤM MENU */
         .hamburger { display: none; font-size: 28px; color: #fff; padding: 10px; cursor: pointer; }
         .sidebar-toggle { display: none; font-size: 20px; color: var(--primary); margin-right: 15px; cursor: pointer; }
         
-        /* MENU MOBILE */
+        /* MENU MOBILE TRƯỢT */
         .mobile-nav { position: fixed; top: 0; right: 0; width: 85%; max-width: 320px; height: 100vh; background: #0a0a0a; z-index: 3000; padding: 80px 30px; transform: translateX(100%); transition: transform 0.4s ease; border-left: 1px solid var(--border); overflow-y: auto; }
         .mobile-nav.open { transform: translateX(0); }
         .mobile-nav a.menu-link { display: block; color: #fff; text-decoration: none; font-size: 16px; padding: 15px 0; border-bottom: 1px solid #1a1a1a; font-weight: 600; }
         .close-btn { position: absolute; top: 20px; right: 20px; font-size: 30px; color: #ff5555; cursor: pointer; }
 
-        /* BỐ CỤC SHOP */
+        /* BỐ CỤC SHOP 2 CỘT */
         .main-layout { display: flex; margin-top: 80px; min-height: 100vh; }
         .sidebar { width: 250px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); border-right: 1px solid var(--border); padding: 20px; position: fixed; height: calc(100vh - 80px); overflow-y: auto; z-index: 1500; transition: transform 0.3s; }
         .sidebar-title { font-family: 'Orbitron'; color: var(--primary); margin-bottom: 20px; font-size: 16px; }
@@ -76,12 +78,29 @@
         .btn-getkey { padding: 8px 15px; background: #00b8ff; border: none; color: #fff; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 12px; }
         .btn-getkey:hover { background: #0088cc; }
 
-        /* MODAL POPUP */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 4000; display: none; justify-content: center; align-items: center; }
-        .key-modal { width: 90%; max-width: 350px; background: #111; border-radius: 15px; border: 1px solid var(--primary); padding: 25px; text-align: center; }
-        .key-input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #000; color: #fff; font-size: 16px; text-align: center; outline: none; margin: 15px 0; font-family: monospace; }
-        .key-input:focus { border-color: #00b8ff; }
+        /* ================= MODAL PHONG CÁCH IOS ================= */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 4000; display: none; justify-content: center; align-items: center; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .ios-modal { width: 320px; background: rgba(30, 30, 30, 0.95); border: 1px solid #444; border-radius: 18px; text-align: center; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8); transform: scale(0.95); transition: 0.3s; }
+        .modal-overlay.active .ios-modal { transform: scale(1); }
+        
+        .ios-content { padding: 25px 20px 20px; }
+        .ios-title { font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 8px; }
+        .ios-desc { font-size: 13px; color: #aaa; line-height: 1.5; }
+        .ios-price-tag { font-family: 'Orbitron'; font-size: 20px; color: #00ff88; margin-top: 10px; font-weight: bold; }
+        
+        .key-input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #555; background: #111; color: #fff; font-size: 15px; text-align: center; outline: none; margin-top: 15px; font-family: monospace; transition: 0.3s; }
+        .key-input:focus { border-color: #00b8ff; background: #000; }
+        
+        .ios-actions { display: flex; border-top: 1px solid #444; }
+        .ios-btn { flex: 1; padding: 16px 0; cursor: pointer; font-size: 16px; border: none; background: transparent; transition: 0.2s; }
+        .ios-btn:hover { background: rgba(255,255,255,0.05); }
+        .ios-btn-cancel { color: #ff453a; border-right: 1px solid #444; }
+        .ios-btn-confirm { color: #0a84ff; font-weight: 600; }
+        .ios-btn-buy { color: #00ff88; font-weight: 600; }
 
+        /* RESPONSIVE */
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-100%); }
             .sidebar.active { transform: translateX(0); }
@@ -159,7 +178,7 @@
                     <div class="prod-details">
                         <div class="prod-title">Tool Obfuscate Python V8.0</div>
                         <div class="prod-meta"><span><i class="fas fa-download"></i> 1.2k</span><span>V8.0</span></div>
-                        <div class="prod-price"><div>250.000đ</div><button class="btn-buy" onclick="buyPaidProduct('Tool Obfuscate Python V8.0', 250000, '#')"><i class="fas fa-cart-plus"></i> MUA</button></div>
+                        <div class="prod-price"><div>250.000đ</div><button class="btn-buy" onclick="openBuyModal('p1', 'Tool Obfuscate Python V8.0', 250000)"><i class="fas fa-cart-plus"></i> MUA</button></div>
                     </div>
                 </div>
 
@@ -168,7 +187,7 @@
                     <div class="prod-details">
                         <div class="prod-title">Source Web Bán Key Tự Động</div>
                         <div class="prod-meta"><span><i class="fas fa-download"></i> 450</span><span>Full API</span></div>
-                        <div class="prod-price"><div>500.000đ</div><button class="btn-buy" onclick="buyPaidProduct('Web Bán Key', 500000, '#')"><i class="fas fa-cart-plus"></i> MUA</button></div>
+                        <div class="prod-price"><div>500.000đ</div><button class="btn-buy" onclick="openBuyModal('p2', 'Source Web Bán Key Tự Động', 500000)"><i class="fas fa-cart-plus"></i> MUA</button></div>
                     </div>
                 </div>
 
@@ -177,7 +196,7 @@
                     <div class="prod-details">
                         <div class="prod-title">Script Blox Fruit Auto Farm</div>
                         <div class="prod-meta"><span><i class="fas fa-download"></i> 8.5k</span><span>V2.1</span></div>
-                        <div class="prod-price"><div style="color:#00b8ff">Miễn Phí</div><button class="btn-getkey" onclick="requestFreeDownload('#')"><i class="fas fa-unlock"></i> GET KEY</button></div>
+                        <div class="prod-price"><div style="color:#00b8ff">Miễn Phí</div><button class="btn-getkey" onclick="openKeyModal('p3', 'Script Blox Fruit Auto Farm')"><i class="fas fa-unlock"></i> GET KEY</button></div>
                     </div>
                 </div>
 
@@ -186,7 +205,7 @@
                     <div class="prod-details">
                         <div class="prod-title">Tool Auto Golike/Tiktok</div>
                         <div class="prod-meta"><span><i class="fas fa-download"></i> 890</span><span>V4.5</span></div>
-                        <div class="prod-price"><div>150.000đ</div><button class="btn-buy" onclick="buyPaidProduct('Auto Golike', 150000, '#')"><i class="fas fa-cart-plus"></i> MUA</button></div>
+                        <div class="prod-price"><div>150.000đ</div><button class="btn-buy" onclick="openBuyModal('p4', 'Tool Auto Golike/Tiktok', 150000)"><i class="fas fa-cart-plus"></i> MUA</button></div>
                     </div>
                 </div>
 
@@ -195,7 +214,7 @@
                     <div class="prod-details">
                         <div class="prod-title">Code HTML Landing Page</div>
                         <div class="prod-meta"><span><i class="fas fa-download"></i> 3.2k</span><span>HTML5</span></div>
-                        <div class="prod-price"><div style="color:#00b8ff">Miễn Phí</div><button class="btn-getkey" onclick="requestFreeDownload('#')"><i class="fas fa-unlock"></i> GET KEY</button></div>
+                        <div class="prod-price"><div style="color:#00b8ff">Miễn Phí</div><button class="btn-getkey" onclick="openKeyModal('p5', 'Code HTML Landing Page')"><i class="fas fa-unlock"></i> GET KEY</button></div>
                     </div>
                 </div>
 
@@ -204,7 +223,7 @@
                     <div class="prod-details">
                         <div class="prod-title">Bot Telegram Quản Lý Nhóm</div>
                         <div class="prod-meta"><span><i class="fas fa-download"></i> 600</span><span>V1.2</span></div>
-                        <div class="prod-price"><div>150.000đ</div><button class="btn-buy" onclick="buyPaidProduct('Bot Telegram', 150000, '#')"><i class="fas fa-cart-plus"></i> MUA</button></div>
+                        <div class="prod-price"><div>150.000đ</div><button class="btn-buy" onclick="openBuyModal('p6', 'Bot Telegram Quản Lý Nhóm', 150000)"><i class="fas fa-cart-plus"></i> MUA</button></div>
                     </div>
                 </div>
 
@@ -213,7 +232,7 @@
                     <div class="prod-details">
                         <div class="prod-title">Fix Lag Roblox Chống Văng</div>
                         <div class="prod-meta"><span><i class="fas fa-download"></i> 12k</span><span>V3.0</span></div>
-                        <div class="prod-price"><div style="color:#00b8ff">Miễn Phí</div><button class="btn-getkey" onclick="requestFreeDownload('#')"><i class="fas fa-unlock"></i> GET KEY</button></div>
+                        <div class="prod-price"><div style="color:#00b8ff">Miễn Phí</div><button class="btn-getkey" onclick="openKeyModal('p7', 'Fix Lag Roblox Chống Văng')"><i class="fas fa-unlock"></i> GET KEY</button></div>
                     </div>
                 </div>
 
@@ -222,16 +241,16 @@
                     <div class="prod-details">
                         <div class="prod-title">Script Auto Reg Mail SLL</div>
                         <div class="prod-meta"><span><i class="fas fa-download"></i> 120</span><span>V1.0</span></div>
-                        <div class="prod-price"><div>200.000đ</div><button class="btn-buy" onclick="buyPaidProduct('Auto Reg Mail', 200000, '#')"><i class="fas fa-cart-plus"></i> MUA</button></div>
+                        <div class="prod-price"><div>200.000đ</div><button class="btn-buy" onclick="openBuyModal('p8', 'Script Auto Reg Mail SLL', 200000)"><i class="fas fa-cart-plus"></i> MUA</button></div>
                     </div>
                 </div>
 
                 <div class="product-card">
                     <div class="prod-thumb" style="color:#1877f2"><i class="fab fa-facebook"></i></div>
                     <div class="prod-details">
-                        <div class="prod-title">Tool Check Live/Die Clone FB</div>
+                        <div class="prod-title">Tool Check Live/Die FB</div>
                         <div class="prod-meta"><span><i class="fas fa-download"></i> 1.5k</span><span>V2.2</span></div>
-                        <div class="prod-price"><div>100.000đ</div><button class="btn-buy" onclick="buyPaidProduct('Check FB', 100000, '#')"><i class="fas fa-cart-plus"></i> MUA</button></div>
+                        <div class="prod-price"><div>100.000đ</div><button class="btn-buy" onclick="openBuyModal('p9', 'Tool Check Live/Die FB', 100000)"><i class="fas fa-cart-plus"></i> MUA</button></div>
                     </div>
                 </div>
 
@@ -240,7 +259,7 @@
                     <div class="prod-details">
                         <div class="prod-title">Python Basic Obfuscator</div>
                         <div class="prod-meta"><span><i class="fas fa-download"></i> 5k</span><span>V1.0</span></div>
-                        <div class="prod-price"><div style="color:#00b8ff">Miễn Phí</div><button class="btn-getkey" onclick="requestFreeDownload('#')"><i class="fas fa-unlock"></i> GET KEY</button></div>
+                        <div class="prod-price"><div style="color:#00b8ff">Miễn Phí</div><button class="btn-getkey" onclick="openKeyModal('p10', 'Python Basic Obfuscator')"><i class="fas fa-unlock"></i> GET KEY</button></div>
                     </div>
                 </div>
 
@@ -249,28 +268,9 @@
                     <div class="prod-details">
                         <div class="prod-title">Source Nạp Thẻ Cào PHP</div>
                         <div class="prod-meta"><span><i class="fas fa-download"></i> 230</span><span>PHP 8</span></div>
-                        <div class="prod-price"><div>300.000đ</div><button class="btn-buy" onclick="buyPaidProduct('Source Nạp Thẻ', 300000, '#')"><i class="fas fa-cart-plus"></i> MUA</button></div>
+                        <div class="prod-price"><div>300.000đ</div><button class="btn-buy" onclick="openBuyModal('p11', 'Source Nạp Thẻ Cào PHP', 300000)"><i class="fas fa-cart-plus"></i> MUA</button></div>
                     </div>
                 </div>
 
                 <div class="product-card">
-                    <div class="prod-thumb" style="color:#00b8ff"><i class="fas fa-sms"></i><span class="prod-tag free">FREE</span></div>
-                    <div class="prod-details">
-                        <div class="prod-title">Tool Spam SMS/Call Troll</div>
-                        <div class="prod-meta"><span><i class="fas fa-download"></i> 800</span><span>Test</span></div>
-                        <div class="prod-price"><div style="color:#00b8ff">Miễn Phí</div><button class="btn-getkey" onclick="requestFreeDownload('#')"><i class="fas fa-unlock"></i> GET KEY</button></div>
-                    </div>
-                </div>
-
-                <div class="product-card">
-                    <div class="prod-thumb" style="color:#ff5555"><i class="fas fa-user-secret"></i><span class="prod-tag vip">VIP</span></div>
-                    <div class="prod-details">
-                        <div class="prod-title">Python Bypass AntiCheat Game</div>
-                        <div class="prod-meta"><span><i class="fas fa-download"></i> 50</span><span>Pro</span></div>
-                        <div class="prod-price"><div>400.000đ</div><button class="btn-buy" onclick="buyPaidProduct('Bypass AntiCheat', 400000, '#')"><i class="fas fa-cart-plus"></i> MUA</button></div>
-                    </div>
-                </div>
-
-                <div class="product-card">
-                    <div class="prod-thumb" style="color:#ff5722"><i class="fas fa-shopping-bag"></i></div>
-                   
+                    <div class="prod-thumb" style="color:#00b8
