@@ -85,7 +85,7 @@
             <h1 class="box-title">TẠO LINK MỞ KHÓA</h1>
             
             <div id="selectionArea">
-                <p class="box-desc">Hệ thống yêu cầu vượt 1 link rút gọn Link4M để lấy mã tải Tool. Quá trình vượt tường lửa sẽ đồng bộ với API Link4M.</p>
+                <p class="box-desc">Hệ thống yêu cầu vượt 1 link rút gọn Link4M để lấy mã tải Tool. Quá trình lấy link sẽ được mã hóa an toàn.</p>
                 
                 <div class="form-group">
                     <label>🔥 CHỌN TOOL CẦN MỞ KHÓA</label>
@@ -125,7 +125,7 @@
     </div>
 
     <script>
-        // API LINK4M
+        // API LINK4M CỦA BẠN (GIỮ NGUYÊN)
         const LINK4M_API_KEY = "6992df868b3d1e423d1ab833"; 
 
         const freeTools = [
@@ -145,7 +145,7 @@
         let selectedToolId = "";
         let animationInterval;
 
-        // XUẤT DANH SÁCH IOS
+        // IN DANH SÁCH VÀO CỬA SỔ IOS
         document.addEventListener("DOMContentLoaded", function() {
             const sheetBody = document.getElementById('sheetBody');
             freeTools.forEach(tool => {
@@ -171,7 +171,7 @@
             closeSheet();
         }
 
-        // ================= CƠ CHẾ ĐỒNG BỘ: THANH LOAD CHẠY THỰC TẾ THEO API =================
+        // ================= CƠ CHẾ ĐỒNG BỘ: THANH LOAD CHẠY THEO API VÀ ĐÁ THẲNG SANG LINK4M =================
         function initiateSyncProcess() {
             if(!selectedToolId) { 
                 alert("⚠️ Bạn chưa chọn Tool nào!"); 
@@ -191,20 +191,19 @@
             // 1. GỌI API NGAY LẬP TỨC TRONG NỀN
             triggerAPI_Link4M();
 
-            // 2. CHẠY HIỆU ỨNG CHỜ API (Chỉ chạy đến 90% rồi đứng đợi)
+            // 2. CHẠY HIỆU ỨNG CHỜ API 
             animationInterval = setInterval(() => {
                 if (progress < 85) {
-                    progress += Math.floor(Math.random() * 8) + 2; // Chạy nhanh khúc đầu
+                    progress += Math.floor(Math.random() * 8) + 2; 
                 } else if (progress < 95) {
-                    progress += 1; // Chạy rất chậm khúc 85 -> 95 để giả vờ đang nối mạng
+                    progress += 1; // Khựng lại ở 95% đợi mạng
                 }
 
-                if(progress > 95) progress = 95; // Cấm vượt 95% nếu API chưa về
+                if(progress > 95) progress = 95; 
                 
                 pBar.style.width = progress + '%';
                 pPercent.innerText = progress + '%';
 
-                // In IP ảo cho nguy hiểm
                 if (progress % 5 === 0) {
                     let ip = Math.floor(Math.random()*255) + "." + Math.floor(Math.random()*255) + ".x.x";
                     let ctry = countries[Math.floor(Math.random() * countries.length)];
@@ -222,12 +221,11 @@
             localStorage.setItem('anti_share_token', fingerprint);
             localStorage.setItem('anti_share_time', timestamp);
 
-            // Dẫn link Callback về trang key.html
+            // Dẫn link Callback về trang key.html của bạn
             let currUrl = window.location.href.split('?')[0].split('#')[0];
             let basePath = currUrl.substring(0, currUrl.lastIndexOf('/'));
             let returnUrl = basePath + "/key.html?tool=" + selectedToolId + "&token=" + fingerprint + "&t=" + timestamp;
             
-            // Gọi Proxy CORS để tránh rào cản trình duyệt Android
             let link4mApi = `https://link4m.co/api?api=${LINK4M_API_KEY}&url=${encodeURIComponent(returnUrl)}`;
             let proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(link4mApi)}`;
 
@@ -237,16 +235,19 @@
                 if(data.status === 'error') {
                     apiFailed(data.message);
                 } else if(data.shortenedUrl) {
-                    // API TRẢ VỀ THÀNH CÔNG -> ÉP THANH LOAD LÊN 100% VÀ ĐÁ TRANG
+                    // API TRẢ VỀ THÀNH CÔNG -> ÉP THANH LOAD LÊN 100% VÀ ĐÁ THẲNG SANG LINK4M!
                     apiSuccess(data.shortenedUrl);
+                } else {
+                    apiFailed("Không nhận được dữ liệu từ Link4M");
                 }
             })
             .catch(err => {
-                apiFallback(returnUrl);
+                // ĐÃ XÓA CỬA SAU: NẾU MẤT MẠNG THÌ BÁO LỖI CHỨ KHÔNG CHO VÀO NHẬN KEY NỮA
+                apiFailed("Mất kết nối với máy chủ Link4M. Vui lòng thử lại!");
             });
         }
 
-        // NẾU LẤY ĐƯỢC LINK THÀNH CÔNG
+        // NẾU LẤY ĐƯỢC LINK RÚT GỌN TỪ LINK4M
         function apiSuccess(shortUrl) {
             clearInterval(animationInterval);
             document.getElementById('pBar').style.width = '100%';
@@ -254,33 +255,22 @@
             
             let pLog = document.getElementById('pLog');
             pLog.innerHTML += `<div style="color:#00ff88; font-weight:bold; margin-top:5px;">> Link4M API CONNECTED SUCCESSFULLY!</div>`;
-            pLog.innerHTML += `<div style="color:#fff">> Redirecting to target...</div>`;
+            pLog.innerHTML += `<div style="color:#fff">> Đang chuyển hướng sang Link4M...</div>`;
             pLog.scrollTop = pLog.scrollHeight;
 
-            // Đợi 0.8s để người dùng nhìn thấy thông báo rồi mới bay
-            setTimeout(() => { window.location.href = shortUrl; }, 800);
+            // ĐÁ THẲNG SANG WEB LINK4M ĐỂ KHÁCH LÀM NHIỆM VỤ
+            setTimeout(() => { window.location.href = shortUrl; }, 1000);
         }
 
-        // NẾU API LỖI (Vd: Sai Key, hết hạn)
+        // NẾU LỖI (SAI API, RỚT MẠNG) - CẤM VƯỢT RÀO
         function apiFailed(msg) {
             clearInterval(animationInterval);
+            document.getElementById('pBar').style.background = '#ff4757';
+            document.getElementById('pBar').style.boxShadow = '0 0 10px #ff4757';
             let pLog = document.getElementById('pLog');
             pLog.innerHTML += `<div style="color:#ff4757; font-weight:bold; margin-top:5px;">> API ERROR: ${msg}</div>`;
+            pLog.innerHTML += `<button onclick="window.location.reload()" style="margin-top:10px; background:#ff4757; color:#fff; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">THỬ LẠI</button>`;
             pLog.scrollTop = pLog.scrollHeight;
-            alert("Lỗi từ Link4M: " + msg + "\n(Vui lòng kiểm tra lại cấu hình API Link4M của bạn)");
-        }
-
-        // NẾU RỚT MẠNG HOẶC TRÌNH DUYỆT CỨNG ĐẦU CHẶN
-        function apiFallback(returnUrl) {
-            clearInterval(animationInterval);
-            document.getElementById('pBar').style.width = '100%';
-            document.getElementById('pPercent').innerText = '100%';
-            let pLog = document.getElementById('pLog');
-            pLog.innerHTML += `<div style="color:#ffb86c; font-weight:bold; margin-top:5px;">> Connection Interrupted. Using Fallback bypass...</div>`;
-            pLog.scrollTop = pLog.scrollHeight;
-            
-            // Đá thẳng tới kết quả để bạn không bị kẹt khi test local
-            setTimeout(() => { window.location.href = returnUrl; }, 1000);
         }
 
         // FIREBASE ĐỒNG BỘ
