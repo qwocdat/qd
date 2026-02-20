@@ -19,7 +19,7 @@
     
     <style>
         :root { --primary: #00ff88; --bg: #050505; --glass: rgba(255,255,255,0.03); --border: rgba(255,255,255,0.1); }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: #fff; overflow-x: hidden; }
         
         header { position: fixed; top: 0; left: 0; width: 100%; padding: 15px 0; z-index: 2000; background: rgba(10,10,10,0.95); border-bottom: 1px solid var(--border); }
@@ -47,6 +47,7 @@
         .shop-content { flex: 1; padding: 20px; margin-left: 250px; }
         .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
         .product-card { background: var(--glass); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: 0.3s; display: flex; flex-direction: column; }
+        .product-card:hover { border-color: var(--primary); transform: translateY(-3px); }
         
         .prod-thumb { height: 120px; background: #111; display: flex; align-items: center; justify-content: center; font-size: 40px; position: relative; }
         .prod-tag { position: absolute; top: 10px; right: 10px; background: var(--primary); color: #000; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; }
@@ -58,7 +59,6 @@
         .prod-meta { display: flex; justify-content: space-between; font-size: 11px; color: #888; margin-bottom: 15px; }
         .prod-price { font-family: 'Orbitron'; font-size: 16px; color: var(--primary); font-weight: bold; margin-top: auto; display: flex; justify-content: space-between; align-items: center; }
         
-        /* Đảm bảo nút nổi lên trên cùng để dễ bấm */
         .btn-buy, .btn-getkey { position: relative; z-index: 10; padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; display: flex; gap: 5px; align-items: center; }
         .btn-buy { background: var(--primary); color: #000; }
         .btn-getkey { background: #00b8ff; color: #fff; }
@@ -84,73 +84,71 @@
 <body>
 
     <script>
-        let targetId = "", targetTitle = "", targetPrice = 0;
+        window.targetId = ""; window.targetTitle = ""; window.targetPrice = 0;
 
-        function openNav() { document.getElementById('mobileNav').style.right = '0px'; }
-        function closeNav() { document.getElementById('mobileNav').style.right = '-100%'; }
-        function toggleSide() { 
-            let sb = document.getElementById('shopSidebar');
-            sb.style.left = (sb.style.left === '0px') ? '-250px' : '0px'; 
-        }
-        function logout() { localStorage.removeItem('vip_username'); window.location.href = "login.html"; }
+        window.openNav = function() { document.getElementById('mobileNav').style.right = '0px'; }
+        window.closeNav = function() { document.getElementById('mobileNav').style.right = '-100%'; }
+        window.toggleSide = function() { let sb = document.getElementById('shopSidebar'); sb.style.left = (sb.style.left === '0px') ? '-250px' : '0px'; }
+        window.logout = function() { localStorage.removeItem('vip_username'); window.location.href = "login.html"; }
 
-        // BẬT CỬA SỔ IOS BẰNG DOM TRỰC TIẾP
-        function openBuy(id, title, price) {
-            targetId = id; targetTitle = title; targetPrice = parseInt(price);
+        window.openBuy = function(id, title, price) {
+            window.targetId = id; window.targetTitle = title; window.targetPrice = parseInt(price);
             document.getElementById('buyTitle').innerText = title;
-            document.getElementById('buyPrice').innerText = targetPrice.toLocaleString('vi-VN') + " đ";
+            document.getElementById('buyPrice').innerText = window.targetPrice.toLocaleString('vi-VN') + " đ";
             document.getElementById('buyModalOverlay').style.display = 'flex';
         }
 
-        function openKey(id, title) {
-            targetId = id; targetTitle = title;
+        window.openKey = function(id, title) {
+            window.targetId = id; window.targetTitle = title;
             document.getElementById('keyTitle').innerText = title;
             document.getElementById('inputKey').value = '';
             document.getElementById('keyError').style.display = 'none';
             document.getElementById('keyModalOverlay').style.display = 'flex';
         }
 
-        function closeAllModals() {
+        window.closeAllModals = function() {
             document.getElementById('buyModalOverlay').style.display = 'none';
             document.getElementById('keyModalOverlay').style.display = 'none';
         }
 
-        function checkKey() {
+        window.checkKey = function() {
             let userKey = document.getElementById('inputKey').value.trim();
-            let now = Math.floor(Date.now() / 1000);
-            let timeStep = Math.floor(now / 900); 
-            let hash = CryptoJS.MD5("QUOC_DAT_SECRET_2026" + timeStep + targetId).toString();
-            let validKey = "quocdat_" + hash.substring(0, 10);
+            try {
+                let now = Math.floor(Date.now() / 1000);
+                let timeStep = Math.floor(now / 900); 
+                let hash = CryptoJS.MD5("QUOC_DAT_SECRET_2026" + timeStep + window.targetId).toString();
+                let validKey = "quocdat_" + hash.substring(0, 10);
 
-            if(userKey === validKey) {
-                alert("✅ Mã chính xác! Đang tải file xuống...");
-                closeAllModals();
-            } else {
-                document.getElementById('keyError').style.display = 'block';
-            }
+                if(userKey === validKey) {
+                    alert("✅ Mở khóa thành công! Hệ thống đang tải file: " + window.targetTitle);
+                    window.closeAllModals();
+                } else {
+                    document.getElementById('keyError').style.display = 'block';
+                }
+            } catch(e) { alert("Lỗi thư viện mã hóa!"); }
         }
     </script>
 
     <header>
         <div class="container nav-flex">
             <div style="display:flex; align-items:center;">
-                <i class="fas fa-stream sidebar-toggle" onclick="toggleSide()"></i>
+                <i class="fas fa-stream sidebar-toggle" onclick="window.toggleSide()"></i>
                 <a href="index.html" class="logo"><i class="fas fa-shield-alt"></i> QUOCDAT.SEC</a>
             </div>
             <nav class="desktop-menu"><a href="index.html">Trang Chủ</a><a href="shop.html" class="active">Kho File VIP</a><a href="getkey.html">Lấy Key</a><a href="naptien.html" style="color:#00b8ff">Nạp Tiền</a></nav>
             <div id="desktopAuth"></div>
-            <i class="fas fa-bars hamburger" onclick="openNav()"></i>
+            <i class="fas fa-bars hamburger" onclick="window.openNav()"></i>
         </div>
     </header>
 
     <div class="mobile-nav" id="mobileNav">
-        <i class="fas fa-times close-btn" onclick="closeNav()"></i>
+        <i class="fas fa-times close-btn" onclick="window.closeNav()"></i>
         <div id="mobileUserArea"></div>
         <a href="index.html" class="menu-link"><i class="fas fa-home"></i> Trang Chủ</a>
         <a href="shop.html" class="menu-link" style="color:var(--primary)"><i class="fas fa-download"></i> Kho Tài Liệu VIP</a>
         <a href="getkey.html" class="menu-link"><i class="fas fa-key"></i> Lấy Key</a>
         <a href="naptien.html" class="menu-link" style="color:#00b8ff"><i class="fas fa-wallet"></i> Nạp Tiền</a>
-        <a href="javascript:void(0)" onclick="logout()" class="menu-link" style="color:#ff5555;margin-top:20px;border:none">Đăng Xuất</a>
+        <a href="javascript:void(0)" onclick="window.logout()" class="menu-link" style="color:#ff5555;margin-top:20px;border:none">Đăng Xuất</a>
     </div>
 
     <div class="main-layout">
@@ -165,7 +163,9 @@
         </div>
 
         <div class="shop-content">
-            <h2 style="font-family:'Orbitron'; margin-bottom:20px; color:var(--primary)">DANH SÁCH TOOL & SCRIPT</h2>
+            <div class="shop-header"><div class="search-box"><i class="fas fa-search"></i><input type="text" placeholder="Tìm kiếm trong 30 Tool..."></div></div>
+            <h2 style="font-family:'Orbitron'; margin-bottom:20px; color:var(--primary)">DANH SÁCH 30 TOOL & SCRIPT</h2>
+            
             <div class="product-grid">
                 
                 <div class="product-card">
@@ -173,16 +173,7 @@
                     <div class="prod-details">
                         <div class="prod-title">Tool Obfuscate Python V8.0</div>
                         <div class="prod-meta"><span><i class="fas fa-download"></i> 1.2k</span><span>V8.0</span></div>
-                        <div class="prod-price"><div>250.000đ</div><button class="btn-buy" onclick="openBuy('tool01', 'Tool Obfuscate Python', 250000)"><i class="fas fa-cart-plus"></i> MUA</button></div>
-                    </div>
-                </div>
-
-                <div class="product-card">
-                    <div class="prod-thumb" style="color:#00b8ff"><i class="fas fa-gamepad"></i><span class="prod-tag free">FREE</span></div>
-                    <div class="prod-details">
-                        <div class="prod-title">Script Blox Fruit Auto Farm</div>
-                        <div class="prod-meta"><span><i class="fas fa-download"></i> 8.5k</span><span>V2.1</span></div>
-                        <div class="prod-price"><div style="color:#00b8ff">Miễn Phí</div><button class="btn-getkey" onclick="openKey('tool03', 'Script Blox Fruit Auto')"><i class="fas fa-unlock"></i> KEY</button></div>
+                        <div class="prod-price"><div>250.000đ</div><button class="btn-buy" onclick="window.openBuy('tool01', 'Tool Obfuscate Python', 250000)"><i class="fas fa-cart-plus"></i> MUA</button></div>
                     </div>
                 </div>
 
@@ -191,7 +182,70 @@
                     <div class="prod-details">
                         <div class="prod-title">Source Web Bán Key Tự Động</div>
                         <div class="prod-meta"><span><i class="fas fa-download"></i> 450</span><span>Full API</span></div>
-                        <div class="prod-price"><div>500.000đ</div><button class="btn-buy" onclick="openBuy('tool02', 'Web Bán Key Tự Động', 500000)"><i class="fas fa-cart-plus"></i> MUA</button></div>
+                        <div class="prod-price"><div>500.000đ</div><button class="btn-buy" onclick="window.openBuy('tool02', 'Web Bán Key', 500000)"><i class="fas fa-cart-plus"></i> MUA</button></div>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="prod-thumb" style="color:#00b8ff"><i class="fas fa-gamepad"></i><span class="prod-tag free">FREE</span></div>
+                    <div class="prod-details">
+                        <div class="prod-title">Script Blox Fruit Auto Farm</div>
+                        <div class="prod-meta"><span><i class="fas fa-download"></i> 8.5k</span><span>V2.1</span></div>
+                        <div class="prod-price"><div style="color:#00b8ff">Miễn Phí</div><button class="btn-getkey" onclick="window.openKey('tool03', 'Script Blox Fruit Auto')"><i class="fas fa-unlock"></i> KEY</button></div>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="prod-thumb" style="color:#ff00ff"><i class="fas fa-robot"></i><span class="prod-tag">NEW</span></div>
+                    <div class="prod-details">
+                        <div class="prod-title">Tool Auto Golike/Tiktok</div>
+                        <div class="prod-meta"><span><i class="fas fa-download"></i> 890</span><span>V4.5</span></div>
+                        <div class="prod-price"><div>150.000đ</div><button class="btn-buy" onclick="window.openBuy('tool04', 'Tool Auto Golike', 150000)"><i class="fas fa-cart-plus"></i> MUA</button></div>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="prod-thumb" style="color:#00b8ff"><i class="fab fa-html5"></i><span class="prod-tag free">FREE</span></div>
+                    <div class="prod-details">
+                        <div class="prod-title">Code HTML Landing Page</div>
+                        <div class="prod-meta"><span><i class="fas fa-download"></i> 3.2k</span><span>HTML5</span></div>
+                        <div class="prod-price"><div style="color:#00b8ff">Miễn Phí</div><button class="btn-getkey" onclick="window.openKey('tool05', 'Code HTML Landing Page')"><i class="fas fa-unlock"></i> KEY</button></div>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="prod-thumb" style="color:#0088cc"><i class="fab fa-telegram"></i><span class="prod-tag">HOT</span></div>
+                    <div class="prod-details">
+                        <div class="prod-title">Bot Telegram Quản Lý Nhóm</div>
+                        <div class="prod-meta"><span><i class="fas fa-download"></i> 600</span><span>V1.2</span></div>
+                        <div class="prod-price"><div>150.000đ</div><button class="btn-buy" onclick="window.openBuy('tool06', 'Bot Telegram', 150000)"><i class="fas fa-cart-plus"></i> MUA</button></div>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="prod-thumb" style="color:#00b8ff"><i class="fas fa-tachometer-alt"></i><span class="prod-tag free">FREE</span></div>
+                    <div class="prod-details">
+                        <div class="prod-title">Fix Lag Roblox Chống Văng</div>
+                        <div class="prod-meta"><span><i class="fas fa-download"></i> 12k</span><span>V3.0</span></div>
+                        <div class="prod-price"><div style="color:#00b8ff">Miễn Phí</div><button class="btn-getkey" onclick="window.openKey('tool07', 'Fix Lag Roblox')"><i class="fas fa-unlock"></i> KEY</button></div>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="prod-thumb" style="color:#ff5555"><i class="fas fa-envelope"></i><span class="prod-tag vip">VIP</span></div>
+                    <div class="prod-details">
+                        <div class="prod-title">Script Auto Reg Mail SLL</div>
+                        <div class="prod-meta"><span><i class="fas fa-download"></i> 120</span><span>V1.0</span></div>
+                        <div class="prod-price"><div>200.000đ</div><button class="btn-buy" onclick="window.openBuy('tool08', 'Auto Reg Mail SLL', 200000)"><i class="fas fa-cart-plus"></i> MUA</button></div>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="prod-thumb" style="color:#1877f2"><i class="fab fa-facebook"></i></div>
+                    <div class="prod-details">
+                        <div class="prod-title">Tool Check Live/Die FB</div>
+                        <div class="prod-meta"><span><i class="fas fa-download"></i> 1.5k</span><span>V2.2</span></div>
+                        <div class="prod-price"><div>100.000đ</div><button class="btn-buy" onclick="window.openBuy('tool09', 'Tool Check FB', 100000)"><i class="fas fa-cart-plus"></i> MUA</button></div>
                     </div>
                 </div>
 
@@ -200,83 +254,21 @@
                     <div class="prod-details">
                         <div class="prod-title">Python Basic Obfuscator</div>
                         <div class="prod-meta"><span><i class="fas fa-download"></i> 5k</span><span>V1.0</span></div>
-                        <div class="prod-price"><div style="color:#00b8ff">Miễn Phí</div><button class="btn-getkey" onclick="openKey('tool10', 'Python Basic Obfuscator')"><i class="fas fa-unlock"></i> KEY</button></div>
+                        <div class="prod-price"><div style="color:#00b8ff">Miễn Phí</div><button class="btn-getkey" onclick="window.openKey('tool10', 'Python Basic Obfuscator')"><i class="fas fa-unlock"></i> KEY</button></div>
                     </div>
                 </div>
 
+                <div class="product-card">
+                    <div class="prod-thumb" style="color:#00ff88"><i class="fas fa-money-bill-wave"></i><span class="prod-tag">HOT</span></div>
+                    <div class="prod-details">
+                        <div class="prod-title">Source Nạp Thẻ Cào PHP</div>
+                        <div class="prod-meta"><span><i class="fas fa-download"></i> 230</span><span>PHP 8</span></div>
+                        <div class="prod-price"><div>300.000đ</div><button class="btn-buy" onclick="window.openBuy('tool11', 'Source Nạp Thẻ', 300000)"><i class="fas fa-cart-plus"></i> MUA</button></div>
+                    </div>
                 </div>
-        </div>
-    </div>
 
-    <div class="modal-overlay" id="buyModalOverlay">
-        <div class="ios-modal">
-            <div class="ios-content">
-                <div class="ios-title">Xác Nhận Thanh Toán</div>
-                <div class="ios-desc">Bạn có muốn mua sản phẩm này?</div>
-                <div class="ios-highlight" id="buyTitle">Tên Tool</div>
-                <div class="ios-price" id="buyPrice">0 đ</div>
-            </div>
-            <div class="ios-actions">
-                <button class="ios-btn ios-btn-cancel" onclick="closeAllModals()">Hủy</button>
-                <button class="ios-btn ios-btn-confirm" style="color:#00ff88" onclick="executeServerBuy()">Mua Ngay</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="keyModalOverlay">
-        <div class="ios-modal">
-            <div class="ios-content">
-                <div class="ios-title" style="color:#00b8ff">Yêu Cầu Mở Khóa</div>
-                <div class="ios-desc">Mỗi sản phẩm có 1 Key riêng. Nhập Key để tải:</div>
-                <div class="ios-highlight" id="keyTitle">Tên Tool</div>
-                <input type="text" id="inputKey" class="key-input" placeholder="quocdat_...">
-                <div id="keyError" style="color:#ff453a; font-size:12px; margin-top:8px; display:none; font-weight:bold">❌ Key không đúng với sản phẩm này!</div>
-            </div>
-            <div class="ios-actions">
-                <button class="ios-btn ios-btn-cancel" onclick="closeAllModals()">Hủy</button>
-                <button class="ios-btn ios-btn-confirm" onclick="checkKey()">Tải Xuống</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let userBalance = 0;
-        try {
-            const config = {
-                apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc",
-                authDomain: "quocdat-b80c2.firebaseapp.com",
-                databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app",
-                projectId: "quocdat-b80c2",
-                storageBucket: "quocdat-b80c2.firebasestorage.app",
-                messagingSenderId: "988520495087",
-                appId: "1:988520495087:web:97c1b46fc0f6d1f3aaa81a"
-            };
-            firebase.initializeApp(config);
-            const db = firebase.database();
-
-            db.ref('users/' + currentUser).on('value', (s) => {
-                userBalance = s.exists() ? (s.val().balance || 0) : 0;
-                let fm = userBalance.toLocaleString('vi-VN') + " đ";
-                let dA = document.getElementById('desktopAuth');
-                if(dA) dA.innerHTML = `<div style="display:flex;align-items:center;gap:15px;background:rgba(255,255,255,0.1);padding:6px 15px;border-radius:30px;border:1px solid rgba(255,255,255,0.2);"><div style="color:#00ff88;font-weight:bold;font-family:'Orbitron';font-size:14px;padding-right:15px;border-right:1px solid #444;">${fm}</div><div style="color:#fff;font-weight:bold;font-size:14px;">${currentUser}</div></div>`;
-                let mA = document.getElementById('mobileUserArea');
-                if(mA) mA.innerHTML = `<div style="text-align:center;padding-bottom:20px;border-bottom:1px solid #333;margin-bottom:20px;"><div style="font-size:24px;color:var(--primary);font-weight:bold;font-family:monospace">${fm}</div><div style="font-size:13px;color:#666;margin-top:5px">Xin chào, ${currentUser}</div></div>`;
-            });
-
-            window.executeServerBuy = function() {
-                if(userBalance >= targetPrice) {
-                    let newBal = userBalance - targetPrice;
-                    db.ref('users/' + currentUser).update({ balance: newBal }).then(() => {
-                        closeAllModals();
-                        alert(`✅ Giao dịch thành công!\nSản phẩm: ${targetTitle}\nĐã trừ: ${targetPrice.toLocaleString('vi-VN')} đ`);
-                    });
-                } else {
-                    alert(`❌ KHÔNG ĐỦ TIỀN!\n\nSố dư của bạn: ${userBalance.toLocaleString('vi-VN')} đ\nCần nạp thêm ${(targetPrice - userBalance).toLocaleString('vi-VN')} đ`);
-                    window.location.href = "naptien.html";
-                }
-            }
-        } catch(e) { console.log("Lỗi tải API"); }
-    </script>
-</body>
-                    </html>
-                    
+                <div class="product-card">
+                    <div class="prod-thumb" style="color:#00b8ff"><i class="fas fa-sms"></i><span class="prod-tag free">FREE</span></div>
+                    <div class="prod-details">
+                        <div class="prod-title">Tool Spam SMS/Call Troll</div>
+     
