@@ -14,7 +14,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -45,10 +45,10 @@
         .btn-generate { width: 100%; padding: 16px; background: var(--primary); color: #000; font-weight: bold; font-size: 15px; border: none; border-radius: 12px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; font-family: 'Orbitron'; transition: 0.3s; margin-top: 10px; }
         .btn-generate:hover { background: #fff; box-shadow: 0 5px 15px rgba(0,255,136,0.3); }
 
-        /* HACKER TERMINAL (PROXY LOAD) */
+        /* HACKER TERMINAL */
         .terminal-box { display: none; text-align: left; background: #000; border: 1px solid #333; border-radius: 10px; padding: 20px; margin-top: 10px; box-shadow: inset 0 0 20px rgba(0,255,136,0.1); }
         .progress-container { width: 100%; background: #222; border-radius: 5px; height: 12px; margin-bottom: 15px; overflow: hidden; border: 1px solid #444; }
-        .progress-bar { width: 0%; height: 100%; background: var(--primary); transition: width 0.1s; box-shadow: 0 0 10px var(--primary); }
+        .progress-bar { width: 0%; height: 100%; background: var(--primary); transition: width 0.3s ease-out; box-shadow: 0 0 10px var(--primary); }
         .proxy-log { font-family: monospace; font-size: 11px; color: #00ff88; height: 120px; overflow-y: hidden; line-height: 1.8; opacity: 0.8; }
         .proxy-percent { font-family: 'Orbitron'; color: var(--primary); font-size: 18px; text-align: right; margin-top: -30px; margin-bottom: 15px; font-weight: bold; }
 
@@ -85,7 +85,7 @@
             <h1 class="box-title">TẠO LINK MỞ KHÓA</h1>
             
             <div id="selectionArea">
-                <p class="box-desc">Hệ thống yêu cầu bạn vượt 1 link rút gọn Link4M để lấy mã tải Tool. Quá trình vượt tường lửa sẽ tự động diễn ra.</p>
+                <p class="box-desc">Hệ thống yêu cầu vượt 1 link rút gọn Link4M để lấy mã tải Tool. Quá trình vượt tường lửa sẽ đồng bộ với API Link4M.</p>
                 
                 <div class="form-group">
                     <label>🔥 CHỌN TOOL CẦN MỞ KHÓA</label>
@@ -95,13 +95,13 @@
                     </div>
                 </div>
 
-                <button class="btn-generate" id="btnGen" onclick="startProxyProcess()">
-                    <span id="btnText">TẠO LINK RÚT GỌN LINK4M</span>
+                <button class="btn-generate" id="btnGen" onclick="initiateSyncProcess()">
+                    <span id="btnText">TIẾN HÀNH LẤY LINK</span>
                 </button>
             </div>
 
             <div class="terminal-box" id="terminalBox">
-                <div style="color:#aaa; font-size:12px; margin-bottom:8px;">> QuocDat SEC. Bypass Protocol v8.0</div>
+                <div style="color:#aaa; font-size:12px; margin-bottom:8px;">> System Sync with Link4M API</div>
                 <div class="progress-container">
                     <div class="progress-bar" id="pBar"></div>
                 </div>
@@ -125,10 +125,9 @@
     </div>
 
     <script>
-        // API LINK4M CỦA BẠN
+        // API LINK4M
         const LINK4M_API_KEY = "6992df868b3d1e423d1ab833"; 
 
-        // DANH SÁCH TOOL
         const freeTools = [
             { id: 'tool03', title: 'Script Blox Fruit Auto Farm' },
             { id: 'tool05', title: 'Code HTML Landing Page Đẹp' },
@@ -144,8 +143,9 @@
         ];
 
         let selectedToolId = "";
+        let animationInterval;
 
-        // IN DANH SÁCH VÀO CỬA SỔ IOS
+        // XUẤT DANH SÁCH IOS
         document.addEventListener("DOMContentLoaded", function() {
             const sheetBody = document.getElementById('sheetBody');
             freeTools.forEach(tool => {
@@ -171,8 +171,8 @@
             closeSheet();
         }
 
-        // ================= XỬ LÝ: CHẠY THANH PROXY -> GỌI API -> CHUYỂN TRANG =================
-        function startProxyProcess() {
+        // ================= CƠ CHẾ ĐỒNG BỘ: THANH LOAD CHẠY THỰC TẾ THEO API =================
+        function initiateSyncProcess() {
             if(!selectedToolId) { 
                 alert("⚠️ Bạn chưa chọn Tool nào!"); 
                 openSheet(); 
@@ -188,71 +188,102 @@
             const pLog = document.getElementById('pLog');
             const countries = ['US', 'UK', 'VN', 'JP', 'RU', 'DE', 'FR', 'BR', 'CA', 'SG', 'KR'];
             
-            // CHẠY HIỆU ỨNG PROXY
-            let interval = setInterval(() => {
-                progress += Math.floor(Math.random() * 4) + 2; 
-                if(progress > 100) progress = 100;
+            // 1. GỌI API NGAY LẬP TỨC TRONG NỀN
+            triggerAPI_Link4M();
+
+            // 2. CHẠY HIỆU ỨNG CHỜ API (Chỉ chạy đến 90% rồi đứng đợi)
+            animationInterval = setInterval(() => {
+                if (progress < 85) {
+                    progress += Math.floor(Math.random() * 8) + 2; // Chạy nhanh khúc đầu
+                } else if (progress < 95) {
+                    progress += 1; // Chạy rất chậm khúc 85 -> 95 để giả vờ đang nối mạng
+                }
+
+                if(progress > 95) progress = 95; // Cấm vượt 95% nếu API chưa về
                 
                 pBar.style.width = progress + '%';
                 pPercent.innerText = progress + '%';
 
-                let ip = Math.floor(Math.random()*255) + "." + Math.floor(Math.random()*255) + ".x.x";
-                let ctry = countries[Math.floor(Math.random() * countries.length)];
-                pLog.innerHTML += `<div>> Injecting proxy ${ip} [${ctry}]... OK</div>`;
-                pLog.scrollTop = pLog.scrollHeight;
-
-                if(progress === 100) {
-                    clearInterval(interval);
-                    pLog.innerHTML += `<div style="color:#fff">> Proxies connected. Requesting Link4M API...</div>`;
+                // In IP ảo cho nguy hiểm
+                if (progress % 5 === 0) {
+                    let ip = Math.floor(Math.random()*255) + "." + Math.floor(Math.random()*255) + ".x.x";
+                    let ctry = countries[Math.floor(Math.random() * countries.length)];
+                    pLog.innerHTML += `<div>> Proxy check ${ip} [${ctry}]... OK</div>`;
                     pLog.scrollTop = pLog.scrollHeight;
-                    
-                    // SAU KHI PROXY 100%, GỌI API LINK4M
-                    setTimeout(() => fetchLink4M(), 800);
                 }
-            }, 50);
+            }, 100);
         }
 
-        function fetchLink4M() {
-            const pLog = document.getElementById('pLog');
-
-            // 1. TẠO DẤU VÂN TAY ANTI-SHARE
+        // GỌI API LINK4M
+        function triggerAPI_Link4M() {
             let timestamp = Math.floor(Date.now() / 1000);
             let fingerprint = CryptoJS.MD5("SECURE" + timestamp + selectedToolId).toString();
             
             localStorage.setItem('anti_share_token', fingerprint);
             localStorage.setItem('anti_share_time', timestamp);
 
-            // 2. LINK CALLBACK (ĐÁ VỀ KEY.HTML)
+            // Dẫn link Callback về trang key.html
             let currUrl = window.location.href.split('?')[0].split('#')[0];
             let basePath = currUrl.substring(0, currUrl.lastIndexOf('/'));
-            // Đường dẫn tuyệt đối về trang key.html
             let returnUrl = basePath + "/key.html?tool=" + selectedToolId + "&token=" + fingerprint + "&t=" + timestamp;
             
-            // 3. GỌI API LINK4M VỚI CORS PROXY ĐỂ CHỐNG LỖI TRÌNH DUYỆT
+            // Gọi Proxy CORS để tránh rào cản trình duyệt Android
             let link4mApi = `https://link4m.co/api?api=${LINK4M_API_KEY}&url=${encodeURIComponent(returnUrl)}`;
-            // AllOrigins là máy chủ bypass CORS cực kỳ uy tín
             let proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(link4mApi)}`;
 
             fetch(proxyUrl)
             .then(res => res.json())
             .then(data => {
                 if(data.status === 'error') {
-                    pLog.innerHTML += `<div style="color:#ff5555">> API Error: ${data.message}</div>`;
-                    alert("Lỗi từ Link4M: " + data.message + "\n(Vui lòng kiểm tra lại API Key)");
+                    apiFailed(data.message);
                 } else if(data.shortenedUrl) {
-                    pLog.innerHTML += `<div style="color:#00ff88">> URL Generated! Redirecting...</div>`;
-                    // ĐÁ SANG TRANG RÚT GỌN
-                    setTimeout(() => { window.location.href = data.shortenedUrl; }, 1000);
+                    // API TRẢ VỀ THÀNH CÔNG -> ÉP THANH LOAD LÊN 100% VÀ ĐÁ TRANG
+                    apiSuccess(data.shortenedUrl);
                 }
             })
             .catch(err => {
-                pLog.innerHTML += `<div style="color:#ffb86c">> Proxy fallback engaged. Redirecting...</div>`;
-                // NẾU CẢ PROXY LỖI, CHUYỂN THẲNG ĐỂ USER KHÔNG BỊ KẸT
-                setTimeout(() => { window.location.href = returnUrl; }, 1500);
+                apiFallback(returnUrl);
             });
         }
 
-        // ================= FIREBASE ĐỒNG BỘ SỐ DƯ =================
+        // NẾU LẤY ĐƯỢC LINK THÀNH CÔNG
+        function apiSuccess(shortUrl) {
+            clearInterval(animationInterval);
+            document.getElementById('pBar').style.width = '100%';
+            document.getElementById('pPercent').innerText = '100%';
+            
+            let pLog = document.getElementById('pLog');
+            pLog.innerHTML += `<div style="color:#00ff88; font-weight:bold; margin-top:5px;">> Link4M API CONNECTED SUCCESSFULLY!</div>`;
+            pLog.innerHTML += `<div style="color:#fff">> Redirecting to target...</div>`;
+            pLog.scrollTop = pLog.scrollHeight;
+
+            // Đợi 0.8s để người dùng nhìn thấy thông báo rồi mới bay
+            setTimeout(() => { window.location.href = shortUrl; }, 800);
+        }
+
+        // NẾU API LỖI (Vd: Sai Key, hết hạn)
+        function apiFailed(msg) {
+            clearInterval(animationInterval);
+            let pLog = document.getElementById('pLog');
+            pLog.innerHTML += `<div style="color:#ff4757; font-weight:bold; margin-top:5px;">> API ERROR: ${msg}</div>`;
+            pLog.scrollTop = pLog.scrollHeight;
+            alert("Lỗi từ Link4M: " + msg + "\n(Vui lòng kiểm tra lại cấu hình API Link4M của bạn)");
+        }
+
+        // NẾU RỚT MẠNG HOẶC TRÌNH DUYỆT CỨNG ĐẦU CHẶN
+        function apiFallback(returnUrl) {
+            clearInterval(animationInterval);
+            document.getElementById('pBar').style.width = '100%';
+            document.getElementById('pPercent').innerText = '100%';
+            let pLog = document.getElementById('pLog');
+            pLog.innerHTML += `<div style="color:#ffb86c; font-weight:bold; margin-top:5px;">> Connection Interrupted. Using Fallback bypass...</div>`;
+            pLog.scrollTop = pLog.scrollHeight;
+            
+            // Đá thẳng tới kết quả để bạn không bị kẹt khi test local
+            setTimeout(() => { window.location.href = returnUrl; }, 1000);
+        }
+
+        // FIREBASE ĐỒNG BỘ
         try {
             const config = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
             firebase.initializeApp(config);
