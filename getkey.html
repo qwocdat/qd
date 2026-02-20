@@ -30,12 +30,13 @@
         .desktop-menu a { color: #aaa; text-decoration: none; font-size: 14px; font-weight: 600; }
         .desktop-menu a.active { color: var(--primary); }
         .hamburger { display: none; font-size: 26px; color: #fff; padding: 10px; cursor: pointer; }
+        
         .mobile-nav { position: fixed; top: 0; right: -100%; width: 85%; max-width: 300px; height: 100vh; background: #0a0a0a; z-index: 3000; padding: 80px 30px; transition: right 0.3s; border-left: 1px solid var(--border); }
         .mobile-nav a.menu-link { display: block; color: #fff; text-decoration: none; font-size: 16px; padding: 15px 0; border-bottom: 1px solid #1a1a1a; font-weight: 600; }
         .close-btn { position: absolute; top: 20px; right: 20px; font-size: 30px; color: #ff5555; cursor: pointer; }
 
         .key-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 120px 20px 60px; }
-        .key-box { width: 100%; max-width: 600px; background: var(--glass); border: 1px solid var(--border); border-radius: 20px; padding: 40px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .key-box { width: 100%; max-width: 500px; background: var(--glass); border: 1px solid var(--border); border-radius: 20px; padding: 40px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); backdrop-filter: blur(10px); }
         .box-icon { font-size: 50px; color: var(--primary); margin-bottom: 20px; }
         .box-title { font-family: 'Orbitron'; font-size: 28px; color: #fff; margin-bottom: 10px; }
         .box-desc { color: #aaa; font-size: 14px; margin-bottom: 30px; line-height: 1.6; }
@@ -43,21 +44,14 @@
         .form-group { text-align: left; margin-bottom: 25px; }
         .form-group label { display: block; font-size: 13px; color: var(--primary); font-weight: bold; margin-bottom: 8px; }
         .form-select { width: 100%; padding: 15px; background: #111; border: 1px solid #444; border-radius: 12px; color: #fff; font-size: 15px; outline: none; cursor: pointer; }
-        .btn-generate { width: 100%; padding: 18px; background: var(--primary); color: #000; font-weight: bold; font-size: 16px; border: none; border-radius: 12px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; font-family: 'Orbitron'; }
         
-        /* TERMINAL HACKER (Hiển thị khi đang load 100 Proxy) */
-        .terminal-box { display: none; text-align: left; background: #000; border: 1px solid #333; border-radius: 10px; padding: 20px; margin-top: 20px; box-shadow: inset 0 0 15px rgba(0,255,136,0.1); }
-        .progress-container { width: 100%; background: #222; border-radius: 5px; height: 15px; margin-bottom: 15px; overflow: hidden; }
-        .progress-bar { width: 0%; height: 100%; background: var(--primary); transition: width 0.1s; box-shadow: 0 0 10px var(--primary); }
-        .proxy-log { font-family: monospace; font-size: 12px; color: #00ff88; height: 80px; overflow-y: hidden; line-height: 1.8; opacity: 0.8; }
-        .proxy-percent { font-family: 'Orbitron'; color: var(--primary); font-size: 20px; text-align: right; margin-top: -30px; margin-bottom: 15px; }
+        .btn-generate { width: 100%; padding: 18px; background: var(--primary); color: #000; font-weight: bold; font-size: 16px; border: none; border-radius: 12px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; font-family: 'Orbitron'; transition: 0.3s; }
+        .btn-generate:hover { background: #fff; }
 
-        .result-box { display: none; padding: 25px; background: rgba(0,255,136,0.05); border: 1px dashed var(--primary); border-radius: 15px; margin-top: 20px; }
-        .result-title { color: var(--primary); font-weight: bold; font-size: 14px; margin-bottom: 10px; text-transform: uppercase; }
-        .key-display { font-family: monospace; font-size: 24px; color: #fff; font-weight: bold; background: #000; padding: 15px; border-radius: 10px; border: 1px solid #333; margin-bottom: 15px; letter-spacing: 2px;}
-        .btn-copy { background: #00b8ff; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; width: 100%; }
+        .loader { display: none; width: 20px; height: 20px; border: 3px solid rgba(0,0,0,0.3); border-top: 3px solid #000; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        @media (max-width: 768px) { .desktop-menu, #desktopAuth { display: none; } .hamburger { display: block; } .key-box { padding: 30px 20px; } .box-title { font-size: 22px; } .key-display { font-size: 20px; } }
+        @media (max-width: 768px) { .desktop-menu, #desktopAuth { display: none; } .hamburger { display: block; } .key-box { padding: 30px 20px; } .box-title { font-size: 24px; } }
     </style>
 </head>
 <body>
@@ -78,128 +72,69 @@
         <a href="shop.html" class="menu-link"><i class="fas fa-download"></i> Kho Tài Liệu VIP</a>
         <a href="getkey.html" class="menu-link" style="color:var(--primary)"><i class="fas fa-key"></i> Lấy Key</a>
         <a href="naptien.html" class="menu-link" style="color:#00b8ff"><i class="fas fa-wallet"></i> Nạp Tiền Hệ Thống</a>
+        <a href="javascript:void(0)" onclick="logout()" class="menu-link" style="color:#ff5555;border:none">Đăng Xuất</a>
     </div>
 
     <div class="key-container">
         <div class="key-box">
-            <i class="fas fa-key box-icon"></i>
-            <h1 class="box-title">HỆ THỐNG GET KEY VIP</h1>
+            <i class="fas fa-link box-icon"></i>
+            <h1 class="box-title">TẠO LINK RÚT GỌN</h1>
+            <p class="box-desc">Chọn Tool bạn muốn mở khóa. Hệ thống sẽ tạo link Link4M. Vượt xong bạn sẽ được chuyển đến trang lấy Key mã hóa.</p>
             
-            <div id="selectionArea">
-                <p class="box-desc">Hệ thống yêu cầu bạn vượt 1 link rút gọn Link4M để lấy mã mở khóa tải Tool Miễn Phí.</p>
-                <div class="form-group">
-                    <label>🔥 Chọn Tool Cần Mở Khóa</label>
-                    <select id="toolSelect" class="form-select">
-                        <option value="" disabled selected>-- Bấm để chọn Tool --</option>
-                        <option value="tool03">Script Blox Fruit Auto Farm</option>
-                        <option value="tool05">Code HTML Landing Page Đẹp</option>
-                        <option value="tool07">Fix Lag Roblox Chống Văng</option>
-                        <option value="tool10">Python Basic Obfuscator</option>
-                        <option value="tool12">Tool Spam SMS/Zalo Call Troll</option>
-                        <option value="tool15">Script Get Token FB Full Quyền</option>
-                        <option value="tool18">Auto Clicker PC Siêu Nhẹ 1MB</option>
-                        <option value="tool20">Script Report FB Xóa Kênh</option>
-                        <option value="tool23">Script Hack Map Moba Hiện Địch</option>
-                        <option value="tool25">Phần Mềm Lọc SĐT/Email Siêu Tốc</option>
-                        <option value="tool28">Bộ 50 Template CV Xin Việc Coder</option>
-                    </select>
-                </div>
-                <button class="btn-generate" id="btnGen" onclick="startLink4m()">
-                    <span id="btnText">VƯỢT LINK LẤY KEY</span>
-                </button>
+            <div class="form-group">
+                <label>🔥 CHỌN TOOL CẦN MỞ KHÓA</label>
+                <select id="toolSelect" class="form-select">
+                    <option value="" disabled selected>-- Bấm để chọn Tool --</option>
+                    <option value="tool03">Script Blox Fruit Auto Farm</option>
+                    <option value="tool05">Code HTML Landing Page Đẹp</option>
+                    <option value="tool07">Fix Lag Roblox Chống Văng</option>
+                    <option value="tool10">Python Basic Obfuscator</option>
+                    <option value="tool12">Tool Spam SMS/Zalo Call Troll</option>
+                    <option value="tool15">Script Get Token FB Full Quyền</option>
+                    <option value="tool18">Auto Clicker PC Siêu Nhẹ 1MB</option>
+                    <option value="tool20">Script Report FB Xóa Kênh</option>
+                    <option value="tool23">Script Hack Map Moba Hiện Địch</option>
+                    <option value="tool25">Phần Mềm Lọc SĐT/Email Siêu Tốc</option>
+                    <option value="tool28">Bộ 50 Template CV Xin Việc Coder</option>
+                </select>
             </div>
 
-            <div class="terminal-box" id="terminalBox">
-                <div style="color:#aaa; font-size:12px; margin-bottom:5px;">Khởi tạo hệ thống ẩn danh an toàn...</div>
-                <div class="progress-container">
-                    <div class="progress-bar" id="pBar"></div>
-                </div>
-                <div class="proxy-percent" id="pPercent">0%</div>
-                <div class="proxy-log" id="pLog">
-                    > Connecting to secure server...<br>
-                </div>
-            </div>
-
-            <div class="result-box" id="resultBox">
-                <div class="result-title">🔑 KEY CỦA BẠN ĐÃ SẴN SÀNG</div>
-                <div class="key-display" id="finalKey">ĐANG TẠO...</div>
-                <button class="btn-copy" onclick="copyMyKey()">Sao Chép Mã Key</button>
-                <div style="font-size:13px; color:#ff5555; margin-top:15px; font-weight:bold;">⚠️ Chú ý: Key này chỉ dành cho Tool bạn đã chọn và sẽ tự hủy sau 15 phút!</div>
-                <button onclick="window.location.href='getkey.html'" style="margin-top:15px; background:none; border:1px solid #444; color:#aaa; padding:10px; border-radius:8px; cursor:pointer; width:100%;">Tạo Key Khác</button>
-            </div>
+            <button class="btn-generate" id="btnGen" onclick="startLink4m()">
+                <span id="btnText">TIẾN HÀNH VƯỢT LINK</span>
+                <div class="loader" id="loadingSpinner"></div>
+            </button>
         </div>
     </div>
 
     <script>
-        // API LINK4M
+        // API LINK4M THẬT CỦA BẠN ĐÂY
         const LINK4M_API_KEY = "6992df868b3d1e423d1ab833"; 
 
-        // KHI TRỞ VỀ TỪ LINK4M SẼ CHẠY HIỆU ỨNG PROXY
-        document.addEventListener("DOMContentLoaded", function() {
-            let urlParams = new URLSearchParams(window.location.search);
-            let step = urlParams.get('step');
-            let targetToolId = urlParams.get('tool');
+        function logout() { localStorage.removeItem('vip_username'); window.location.href = "login.html"; }
 
-            if(step === '2' && targetToolId) {
-                document.getElementById('selectionArea').style.display = 'none';
-                document.getElementById('terminalBox').style.display = 'block';
-                
-                runProxyAnimation(targetToolId);
-            }
-        });
-
-        // HIỆU ỨNG LOAD 100 PROXY
-        function runProxyAnimation(toolId) {
-            let progress = 0;
-            const pBar = document.getElementById('pBar');
-            const pPercent = document.getElementById('pPercent');
-            const pLog = document.getElementById('pLog');
-            
-            const countries = ['US', 'UK', 'VN', 'JP', 'RU', 'DE', 'FR', 'CA', 'BR', 'AU', 'IN', 'KR', 'SG', 'IT', 'NL'];
-            
-            let interval = setInterval(() => {
-                progress += 2; // Chạy nhanh để đỡ mỏi tay (mất khoảng 3-4 giây)
-                
-                pBar.style.width = progress + '%';
-                pPercent.innerText = progress + '%';
-                
-                // Random text log
-                let ip = Math.floor(Math.random()*255) + "." + Math.floor(Math.random()*255) + ".x.x";
-                let port = Math.floor(Math.random()*9000) + 1000;
-                let ctry = countries[Math.floor(Math.random() * countries.length)];
-                
-                pLog.innerHTML = `> Bypassing proxy ${ip}:${port} [${ctry}]... OK<br>` + pLog.innerHTML;
-
-                if(progress >= 100) {
-                    clearInterval(interval);
-                    pLog.innerHTML = "> Đã kết nối 100 Proxy an toàn. Đang tạo Key MD5... OK<br>" + pLog.innerHTML;
-                    
-                    setTimeout(() => {
-                        // Sinh KEY thật
-                        let now = Math.floor(Date.now() / 1000);
-                        let timeStep = Math.floor(now / 900); 
-                        let hash = CryptoJS.MD5("QUOC_DAT_SECRET_2026" + timeStep + toolId).toString();
-                        let finalKey = "quocdat_" + hash.substring(0, 10);
-                        
-                        document.getElementById('terminalBox').style.display = 'none';
-                        document.getElementById('finalKey').innerText = finalKey;
-                        document.getElementById('resultBox').style.display = 'block';
-                    }, 800);
-                }
-            }, 60);
-        }
-
-        // BẤM VƯỢT LINK ĐÁ SANG LINK4M
         function startLink4m() {
             let toolId = document.getElementById('toolSelect').value;
             if(!toolId) { alert("⚠️ Vui lòng chọn 1 Tool!"); return; }
 
-            document.getElementById('btnText').innerText = "ĐANG TẠO LINK4M...";
+            document.getElementById('btnText').innerText = "ĐANG KẾT NỐI API...";
+            document.getElementById('loadingSpinner').style.display = 'block';
             document.getElementById('btnGen').style.pointerEvents = 'none';
 
-            let cleanUrl = window.location.href.split('?')[0].split('#')[0]; 
-            let returnUrl = cleanUrl + "?step=2&tool=" + toolId; 
+            // 1. TẠO DẤU VÂN TAY ANTI-SHARE VÀ LƯU VÀO ĐIỆN THOẠI KHÁCH
+            let timestamp = Math.floor(Date.now() / 1000);
+            let fingerprint = CryptoJS.MD5("SECURE" + timestamp + toolId).toString();
             
+            localStorage.setItem('anti_share_token', fingerprint);
+            localStorage.setItem('anti_share_time', timestamp);
+
+            // 2. TẠO LINK CALLBACK ĐÁ VỀ TRANG KEY.HTML MỚI
+            let cleanUrl = window.location.href.split('?')[0].split('#')[0]; 
+            let keyPageUrl = cleanUrl.replace('getkey.html', 'key.html'); 
+            
+            // Link Callback kèm bằng chứng để key.html check lại
+            let returnUrl = `${keyPageUrl}?tool=${toolId}&token=${fingerprint}&t=${timestamp}`; 
+            
+            // 3. GỌI API LINK4M
             let apiUrl = `https://link4m.co/api-shorten/v2?api=${LINK4M_API_KEY}&url=${encodeURIComponent(returnUrl)}`;
 
             fetch(apiUrl)
@@ -207,33 +142,27 @@
             .then(data => {
                 if(data.status === 'error') {
                     alert("Lỗi Link4M: " + data.message);
-                    document.getElementById('btnText').innerText = "VƯỢT LINK LẤY KEY";
-                    document.getElementById('btnGen').style.pointerEvents = 'auto';
+                    resetBtn();
                 } else {
+                    // Đá thẳng khách sang Link4M
                     window.location.href = data.shortenedUrl; 
                 }
             })
             .catch(err => {
-                // FALLBACK NẾU MẠNG LỖI HOẶC HẾT TIỀN API (TEST LOCAL)
+                alert("Mạng lỗi! Nhưng hệ thống sẽ chuyển thẳng để bạn Test trước.");
                 setTimeout(() => { window.location.href = returnUrl; }, 1000);
             });
         }
 
-        function copyMyKey() {
-            navigator.clipboard.writeText(document.getElementById('finalKey').innerText).then(() => alert("✅ Đã copy mã!"));
+        function resetBtn() {
+            document.getElementById('btnText').innerText = "TIẾN HÀNH VƯỢT LINK";
+            document.getElementById('loadingSpinner').style.display = 'none';
+            document.getElementById('btnGen').style.pointerEvents = 'auto';
         }
 
-        // FIREBASE UI
+        // FIREBASE UI (Chỉ để hiện số dư Header)
         try {
-            const config = {
-                apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc",
-                authDomain: "quocdat-b80c2.firebaseapp.com",
-                databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app",
-                projectId: "quocdat-b80c2",
-                storageBucket: "quocdat-b80c2.firebasestorage.app",
-                messagingSenderId: "988520495087",
-                appId: "1:988520495087:web:97c1b46fc0f6d1f3aaa81a"
-            };
+            const config = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
             firebase.initializeApp(config);
             firebase.database().ref('users/' + currentUser).on('value', (s) => {
                 let bal = s.exists() ? (s.val().balance || 0) : 0;
