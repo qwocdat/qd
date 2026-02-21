@@ -3,340 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LẤY KEY VIP | QUOCDAT SEC</title>
+    <title>QUẢN LÝ KEY BẢN QUYỀN | QUOCDAT SEC</title>
     
     <script>
         var currentUser = localStorage.getItem('vip_username');
-        if(!currentUser) { window.location.href = "login.html"; }
+        var safeUserId = "guest";
+        if(!currentUser || currentUser.trim() === "") { window.location.replace("login.html"); } 
+        else { safeUserId = currentUser.replace(/[.#$\[\]]/g, '_'); }
+
+        window.goToPage = function(url) {
+            document.body.style.opacity = '0';
+            setTimeout(() => { window.location.href = url; }, 300);
+        }
+
+        window.copyKey = function(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                let toast = document.getElementById('toastMsg');
+                toast.innerHTML = `<i class="fas fa-copy"></i> Đã Copy: ${text}`;
+                toast.classList.add('show');
+                setTimeout(() => { toast.classList.remove('show'); }, 3000);
+            });
+        }
     </script>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: #fff; padding-top: 70px; }
+        :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --accent: #00b8ff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: #fff; padding-top: 70px; padding-bottom: 50px; transition: opacity 0.4s; }
         
-        header { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(10,10,15,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 1000; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
-        .logo { font-family: 'Orbitron'; font-size: 20px; font-weight: 900; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 8px; }
-        .logo i { color: var(--primary); }
-        .user-wallet { background: rgba(0,255,136,0.1); border: 1px solid var(--primary); color: var(--primary); padding: 6px 12px; border-radius: 20px; font-weight: 700; font-size: 13px; font-family: 'Orbitron'; }
+        header { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(10,10,15,0.98); border-bottom: 1px solid var(--border); z-index: 1000; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+        .logo { font-family: 'Orbitron'; font-size: 18px; font-weight: 900; color: #fff; text-decoration: none; cursor: pointer; }
+        .pc-wallet { background: rgba(0,255,136,0.1); border: 1px solid var(--primary); color: var(--primary); padding: 8px 15px; border-radius: 30px; font-size: 14px; font-family: 'Orbitron'; font-weight: bold; }
         
-        .floating-menu { position: fixed; bottom: 20px; right: 20px; z-index: 500; display: flex; flex-direction: column; gap: 10px; }
-        .float-btn { width: 45px; height: 45px; border-radius: 50%; background: #111; border: 1px solid #333; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 18px; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .float-btn.naptien { background: #1e90ff; color: #fff; border: none; }
+        .toast { position: fixed; top: 90px; right: -300px; background: rgba(10,10,15,0.95); border-left: 4px solid var(--primary); border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); color: #fff; padding: 15px 20px; font-size: 13px; font-weight: bold; z-index: 99999; transition: 0.4s; }
+        .toast.show { right: 20px; }
 
-        .key-container { min-height: calc(100vh - 70px); display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .key-box { width: 100%; max-width: 500px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 30px 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+        .page-title { text-align: center; font-family: 'Orbitron'; font-size: 26px; color: var(--primary); margin-bottom: 10px; text-transform: uppercase; }
+        .page-desc { text-align: center; color: #888; font-size: 14px; margin-bottom: 40px; }
+
+        .grid-keys { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
         
-        .box-icon { font-size: 45px; color: var(--primary); margin-bottom: 15px; text-shadow: 0 0 15px rgba(0,255,136,0.5); }
-        .box-title { font-family: 'Orbitron'; font-size: 22px; color: #fff; margin-bottom: 10px; font-weight: 900; }
-        .box-desc { color: #aaa; font-size: 13px; margin-bottom: 25px; line-height: 1.5; }
-
-        .form-group { text-align: left; margin-bottom: 20px; }
-        .form-group label { display: block; font-size: 12px; color: var(--primary); font-weight: bold; margin-bottom: 8px; text-transform: uppercase; }
-        .ios-select-btn { width: 100%; padding: 16px 20px; background: #0a0a0f; border: 1px solid #333; border-radius: 12px; color: #1e90ff; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+        .key-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 15px; padding: 20px; position: relative; overflow: hidden; }
+        .key-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #f1c40f; }
+        .k-title { font-family: 'Orbitron'; font-size: 16px; font-weight: bold; margin-bottom: 15px; color: #fff; }
         
-        .btn-generate { width: 100%; padding: 16px; background: var(--primary); color: #000; font-weight: bold; font-size: 15px; border: none; border-radius: 12px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; font-family: 'Orbitron'; transition: 0.3s; margin-top: 10px; }
-        .btn-generate:hover { background: #fff; box-shadow: 0 5px 15px rgba(0,255,136,0.3); }
+        .k-box { background: rgba(241,196,15,0.1); border: 1px dashed #f1c40f; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .k-text { color: #f1c40f; font-family: monospace; font-size: 18px; font-weight: bold; letter-spacing: 2px; }
+        .k-btn { background: #f1c40f; color: #000; border: none; padding: 8px 15px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .k-btn:hover { background: #fff; }
 
-        /* HACKER TERMINAL - 200 PROXY CHÂU Á */
-        .terminal-box { display: none; text-align: left; background: #000; border: 1px solid #333; border-radius: 10px; padding: 20px; margin-top: 10px; box-shadow: inset 0 0 20px rgba(0,255,136,0.1); }
-        .progress-container { width: 100%; background: #222; border-radius: 5px; height: 12px; margin-bottom: 15px; overflow: hidden; border: 1px solid #444; }
-        .progress-bar { width: 0%; height: 100%; background: var(--primary); transition: width 0.05s linear; box-shadow: 0 0 10px var(--primary); }
-        .proxy-log { font-family: monospace; font-size: 11px; color: #00ff88; height: 130px; overflow-y: hidden; line-height: 1.8; opacity: 0.8; word-wrap: break-word; }
-        .proxy-percent { font-family: 'Orbitron'; color: var(--primary); font-size: 18px; text-align: right; margin-top: -30px; margin-bottom: 15px; font-weight: bold; }
-
-        /* IOS ACTION SHEET */
-        .sheet-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 9999; display: none; flex-direction: column; justify-content: flex-end; opacity: 0; transition: opacity 0.3s; }
-        .sheet-overlay.active { display: flex; opacity: 1; }
-        .ios-sheet { background: #1c1c1e; width: 100%; max-width: 500px; margin: 0 auto; border-radius: 20px 20px 0 0; transform: translateY(100%); transition: transform 0.3s; padding-bottom: env(safe-area-inset-bottom); display: flex; flex-direction: column; max-height: 70vh; }
-        .sheet-overlay.active .ios-sheet { transform: translateY(0); }
-        .sheet-header { padding: 15px 20px; border-bottom: 1px solid #2c2c2e; display: flex; justify-content: space-between; align-items: center; }
-        .sheet-title { color: #8e8e93; font-size: 13px; font-weight: bold; text-transform: uppercase; }
-        .sheet-close { color: #0a84ff; background: none; border: none; font-size: 16px; font-weight: bold; cursor: pointer; }
-        .sheet-body { overflow-y: auto; flex: 1; }
-        .sheet-item { padding: 18px 20px; border-bottom: 1px solid #2c2c2e; color: #fff; font-size: 15px; font-weight: 500; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .sheet-item.selected { color: #0a84ff; }
-        .sheet-item.selected::after { content: '\f00c'; font-family: "Font Awesome 6 Free"; font-weight: 900; color: #0a84ff; }
+        .free-key-section { margin-top: 50px; background: rgba(0,184,255,0.05); border: 1px solid var(--border); padding: 30px; border-radius: 20px; text-align: center; }
+        .btn-bypass { background: var(--accent); color: #000; padding: 15px 30px; border-radius: 12px; font-weight: bold; font-family: 'Orbitron'; border: none; cursor: pointer; font-size: 15px; margin-top: 20px; }
+        
+        .empty-state { text-align: center; padding: 50px 20px; color: #666; background: var(--card-bg); border-radius: 15px; border: 1px solid var(--border); grid-column: 1 / -1; }
     </style>
 </head>
 <body>
+        <div class="toast" id="toastMsg"></div>
 
     <header>
-        <a href="index.html" class="logo"><i class="fas fa-shield-alt"></i> QUOCDAT.SEC</a>
-        <div class="user-wallet" id="topBalance">Đang tải...</div>
+        <div class="logo" onclick="window.goToPage('index.html')"><i class="fas fa-arrow-left" style="color:#888; margin-right:10px;"></i> VỀ TRANG CHỦ</div>
+        <div class="pc-wallet" id="pcBal">0 đ</div>
     </header>
 
-    <div class="floating-menu">
-        <a href="naptien.html" class="float-btn naptien"><i class="fas fa-wallet"></i></a>
-        <a href="shop.html" class="float-btn"><i class="fas fa-store"></i></a>
-        <a href="index.html" class="float-btn"><i class="fas fa-home"></i></a>
-    </div>
+    <div class="container">
+        <div class="page-title"><i class="fas fa-key"></i> KHO KEY BẢN QUYỀN</div>
+        <div class="page-desc">Tất cả mã KEY kích hoạt Tool Auto / Script Game bạn đã mua được đồng bộ tại đây.</div>
 
-    <div class="key-container">
-        <div class="key-box" id="mainBox">
-            <i class="fas fa-link box-icon"></i>
-            <h1 class="box-title">TẠO LINK MỞ KHÓA</h1>
+        <h3 style="font-family:'Orbitron'; font-size:16px; margin-bottom:20px; color:#fff; border-left: 3px solid var(--primary); padding-left: 10px;">KEY TOOL ĐÃ MUA</h3>
+        <div class="grid-keys" id="keyGrid">
+            <div class="empty-state">
+                <i class="fas fa-spinner fa-spin" style="font-size:40px; color:var(--primary); margin-bottom:15px;"></i>
+                <p>Đang đồng bộ dữ liệu KEY từ máy chủ Firebase...</p>
+            </div>
+        </div>
+
+        <div class="free-key-section">
+            <h3 style="font-family:'Orbitron'; font-size:20px; color:var(--accent); margin-bottom:10px;">LẤY KEY SỬ DỤNG MIỄN PHÍ</h3>
+            <p style="color:#888; font-size:14px; max-width: 600px; margin: 0 auto;">Dành cho các phiên bản Tool dùng thử. Vui lòng vượt link rút gọn để ủng hộ Admin duy trì Server. Key Free có thời hạn sử dụng 24H.</p>
+            <button class="btn-bypass" onclick="openBypassLink()"><i class="fas fa-link"></i> VƯỢT LINK LẤY KEY NGÀY</button>
+            <div id="freeKeyResult" style="display:none; margin-top:20px;">
+                <div class="k-box" style="max-width:400px; margin:0 auto; border-color:var(--accent); background:rgba(0,184,255,0.1);">
+                    <span class="k-text" style="color:var(--accent);" id="freeKeyCode">QD-FREE-XXXX</span>
+                    <button class="k-btn" style="background:var(--accent);" onclick="copyKey(document.getElementById('freeKeyCode').innerText)">COPY</button>
+                </div>
+            </div>
+        </div>
+    </div>
+        <script>
+        // HÀM MÔ PHỎNG VƯỢT LINK LẤY KEY FREE
+        function openBypassLink() {
+            let btn = document.querySelector('.btn-bypass');
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ĐANG TẠO LINK...`;
+            btn.style.background = "#333";
+            btn.style.color = "#fff";
             
-            <div id="selectionArea">
-                <p class="box-desc">Hệ thống yêu cầu vượt 1 link rút gọn Link4M để lấy mã tải Tool. Cổng bảo mật Châu Á đa luồng đã được kích hoạt.</p>
+            // Giả lập sau 2 giây sẽ cấp Key Free
+            setTimeout(() => {
+                btn.style.display = 'none';
+                let randomKey = "QDFREE-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+                document.getElementById('freeKeyCode').innerText = randomKey;
+                document.getElementById('freeKeyResult').style.display = 'block';
+                showToast("Vượt link thành công! Nhận Key 24H.");
+            }, 2000);
+        }
+
+        // KẾT NỐI FIREBASE ĐỂ LẤY SỐ DƯ & KEY VIP
+        const firebaseConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // 1. ĐỒNG BỘ SỐ DƯ LÊN GÓC PHẢI
+        if(safeUserId !== "guest") {
+            db.ref('users/' + safeUserId).on('value', (snapshot) => {
+                if(snapshot.exists()) {
+                    let bal = snapshot.val().balance || 0;
+                    document.getElementById('pcBal').innerText = bal.toLocaleString('vi-VN') + " đ";
+                }
+            });
+        }
+
+        // 2. TỰ ĐỘNG ĐỒNG BỘ KEY TỪ BẢNG LỊCH SỬ MUA HÀNG CỦA USER
+        db.ref('transactions').orderByChild('user').equalTo(safeUserId).on('value', (snap) => {
+            let grid = document.getElementById('keyGrid');
+            grid.innerHTML = '';
+
+            if(snap.exists()) {
+                let allTrans = [];
+                snap.forEach(child => { allTrans.push(child.val()); });
+                allTrans.reverse(); // Ưu tiên Key mới mua lên đầu
                 
-                <div class="form-group">
-                    <label>🔥 CHỌN TOOL CẦN MỞ KHÓA</label>
-                    <div class="ios-select-btn" onclick="openSheet()">
-                        <span id="selectedText">-- Chạm để chọn Tool --</span>
-                        <i class="fas fa-chevron-down" style="color:#444;"></i>
+                let hasKey = false;
+
+                allTrans.forEach(t => {
+                    // Lọc ra các giao dịch là "Mua hàng" và có chứa MÃ KEY
+                    if(t.type === 'purchase' && t.key_granted && t.key_granted !== "") {
+                        hasKey = true;
+                        // Cắt chữ "Mua: " ra khỏi tên sản phẩm cho đẹp
+                        let prodName = t.detail.replace('Mua: ', '');
+                        
+                        grid.innerHTML += `
+                            <div class="key-card">
+                                <div class="k-title"><i class="fas fa-shield-alt" style="color:#f1c40f; margin-right:8px;"></i> ${prodName}</div>
+                                <div style="font-size:12px; color:#888; margin-bottom:10px;">Mã kích hoạt VIP (Lifetime):</div>
+                                <div class="k-box">
+                                    <span class="k-text">${t.key_granted}</span>
+                                    <button class="k-btn" onclick="copyKey('${t.key_granted}')">COPY</button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+
+                if(!hasKey) {
+                    grid.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-folder-open" style="font-size:40px; margin-bottom:15px; color:#444;"></i>
+                            <p>Bạn chưa mua sản phẩm nào có chứa mã KEY.</p>
+                        </div>
+                    `;
+                }
+            } else {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-ghost" style="font-size:40px; margin-bottom:15px; color:#444;"></i>
+                        <p>Không tìm thấy dữ liệu mua hàng của bạn.</p>
                     </div>
-                </div>
-
-                <button class="btn-generate" id="btnGen" onclick="startProcess()">
-                    <span id="btnText">TIẾN HÀNH LẤY LINK</span>
-                </button>
-            </div>
-
-            <div class="terminal-box" id="terminalBox">
-                <div style="color:#aaa; font-size:12px; margin-bottom:8px;">> Syncing with Asian Node Cluster (200 Proxies)</div>
-                <div class="progress-container">
-                    <div class="progress-bar" id="pBar"></div>
-                </div>
-                <div class="proxy-percent" id="pPercent">0%</div>
-                <div class="proxy-log" id="pLog">
-                    > Injecting secure payload...<br>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="sheet-overlay" id="iosSheetOverlay" onclick="handleOverlayClick(event)">
-        <div class="ios-sheet" id="iosSheet">
-            <div class="sheet-header">
-                <div class="sheet-title">Danh sách Tool Miễn Phí</div>
-                <button class="sheet-close" onclick="closeSheet()">Xong</button>
-            </div>
-            <div class="sheet-body" id="sheetBody"></div>
-        </div>
-    </div>
-
-    <script>
-        // API LINK4M CỦA BẠN
-        const LINK4M_API_KEY = "6992df868b3d1e423d1ab833"; 
-
-        const freeTools = [
-            { id: 'tool03', title: 'Script Blox Fruit Auto Farm' },
-            { id: 'tool05', title: 'Code HTML Landing Page Đẹp' },
-            { id: 'tool07', title: 'Fix Lag Roblox Chống Văng iOS' },
-            { id: 'tool10', title: 'Python Basic Obfuscator V1' },
-            { id: 'tool12', title: 'Tool Spam SMS/Zalo Call Troll' },
-            { id: 'tool15', title: 'Script Get Token FB Full Quyền' },
-            { id: 'tool18', title: 'Auto Clicker PC Siêu Nhẹ 1MB' },
-            { id: 'tool20', title: 'Script Report FB Xóa Kênh Die' },
-            { id: 'tool23', title: 'Script Hack Map Moba Hiện Địch' },
-            { id: 'tool25', title: 'Phần Mềm Lọc SĐT/Email Siêu Tốc' },
-            { id: 'tool28', title: 'Bộ 50 Template CV Xin Việc Coder' }
-        ];
-
-        let selectedToolId = "";
-
-        document.addEventListener("DOMContentLoaded", function() {
-            const sheetBody = document.getElementById('sheetBody');
-            freeTools.forEach(tool => {
-                let div = document.createElement("div");
-                div.className = "sheet-item";
-                div.id = "item_" + tool.id;
-                div.innerText = tool.title;
-                div.onclick = () => selectItem(tool.id, tool.title);
-                sheetBody.appendChild(div);
-            });
+                `;
+            }
         });
-
-        function openSheet() { document.getElementById('iosSheetOverlay').classList.add('active'); }
-        function closeSheet() { document.getElementById('iosSheetOverlay').classList.remove('active'); }
-        function handleOverlayClick(event) { if(event.target.id === 'iosSheetOverlay') closeSheet(); }
-
-        function selectItem(id, title) {
-            selectedToolId = id;
-            document.getElementById('selectedText').innerText = title;
-            document.getElementById('selectedText').style.color = "#00ff88";
-            document.querySelectorAll('.sheet-item').forEach(el => el.classList.remove('selected'));
-            document.getElementById('item_' + id).classList.add('selected');
-            closeSheet();
-        }
-
-        // ================= XỬ LÝ CHÍNH: CHẠY THANH 200 PROXY ĐỒNG BỘ =================
-        function startProcess() {
-            if(!selectedToolId) { 
-                alert("⚠️ Bạn chưa chọn Tool nào!"); 
-                openSheet(); 
-                return; 
-            }
-
-            document.getElementById('selectionArea').style.display = 'none';
-            document.getElementById('terminalBox').style.display = 'block';
-
-            const pBar = document.getElementById('pBar');
-            const pPercent = document.getElementById('pPercent');
-            const pLog = document.getElementById('pLog');
-            
-            // DANH SÁCH MÃ QUỐC GIA CHÂU Á CHUẨN XÁC
-            const asianCountries = ['VN', 'SG', 'JP', 'KR', 'TH', 'MY', 'ID', 'PH', 'TW', 'HK'];
-            
-            let proxyCount = 0;
-            const maxProxies = 200;
-            let finalLink = null;
-            let isApiFailed = false;
-            let errorMsg = "";
-
-            // 1. KÍCH HOẠT HÀM FETCH NGẦM NGAY LẬP TỨC
-            fetchLink4MData().then(res => {
-                if(res.success) {
-                    finalLink = res.url;
-                } else {
-                    isApiFailed = true;
-                    errorMsg = res.message;
-                }
-            });
-
-            // 2. VÒNG LẶP CHẠY THANH TIẾN TRÌNH VÀ IP ẢO
-            let interval = setInterval(() => {
-                proxyCount += Math.floor(Math.random() * 4) + 2; // Nhảy 2-5 proxy mỗi nhịp
-                if(proxyCount > maxProxies) proxyCount = maxProxies;
-
-                // Tính toán phần trăm
-                let progress = Math.floor((proxyCount / maxProxies) * 100);
-                
-                // NẾU API CHƯA CÓ KẾT QUẢ, KHÓA CHẶT THANH Ở MỨC 99% KHÔNG CHO LÊN 100%
-                if (progress > 99 && !finalLink && !isApiFailed) {
-                    progress = 99;
-                }
-                
-                pBar.style.width = progress + '%';
-                pPercent.innerText = progress + '%';
-
-                // Render IP Châu Á liên tục
-                if (proxyCount % 3 === 0 || proxyCount === maxProxies) {
-                    let ip = "1" + Math.floor(Math.random()*9) + "." + Math.floor(Math.random()*255) + "." + Math.floor(Math.random()*255) + ".x";
-                    let ctry = asianCountries[Math.floor(Math.random() * asianCountries.length)];
-                    pLog.innerHTML += `<div>> Asian Route ${proxyCount}/${maxProxies} [${ctry}] IP ${ip}... OK</div>`;
-                    pLog.scrollTop = pLog.scrollHeight;
-                }
-
-                // 3. XỬ LÝ ĐIỀU KIỆN KHI ĐẠT 99% HOẶC CÓ KẾT QUẢ
-                if(progress >= 99) {
-                    // NẾU ĐÃ CÓ LINK -> ĐÁP 100% VÀ BAY NGAY LẬP TỨC
-                    if (finalLink) {
-                        clearInterval(interval);
-                        pBar.style.width = '100%';
-                        pPercent.innerText = '100%';
-                        
-                        pLog.innerHTML += `<div style="color:#00ff88; font-weight:bold; margin-top:5px;">> [SUCCESS] Cloudflare Bypassed!</div>`;
-                        pLog.innerHTML += `<div style="color:#fff; font-weight:bold;">> BẮT ĐẦU CHUYỂN TRANG...</div>`;
-                        pLog.scrollTop = pLog.scrollHeight;
-                        
-                        // Lệnh redirect dứt khoát không có setTimeout
-                        window.location.replace(finalLink);
-                    } 
-                    // NẾU LỖI (CHẠY HẾT 5 CỔNG ĐỀU CHẾT)
-                    else if (isApiFailed) {
-                        clearInterval(interval);
-                        pBar.style.background = '#ff4757';
-                        pBar.style.boxShadow = '0 0 10px #ff4757';
-                        pLog.innerHTML += `<div style="color:#ff4757; font-weight:bold; margin-top:5px;">> [ERROR]: ${errorMsg}</div>`;
-                        pLog.innerHTML += `<button onclick="window.location.reload()" style="margin-top:10px; background:#ff4757; color:#fff; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold;">TẢI LẠI TRANG</button>`;
-                        pLog.scrollTop = pLog.scrollHeight;
-                    }
-                }
-            }, 40); // 40ms = Chạy rất mượt và nhanh
-        }
-
-        // ================= HÀM FETCH "ĐỤC THỦNG" CLOUDFLARE =================
-        async function fetchLink4MData() {
-            let timestamp = Math.floor(Date.now() / 1000);
-            let fingerprint = CryptoJS.MD5("SECURE" + timestamp + selectedToolId).toString();
-            
-            localStorage.setItem('anti_share_token', fingerprint);
-            localStorage.setItem('anti_share_time', timestamp);
-
-            // Dẫn link Callback về key.html
-            let currUrl = window.location.href.split('?')[0].split('#')[0];
-            let keyPageUrl = currUrl.replace('getkey.html', 'key.html');
-            if(!keyPageUrl.includes('key.html')) keyPageUrl = keyPageUrl.replace(/\/$/, '') + '/key.html';
-            
-            let returnUrl = `${keyPageUrl}?tool=${selectedToolId}&token=${fingerprint}&t=${timestamp}`; 
-            
-            // Link API gốc của Link4M
-            let directApiUrl = `https://link4m.co/api-shorten/v2?api=${LINK4M_API_KEY}&url=${encodeURIComponent(returnUrl)}`;
-
-            // DANH SÁCH 5 CỔNG PROXY VIP ĐỂ LÁCH CLOUDFLARE
-            const proxies = [
-                `https://corsproxy.io/?${encodeURIComponent(directApiUrl)}`,
-                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(directApiUrl)}`,
-                `https://api.allorigins.win/raw?url=${encodeURIComponent(directApiUrl)}`,
-                `https://cors-proxy.htmldriven.com/?url=${encodeURIComponent(directApiUrl)}`
-            ];
-
-            let pLog = document.getElementById('pLog');
-
-            // BƯỚC 1: THỬ GỌI TRỰC TIẾP (Phòng trường hợp mạng khách tự qua được)
-            try {
-                let res = await fetch(directApiUrl);
-                let json = await res.json();
-                if(json.shortenedUrl) return { success: true, url: json.shortenedUrl };
-            } catch(e) { 
-                // Gọi trực tiếp bị CORS chặn, bắt đầu dùng Proxy
-            }
-
-            // BƯỚC 2: QUÉT QUA TỪNG CỔNG PROXY. CỔNG NÀO SỐNG THÌ NHẶT LINK RỒI DỪNG LẠI.
-            for (let i = 0; i < proxies.length; i++) {
-                try {
-                    let res = await fetch(proxies[i]);
-                    let text = await res.text();
-
-                    // Nếu CF trả về trang chặn (có chữ cloudflare hoặc Just a moment) -> Bỏ qua cổng này
-                    if (text.toLowerCase().includes('cloudflare') || text.toLowerCase().includes('just a moment')) {
-                        pLog.innerHTML += `<div style="color:#ffb86c">> Route ${i+1} Blocked by CF. Redirecting...</div>`;
-                        pLog.scrollTop = pLog.scrollHeight;
-                        continue; 
-                    }
-
-                    // Thử Parse JSON
-                    try {
-                        let data = JSON.parse(text);
-                        if (data.status === 'success' || data.shortenedUrl) {
-                            return { success: true, url: data.shortenedUrl };
-                        } else if (data.status === 'error') {
-                            return { success: false, message: data.message }; // Báo lỗi nếu API Key sai
-                        }
-                    } catch(jsonErr) {
-                        // Nếu Link4M trả về text link thô (không phải JSON)
-                        if (text.includes("http")) {
-                            return { success: true, url: text.trim() };
-                        }
-                    }
-                } catch(error) {
-                    pLog.innerHTML += `<div style="color:#444">> Route ${i+1} timeout. Switching...</div>`;
-                    continue;
-                }
-            }
-
-            // Nếu chạy hết 5 cổng mà vẫn chết
-            return { success: false, message: "Hệ thống bảo mật mạng của bạn hoặc Cloudflare đang chặn toàn bộ cổng kết nối API. Vui lòng thử dùng mạng 4G." };
-        }
-
-        // FIREBASE ĐỒNG BỘ
-        try {
-            const config = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
-            firebase.initializeApp(config);
-            firebase.database().ref('users/' + currentUser).on('value', (s) => {
-                let bal = s.exists() ? (s.val().balance || 0) : 0;
-                document.getElementById('topBalance').innerText = bal.toLocaleString('vi-VN') + " đ";
-            });
-        } catch(e) {}
     </script>
 </body>
 </html>
