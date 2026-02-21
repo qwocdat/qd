@@ -2,124 +2,253 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>VƯỢT LINK PRO</title>
-    <!-- giữ nguyên các thẻ meta, css, firebase, font -->
-    <style> /* giữ nguyên style cũ */ </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LẤY KEY THÀNH CÔNG | QUOCDAT SEC</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a0f;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: #15151e;
+            border: 1px solid #2a2a35;
+            border-radius: 30px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+        .icon-success {
+            font-size: 80px;
+            color: #00ff88;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #00ff88;
+        }
+        h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: #00ff88;
+            margin-bottom: 15px;
+            font-size: 28px;
+        }
+        .description {
+            color: #aaa;
+            font-size: 14px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .key-box {
+            background: #1e1e2a;
+            border: 2px dashed #00b8ff;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 30px;
+            position: relative;
+            word-break: break-word;
+        }
+        .key-label {
+            font-size: 12px;
+            color: #00b8ff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+        #keyValue {
+            font-family: 'Orbitron', monospace;
+            font-size: 24px;
+            font-weight: 900;
+            color: #fff;
+            background: none;
+            border: none;
+            text-align: center;
+            width: 100%;
+            outline: none;
+        }
+        .copy-btn {
+            background: #2a2a35;
+            color: #00b8ff;
+            border: none;
+            border-radius: 30px;
+            padding: 12px 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+        }
+        .copy-btn:hover {
+            background: #00b8ff;
+            color: #000;
+        }
+        .error-message {
+            color: #ff5555;
+            padding: 20px;
+            background: #2a1a1a;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .btn-home {
+            display: inline-block;
+            background: #2a2a35;
+            color: #fff;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            margin-top: 20px;
+            font-weight: 500;
+        }
+        .loading {
+            color: #00ff88;
+            font-size: 16px;
+        }
+        .loading i {
+            margin-right: 8px;
+        }
+    </style>
 </head>
 <body>
-    <header>...</header>
-    <div class="container">...</div>
+    <div class="container" id="mainContainer">
+        <div id="loadingScreen" class="loading">
+            <i class="fas fa-spinner fa-spin"></i> Đang xác thực key...
+        </div>
+        
+        <div id="successScreen" style="display: none;">
+            <div class="icon-success">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2>XÁC THỰC THÀNH CÔNG</h2>
+            <div class="description">
+                Key của bạn đã được kích hoạt. Vui lòng sao chép và sử dụng.
+            </div>
+            <div class="key-box">
+                <div class="key-label">KEY BẢO MẬT</div>
+                <div id="keyValue">XXXXXXXX</div>
+            </div>
+            <button class="copy-btn" id="copyKeyBtn">
+                <i class="far fa-copy"></i> SAO CHÉP KEY
+            </button>
+        </div>
+
+        <div id="errorScreen" style="display: none;">
+            <div class="icon-success" style="color: #ff5555;">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h2 style="color: #ff5555;">XÁC THỰC THẤT BẠI</h2>
+            <div class="error-message" id="errorMessage">
+                Token không hợp lệ hoặc đã hết hạn.
+            </div>
+            <a href="index.html" class="btn-home">
+                <i class="fas fa-home"></i> VỀ TRANG CHỦ
+            </a>
+        </div>
+    </div>
 
     <script>
-        const MY_API_KEY = "6992df868b3d1e423d1ab833";
-        const firebaseConfig = { ... };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        // Cấu hình Firebase (phải giống với file chính)
+        const firebaseConfig = {
+            apiKey: "6992df868b3d1e423d1ab833",
+            databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "quocdat-b80c2"
+        };
+        // Khởi tạo Firebase nếu chưa có
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const db = firebase.database();
 
-        // Hàm gọi JSONP (dành cho /api)
-        function jsonpRequest(url, callbackName) {
-            return new Promise((resolve, reject) => {
-                const cbName = callbackName + '_' + Date.now();
-                window[cbName] = function(data) {
-                    resolve(data);
-                    cleanup();
-                };
-                const script = document.createElement('script');
-                script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cbName;
-                script.async = true;
-                const timeout = setTimeout(() => {
-                    cleanup();
-                    reject(new Error('JSONP timeout'));
-                }, 8000);
-                script.onerror = () => { cleanup(); reject(new Error('JSONP network error')); };
-                document.head.appendChild(script);
-                function cleanup() {
-                    if (script.parentNode) script.parentNode.removeChild(script);
-                    delete window[cbName];
-                    clearTimeout(timeout);
-                }
-            });
+        // Lấy token từ URL (tham số 'verify')
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('verify');
+
+        // DOM elements
+        const loading = document.getElementById('loadingScreen');
+        const success = document.getElementById('successScreen');
+        const error = document.getElementById('errorScreen');
+        const keyDiv = document.getElementById('keyValue');
+        const errorMsg = document.getElementById('errorMessage');
+
+        // Hàm hiển thị lỗi
+        function showError(message) {
+            loading.style.display = 'none';
+            errorMsg.innerText = message;
+            error.style.display = 'block';
         }
 
-        // Hàm thử từng phương thức
-        async function tryAllMethods(destinationUrl) {
-            // Phương thức 1: Gọi /api bằng JSONP (nếu link4m hỗ trợ callback)
-            try {
-                const apiUrl = `https://link4m.com/api?api=${MY_API_KEY}&url=${encodeURIComponent(destinationUrl)}`;
-                const data = await jsonpRequest(apiUrl, 'link4m_callback');
-                // Định dạng response có thể khác nhau: thử các trường phổ biến
-                const shortLink = data.shortenedUrl || data.shortlink || data.url || (data.status === 'success' && data.link);
-                if (shortLink) {
-                    console.log('✅ Thành công qua /api JSONP');
-                    window.location.href = shortLink;
-                    return true;
-                }
-            } catch (e) {
-                console.warn('⚠️ /api JSONP thất bại:', e);
+        // Xác thực token
+        async function verifyToken() {
+            // Kiểm tra token có tồn tại không
+            if (!token) {
+                showError('Không tìm thấy token xác thực (thiếu tham số verify).');
+                return;
             }
 
-            // Phương thức 2: Dùng fetch với proxy CORS (nếu có server proxy)
-            // (Ở đây giả sử bạn có file proxy.php cùng thư mục)
             try {
-                const proxyUrl = `proxy.php?api=${MY_API_KEY}&url=${encodeURIComponent(destinationUrl)}`;
-                const res = await fetch(proxyUrl);
-                const data = await res.json();
-                const shortLink = data.shortenedUrl || data.shortlink || data.url;
-                if (shortLink) {
-                    console.log('✅ Thành công qua proxy PHP');
-                    window.location.href = shortLink;
-                    return true;
+                // Đọc dữ liệu từ Firebase
+                const snapshot = await db.ref('free_tokens/' + token).once('value');
+                const data = snapshot.val();
+
+                if (!data) {
+                    showError('Token không tồn tại trong hệ thống.');
+                    return;
                 }
-            } catch (e) {
-                console.warn('⚠️ Proxy thất bại:', e);
-            }
 
-            // Phương thức 3: Redirect trực tiếp đến /st (cách cũ)
-            try {
-                const stUrl = `https://link4m.com/st?api=${MY_API_KEY}&url=${encodeURIComponent(destinationUrl)}`;
-                console.log('🔄 Thử redirect đến /st');
-                window.location.href = stUrl;
-                return true; // Không thể kiểm tra thành công, nhưng hy vọng redirect hoạt động
-            } catch (e) {
-                console.error('❌ /st redirect thất bại:', e);
-            }
-
-            return false;
-        }
-
-        async function forceGenerateLink() {
-            const btn = document.getElementById('btnCreateLink');
-            const status = document.getElementById('loadingStatus');
-            const errorMsg = document.getElementById('errorMsg');
-
-            btn.style.display = 'none';
-            status.style.display = 'block';
-            errorMsg.style.display = 'none';
-
-            const uniqueToken = "TK-" + Math.random().toString(36).substring(2, 12).toUpperCase();
-            const freeKey = "QDFREE-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-            const urlParams = new URLSearchParams(window.location.search);
-            const freeItem = urlParams.get('free_item');
-            let currentPath = window.location.href.split('?')[0];
-            let baseUrl = currentPath.substring(0, currentPath.lastIndexOf('/'));
-            let destinationUrl = `${baseUrl}/key.html?verify=${uniqueToken}`;
-            if (freeItem) destinationUrl += `&free_item=${freeItem}`;
-
-            try {
-                await db.ref('free_tokens/' + uniqueToken).set({ key: freeKey, status: 'pending', created_at: Date.now() });
-
-                // Thử lần lượt các phương thức
-                const success = await tryAllMethods(destinationUrl);
-                if (!success) {
-                    throw new Error('Tất cả phương thức đều thất bại');
+                // Kiểm tra trạng thái token
+                if (data.status === 'used') {
+                    showError('Key này đã được sử dụng trước đó.');
+                    return;
                 }
+
+                // Kiểm tra thời gian hiệu lực (10 phút)
+                const now = Date.now();
+                const createdAt = data.created_at || 0;
+                const maxAge = 10 * 60 * 1000; // 10 phút
+                if (now - createdAt > maxAge) {
+                    showError('Token đã hết hạn (quá 10 phút).');
+                    return;
+                }
+
+                // Đánh dấu token đã dùng
+                await db.ref('free_tokens/' + token).update({ status: 'used' });
+
+                // Hiển thị key
+                keyDiv.innerText = data.key || 'KEY_ERROR';
+                loading.style.display = 'none';
+                success.style.display = 'block';
             } catch (err) {
-                console.error('Lỗi nghiêm trọng:', err);
-                errorMsg.style.display = 'block';
-                btn.style.display = 'block';
-                status.style.display = 'none';
+                console.error(err);
+                showError('Lỗi kết nối database: ' + err.message);
             }
         }
+
+        // Sao chép key
+        document.getElementById('copyKeyBtn').addEventListener('click', function() {
+            const keyText = keyDiv.innerText;
+            navigator.clipboard.writeText(keyText).then(() => {
+                alert('Đã sao chép key vào clipboard!');
+            }).catch(() => {
+                alert('Không thể sao chép tự động, vui lòng chọn và copy thủ công.');
+            });
+        });
+
+        // Chạy xác thực khi tải trang
+        verifyToken();
     </script>
 </body>
 </html>
