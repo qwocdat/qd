@@ -3,271 +3,785 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>QUOCDAT SEC | HỆ THỐNG TÀI NGUYÊN MMO</title>
+    <title>QUOCDAT SEC | HỆ THỐNG TÀI NGUYÊN MMO CHUYÊN NGHIỆP</title>
 
-    <script>
-        // KIỂM TRA ĐĂNG NHẬP - chạy ngay lập tức
-        (function() {
-            var currentUser = localStorage.getItem('vip_username');
-            if (!currentUser || currentUser.trim() === "") {
-                window.location.href = "login.html";
-                return; // dừng script hiện tại
-            }
-            window.currentUser = currentUser.trim(); // lưu để dùng sau
-        })();
-
-        // HÀM TOÀN CỤC (ưu tiên số 1)
-        window.openNav = function() { document.getElementById('mobileNav').style.right = '0px'; }
-        window.closeNav = function() { document.getElementById('mobileNav').style.right = '-100%'; }
-        window.logout = function() { localStorage.clear(); window.location.href = "login.html"; }
-        window.openModal = function(id) { window.closeNav(); document.getElementById(id).style.display = 'flex'; }
-        window.closeModal = function(id) { document.getElementById(id).style.display = 'none'; }
-        window.closeOutside = function(event, id) { if(event.target.id === id) window.closeModal(id); }
-        window.goToPage = function(url) {
-            document.body.style.opacity = '0';
-            setTimeout(() => { window.location.href = url; }, 300);
-        }
-        window.showToast = function(message, type = 'success') {
-            let toast = document.getElementById('toast');
-            if (!toast) {
-                toast = document.createElement('div');
-                toast.id = 'toast';
-                document.body.appendChild(toast);
-            }
-            toast.className = `toast-show toast-${type}`;
-            toast.innerText = message;
-            setTimeout(() => { toast.className = ''; }, 3000);
-        }
-    </script>
-
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        :root { --primary: #00ff88; --primary-dark: #00cc66; --accent: #00b8ff; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --text-muted: #a0a0a0; }
-        body { background: var(--bg) url('https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat fixed; color: #fff; overflow-x: hidden; padding-top: 70px; padding-bottom: 50px; transition: opacity 0.4s; }
-        .overlay-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,10,15,0.95); z-index: -1; }
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-        /* PRELOADER - đơn giản, luôn biến mất sau 2 giây */
-        #preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050508; z-index: 9999999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s; }
-        .loader-logo { font-family: 'Orbitron'; font-size: 32px; font-weight: 900; color: #fff; margin-bottom: 20px; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
-        .loader-bar { width: 240px; height: 4px; background: #222; border-radius: 10px; overflow: hidden; margin: 20px 0; border: 1px solid #333; }
-        #lFill { width: 0%; height: 100%; background: var(--primary); box-shadow: 0 0 20px var(--primary); transition: width 0.1s linear; }
-        #lTxt { font-family: 'Orbitron'; color: var(--primary); font-weight: bold; font-size: 20px; }
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary: #00ff88;
+            --primary-dark: #00cc66;
+            --accent: #00b8ff;
+            --bg: #0a0a0f;
+            --card-bg: #15151e;
+            --border: #2a2a35;
+            --text: #e0e0e0;
+            --text-muted: #a0a0a0;
+        }
+
+        body {
+            background: var(--bg) url('https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat fixed;
+            color: #fff;
+            overflow-x: hidden;
+            padding-top: 70px;
+            padding-bottom: 50px;
+            transition: opacity 0.4s;
+        }
+
+        .overlay-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.95);
+            z-index: -1;
+        }
+
+        /* PRELOADER */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #050508;
+            z-index: 9999999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s;
+        }
+
+        .loader-logo {
+            font-family: 'Orbitron';
+            font-size: 32px;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 20px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        .loader-bar {
+            width: 240px;
+            height: 4px;
+            background: #222;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+            border: 1px solid #333;
+        }
+
+        #lFill {
+            width: 0%;
+            height: 100%;
+            background: var(--primary);
+            box-shadow: 0 0 20px var(--primary);
+            transition: width 0.1s linear;
+        }
+
+        #lTxt {
+            font-family: 'Orbitron';
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 20px;
+        }
 
         /* HEADER */
-        header { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(10,10,15,0.98); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); z-index: 1000; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
-        .logo { font-family: 'Orbitron'; font-size: 20px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 8px; cursor: pointer; }
-        .pc-wallet { background: rgba(0,255,136,0.1); border: 1px solid var(--primary); color: var(--primary); padding: 8px 16px; border-radius: 30px; font-size: 13px; font-family: 'Orbitron'; font-weight: 700; display: none; }
-        .hamburger { font-size: 28px; color: #fff; cursor: pointer; }
-        @media (min-width: 992px) { .pc-wallet { display: block; } .hamburger { display: none; } }
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background: rgba(10, 10, 15, 0.98);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-family: 'Orbitron';
+            font-size: 20px;
+            font-weight: 900;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .pc-wallet {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-family: 'Orbitron';
+            font-weight: 700;
+            display: none;
+        }
+
+        .hamburger {
+            font-size: 28px;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        @media (min-width: 992px) {
+            .pc-wallet {
+                display: block;
+            }
+            .hamburger {
+                display: none;
+            }
+        }
 
         /* FLOATING MENU */
-        .floating-menu { position: fixed; bottom: 20px; right: 20px; z-index: 500; display: flex; flex-direction: column; gap: 10px; }
-        .float-btn { width: 50px; height: 50px; border-radius: 50%; background: #111; border: 1px solid var(--border); display: flex; justify-content: center; align-items: center; color: #fff; transition: 0.2s; cursor: pointer; }
-        .float-btn:hover { background: var(--primary); color: #000; transform: scale(1.1); }
+        .floating-menu {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 500;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .float-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #111;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .float-btn:hover {
+            background: var(--primary);
+            color: #000;
+            transform: scale(1.1);
+        }
 
         /* SIDEBAR */
-        .mobile-nav { position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; background: #0a0a0f; z-index: 3000; transition: 0.4s; border-left: 1px solid var(--border); overflow-y: auto; }
-        .nav-profile { background: #1a1a24; padding: 40px 20px; text-align: center; border-bottom: 1px solid var(--border); }
-        .avatar { width: 70px; height: 70px; background: var(--primary); color: #000; font-size: 32px; font-weight: bold; border-radius: 50%; margin: 0 auto 15px; display: flex; justify-content: center; align-items: center; border: 4px solid #000; font-family: 'Orbitron'; }
-        .menu-link { display: flex; align-items: center; gap: 12px; color: #fff; text-decoration: none; padding: 14px 20px; border-radius: 10px; font-weight: 600; margin: 0 8px 8px; cursor: pointer; transition: 0.2s; }
-        .menu-link:hover { background: rgba(255,255,255,0.05); }
-        .menu-link.highlight { background: rgba(0,255,136,0.1); color: var(--primary); }
-
-        /* MODALS & TOAST (giữ nguyên) */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 99999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
-        .ios-modal { width: 320px; background: #1c1c1e; border-radius: 24px; padding: 30px 20px; text-align: center; border: 1px solid #333; animation: zoomIn 0.2s; }
-        @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1c1c1e; color: #fff; padding: 12px 28px; border-radius: 50px; font-weight: 600; z-index: 100000; transition: 0.3s; opacity: 0; visibility: hidden; border-left: 4px solid var(--primary); white-space: nowrap; }
-        #toast.toast-show { opacity: 1; visibility: visible; bottom: 40px; }
-
-        /* HERO, SECTIONS (giữ nguyên style đẹp) */
-        .hero { min-height: 80vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 40px 20px; position: relative; overflow: hidden; }
-        .hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(0,255,136,0.1) 0%, transparent 70%); animation: rotate 30s linear infinite; z-index: -1; }
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .hero h1 { font-size: 48px; font-family: 'Orbitron'; font-weight: 900; line-height: 1.2; margin-bottom: 20px; text-transform: uppercase; }
-        .hero h1 span { color: var(--primary); }
-        .btn-group { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
-        .btn-lg { padding: 16px 36px; border-radius: 40px; font-weight: 700; font-family: 'Orbitron'; font-size: 15px; display: inline-flex; align-items: center; gap: 10px; transition: 0.3s; cursor: pointer; border: none; }
-        .btn-main { background: var(--primary); color: #000; box-shadow: 0 5px 25px rgba(0,255,136,0.4); }
-        .btn-main:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,255,136,0.6); }
-        .btn-sub { background: transparent; color: #fff; border: 2px solid var(--border); }
-        .btn-sub:hover { border-color: var(--primary); color: var(--primary); }
-
-        .section { padding: 80px 20px; max-width: 1200px; margin: 0 auto; }
-        .sec-title { text-align: center; font-family: 'Orbitron'; font-size: 32px; margin-bottom: 60px; text-transform: uppercase; }
-        .sec-title:after { content: ''; display: block; width: 80px; height: 3px; background: var(--primary); margin: 20px auto 0; border-radius: 2px; }
-
-        /* Các thành phần khác giữ nguyên từ bản trước (grid, card, about, features, skills, testimonials, stats, legal, footer) */
-        /* ... (đã có đầy đủ) ... */
-
-        /* Tạm thời copy lại các style cần thiết */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; }
-        .card { background: var(--card-bg); padding: 30px; border-radius: 24px; border: 1px solid var(--border); transition: 0.3s; }
-        .card:hover { border-color: var(--primary); transform: translateY(-5px); }
-        .card i.main-icon { color: var(--primary); font-size: 36px; margin-bottom: 20px; }
-        .price { font-size: 26px; font-weight: 900; color: var(--primary); margin: 15px 0; }
-        .btn-small { background: transparent; border: 1px solid var(--border); color: #fff; padding: 8px 20px; border-radius: 30px; cursor: pointer; transition: 0.2s; }
-        .btn-small:hover { background: var(--primary); color: #000; }
-        .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; }
-        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; }
-        .skill-item { margin-bottom: 25px; }
-        .progress-bg { width: 100%; height: 12px; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #333; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--primary)); width: 0; transition: width 2s; }
-        .testimonials { display: flex; flex-wrap: wrap; gap: 25px; justify-content: center; }
-        .stats-grid { display: flex; justify-content: space-around; background: var(--card-bg); border-radius: 40px; padding: 50px 30px; border: 1px solid var(--border); }
-        .legal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
-        footer { padding: 50px 20px 30px; border-top: 1px solid var(--border); }
-        .fade-up { opacity: 0; transform: translateY(30px); transition: opacity 0.8s, transform 0.8s; }
-        .fade-up.appear { opacity: 1; transform: translateY(0); }
-
-        /* Responsive cơ bản */
-        @media (max-width: 768px) {
-            .hero h1 { font-size: 36px; }
-            .about-grid { grid-template-columns: 1fr; }
+        .mobile-nav {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 280px;
+            height: 100vh;
+            background: #0a0a0f;
+            z-index: 3000;
+            transition: 0.4s;
+            border-left: 1px solid var(--border);
+            overflow-y: auto;
         }
-    </style>
-</head>
-<body>
 
-    <!-- PRELOADER với fallback timeout cứng -->
-    <div id="preloader">
-        <div class="loader-logo">QUOCDAT<span style="color:var(--primary);">.SEC</span></div>
-        <div class="loader-bar"><div id="lFill"></div></div>
-        <div id="lTxt">0%</div>
-        <div style="font-family:monospace; font-size:12px; color:#444; margin-top:20px;">Đang tải tài nguyên...</div>
-    </div>
+        .nav-profile {
+            background: #1a1a24;
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
 
-    <script>
-        // Preloader: vừa chạy tiến trình vừa đảm bảo sẽ ẩn sau 2.5 giây dù thế nào
-        (function() {
-            let p = 0;
-            let interval = setInterval(() => {
-                p += 3;
-                if (p > 100) p = 100;
-                document.getElementById('lFill').style.width = p + '%';
-                document.getElementById('lTxt').innerText = p + '%';
-                if (p >= 100) {
-                    clearInterval(interval);
-                }
-            }, 20); // ~ 20*34 = 680ms để đạt 100%
+        .avatar {
+            width: 70px;
+            height: 70px;
+            background: var(--primary);
+            color: #000;
+            font-size: 32px;
+            font-weight: bold;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 4px solid #000;
+            font-family: 'Orbitron';
+        }
 
-            // Fallback cứng: ẩn preloader sau 2.5 giây
-            setTimeout(() => {
-                clearInterval(interval); // đề phòng interval vẫn chạy
-                document.getElementById('preloader').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('preloader').style.display = 'none';
-                    // Kích hoạt thanh kỹ năng (nếu đã có)
-                    document.getElementById('s1') && (document.getElementById('s1').style.width = '77%');
-                    document.getElementById('s2') && (document.getElementById('s2').style.width = '50%');
-                    document.getElementById('s3') && (document.getElementById('s3').style.width = '40%');
-                    document.getElementById('s4') && (document.getElementById('s4').style.width = '36%');
-                    document.getElementById('s5') && (document.getElementById('s5').style.width = '20%');
-                }, 500);
-            }, 2500);
-        })();
-    </script>
+        .menu-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #fff;
+            text-decoration: none;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            margin: 0 8px 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
 
-    <div class="overlay-bg"></div>
+        .menu-link:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
 
-    <header>
-        <div class="logo" onclick="window.goToPage('index.html')">
-            <i class="fas fa-shield-halved"></i> QUOCDAT.SEC
-        </div>
-        <div class="header-right">
-            <div class="pc-wallet" id="pcBal">0 đ</div>
-            <i class="fas fa-bars-staggered hamburger" onclick="window.openNav()"></i>
-        </div>
-    </header>
+        .menu-link.highlight {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--primary);
+        }
 
-    <!-- FLOATING MENU -->
-    <div class="floating-menu">
-        <a onclick="window.goToPage('naptien.html')" class="float-btn" title="Nạp tiền"><i class="fas fa-wallet"></i></a>
-        <a onclick="window.goToPage('getkey.html')" class="float-btn" title="Lấy key"><i class="fas fa-key"></i></a>
-        <a onclick="window.goToPage('shop.html')" class="float-btn" title="Cửa hàng"><i class="fas fa-store"></i></a>
-    </div>
+        /* MODALS */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 99999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
 
-    <!-- SIDEBAR -->
-    <div class="mobile-nav" id="mobileNav">
-        <div style="padding:20px; text-align:right;"><i class="fas fa-xmark" style="font-size:32px; color:#666; cursor:pointer;" onclick="window.closeNav()"></i></div>
-        <div class="nav-profile">
-            <div class="avatar" id="nA">?</div>
-            <div id="nU" style="font-family:'Orbitron'; font-weight:bold; font-size:18px;">User</div>
-            <div id="nB" style="font-size:24px; color:var(--primary); font-weight:900; margin:10px 0;">0 đ</div>
-            <button style="background:rgba(255,255,255,0.05); color:#fff; border:1px solid #333; padding:10px 20px; border-radius:10px; font-size:13px;" onclick="window.openModal('infoModal')">CHI TIẾT</button>
-        </div>
-        <div class="nav-links">
-            <a onclick="window.goToPage('index.html')" class="menu-link highlight"><i class="fas fa-house"></i> TRANG CHỦ</a>
-            <a onclick="window.goToPage('shop.html')" class="menu-link"><i class="fas fa-cart-shopping"></i> CỬA HÀNG</a>
-            <a onclick="window.goToPage('getkey.html')" class="menu-link"><i class="fas fa-unlock-keyhole"></i> LẤY KEY VIP</a>
-            <a onclick="window.goToPage('naptien.html')" class="menu-link" style="color:var(--accent);"><i class="fas fa-credit-card"></i> NẠP TIỀN</a>
-            <div class="menu-link" style="color:#ffb86c;" onclick="window.openModal('historyModal')"><i class="fas fa-clock-rotate-left"></i> LỊCH SỬ</div>
-            <div class="menu-link" style="color:#ff4757; margin-top:30px; border-top: 1px solid #1a1a24;" onclick="window.logout()"><i class="fas fa-power-off"></i> ĐĂNG XUẤT</div>
-        </div>
-    </div>
+        .ios-modal {
+            width: 320px;
+            background: #1c1c1e;
+            border-radius: 24px;
+            padding: 30px 20px;
+            text-align: center;
+            border: 1px solid #333;
+            animation: zoomIn 0.2s;
+        }
 
-    <!-- MODALS (giữ nguyên) -->
-    <div class="modal-overlay" id="infoModal" onclick="window.closeOutside(event, 'infoModal')">
-        <div class="ios-modal">...</div> <!-- nội dung đã có -->
-    </div>
-    <div class="modal-overlay" id="historyModal" onclick="window.closeOutside(event, 'historyModal')">
-        <div class="ios-modal">...</div>
-    </div>
-    <div class="modal-overlay" id="policyModal" onclick="window.closeOutside(event, 'policyModal')">
-        <div class="ios-modal policy-modal">...</div>
-    </div>
+        .policy-modal {
+            max-width: 420px;
+            max-height: 70vh;
+            overflow-y: auto;
+            text-align: left;
+        }
 
-    <main>
-        <!-- HERO -->
-        <section class="hero">
-            <h1>GIẢI PHÁP <span>TỰ ĐỘNG HÓA</span><br>DÀNH CHO MMO</h1>
-            <p>Hệ thống cung cấp mã nguồn, tool auto, script vip uy tín hàng đầu Việt Nam. Hơn 3.200 thành viên đang tin dùng.</p>
-            <div class="btn-group">
-                <button class="btn-lg btn-main" onclick="window.goToPage('shop.html')"><i class="fas fa-shopping-bag"></i> KHÁM PHÁ NGAY</button>
-                <button class="btn-lg btn-sub" onclick="window.goToPage('getkey.html')"><i class="fas fa-gift"></i> DÙNG THỬ MIỄN PHÍ</button>
-            </div>
-        </section>
+        @keyframes zoomIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
 
-        <!-- GIỚI THIỆU CÔNG TY -->
-        <section class="section">
-            <div class="about-grid">
-                <div class="about-content fade-up">
-                    <h3>VỀ QUOCDAT SEC</h3>
-                    <p>Được thành lập từ 2023, QUOCDAT SEC là đơn vị tiên phong trong lĩnh vực cung cấp giải pháp tự động hóa cho cộng đồng MMO Việt Nam. Chúng tôi kết hợp công nghệ hiện đại và kinh nghiệm thực chiến để tạo ra những sản phẩm chất lượng cao, giúp tối ưu hiệu suất làm việc.</p>
-                    <p>Với đội ngũ developer giàu kinh nghiệm, chúng tôi đã phát triển hơn 35 tool và mã nguồn, phục vụ hàng ngàn khách hàng từ cá nhân đến doanh nghiệp.</p>
-                    <div class="about-stats" style="display:flex; gap:30px; margin-top:20px;">
-                        <div><div class="stat-number">3+</div><div>Năm</div></div>
-                        <div><div class="stat-number">35+</div><div>Sản phẩm</div></div>
-                        <div><div class="stat-number">3.2K</div><div>Thành viên</div></div>
-                    </div>
-                </div>
-                <div class="about-image fade-up">
-                    <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Đội ngũ" style="width:100%; border-radius:20px;">
-                </div>
-            </div>
-        </section>
+        /* TOAST */
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1c1c1e;
+            color: #fff;
+            padding: 12px 28px;
+            border-radius: 50px;
+            font-weight: 600;
+            z-index: 100000;
+            transition: 0.3s;
+            opacity: 0;
+            visibility: hidden;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            white-space: nowrap;
+        }
 
-        <!-- TÍNH NĂNG NỔI BẬT -->
-        <section class="section">
-            <h2 class="sec-title">TÍNH NĂNG <span>VƯỢT TRỘI</span></h2>
-            <div class="features-grid">
-                <div class="feature-item fade-up"><i class="fas fa-bolt"></i><h4>Tốc độ cao</h4><p>Xử lý hàng nghìn tác vụ mỗi phút.</p></div>
-                <div class="feature-item fade-up"><i class="fas fa-shield-alt"></i><h4>Bảo mật</h4><p>Mã hóa đầu cuối, ẩn danh.</p></div>
-                <div class="feature-item fade-up"><i class="fas fa-headset"></i><h4>Hỗ trợ 24/7</h4><p>Phản hồi nhanh chóng.</p></div>
-                <div class="feature-item fade-up"><i class="fas fa-sync-alt"></i><h4>Cập nhật liên tục</h4><p>Theo thuật toán mới nhất.</p></div>
-            </div>
-        </section>
+        #toast.toast-show {
+            opacity: 1;
+            visibility: visible;
+            bottom: 40px;
+        }
 
-        <!-- SẢN PHẨM BÁN CHẠY -->
-        <section class="section">
-            <h2 class="sec-title">SẢN PHẨM <span>BÁN CHẠY</span></h2>
-            <div class="grid">
-                <div class="card fade-up"><i class="fab fa-facebook main-icon"></i><h3>Tool Auto Facebook</h3><p>Đăng bài, kết bạn, like tự động.</p><div class="price">599.000 đ</div><button class="btn-small">XEM</button></div>
-                <div class="card fade-up"><i class="fab fa-instagram main-icon"></i><h3>IG Auto Grow</h3><p>Tăng follow, tương tác.</p><div class="price">799.000 đ</div><button class="btn-small">XEM</button></div>
-                <div class="card fade-up"><i class="fas fa-code main-icon"></i><h3>Source Web Bán Acc</h3><p>Mã ngu
+        #toast.toast-error {
+            border-left-color: #ff4757;
+        }
+
+        /* HERO */
+        .hero {
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0,255,136,0.1) 0%, transparent 70%);
+            animation: rotate 30s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-family: 'Orbitron';
+            font-weight: 900;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(0,255,136,0.3);
+        }
+
+        .hero h1 span {
+            color: var(--primary);
+            display: inline-block;
+            animation: glitch 3s infinite;
+        }
+
+        @keyframes glitch {
+            2%, 64% { transform: skew(2deg, 0); }
+            4%, 60% { transform: skew(-2deg, 0); }
+            62% { transform: skew(0, 0); }
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin-bottom: 30px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn-lg {
+            padding: 16px 36px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-family: 'Orbitron';
+            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-main {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 5px 25px rgba(0, 255, 136, 0.4);
+        }
+
+        .btn-main:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.6);
+        }
+
+        .btn-sub {
+            background: transparent;
+            color: #fff;
+            border: 2px solid var(--border);
+        }
+
+        .btn-sub:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* SECTION CHUNG */
+        .section {
+            padding: 80px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .sec-title {
+            text-align: center;
+            font-family: 'Orbitron';
+            font-size: 32px;
+            margin-bottom: 60px;
+            text-transform: uppercase;
+            position: relative;
+        }
+
+        .sec-title:after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 3px;
+            background: var(--primary);
+            margin: 20px auto 0;
+            border-radius: 2px;
+        }
+
+        .sec-title span {
+            color: var(--primary);
+        }
+
+        /* GRID */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            transition: 0.3s;
+            backdrop-filter: blur(5px);
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 255, 136, 0.15);
+        }
+
+        .card i.main-icon {
+            color: var(--primary);
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .card h3 {
+            font-family: 'Orbitron';
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .price {
+            font-size: 26px;
+            font-weight: 900;
+            color: var(--primary);
+            margin: 15px 0;
+        }
+
+        .btn-small {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 14px;
+        }
+
+        .btn-small:hover {
+            background: var(--primary);
+            color: #000;
+            border-color: var(--primary);
+        }
+
+        /* ABOUT SECTION */
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+
+        .about-content h3 {
+            font-family: 'Orbitron';
+            font-size: 24px;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .about-content p {
+            color: var(--text-muted);
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .about-stats {
+            display: flex;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .stat-box {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: 'Orbitron';
+            font-size: 36px;
+            font-weight: 900;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .about-image {
+            position: relative;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .about-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: 0.5s;
+        }
+
+        .about-image:hover img {
+            transform: scale(1.05);
+        }
+
+        /* FEATURES */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .feature-item {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 30px 20px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .feature-item:hover {
+            border-color: var(--accent);
+        }
+
+        .feature-item i {
+            font-size: 40px;
+            color: var(--accent);
+            margin-bottom: 15px;
+        }
+
+        .feature-item h4 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .feature-item p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* SKILLS BARS */
+        .skills-container {
+            background: var(--card-bg);
+            border-radius: 30px;
+            padding: 40px;
+            border: 1px solid var(--border);
+        }
+
+        .skill-item {
+            margin-bottom: 25px;
+        }
+
+        .skill-info {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #ddd;
+            font-family: 'Orbitron';
+        }
+
+        .progress-bg {
+            width: 100%;
+            height: 12px;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--primary));
+            width: 0;
+            transition: width 2s cubic-bezier(0.1, 0.5, 0.1, 1);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        /* TESTIMONIALS */
+        .testimonials {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            justify-content: center;
+        }
+
+        .testimonial-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid #1a1a24;
+            border-radius: 24px;
+            padding: 30px;
+            max-width: 320px;
+            transition: 0.3s;
+        }
+
+        .testimonial-item:hover {
+            border-color: var(--primary);
+        }
+
+        .testimonial-item i {
+            color: var(--primary);
+            font-size: 28px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .testimonial-item p {
+            font-style: italic;
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .testimonial-item h4 {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* STATS GRID */
+        .stats-grid {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            background: var(--card-bg);
+            border-radius: 40px;
+            padding: 50px 30px;
+            border: 1px solid var(--border);
+            gap: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-item .stat-number {
+            font-family: 'Orbitron';
+            font-size: 48px;
+            font-weight: 900;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        .stat-item .stat-label {
+            color: var(--text-muted);
+            font-size: 16px;
+            margin-top: 8px;
+        }
+
+        /* LEGAL */
+        .legal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .legal-box {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid #1a1a24;
+        }
+
+        .legal-title {
+            font-family: 'Orbitron';
+            font-size: 16px;
+            color: var(--primary);
+            margin-bottom: 25px;
+            border-bottom: 1px solid #1a1a24;
+            padding-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .legal-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .legal-row span:first-child {
+            color: #777;
+            font-weight: 500;
+        }
+
+        .legal-row span:last-child {
+            color: #fff;
+            text-align: right;
+        }
+
+        /* FOOTER */
+        footer {
+            padding: 50px 20px 30px;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .footer-links a {
+            color: #888;
+            te
