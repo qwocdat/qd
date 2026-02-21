@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LẤY KEY MIỄN PHÍ | QUOCDAT SEC</title>
+    <title>VƯỢT LINK BẢO MẬT | QUOCDAT SEC</title>
     
     <script>
         var currentUser = localStorage.getItem('vip_username');
@@ -33,11 +33,12 @@
         .btn-bypass:hover { filter: brightness(1.2); }
         .btn-bypass:disabled { background: #333; color: #888; cursor: not-allowed; }
 
-        /* THANH TIẾN TRÌNH (PROGRESS BAR) */
+        /* THANH TIẾN TRÌNH */
         .progress-wrapper { width: 100%; background: #000; border: 1px solid #333; border-radius: 10px; height: 18px; margin-top: 25px; overflow: hidden; display: none; position: relative; }
-        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--primary)); transition: width 0.3s ease; box-shadow: 0 0 15px var(--accent); }
+        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--primary)); transition: width 0.2s ease; box-shadow: 0 0 15px var(--accent); }
         
-        .terminal-text { font-family: monospace; font-size: 12px; color: var(--accent); text-align: left; margin-top: 15px; display: none; background: #000; padding: 10px; border-radius: 8px; border: 1px dashed #333; }
+        /* MÀN HÌNH TERMINAL */
+        .terminal-text { font-family: monospace; font-size: 12px; color: var(--accent); text-align: left; margin-top: 15px; display: none; background: #000; padding: 15px; border-radius: 8px; border: 1px dashed #333; height: 120px; overflow-y: hidden; line-height: 1.5; }
         .t-success { color: var(--primary); }
         .t-error { color: #ff4757; }
     </style>
@@ -49,151 +50,143 @@
 
     <div class="container">
         <div class="free-key-section">
-            <i class="fas fa-link" style="font-size: 60px; color: var(--accent); margin-bottom: 20px;"></i>
-            <h2 style="font-family:'Orbitron'; color:var(--accent); margin-bottom:10px;">VƯỢT LINK LẤY KEY FREE</h2>
-            <p style="color:#888; font-size:14px; margin-bottom:20px; line-height:1.6;">Kết nối an toàn thông qua mạng lưới Proxy Châu Á. Quá trình sinh mã Token bảo mật có thể mất vài giây.</p>
+            <i class="fas fa-satellite-dish" style="font-size: 60px; color: var(--accent); margin-bottom: 20px;"></i>
+            <h2 style="font-family:'Orbitron'; color:var(--accent); margin-bottom:10px;">KẾT NỐI BẢO MẬT</h2>
+            <p style="color:#888; font-size:14px; margin-bottom:20px; line-height:1.6;" id="descText">Hệ thống đang chuẩn bị tạo Link vượt cấp Key. Quá trình sinh mã Token bảo mật có thể mất vài giây.</p>
             
             <button class="btn-bypass" id="btnCreateLink" onclick="generateLink4M()">
-                <i class="fas fa-external-link-alt"></i> TẠO LINK VÀ VƯỢT NGAY
+                <i class="fas fa-external-link-alt"></i> KHỞI TẠO LINK VƯỢT NGAY
             </button>
 
             <div id="progressContainer" class="progress-wrapper">
                 <div id="progressBar" class="progress-fill"></div>
             </div>
             
-            <div id="terminalText" class="terminal-text">
-                > Khởi tạo mạng lưới Proxy...<br>
-            </div>
+            <div id="terminalText" class="terminal-text"></div>
         </div>
     </div>
         <script>
-        // API CỦA BẠN
+        // API LINK4M CỦA BẠN
         const LINK4M_API = "6992df868b3d1e423d1ab833"; 
 
         const firebaseConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // DANH SÁCH PROXY ẢO/CORS PROXY ĐỂ BYPASS CHẶN API
-        const proxyNodes = [
-            "VN-HN-01 (Hà Nội)", "VN-HCM-02 (HCM)", "SG-AP-05 (Singapore)", 
-            "HK-CN-09 (HongKong)", "JP-TK-11 (Tokyo)", "TW-TP-03 (Đài Loan)"
-        ];
+        // TẠO MẢNG 500 PROXY ĐỂ BYPASS
+        const fakeProxies = Array.from({length: 500}, (_, i) => {
+            let regions = ["VN-HN", "VN-HCM", "SG-AP", "HK-CN", "JP-TK", "US-NY"];
+            return `${regions[Math.floor(Math.random() * regions.length)]}-NODE-${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}:8080`;
+        });
 
-        // MẠNG LƯỚI CORS PROXY DỰ PHÒNG NẾU LINK4M CHẶN TRỰC TIẾP
+        // 4 TRẠM CORS PROXY QUỐC TẾ ĐỂ CHỐNG LỖI KHI GỌI API
         const corsProxies = [
-            "", // Thử gọi trực tiếp trước
-            "https://api.allorigins.win/get?url=", 
-            "https://corsproxy.io/?"
+            "https://api.allorigins.win/raw?url=", 
+            "https://corsproxy.io/?",              
+            "https://api.codetabs.com/v1/proxy?quest=", 
+            "" // Gọi thẳng nếu các proxy trên hỏng
         ];
 
         function logTerminal(msg, type="") {
             let term = document.getElementById('terminalText');
+            if(!term) return;
             let colorClass = type === "err" ? "t-error" : (type === "ok" ? "t-success" : "");
             term.innerHTML += `<span class="${colorClass}">> ${msg}</span><br>`;
-            term.scrollTop = term.scrollHeight; // Cuộn xuống dòng cuối
+            term.scrollTop = term.scrollHeight; // Tự cuộn xuống dòng mới nhất
         }
 
-        function generateLink4M() {
+        async function generateLink4M() {
             let btn = document.getElementById('btnCreateLink'); 
             let pWrap = document.getElementById('progressContainer');
             let pBar = document.getElementById('progressBar');
             let term = document.getElementById('terminalText');
 
-            // Ẩn nút, Hiện thanh tiến trình
             btn.style.display = 'none';
             pWrap.style.display = 'block';
             term.style.display = 'block';
-            term.innerHTML = "> Khởi tạo hệ thống Anti-Share...<br>";
+            term.innerHTML = "> Đang khởi động hệ thống định tuyến (Routing)...<br>";
 
-            let progress = 0;
-            let targetUrl = ""; // Link đích cuối cùng
+            // Lấy ID sản phẩm Miễn phí nếu được Shop ném sang
+            const urlParams = new URLSearchParams(window.location.search);
+            const freeItem = urlParams.get('free_item');
 
-            // HÀM CHẠY THANH TIẾN TRÌNH TỪ 0 LÊN 90% (Giả lập xoay Proxy)
-            let loadInterval = setInterval(() => {
-                if (progress < 90) {
-                    progress += Math.floor(Math.random() * 10) + 5;
-                    if (progress > 90) progress = 90;
-                    
-                    pBar.style.width = progress + '%';
-                    
-                    // Hiển thị hiệu ứng xoay IP
-                    let randomIP = proxyNodes[Math.floor(Math.random() * proxyNodes.length)];
-                    logTerminal(`Đang kết nối qua node: ${randomIP} [${progress}%]`);
-                } 
-                // KHI ĐÃ CÓ LINK VÀ TIẾN TRÌNH ĐANG Ở 90% -> CHẠY LÊN 100% VÀ ĐÁ TRANG
-                else if (progress >= 90 && targetUrl !== "") {
-                    clearInterval(loadInterval);
-                    pBar.style.width = '100%';
-                    logTerminal(`ĐÃ TẠO XONG LINK! Chuyển hướng... [100%]`, "ok");
-                    
-                    // Delay 0.5s ở 100% rồi chuyển trang
-                    setTimeout(() => {
-                        window.location.href = targetUrl;
-                    }, 500);
-                }
-            }, 400);
-
-            // ============================================
-            // XỬ LÝ LÕI: TẠO TOKEN VÀ GỌI API LINK4M
-            // ============================================
-            let uniqueToken = "TK-" + Math.random().toString(36).substring(2, 10).toUpperCase();
+            // Cấu hình mã Token và URL đích
+            let uniqueToken = "TK-" + Math.random().toString(36).substring(2, 12).toUpperCase();
             let freeKey = "QDFREE-" + Math.random().toString(36).substring(2, 8).toUpperCase();
             
             let currentPath = window.location.href.split('?')[0]; 
             let baseUrl = currentPath.substring(0, currentPath.lastIndexOf('/'));
             let destinationUrl = baseUrl + "/key.html?verify=" + uniqueToken;
+            
+            // Nếu có ID đồ Free, gắn nó vào link đích để lát về key.html trả hàng
+            if(freeItem) destinationUrl += "&free_item=" + freeItem;
 
-            // 1. Đẩy Token lên Firebase
-            db.ref('free_tokens/' + uniqueToken).set({ 
+            // 1. Đẩy Token lên Firebase chờ khởi tạo (Pending)
+            await db.ref('free_tokens/' + uniqueToken).set({ 
                 key: freeKey, 
                 status: 'pending', 
                 created_at: Date.now() 
-            }).then(() => {
-                logTerminal("Token bảo mật đã được ghi nhận vào DB.", "ok");
-                
-                // 2. GỌI API LINK4M (Có xử lý CORS)
-                let rawApiUrl = `https://link4m.com/api-shorten/v2?api=${LINK4M_API}&url=${encodeURIComponent(destinationUrl)}`;
-                
-                // Cố gắng gọi bằng CORS proxy để chống lỗi
-                fetch(corsProxies[0] + rawApiUrl) // Đang dùng gọi thẳng
-                .then(response => response.json())
-                .then(data => {
-                    if(data.status === "success" || data.status === 200 || data.shortenedUrl) {
-                        targetUrl = data.shortenedUrl || data.url; 
-                    } else {
-                        throw new Error(JSON.stringify(data)); // Quăng lỗi để catch bên dưới bắt
-                    }
-                })
-                .catch(err => {
-                    logTerminal("Kết nối tuyến chính thất bại. Đang thử qua CORS Proxy...", "err");
-                    
-                    // NẾU LỖI API CHÍNH -> GỌI QUA CORS PROXY DỰ PHÒNG ALLORIGINS
-                    fetch(corsProxies[1] + encodeURIComponent(rawApiUrl))
-                    .then(res => res.json())
-                    .then(proxyData => {
-                        let parsedData = JSON.parse(proxyData.contents);
-                        if(parsedData.status === "success" || parsedData.shortenedUrl) {
-                            targetUrl = parsedData.shortenedUrl || parsedData.url;
-                        } else {
-                            handleApiFail();
-                        }
-                    }).catch(e => handleApiFail());
-                });
             });
+            logTerminal("Token bảo mật đã được ghi nhận vào Firebase.", "ok");
 
-            // Hàm xử lý nếu Link4M thực sự lỗi (hết tiền, sập server)
-            function handleApiFail() {
-                clearInterval(loadInterval);
-                logTerminal("TOÀN BỘ KẾT NỐI API THẤT BẠI. Vui lòng thử lại!", "err");
-                pBar.style.background = "#ff4757"; // Chuyển thanh tiến trình sang màu đỏ
-                setTimeout(() => {
-                    btn.style.display = 'block';
-                    btn.innerHTML = `<i class="fas fa-redo"></i> THỬ KẾT NỐI LẠI`;
-                    pWrap.style.display = 'none';
-                    progress = 0;
-                }, 2000);
-            }
+            // 2. GỌI API LINK4M
+            let rawApiUrl = `https://link4m.com/api-shorten/v2?api=${LINK4M_API}&url=${encodeURIComponent(destinationUrl)}`;
+            let targetUrl = "";
+            let apiSuccess = false;
+
+            logTerminal("Đang thiết lập kết nối qua 500 Proxies...");
+
+            // Bắn API ngầm (Dùng Async để không làm lag hiệu ứng terminal)
+            (async function fetchAPI() {
+                for(let proxy of corsProxies) {
+                    try {
+                        let fetchUrl = proxy === "" ? rawApiUrl : proxy + encodeURIComponent(rawApiUrl);
+                        let res = await fetch(fetchUrl);
+                        let data = await res.json();
+                        
+                        if(data.status === "error") {
+                            logTerminal("API Error: " + data.message, "err");
+                            continue;
+                        }
+                        
+                        if(data.status === "success" || data.status === 200 || data.shortenedUrl) {
+                            targetUrl = data.shortenedUrl || data.url; 
+                            apiSuccess = true;
+                            break; 
+                        }
+                    } catch(e) {
+                        continue; 
+                    }
+                }
+            })();
+
+            // 3. HIỆU ỨNG CHẠY TIẾN TRÌNH & TERMINAL
+            let progress = 0;
+            let loadInterval = setInterval(() => {
+                progress += Math.floor(Math.random() * 5) + 2;
+                if (progress > 85 && !apiSuccess) progress = 85; // Bị kẹt ở 85% nếu API đang load
+                if (progress > 100) progress = 100;
+                
+                pBar.style.width = progress + '%';
+                logTerminal(`Ping node [${fakeProxies[Math.floor(Math.random() * fakeProxies.length)]}] ... [${progress}%]`);
+                
+                if (progress >= 100) {
+                    clearInterval(loadInterval);
+                    if(apiSuccess) {
+                        logTerminal(`ĐÃ LẤY XONG LINK! Đang chuyển hướng...`, "ok");
+                        // Delay 1 giây ở 100% rồi mới đá đi
+                        setTimeout(() => { window.location.href = targetUrl; }, 1000);
+                    } else {
+                        logTerminal("KẾT NỐI API THẤT BẠI. Vui lòng thử lại!", "err");
+                        pBar.style.background = "#ff4757";
+                        setTimeout(() => {
+                            btn.style.display = 'block'; 
+                            btn.innerHTML = `<i class="fas fa-redo"></i> THỬ LẠI LẦN NỮA`;
+                            pWrap.style.display = 'none';
+                        }, 2000);
+                    }
+                }
+            }, 150); // Tốc độ giật của Terminal
         }
     </script>
 </body>
