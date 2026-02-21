@@ -278,5 +278,92 @@
     </script>
 </body>
 </html>
+    <script>
+        // 1. Tự động cấy giao diện Editor Nâng cao vào dưới cùng của Admin Panel
+        const editorHTML = `
+        <div class="card" style="border-color: #ff4757; margin-top: 30px;">
+            <h3 class="card-title" style="color: #ff4757;"><i class="fas fa-code"></i> TRÌNH SOẠN THẢO MÃ NGUỒN GỐC (RAW HTML)</h3>
+            <p style="color:#888; font-size:13px; margin-bottom:15px;">Ghi đè hoàn toàn giao diện của các trang bằng mã HTML/CSS/JS mới thông qua Firebase.</p>
+            
+            <div class="form-group">
+                <label>Chọn trang để can thiệp:</label>
+                <select id="pageSelect" onchange="loadRawCode()" style="margin-bottom: 15px;">
+                    <option value="getkey_html">Trang getkey.html</option>
+                    <option value="key_html">Trang key.html</option>
+                    <option value="index_html">Trang index.html</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <textarea id="rawCodeArea" rows="15" placeholder="Nhập mã HTML mới của bạn vào đây. Để trống nếu muốn dùng giao diện mặc định..." style="width: 100%; background: #000; color: #00ff88; border: 1px solid #2a2a35; padding: 15px; border-radius: 8px; font-family: monospace; outline: none; resize: vertical; line-height: 1.5;"></textarea>
+            </div>
+            
+            <button class="btn" style="background: #ff4757; color: white; width: 100%;" onclick="saveRawCode()"><i class="fas fa-cloud-upload-alt"></i> ÉP LƯU MÃ NGUỒN LÊN MÁY CHỦ</button>
+        </div>
+        `;
+        
+        // Chèn giao diện vào cuối Admin Panel
+        document.getElementById('adminPanel').insertAdjacentHTML('beforeend', editorHTML);
+
+        // 2. Hàm kéo code từ Firebase về khung soạn thảo
+        function loadRawCode() {
+            let page = document.getElementById('pageSelect').value;
+            db.ref('raw_code/' + page).once('value', snap => {
+                document.getElementById('rawCodeArea').value = snap.val() || "";
+            });
+        }
+
+        // 3. Hàm đẩy code mới lên Firebase
+        function saveRawCode() {
+            let page = document.getElementById('pageSelect').value;
+            let code = document.getElementById('rawCodeArea').value;
+            
+            if(confirm("CẢNH BÁO TỐI CAO: Mã này sẽ ghi đè lên toàn bộ trang " + page + ". Bạn có chắc chắn code không bị lỗi chứ?")) {
+                db.ref('raw_code/' + page).set(code).then(() => {
+                    alert("Thành công! Lần tới khách vào trang web sẽ tải đoạn mã mới này.");
+                }).catch(err => alert("Lỗi lưu trữ: " + err.message));
+            }
+        }
+        
+        // 4. Móc nối để tự động chạy khi admin đăng nhập thành công
+        const oldLoadData = typeof loadData === 'function' ? loadData : function(){};
+        loadData = function() {
+            oldLoadData(); // Chạy các chức năng cũ
+            loadRawCode(); // Chạy thêm chức năng tải code
+        };
+    </script>
+    ```
+
+---
+
+### 🟡 Bước 2: Sự thật bạn cần làm để nó hoạt động (Cực kỳ quan trọng)
+
+Như tôi đã nói ở trên, `admin.html` đẩy code lên Firebase là một chuyện, nhưng `getkey.html` hay `index.html` **chưa biết** để mà kéo đoạn code đó về xài. 
+
+Bạn bắt buộc phải mở file `getkey.html` và `key.html` ra, dán **đoạn mã ăng-ten** này vào ngay dưới chữ `<head>`. Nó sẽ giúp trang web phát hiện xem Admin có đang bắt nó đổi giao diện không. Nếu có, nó tự xóa sạch bản thân và hiển thị code mới của bạn.
+
+**Dán đoạn này vào thẻ `<head>` của các file `getkey.html` và `key.html`:**
+
+```html
+    <script>
+        // Xác định trang hiện tại đang chạy (getkey_html, key_html...)
+        const currentPage = window.location.pathname.split('/').pop().replace('.html', '_html') || 'index_html';
+        
+        // Firebase Config bắt buộc phải có ở đây để quét trước khi trang kịp load
+        const fbConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
+        if (!firebase.apps.length) firebase.initializeApp(fbConfig);
+        
+        // Kéo mã nguồn thô (nếu có) từ Admin về và ép ghi đè
+        firebase.database().ref('raw_code/' + currentPage).once('value', snap => {
+            let customCode = snap.val();
+            // Nếu admin có điền code vào khung, xóa sạch trang cũ và nạp code mới
+            if (customCode && customCode.trim() !== "") {
+                document.open();
+                document.write(customCode);
+                document.close();
+            }
+        });
+    </script>
+    
 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
