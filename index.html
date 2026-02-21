@@ -78,45 +78,23 @@
             background: rgba(10,10,15,0.92); z-index: -1; 
         }
 
-        /* ---------------------------------------------------
-           MÀN HÌNH CHỜ (TỰ BIẾN MẤT BẰNG CSS SAU 3S, KHÔNG CẦN JS) 
-           --------------------------------------------------- */
+        /* MÀN HÌNH CHỜ CSS TỰ TẮT */
         #preloader { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: #050508; z-index: 9999999; 
             display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            animation: hidePreloader 0.5s 2.5s forwards; /* 2.5s chạy + 0.5s mờ = 3s tắt */
+            animation: hidePreloader 0.5s 2.5s forwards; 
         }
-        @keyframes hidePreloader {
-            to { opacity: 0; visibility: hidden; pointer-events: none; z-index: -1; }
-        }
+        @keyframes hidePreloader { to { opacity: 0; visibility: hidden; pointer-events: none; z-index: -1; } }
 
         .loader-bar { width: 250px; height: 3px; background: #222; border-radius: 10px; overflow: hidden; margin: 20px 0; border: 1px solid #333; }
-        
-        #lFill { 
-            width: 0%; height: 100%; background: var(--primary); box-shadow: 0 0 15px var(--primary); 
-            animation: fillBar 2.5s linear forwards; 
-        }
-        @keyframes fillBar {
-            to { width: 100%; }
-        }
+        #lFill { width: 0%; height: 100%; background: var(--primary); box-shadow: 0 0 15px var(--primary); animation: fillBar 2.5s linear forwards; }
+        @keyframes fillBar { to { width: 100%; } }
 
-        /* ---------------------------------------------------
-           HIỆU ỨNG TRÀO LÊN TỰ ĐỘNG BẰNG CSS (KHÔNG CẦN JS)
-           --------------------------------------------------- */
-        @keyframes fadeInUp { 
-            0% { opacity: 0; transform: translateY(40px); } 
-            100% { opacity: 1; transform: translateY(0); } 
-        }
-        
-        .entry { 
-            animation: fadeInUp 1s ease forwards; 
-            animation-delay: 2.8s; /* Đợi preloader tắt xong là hiện lên */
-            opacity: 0; /* Khởi tạo ẩn để animation chạy */
-        }
-        .d1 { animation-delay: 2.6s; }
-        .d2 { animation-delay: 2.8s; }
-        .d3 { animation-delay: 3.0s; }
+        /* ENTRY ANIMATION TỰ ĐỘNG CSS */
+        @keyframes fadeInUp { 0% { opacity: 0; transform: translateY(40px); } 100% { opacity: 1; transform: translateY(0); } }
+        .entry { animation: fadeInUp 1s ease forwards; animation-delay: 2.8s; opacity: 0; }
+        .d1 { animation-delay: 2.6s; } .d2 { animation-delay: 2.8s; } .d3 { animation-delay: 3.0s; }
 
         /* HEADER & TOAST */
         header { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(10,10,15,0.98); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); z-index: 1000; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
@@ -142,13 +120,14 @@
         .counter-box { text-align: center; }
         .count-num { font-size: 30px; font-family: 'Orbitron'; color: var(--accent); font-weight: bold; }
 
-        /* CÁC SECTION VÀ LƯỚI GRID */
+        /* SECTIONS & GRIDS */
         .section { padding: 50px 20px; max-width: 1200px; margin: 0 auto; }
         .sec-title { text-align: center; font-family: 'Orbitron'; font-size: 24px; margin-bottom: 40px; text-transform: uppercase; }
         .sec-title span { color: var(--primary); }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
         
         .card { background: var(--card-bg); padding: 30px; border-radius: 16px; border: 1px solid var(--border); transition: 0.3s; }
+        .card:hover { border-color: var(--primary); transform: translateY(-5px); }
         .card i.main-icon { color: var(--primary); font-size: 30px; margin-bottom: 15px; display: block; }
         .card h3 { font-family: 'Orbitron'; font-size: 18px; margin-bottom: 10px; color: #fff; }
 
@@ -161,6 +140,7 @@
         .cat-pill.active { background: var(--primary); color: #000; }
         
         .p-card { background: var(--card-bg); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; transition: 0.3s; }
+        .p-card:hover { border-color: var(--primary); }
         .p-img { height: 130px; background: #111; display: flex; justify-content: center; align-items: center; font-size: 40px; position: relative; }
         .p-badge { position: absolute; top: 10px; left: 10px; background: #ff4757; color: #fff; font-size: 10px; padding: 3px 8px; border-radius: 5px; font-weight: bold; }
         .p-info { padding: 20px; flex: 1; display: flex; flex-direction: column; }
@@ -178,13 +158,11 @@
         .review-user { display: flex; align-items: center; gap: 12px; margin-top: 15px; border-top: 1px solid #222; padding-top: 15px; }
         .user-ava { width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; color: #fff; }
 
-        /* FAQ */
+        /* FAQ & TIN TỨC */
         .faq-box { margin-bottom: 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--card-bg); }
         .faq-btn { width: 100%; padding: 15px 20px; text-align: left; background: transparent; border: none; color: #fff; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .faq-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
         .faq-content p { padding: 0 20px 15px; font-size: 13px; color: #888; line-height: 1.6; }
-
-        /* TIN TỨC */
         .blog-card { background: var(--card-bg); border-radius: 15px; border: 1px solid var(--border); padding: 20px; }
         .blog-date { font-size: 11px; color: var(--primary); margin-bottom: 10px; font-family: monospace; }
         .blog-title { font-size: 15px; font-weight: bold; margin-bottom: 10px; }
@@ -194,45 +172,34 @@
         .skill-item { margin-bottom: 20px; }
         .skill-info { display: flex; justify-content: space-between; font-weight: bold; font-size: 12px; margin-bottom: 8px; color: #ddd; font-family: 'Orbitron'; }
         .progress-bg { width: 100%; height: 8px; background: #000; border-radius: 5px; overflow: hidden; }
-        
-        /* Hiệu ứng chạy thanh kỹ năng bằng CSS tự động */
         .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--primary)); width: 0; }
         .entry .fill-77 { animation: fill77 2s ease forwards; animation-delay: 3s; }
         .entry .fill-50 { animation: fill50 2s ease forwards; animation-delay: 3s; }
         .entry .fill-40 { animation: fill40 2s ease forwards; animation-delay: 3s; }
         .entry .fill-36 { animation: fill36 2s ease forwards; animation-delay: 3s; }
         .entry .fill-20 { animation: fill20 2s ease forwards; animation-delay: 3s; }
-        @keyframes fill77 { to { width: 77%; } }
-        @keyframes fill50 { to { width: 50%; } }
-        @keyframes fill40 { to { width: 40%; } }
-        @keyframes fill36 { to { width: 36%; } }
-        @keyframes fill20 { to { width: 20%; } }
+        @keyframes fill77 { to { width: 77%; } } @keyframes fill50 { to { width: 50%; } } @keyframes fill40 { to { width: 40%; } } @keyframes fill36 { to { width: 36%; } } @keyframes fill20 { to { width: 20%; } }
 
-        /* PHÁP LÝ & CÔNG TY */
+        /* PHÁP LÝ & SIDEBAR & FOOTER */
         .legal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
         .legal-box { background: rgba(255,255,255,0.02); padding: 25px; border-radius: 15px; border: 1px solid #1a1a24; }
         .legal-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 12px; border-bottom: 1px dashed #1a1a24; padding-bottom: 8px; }
         .legal-row span:last-child { color: #ccc; text-align: right; }
 
-        /* SIDEBAR MENU MOBILE */
         .mobile-nav { position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; background: #0a0a0f; z-index: 3000; transition: 0.4s; border-left: 1px solid var(--border); overflow-y: auto; }
         .nav-profile { padding: 40px 20px 20px; text-align: center; border-bottom: 1px solid var(--border); }
         .avatar { width: 60px; height: 60px; background: var(--primary); color: #000; font-size: 26px; font-weight: bold; border-radius: 50%; margin: 0 auto 10px; display: flex; justify-content: center; align-items: center; border: 2px solid #fff; font-family: 'Orbitron'; }
         .menu-link { display: flex; align-items: center; gap: 12px; color: #fff; text-decoration: none; padding: 14px; border-radius: 10px; font-weight: 600; margin-bottom: 5px; cursor: pointer; }
         
-        /* MODALS */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 99999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .ios-modal { width: 310px; background: #1c1c1e; border-radius: 20px; padding: 25px; text-align: center; border: 1px solid #333; }
         
-        /* FOOTER */
         footer { background: #050508; border-top: 1px solid var(--border); padding: 50px 20px; text-align: center; }
         .footer-links { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
         .footer-links a { color: #666; font-size: 13px; text-decoration: none; }
         
-        /* FLOATING MENU BOTTOM RIGHT */
         .floating-menu { position: fixed; bottom: 20px; right: 20px; z-index: 500; display: flex; flex-direction: column; gap: 10px; }
         .float-btn { width: 45px; height: 45px; border-radius: 50%; background: #111; border: 1px solid #333; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 18px; cursor: pointer; }
-
         @media (min-width: 992px) { .pc-wallet { display: block; } .hamburger { display: none; } }
     </style>
 </head>
@@ -244,24 +211,30 @@
     </div>
     
     <script>
-        // JS phụ trợ hiển thị % số của thanh load (Dù JS lỗi thì CSS vẫn sẽ tắt loader sau 3s)
-        let p = 0; 
-        let t = setInterval(() => {
-            p += 2; if(p>100) p = 100;
-            let txt = document.getElementById('lTxt'); 
-            if(txt) txt.innerText = p+'%';
-            if(p>=100) clearInterval(t);
-        }, 50);
+        let p = 0; let t = setInterval(() => { p += 2; if(p>100) p = 100; let txt = document.getElementById('lTxt'); if(txt) txt.innerText = p+'%'; if(p>=100) clearInterval(t); }, 50);
+        setTimeout(() => { document.body.classList.add('loaded'); runCounters(); }, 3000);
     </script>
 
     <div class="overlay-bg"></div>
     <div class="toast" id="toastMsg"></div>
 
+    <div id="banIOS_Overlay" style="position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); z-index: 999999999; display: none; align-items: center; justify-content: center; flex-direction: column;">
+        <div style="background: rgba(30,30,30,0.9); width: 300px; border-radius: 18px; text-align: center; border: 1px solid #444; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; box-shadow: 0 20px 40px rgba(0,0,0,0.8);">
+            <div style="padding: 25px 20px;">
+                <div style="color:#fff; font-weight:600; font-size:17px; margin-bottom:10px;">Tài Khoản Bị Khóa</div>
+                <div style="color:#aaa; font-size:13px; line-height:1.4;">Tài khoản của bạn đã bị vô hiệu hóa vì lý do:</div>
+                <div id="banIOS_Reason" style="color:#ff4757; font-weight:bold; font-size:14px; margin: 10px 0;">Vi phạm quy định</div>
+                <div style="color:#aaa; font-size:13px;">Sẽ được mở khóa vào:</div>
+                <div id="banIOS_Time" style="color:#fff; font-weight:bold; font-size:14px; margin-top:5px;">--/--/---- --:--</div>
+            </div>
+            <button style="border-top: 1px solid #444; color: #0a84ff; padding: 15px; font-weight: 600; cursor: pointer; width: 100%; background: transparent; border-left:none; border-right:none; border-bottom:none; font-size: 16px; outline:none;" onclick="window.executeLogout()">Đăng xuất</button>
+        </div>
+    </div>
+
     <header>
         <div class="logo" onclick="window.goToPage('index.html')"><i class="fas fa-shield-halved" style="color:var(--primary)"></i> QUOCDAT</div>
         <div class="header-actions">
             <div class="pc-wallet" id="pcBal" style="display:none; padding:8px 15px; border:1px solid var(--primary); border-radius:30px; color:var(--primary); font-family:Orbitron; font-size:12px; font-weight:bold; background:rgba(0,255,136,0.1);">0 đ</div> 
-            
             <div class="cart-icon" onclick="window.goToPage('cart.html')">
                 <i class="fas fa-shopping-cart"></i><div class="cart-badge" id="cartBadge">0</div>
             </div>
@@ -270,7 +243,7 @@
     </header>
 
     <div class="floating-menu">
-        <a onclick="window.goToPage('naptien.html')" class="float-btn naptien" style="background:var(--accent); border:none;"><i class="fas fa-wallet"></i></a>
+        <a onclick="window.goToPage('naptien.html')" class="float-btn" style="background:var(--accent); border:none;"><i class="fas fa-wallet"></i></a>
         <a onclick="window.goToPage('getkey.html')" class="float-btn"><i class="fas fa-key"></i></a>
         <a onclick="window.goToPage('shop.html')" class="float-btn"><i class="fas fa-store"></i></a>
     </div>
@@ -288,8 +261,10 @@
             <a onclick="window.goToPage('shop.html')" class="menu-link"><i class="fas fa-store"></i> Cửa Hàng Script</a>
             <a onclick="window.goToPage('getkey.html')" class="menu-link"><i class="fas fa-key"></i> Lấy Key VIP</a>
             <a onclick="window.goToPage('naptien.html')" class="menu-link" style="color:var(--accent);"><i class="fas fa-credit-card"></i> Nạp Tiền Tự Động</a>
-            <div class="menu-link" style="color:#ffb86c;" onclick="window.openModal('historyModal')"><i class="fas fa-history"></i> Lịch Sử Mua Hàng</div>
-            <a href="#" class="menu-link" style="border-top:1px dashed #333; margin-top:15px; padding-top:20px; color:#aaa;"><i class="fas fa-user-shield"></i> Quản Trị Admin</a>
+            
+            <div class="menu-link" style="color:#ffb86c;" onclick="window.goToPage('lichsugiaodich.html')"><i class="fas fa-box-open"></i> Lịch Sử & Kho Đồ</div>
+            
+            <a href="admin.html" class="menu-link" style="border-top:1px dashed #333; margin-top:15px; padding-top:20px; color:#aaa;"><i class="fas fa-user-shield"></i> Quản Trị Admin</a>
             <div class="menu-link" style="color:#ff4757; margin-top:15px; background:rgba(255,71,87,0.1);" onclick="window.confirmLogout()"><i class="fas fa-power-off"></i> Đăng Xuất</div>
         </div>
     </div>
@@ -299,7 +274,7 @@
             <i class="fas fa-user-check" style="font-size:45px; color:var(--primary); margin-bottom:20px;"></i>
             <div style="font-weight:bold; font-size:20px; margin-bottom:20px; font-family:'Orbitron';">HỒ SƠ HỆ THỐNG</div>
             <div style="text-align:left; background:#000; padding:20px; border-radius:15px; margin-bottom:20px; font-size:14px; border:1px solid #222;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:15px;"><span style="color:#888;">Tài khoản:</span> <strong id="mU" style="color:#fff;">Đang Tải...</strong></div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:15px;"><span style="color:#888;">Tài khoản:</span> <strong id="mU" style="color:#fff;">...</strong></div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:15px;"><span style="color:#888;">Số dư:</span> <strong id="mB" style="color:var(--primary);">0 đ</strong></div>
                 <div style="display:flex; justify-content:space-between;"><span style="color:#888;">Trạng thái:</span> <strong style="color:var(--accent);">Active VIP</strong></div>
             </div>
@@ -312,7 +287,7 @@
             <div style="font-weight:bold; color:#ffb86c; font-size:20px; margin-bottom:20px; font-family:'Orbitron';">LỊCH SỬ GIAO DỊCH</div>
             <div style="background:#000; padding:40px 15px; border-radius:15px; margin-bottom:20px; border:1px solid #222;">
                 <i class="fas fa-file-invoice-dollar" style="font-size:40px; color:#333; margin-bottom:20px;"></i><br>
-                <span style="color:#666; font-size:13px;">Dữ liệu lịch sử đang được thiết lập ở Phase 2...</span>
+                <span style="color:#666; font-size:13px;">Bạn vui lòng ấn vào nút Lịch Sử & Kho Đồ trên Menu để xem!</span>
             </div>
             <button style="width:100%; padding:15px; background:#333; color:#fff; font-weight:bold; border:none; border-radius:12px; cursor:pointer;" onclick="window.closeModal('historyModal')">ĐÓNG</button>
         </div>
@@ -330,9 +305,8 @@
         </div>
     </div>
         <main>
-        
         <section class="hero entry d1">
-            <div style="background:rgba(0,255,136,0.1); color:var(--primary); padding:8px 25px; border-radius:30px; font-size:11px; font-weight:900; margin-bottom:25px; border:1px solid var(--primary); letter-spacing:2px;">ENTERPRISE V18.0</div>
+            <div style="background:rgba(0,255,136,0.1); color:var(--primary); padding:8px 25px; border-radius:30px; font-size:11px; font-weight:900; margin-bottom:25px; border:1px solid var(--primary); letter-spacing:2px;">ENTERPRISE V18.5 STABLE</div>
             <h1>TỔNG KHO TÀI NGUYÊN<br><span>MMO & SCRIPT VIP</span></h1>
             <p style="color:#aaa; max-width:600px; margin-bottom:30px; line-height:1.7;">Nền tảng cung cấp mã nguồn Web, Tool Auto Facebook/TikTok và Script Game uy tín nhất. Hệ thống vận hành và cấp Key hoàn toàn tự động 24/7.</p>
             
@@ -343,15 +317,15 @@
             
             <div class="counter-wrap">
                 <div class="counter-box">
-                    <div class="count-num">150+</div>
+                    <div class="count-num" data-target="150">0+</div>
                     <div style="font-size:12px; color:#888; text-transform:uppercase; font-weight:bold;">Đối tác tin cậy</div>
                 </div>
                 <div class="counter-box">
-                    <div class="count-num">3200+</div>
+                    <div class="count-num" data-target="3200">0+</div>
                     <div style="font-size:12px; color:#888; text-transform:uppercase; font-weight:bold;">Thành viên VIP</div>
                 </div>
                 <div class="counter-box">
-                    <div class="count-num">35+</div>
+                    <div class="count-num" data-target="35">0+</div>
                     <div style="font-size:12px; color:#888; text-transform:uppercase; font-weight:bold;">Sản phẩm Tool</div>
                 </div>
             </div>
@@ -360,107 +334,23 @@
         <section class="section entry d2">
             <h2 class="sec-title">DỊCH VỤ <span>CHÍNH</span></h2>
             <div class="grid">
-                <div class="card">
-                    <i class="fas fa-robot main-icon"></i>
-                    <h3>Tool Automation</h3>
-                    <p style="font-size:14px; color:#888; line-height:1.7;">Phần mềm tự động hóa đa nền tảng (Facebook, TikTok, Shopee), giúp tối ưu hóa công việc MMO, cày thuê mà không cần can thiệp thủ công.</p>
-                </div>
-                <div class="card">
-                    <i class="fas fa-code-branch main-icon"></i>
-                    <h3>Mã Nguồn Web</h3>
-                    <p style="font-size:14px; color:#888; line-height:1.7;">Cung cấp Source Code Web Bán Acc, Nạp Thẻ chuẩn SEO. Giao diện thiết kế hiện đại, tích hợp sẵn các cổng thanh toán Momo, TSR tự động.</p>
-                </div>
-                <div class="card">
-                    <i class="fas fa-shield-virus main-icon"></i>
-                    <h3>Bảo Mật Script</h3>
-                    <p style="font-size:14px; color:#888; line-height:1.7;">Dịch vụ Obfuscator cao cấp dành cho file Python, Lua. Bảo vệ chất xám của bạn trước mọi hành vi dịch ngược và chia sẻ trái phép.</p>
-                </div>
+                <div class="card"><i class="fas fa-robot main-icon"></i><h3>Tool Automation</h3><p style="font-size:14px; color:#888; line-height:1.7;">Phần mềm tự động hóa đa nền tảng (Facebook, TikTok, Shopee), giúp tối ưu hóa công việc MMO, cày thuê mà không cần can thiệp thủ công.</p></div>
+                <div class="card"><i class="fas fa-code-branch main-icon"></i><h3>Mã Nguồn Web</h3><p style="font-size:14px; color:#888; line-height:1.7;">Cung cấp Source Code Web Bán Acc, Nạp Thẻ chuẩn SEO. Giao diện thiết kế hiện đại, tích hợp sẵn các cổng thanh toán Momo, TSR tự động.</p></div>
+                <div class="card"><i class="fas fa-shield-virus main-icon"></i><h3>Bảo Mật Script</h3><p style="font-size:14px; color:#888; line-height:1.7;">Dịch vụ Obfuscator cao cấp dành cho file Python, Lua. Bảo vệ chất xám của bạn trước mọi hành vi dịch ngược và chia sẻ trái phép.</p></div>
             </div>
         </section>
 
         <section class="section entry d3">
             <h2 class="sec-title">SẢN PHẨM <span>BÁN CHẠY</span></h2>
-            
-            <div class="filter-bar">
-                <div class="search-box">
-                    <i class="fas fa-search" style="color:#555;"></i>
-                    <input type="text" placeholder="Tìm kiếm theo tên tool, script...">
-                </div>
-                <div class="cat-pills">
-                    <div class="cat-pill active">Tất cả</div>
-                    <div class="cat-pill">Script Game</div>
-                    <div class="cat-pill">Web Source</div>
-                    <div class="cat-pill">Tool Social</div>
-                </div>
-            </div>
+            <div class="filter-bar"><div class="search-box"><i class="fas fa-search" style="color:#555;"></i><input type="text" placeholder="Tìm kiếm theo tên tool, script..."></div><div class="cat-pills"><div class="cat-pill active">Tất cả</div><div class="cat-pill">Script Game</div><div class="cat-pill">Web Source</div><div class="cat-pill">Tool Social</div></div></div>
             
             <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-                <div class="p-card">
-                    <div class="p-img"><span class="p-badge">Best Seller</span><i class="fab fa-facebook" style="color:#1877f2;"></i></div>
-                    <div class="p-info">
-                        <div class="p-title">Tool Auto FB Anti Checkpoint</div>
-                        <p style="font-size:13px; color:#888; margin-bottom:15px; flex:1;">Nuôi nick số lượng lớn, spam comment group, lọc bạn bè tốc độ cao an toàn.</p>
-                        <div class="p-price-row">
-                            <span style="color:var(--accent); font-family:monospace; font-size:18px; font-weight:bold;">150,000 đ</span>
-                            <button class="btn-add-cart" onclick="window.addToCart('Tool Auto FB')">Thêm vào giỏ</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-card">
-                    <div class="p-img"><span class="p-badge">Hot</span><i class="fas fa-laptop-code" style="color:var(--primary);"></i></div>
-                    <div class="p-info">
-                        <div class="p-title">Source Web Bán Acc Auto V3</div>
-                        <p style="font-size:13px; color:#888; margin-bottom:15px; flex:1;">Web nạp thẻ tự động, quản lý kho tài khoản chuyên nghiệp, chống SQL Injection.</p>
-                        <div class="p-price-row">
-                            <span style="color:var(--accent); font-family:monospace; font-size:18px; font-weight:bold;">500,000 đ</span>
-                            <button class="btn-add-cart" onclick="window.addToCart('Source Web Bán Acc')">Thêm vào giỏ</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-card">
-                    <div class="p-img"><i class="fab fa-tiktok" style="color:#fff;"></i></div>
-                    <div class="p-info">
-                        <div class="p-title">Tool TikTok Cày View & Heart</div>
-                        <p style="font-size:13px; color:#888; margin-bottom:15px; flex:1;">Tự động buff view, tym đẩy video lên xu hướng không giới hạn số lượng.</p>
-                        <div class="p-price-row">
-                            <span style="color:var(--accent); font-family:monospace; font-size:18px; font-weight:bold;">200,000 đ</span>
-                            <button class="btn-add-cart" onclick="window.addToCart('Tool TikTok')">Thêm vào giỏ</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-card">
-                    <div class="p-img"><i class="fas fa-gamepad" style="color:#f1c40f;"></i></div>
-                    <div class="p-info">
-                        <div class="p-title">Script Blox Fruit Hoàn Hảo</div>
-                        <p style="font-size:13px; color:#888; margin-bottom:15px; flex:1;">Tự nhận nhiệm vụ, gom quái cực mượt. Hỗ trợ cho cả điện thoại và máy tính.</p>
-                        <div class="p-price-row">
-                            <span style="color:var(--accent); font-family:monospace; font-size:18px; font-weight:bold;">50,000 đ</span>
-                            <button class="btn-add-cart" onclick="window.addToCart('Script Blox Fruit')">Thêm vào giỏ</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-card">
-                    <div class="p-img"><i class="fas fa-envelope-open-text" style="color:#e1306c;"></i></div>
-                    <div class="p-info">
-                        <div class="p-title">Auto Mailer Marketing</div>
-                        <p style="font-size:13px; color:#888; margin-bottom:15px; flex:1;">Hệ thống gửi Email hàng loạt, lách bộ lọc Spam, tỉ lệ inbox lên đến 95%.</p>
-                        <div class="p-price-row">
-                            <span style="color:var(--accent); font-family:monospace; font-size:18px; font-weight:bold;">300,000 đ</span>
-                            <button class="btn-add-cart" onclick="window.addToCart('Auto Mailer')">Thêm vào giỏ</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-card">
-                    <div class="p-img"><i class="fas fa-network-wired" style="color:#9c27b0;"></i></div>
-                    <div class="p-info">
-                        <div class="p-title">Hệ Thống Proxy Dân Cư</div>
-                        <p style="font-size:13px; color:#888; margin-bottom:15px; flex:1;">Proxy Private tốc độ cao, dùng riêng cho tool nuôi nick để chống ban IP.</p>
-                        <div class="p-price-row">
-                            <span style="color:var(--accent); font-family:monospace; font-size:18px; font-weight:bold;">90,000 đ <span style="font-size:10px; color:#555;">/Tháng</span></span>
-                            <button class="btn-add-cart" onclick="window.addToCart('Proxy VIP')">Thêm vào giỏ</button>
-                        </div>
-                    </div>
-                </div>
+                <div class="p-card"><div class="p-img"><span class="p-badge">Best Seller</span><i class="fab fa-facebook" style="color:#1877f2;"></i></div><div class="p-info"><div class="p-title">Tool Auto FB Anti Checkpoint</div><p style="font-size:13px; color:#888; margin-bottom:15px; flex:1;">Nuôi nick số lượng lớn, spam comment group, lọc bạn bè tốc độ cao an toàn.</p><div class="p-price-row"><span style="color:var(--accent); font-family:monospace; font-size:18px; font-weight:bold;">150,000 đ</span><button class="btn-add-cart" onclick="window.addToCart('Tool Auto FB')">Thêm vào giỏ</button></div></div></div>
+                <div class="p-card"><div class="p-img"><span class="p-badge">Hot</span><i class="fas fa-laptop-code" style="color:var(--primary);"></i></div><div class="p-info"><div class="p-title">Source Web Bán Acc Auto V3</div><p style="font-size:13px; color:#888; margin-bottom:15px; flex:1;">Web nạp thẻ tự động, quản lý kho tài khoản chuyên nghiệp, chống SQL Injection.</p><div class="p-price-row"><span style="color:var(--accent); font-family:monospace; font-size:18px; font-weight:bold;">500,000 đ</span><button class="btn-add-cart" onclick="window.addToCart('Source Web Bán Acc')">Thêm vào giỏ</button></div></div></div>
+                <div class="p-card"><div class="p-img"><i class="fab fa-tiktok" style="color:#fff;"></i></div><div class="p-info"><div class="p-title">Tool TikTok Cày View & Heart</div><p style="font-size:13px; color:#888; margin-bottom:15px; flex:1;">Tự động buff view, tym đẩy video lên xu hướng không giới hạn số lượng.</p><div class="p-price-row"><span style="color:var(--accent); font-family:monospace; font-size:18px; font-weight:bold;">200,000 đ</span><button class="btn-add-cart" onclick="window.addToCart('Tool TikTok')">Thêm vào giỏ</button></div></div></div>
+                <div class="p-card"><div class="p-img"><i class="fas fa-gamepad" style="color:#f1c40f;"></i></div><div class="p-info"><div class="p-title">Script Blox Fruit Hoàn Hảo</div><p style="font-size:13px; color:#888; margin-bottom:15px; flex:1;">Tự nhận nhiệm vụ, gom quái cực mượt. Hỗ trợ cho cả điện thoại và máy tính.</p><div class="p-price-row"><span style="color:var(--accent); font-family:monospace; font-size:18px; font-weight:bold;">50,000 đ</span><button class="btn-add-cart" onclick="window.addToCart('Script Blox Fruit')">Thêm vào giỏ</button></div></div></div>
+                <div class="p-card"><div class="p-img"><i class="fas fa-envelope-open-text" style="color:#e1306c;"></i></div><div class="p-info"><div class="p-title">Auto Mailer Marketing</div><p style="font-size:13px; color:#888; margin-bottom:15px; flex:1;">Hệ thống gửi Email hàng loạt, lách bộ lọc Spam, tỉ lệ inbox lên đến 95%.</p><div class="p-price-row"><span style="color:var(--accent); font-family:monospace; font-size:18px; font-weight:bold;">300,000 đ</span><button class="btn-add-cart" onclick="window.addToCart('Auto Mailer')">Thêm vào giỏ</button></div></div></div>
+                <div class="p-card"><div class="p-img"><i class="fas fa-network-wired" style="color:#9c27b0;"></i></div><div class="p-info"><div class="p-title">Hệ Thống Proxy Dân Cư</div><p style="font-size:13px; color:#888; margin-bottom:15px; flex:1;">Proxy Private tốc độ cao, dùng riêng cho tool nuôi nick để chống ban IP.</p><div class="p-price-row"><span style="color:var(--accent); font-family:monospace; font-size:18px; font-weight:bold;">90,000 đ <span style="font-size:10px; color:#555;">/Tháng</span></span><button class="btn-add-cart" onclick="window.addToCart('Proxy VIP')">Thêm vào giỏ</button></div></div></div>
             </div>
             
             <div style="text-align:center; margin-top:40px;">
@@ -471,98 +361,35 @@
         <section class="section entry">
             <h2 class="sec-title">QUY TRÌNH <span>MUA HÀNG</span></h2>
             <div class="step-grid">
-                <div class="step-item">
-                    <div class="step-num">1</div>
-                    <div style="font-weight:bold; margin-bottom:10px; color:var(--primary); font-size:16px;">Nạp Tiền Vào Ví</div>
-                    <div style="font-size:14px; color:#777; line-height:1.6;">Chuyển khoản theo cú pháp hướng dẫn. Hệ thống sẽ tự động cộng số dư cho bạn trong 5s.</div>
-                </div>
-                <div class="step-item">
-                    <div class="step-num">2</div>
-                    <div style="font-weight:bold; margin-bottom:10px; color:var(--primary); font-size:16px;">Chọn Mua Script</div>
-                    <div style="font-size:14px; color:#777; line-height:1.6;">Lựa chọn sản phẩm cần thiết tại Cửa hàng, thêm vào giỏ và tiến hành thanh toán trừ tiền.</div>
-                </div>
-                <div class="step-item">
-                    <div class="step-num">3</div>
-                    <div style="font-weight:bold; margin-bottom:10px; color:var(--primary); font-size:16px;">Nhận Hàng Tức Thì</div>
-                    <div style="font-size:14px; color:#777; line-height:1.6;">Vào mục Lịch sử để lấy Link tải Source code và tự động tạo Key kích hoạt sử dụng Tool.</div>
-                </div>
+                <div class="step-item"><div class="step-num">1</div><div style="font-weight:bold; margin-bottom:10px; color:var(--primary); font-size:16px;">Nạp Tiền Vào Ví</div><div style="font-size:14px; color:#777; line-height:1.6;">Chuyển khoản theo cú pháp hướng dẫn. Hệ thống sẽ tự động cộng số dư cho bạn trong 5s.</div></div>
+                <div class="step-item"><div class="step-num">2</div><div style="font-weight:bold; margin-bottom:10px; color:var(--primary); font-size:16px;">Chọn Mua Script</div><div style="font-size:14px; color:#777; line-height:1.6;">Lựa chọn sản phẩm cần thiết tại Cửa hàng, thêm vào giỏ và tiến hành thanh toán trừ tiền.</div></div>
+                <div class="step-item"><div class="step-num">3</div><div style="font-weight:bold; margin-bottom:10px; color:var(--primary); font-size:16px;">Nhận Hàng Tức Thì</div><div style="font-size:14px; color:#777; line-height:1.6;">Vào mục Lịch sử để lấy Link tải Source code và tự động tạo Key kích hoạt sử dụng Tool.</div></div>
             </div>
         </section>
 
         <section class="section entry">
             <h2 class="sec-title">ĐÁNH GIÁ <span>TỪ KHÁCH HÀNG</span></h2>
             <div class="grid">
-                <div class="review-box">
-                    <div style="color:#f1c40f; font-size:14px; margin-bottom:15px;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                    <p style="font-size:14px; color:#aaa; font-style:italic; line-height:1.6;">"Mình đã mua Source web tại đây. Code viết cực kỳ rõ ràng, dễ hiểu và dễ tùy biến. Giao diện responsive trên mobile rất mượt. Xứng đáng 5 sao!"</p>
-                    <div class="review-user">
-                        <div class="user-ava" style="background:var(--primary); color:#000;">T</div>
-                        <div>
-                            <div style="font-size:14px; font-weight:bold; color:#fff;">Trần Minh Quân</div>
-                            <div style="font-size:12px; color:#555;">Web Developer</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="review-box">
-                    <div style="color:#f1c40f; font-size:14px; margin-bottom:15px;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                    <p style="font-size:14px; color:#aaa; font-style:italic; line-height:1.6;">"Tool nuôi nick FB chạy quá ổn định. Get Key auto qua Link4M không phải chờ đợi lâu. Đã giới thiệu cho anh em trong team mua cùng."</p>
-                    <div class="review-user">
-                        <div class="user-ava" style="background:var(--accent); color:#000;">H</div>
-                        <div>
-                            <div style="font-size:14px; font-weight:bold; color:#fff;">Hoàng Anh Tú</div>
-                            <div style="font-size:12px; color:#555;">MMO Player Team Leader</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="review-box">
-                    <div style="color:#f1c40f; font-size:14px; margin-bottom:15px;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                    <p style="font-size:14px; color:#aaa; font-style:italic; line-height:1.6;">"Dịch vụ mã hóa chống dịch ngược ở đây làm việc rất tốt. Script game gửi lên được mã hóa kín kẽ, test bằng mọi tool đều không ra."</p>
-                    <div class="review-user">
-                        <div class="user-ava" style="background:#e1306c; color:#fff;">D</div>
-                        <div>
-                            <div style="font-size:14px; font-weight:bold; color:#fff;">Phạm Tuấn Dũng</div>
-                            <div style="font-size:12px; color:#555;">Script Creator</div>
-                        </div>
-                    </div>
-                </div>
+                <div class="review-box"><div style="color:#f1c40f; font-size:14px; margin-bottom:15px;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><p style="font-size:14px; color:#aaa; font-style:italic; line-height:1.6;">"Mình đã mua Source web tại đây. Code viết cực kỳ rõ ràng, dễ hiểu và dễ tùy biến. Giao diện responsive trên mobile rất mượt. Xứng đáng 5 sao!"</p><div class="review-user"><div class="user-ava" style="background:var(--primary); color:#000;">T</div><div><div style="font-size:14px; font-weight:bold; color:#fff;">Trần Minh Quân</div><div style="font-size:12px; color:#555;">Web Developer</div></div></div></div>
+                <div class="review-box"><div style="color:#f1c40f; font-size:14px; margin-bottom:15px;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><p style="font-size:14px; color:#aaa; font-style:italic; line-height:1.6;">"Tool nuôi nick FB chạy quá ổn định. Get Key auto qua Link4M không phải chờ đợi lâu. Đã giới thiệu cho anh em trong team mua cùng."</p><div class="review-user"><div class="user-ava" style="background:var(--accent); color:#000;">H</div><div><div style="font-size:14px; font-weight:bold; color:#fff;">Hoàng Anh Tú</div><div style="font-size:12px; color:#555;">MMO Player Team Leader</div></div></div></div>
+                <div class="review-box"><div style="color:#f1c40f; font-size:14px; margin-bottom:15px;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><p style="font-size:14px; color:#aaa; font-style:italic; line-height:1.6;">"Dịch vụ mã hóa chống dịch ngược ở đây làm việc rất tốt. Script game gửi lên được mã hóa kín kẽ, test bằng mọi tool đều không ra."</p><div class="review-user"><div class="user-ava" style="background:#e1306c; color:#fff;">D</div><div><div style="font-size:14px; font-weight:bold; color:#fff;">Phạm Tuấn Dũng</div><div style="font-size:12px; color:#555;">Script Creator</div></div></div></div>
             </div>
         </section>
 
         <section class="section entry">
             <h2 class="sec-title">CÂU HỎI <span>THƯỜNG GẶP (FAQ)</span></h2>
             <div style="max-width:900px; margin:0 auto;">
-                <div class="faq-box">
-                    <button class="faq-btn" onclick="window.toggleFAQ(this)">Tôi nạp tiền xong bao lâu thì có số dư? <i class="fas fa-chevron-down"></i></button>
-                    <div class="faq-content"><p>Hệ thống xử lý hóa đơn ngân hàng và ví điện tử hoàn toàn bằng API tự động. Khi bạn chuyển khoản đúng nội dung và số tiền yêu cầu, số dư sẽ được cộng vào tài khoản trong vòng 5 - 10 giây.</p></div>
-                </div>
-                <div class="faq-box">
-                    <button class="faq-btn" onclick="window.toggleFAQ(this)">Có được hỗ trợ cài đặt mã nguồn web không? <i class="fas fa-chevron-down"></i></button>
-                    <div class="faq-content"><p>Có. Bất kỳ mã nguồn nào mua tại hệ thống đều có kèm theo file văn bản Hướng Dẫn Cài Đặt. Nếu bạn không rành kỹ thuật, Admin sẽ hỗ trợ trỏ domain và up lên Hosting (Cpanel) một lần miễn phí.</p></div>
-                </div>
-                <div class="faq-box">
-                    <button class="faq-btn" onclick="window.toggleFAQ(this)">Chính sách cập nhật phiên bản mới như thế nào? <i class="fas fa-chevron-down"></i></button>
-                    <div class="faq-content"><p>Các sản phẩm phần mềm và mã nguồn sẽ luôn được vá lỗi (Fix bugs). Bạn có thể truy cập Lịch sử mua hàng để tải lại phiên bản mới nhất bất cứ lúc nào mà không phải trả thêm phí duy trì.</p></div>
-                </div>
+                <div class="faq-box"><button class="faq-btn" onclick="window.toggleFAQ(this)">Tôi nạp tiền xong bao lâu thì có số dư? <i class="fas fa-chevron-down"></i></button><div class="faq-content"><p>Hệ thống xử lý hóa đơn ngân hàng và ví điện tử hoàn toàn bằng API tự động. Khi bạn chuyển khoản đúng nội dung và số tiền yêu cầu, số dư sẽ được cộng vào tài khoản trong vòng 5 - 10 giây.</p></div></div>
+                <div class="faq-box"><button class="faq-btn" onclick="window.toggleFAQ(this)">Có được hỗ trợ cài đặt mã nguồn web không? <i class="fas fa-chevron-down"></i></button><div class="faq-content"><p>Có. Bất kỳ mã nguồn nào mua tại hệ thống đều có kèm theo file văn bản Hướng Dẫn Cài Đặt. Nếu bạn không rành kỹ thuật, Admin sẽ hỗ trợ trỏ domain và up lên Hosting (Cpanel) một lần miễn phí.</p></div></div>
+                <div class="faq-box"><button class="faq-btn" onclick="window.toggleFAQ(this)">Chính sách cập nhật phiên bản mới như thế nào? <i class="fas fa-chevron-down"></i></button><div class="faq-content"><p>Các sản phẩm phần mềm và mã nguồn sẽ luôn được vá lỗi (Fix bugs). Bạn có thể truy cập Lịch sử mua hàng để tải lại phiên bản mới nhất bất cứ lúc nào mà không phải trả thêm phí duy trì.</p></div></div>
             </div>
         </section>
 
         <section class="section entry">
             <h2 class="sec-title">BẢN TIN <span>HỆ THỐNG</span></h2>
             <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));">
-                <div class="blog-card">
-                    <div class="blog-date"><i class="far fa-calendar-alt"></i> Ngày 21 Tháng 02, 2026</div>
-                    <div class="blog-title">Cập nhật khẩn cấp thuật toán Anti-Checkpoint Facebook V8.5</div>
-                    <p style="font-size:13px; color:#888; margin-bottom:15px; line-height:1.6;">Facebook vừa tiến hành thay đổi hàng loạt thuật toán quét thiết bị. Đội ngũ DEV đã tung bản vá sử dụng Proxy động để khắc phục...</p>
-                    <a href="#" style="color:var(--primary); font-size:13px; font-weight:bold; text-decoration:none;">Đọc chi tiết <i class="fas fa-arrow-right"></i></a>
-                </div>
-                <div class="blog-card">
-                    <div class="blog-date"><i class="far fa-calendar-alt"></i> Ngày 18 Tháng 02, 2026</div>
-                    <div class="blog-title">Cẩm nang hướng dẫn cấu hình Momo API vào Source Web Nạp Thẻ</div>
-                    <p style="font-size:13px; color:#888; margin-bottom:15px; line-height:1.6;">Bài viết sẽ chỉ ra nguyên nhân khiến Momo API không tự động duyệt thẻ và cách thay thế bằng Token cá nhân để web hoạt động trơn tru...</p>
-                    <a href="#" style="color:var(--primary); font-size:13px; font-weight:bold; text-decoration:none;">Đọc chi tiết <i class="fas fa-arrow-right"></i></a>
-                </div>
+                <div class="blog-card"><div class="blog-date"><i class="far fa-calendar-alt"></i> Ngày 21 Tháng 02, 2026</div><div class="blog-title">Cập nhật khẩn cấp thuật toán Anti-Checkpoint Facebook V8.5</div><p style="font-size:13px; color:#888; margin-bottom:15px; line-height:1.6;">Facebook vừa tiến hành thay đổi hàng loạt thuật toán quét thiết bị. Đội ngũ DEV đã tung bản vá sử dụng Proxy động để khắc phục...</p><a href="#" style="color:var(--primary); font-size:13px; font-weight:bold; text-decoration:none;">Đọc chi tiết <i class="fas fa-arrow-right"></i></a></div>
+                <div class="blog-card"><div class="blog-date"><i class="far fa-calendar-alt"></i> Ngày 18 Tháng 02, 2026</div><div class="blog-title">Cẩm nang hướng dẫn cấu hình Momo API vào Source Web Nạp Thẻ</div><p style="font-size:13px; color:#888; margin-bottom:15px; line-height:1.6;">Bài viết sẽ chỉ ra nguyên nhân khiến Momo API không tự động duyệt thẻ và cách thay thế bằng Token cá nhân để web hoạt động trơn tru...</p><a href="#" style="color:var(--primary); font-size:13px; font-weight:bold; text-decoration:none;">Đọc chi tiết <i class="fas fa-arrow-right"></i></a></div>
             </div>
             
             <div style="text-align:center; margin-top:70px;">
@@ -576,180 +403,113 @@
         <section class="section entry">
             <h2 class="sec-title">NĂNG LỰC <span>CÔNG NGHỆ</span></h2>
             <div class="skills-container">
-                <div class="skill-item">
-                    <div class="skill-info"><span>HTML / CSS / GIAO DIỆN UI/UX</span><span>77%</span></div>
-                    <div class="progress-bg"><div class="progress-fill fill-77" id="s1"></div></div>
-                </div>
-                <div class="skill-item">
-                    <div class="skill-info"><span>JAVASCRIPT / NODE.JS / REACT</span><span>50%</span></div>
-                    <div class="progress-bg"><div class="progress-fill fill-50" id="s2"></div></div>
-                </div>
-                <div class="skill-item">
-                    <div class="skill-info"><span>PHP / LARAVEL / BACKEND API</span><span>40%</span></div>
-                    <div class="progress-bg"><div class="progress-fill fill-40" id="s3"></div></div>
-                </div>
-                <div class="skill-item">
-                    <div class="skill-info"><span>PYTHON / TOOL AUTOMATION / BOT AI</span><span>36%</span></div>
-                    <div class="progress-bg"><div class="progress-fill fill-36" id="s4"></div></div>
-                </div>
-                <div class="skill-item">
-                    <div class="skill-info"><span>LUA / KỊCH BẢN GAME SCRIPTING</span><span>20%</span></div>
-                    <div class="progress-bg"><div class="progress-fill fill-20" id="s5"></div></div>
-                </div>
+                <div class="skill-item"><div class="skill-info"><span>HTML / CSS / GIAO DIỆN UI/UX</span><span>77%</span></div><div class="progress-bg"><div class="progress-fill fill-77" id="s1"></div></div></div>
+                <div class="skill-item"><div class="skill-info"><span>JAVASCRIPT / NODE.JS / REACT</span><span>50%</span></div><div class="progress-bg"><div class="progress-fill fill-50" id="s2"></div></div></div>
+                <div class="skill-item"><div class="skill-info"><span>PHP / LARAVEL / BACKEND API</span><span>40%</span></div><div class="progress-bg"><div class="progress-fill fill-40" id="s3"></div></div></div>
+                <div class="skill-item"><div class="skill-info"><span>PYTHON / TOOL AUTOMATION / BOT AI</span><span>36%</span></div><div class="progress-bg"><div class="progress-fill fill-36" id="s4"></div></div></div>
+                <div class="skill-item"><div class="skill-info"><span>LUA / KỊCH BẢN GAME SCRIPTING</span><span>20%</span></div><div class="progress-bg"><div class="progress-fill fill-20" id="s5"></div></div></div>
             </div>
         </section>
 
         <section class="section entry">
             <h2 class="sec-title">XÁC THỰC <span>DOANH NGHIỆP</span></h2>
             <div class="legal-grid">
-                <div class="legal-box">
-                    <div class="legal-title"><i class="fas fa-file-contract"></i> HỒ SƠ PHÁP LÝ CÔNG TY</div>
-                    <div class="legal-row"><span>Tổ chức sở hữu:</span> <span>QUOCDAT SEC TECHNOLOGIES</span></div>
-                    <div class="legal-row"><span>Người đại diện:</span> <span>QUỐC ĐẠT (Admin)</span></div>
-                    <div class="legal-row"><span>Mã số thuế doanh nghiệp:</span> <span>0316829xxx</span></div>
-                    <div class="legal-row"><span>Giấy phép hoạt động:</span> <span>41G802xxxx cấp bởi UBND TP.HCM</span></div>
-                </div>
-                <div class="legal-box">
-                    <div class="legal-title"><i class="fas fa-headset"></i> LIÊN HỆ & TRỤ SỞ LÀM VIỆC</div>
-                    <div class="legal-row"><span>Văn phòng làm việc:</span> <span>Tòa nhà Innovation, Quận 1, HCM</span></div>
-                    <div class="legal-row"><span>Đường dây nóng (Zalo):</span> <span>0988.xxx.xxx</span></div>
-                    <div class="legal-row"><span>Chăm sóc khách hàng:</span> <span>contact@quocdatsec.vn</span></div>
-                    <div class="legal-row"><span>Hỗ trợ kỹ thuật:</span> <span>Telegram @quocdatsec</span></div>
-                </div>
+                <div class="legal-box"><div class="legal-title"><i class="fas fa-file-contract"></i> HỒ SƠ PHÁP LÝ CÔNG TY</div><div class="legal-row"><span>Tổ chức sở hữu:</span> <span>QUOCDAT SEC TECHNOLOGIES</span></div><div class="legal-row"><span>Người đại diện:</span> <span>QUỐC ĐẠT (Admin)</span></div><div class="legal-row"><span>Mã số thuế doanh nghiệp:</span> <span>0316829xxx</span></div><div class="legal-row"><span>Giấy phép hoạt động:</span> <span>41G802xxxx cấp bởi UBND TP.HCM</span></div></div>
+                <div class="legal-box"><div class="legal-title"><i class="fas fa-headset"></i> LIÊN HỆ & TRỤ SỞ LÀM VIỆC</div><div class="legal-row"><span>Văn phòng làm việc:</span> <span>Tòa nhà Innovation, Quận 1, HCM</span></div><div class="legal-row"><span>Đường dây nóng (Zalo):</span> <span>0988.xxx.xxx</span></div><div class="legal-row"><span>Chăm sóc khách hàng:</span> <span>contact@quocdatsec.vn</span></div><div class="legal-row"><span>Hỗ trợ kỹ thuật:</span> <span>Telegram @quocdatsec</span></div></div>
             </div>
         </section>
 
         <footer class="entry">
             <div style="text-align:center; font-family:'Orbitron'; font-size:26px; font-weight:900; margin-bottom:25px;">QUOCDAT<span style="color:var(--primary);">.SEC</span></div>
             <div class="footer-links">
-                <a href="#">Trang Chủ</a>
-                <a href="#">Cửa Hàng</a>
-                <a href="#">Chính Sách Bảo Mật Dữ Liệu</a>
-                <a href="#">Điều Khoản Sử Dụng Dịch Vụ</a>
-                <a href="#">Chính Sách Thanh Toán & Hoàn Tiền</a>
+                <a href="#">Trang Chủ</a><a href="#">Cửa Hàng</a><a href="#">Chính Sách Bảo Mật Dữ Liệu</a><a href="#">Điều Khoản Sử Dụng Dịch Vụ</a><a href="#">Chính Sách Thanh Toán & Hoàn Tiền</a>
             </div>
             <div style="display:flex; justify-content:center; gap:20px; font-size:22px; margin-bottom:30px;">
-                <i class="fab fa-facebook" style="color:#1877f2; cursor:pointer;"></i>
-                <i class="fab fa-telegram" style="color:#0088cc; cursor:pointer;"></i>
-                <i class="fab fa-youtube" style="color:#ff0000; cursor:pointer;"></i>
+                <i class="fab fa-facebook" style="color:#1877f2; cursor:pointer;"></i> <i class="fab fa-telegram" style="color:#0088cc; cursor:pointer;"></i> <i class="fab fa-youtube" style="color:#ff0000; cursor:pointer;"></i>
             </div>
             <div style="font-size:12px; color:#555; letter-spacing:1px; line-height:1.6;">
-                © 2026 QUOCDAT SEC SYSTEM. ALL RIGHTS RESERVED.<br>
-                Mọi hành vi sao chép nội dung và giao diện đều vi phạm bản quyền.
+                © 2026 QUOCDAT SEC SYSTEM. ALL RIGHTS RESERVED.<br>Mọi hành vi sao chép nội dung và giao diện đều vi phạm bản quyền.
             </div>
         </footer>
     </main>
 
     <script>
-        // 1. GÁN TÊN NGAY LẬP TỨC ĐỂ TRÁNH TRỐNG TEXT (SAU KHI DOM ĐÃ CÓ SẴN)
         document.addEventListener("DOMContentLoaded", function() {
             try {
                 if(currentUser && currentUser.trim() !== "") {
                     let cleanName = currentUser.trim();
                     let firstLetter = cleanName.charAt(0).toUpperCase();
-                    
-                    // Gán vào Node nếu Node tồn tại
                     let nU = document.getElementById('nU'); if(nU) nU.innerText = cleanName;
                     let nA = document.getElementById('nA'); if(nA) nA.innerText = firstLetter;
                     let mU = document.getElementById('mU'); if(mU) mU.innerText = cleanName;
                 }
-            } catch(e) { 
-                console.error("[SYS] Lỗi khi render thông tin User:", e); 
-            }
+            } catch(e) { console.error("[SYS] Lỗi khi render thông tin User:", e); }
         });
 
-        // 2. KẾT NỐI FIREBASE LẤY SỐ DƯ TÀI KHOẢN (CHẠY ĐỘC LẬP)
         try {
-            const firebaseConfig = { 
-                apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", 
-                databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", 
-                projectId: "quocdat-b80c2" 
-            };
+            const firebaseConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
+            if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
             
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
-            
-            // Trỏ vào bảng Data của user đó
             let databaseRef = firebase.database().ref('users/' + safeUserId);
             
             databaseRef.on('value', (snapshot) => {
-                // Tự tạo user nếu DB chưa có
                 if(!snapshot.exists() && safeUserId !== "guest") { 
                     databaseRef.set({ balance: 0, joined_at: new Date().toISOString() }); 
                 }
                 
-                let rawBalance = snapshot.exists() ? (snapshot.val().balance || 0) : 0;
+                let uData = snapshot.val() || {};
+                let rawBalance = uData.balance || 0;
                 let moneyFormat = rawBalance.toLocaleString('vi-VN') + " đ";
                 
-                // Gán vào HTML và hiển thị (Nếu PC thì cho hiện block vì mặc định ẩn)
-                let pc = document.getElementById('pcBal');
-                if(pc) { pc.innerText = moneyFormat; pc.style.display = 'block'; }
+                let pc = document.getElementById('pcBal'); if(pc) { pc.innerText = moneyFormat; pc.style.display = 'block'; }                let nb = document.getElementById('nB'); if(nb) { nb.innerText = moneyFormat; }
+                let mb = document.getElementById('mB'); if(mb) { mb.innerText = moneyFormat; }
 
-                let nb = document.getElementById('nB');
-                if(nb) { nb.innerText = moneyFormat; }
-
-                let mb = document.getElementById('mB');
-                if(mb) { mb.innerText = moneyFormat; }
+                // LOGIC CHẶN IOS NẾU TÀI KHOẢN BỊ ADMIN KHÓA
+                if(uData.banned && uData.ban_until) {
+                    let now = new Date().getTime();
+                    let banTime = new Date(uData.ban_until).getTime();
+                    if(banTime > now) {
+                        let reasonBox = document.getElementById('banIOS_Reason');
+                        if(reasonBox) reasonBox.innerText = uData.ban_reason || "Vi phạm chính sách.";
+                        let timeBox = document.getElementById('banIOS_Time');
+                        if(timeBox) timeBox.innerText = new Date(uData.ban_until).toLocaleString('vi-VN', { hour: '2-digit', minute:'2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
+                        
+                        let banUI = document.getElementById('banIOS_Overlay');
+                        if(banUI) { banUI.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+                    } else {
+                        // Tự động mở khóa nếu quá hạn
+                        databaseRef.update({ banned: false, ban_reason: null, ban_until: null });
+                        let banUI = document.getElementById('banIOS_Overlay');
+                        if(banUI) { banUI.style.display = 'none'; document.body.style.overflow = 'auto'; }
+                    }
+                } else {
+                    let banUI = document.getElementById('banIOS_Overlay');
+                    if(banUI) { banUI.style.display = 'none'; document.body.style.overflow = 'auto'; }
+                }
             });
             
-        } catch(e) { 
-            console.error("Khởi tạo Firebase thất bại:", e); 
+        } catch(e) { console.error("Khởi tạo Firebase thất bại:", e); }
+
+        function runCounters() {
+            try {
+                const counterElements = document.querySelectorAll('.count-num');
+                counterElements.forEach(counter => {
+                    const finalValue = parseInt(counter.getAttribute('data-target'), 10);
+                    const stepValue = finalValue / 50; 
+                    let currentValue = 0;
+                    const updateValue = () => {
+                        currentValue += stepValue;
+                        if(currentValue < finalValue) {
+                            counter.innerText = Math.ceil(currentValue) + (finalValue > 50 ? '+' : '');
+                            setTimeout(updateValue, 30);
+                        } else {
+                            counter.innerText = finalValue + (finalValue > 50 ? '+' : '');
+                        }
+                    };
+                    updateValue();
+                });
+            } catch(e) { console.error("[SYS] Lỗi chạy số đếm:", e); }
         }
     </script>
 </body>
 </html>
-<div id="banIOS_Overlay" style="position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); z-index: 999999999; display: none; align-items: center; justify-content: center; flex-direction: column;">
-    <div style="background: rgba(30,30,30,0.9); width: 300px; border-radius: 18px; text-align: center; border: 1px solid #444; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; box-shadow: 0 20px 40px rgba(0,0,0,0.8);">
-        <div style="padding: 25px 20px;">
-            <div style="color:#fff; font-weight:600; font-size:17px; margin-bottom:10px;">Tài Khoản Bị Khóa</div>
-            <div style="color:#aaa; font-size:13px; line-height:1.4;">Tài khoản của bạn đã bị vô hiệu hóa vì lý do:</div>
-            <div id="banIOS_Reason" style="color:#ff4757; font-weight:bold; font-size:14px; margin: 10px 0;">Sử dụng Bug</div>
-            <div style="color:#aaa; font-size:13px;">Sẽ được mở khóa vào:</div>
-            <div id="banIOS_Time" style="color:#fff; font-weight:bold; font-size:14px; margin-top:5px;">20/10/2026 15:00</div>
-        </div>
-        <button style="border-top: 1px solid #444; color: #0a84ff; padding: 15px; font-weight: 600; cursor: pointer; width: 100%; background: transparent; border-left:none; border-right:none; border-bottom:none; font-size: 16px; outline:none;" onclick="window.executeLogout()">Đăng xuất</button>
-    </div>
-</div>
-
-<script>
-    // LẮNG NGHE LỆNH KHÓA TỪ ADMIN
-    document.addEventListener("DOMContentLoaded", function() {
-        if(currentUser && safeUserId !== "guest") {
-            let banRef = firebase.database().ref('users/' + safeUserId);
-            banRef.on('value', (snapshot) => {
-                if(snapshot.exists()) {
-                    let uData = snapshot.val();
-                    // Nếu tài khoản bị đánh dấu khóa
-                    if(uData.banned && uData.ban_until) {
-                        let now = new Date().getTime();
-                        let banTime = new Date(uData.ban_until).getTime();
-                        
-                        // Kiểm tra xem đã hết hạn khóa chưa
-                        if(banTime > now) {
-                            // Chưa hết hạn -> MỞ BỨC TƯỜNG CHẶN IOS
-                            document.getElementById('banIOS_Reason').innerText = uData.ban_reason || "Vi phạm chính sách.";
-                            
-                            // Chuyển giờ về định dạng Việt Nam
-                            let displayTime = new Date(uData.ban_until).toLocaleString('vi-VN', { hour: '2-digit', minute:'2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
-                            document.getElementById('banIOS_Time').innerText = displayTime;
-                            
-                            document.getElementById('banIOS_Overlay').style.display = 'flex';
-                            document.body.style.overflow = 'hidden'; // Chặn cuộn trang
-                        } else {
-                            // Đã quá hạn khóa -> Tự động ân xá
-                            banRef.update({ banned: false, ban_reason: null, ban_until: null });
-                            document.getElementById('banIOS_Overlay').style.display = 'none';
-                            document.body.style.overflow = 'auto';
-                        }
-                    } else {
-                        // Bình thường
-                        document.getElementById('banIOS_Overlay').style.display = 'none';
-                        document.body.style.overflow = 'auto';
-                    }
-                }
-            });
-        }
-    });
-</script>
-
