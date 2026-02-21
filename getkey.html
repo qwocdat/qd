@@ -7,7 +7,9 @@
     
     <script>
         var currentUser = localStorage.getItem('vip_username');
+        var safeUserId = "guest";
         if(!currentUser || currentUser.trim() === "") { window.location.replace("login.html"); } 
+        else { safeUserId = currentUser.replace(/[.#$\[\]]/g, '_'); }
         window.goToPage = function(url) { window.location.href = url; }
     </script>
 
@@ -31,7 +33,7 @@
         .btn-bypass:disabled { background: #333; color: #888; cursor: not-allowed; }
 
         .progress-wrapper { width: 100%; background: #000; border: 1px solid #333; border-radius: 10px; height: 18px; margin-top: 25px; overflow: hidden; display: none; position: relative; }
-        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--primary)); transition: width 0.2s ease; box-shadow: 0 0 15px var(--accent); }
+        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--primary)); transition: width 0.3s ease; box-shadow: 0 0 15px var(--accent); }
         
         .terminal-text { font-family: monospace; font-size: 12px; color: var(--accent); text-align: left; margin-top: 15px; display: none; background: #000; padding: 15px; border-radius: 8px; border: 1px dashed #333; height: 130px; overflow-y: hidden; line-height: 1.6; }
         .t-success { color: var(--primary); }
@@ -39,7 +41,7 @@
     </style>
 </head>
 <body>
-    <header>
+        <header>
         <div class="logo" onclick="window.goToPage('index.html')"><i class="fas fa-arrow-left" style="color:#888; margin-right:10px;"></i> VỀ TRANG CHỦ</div>
     </header>
 
@@ -47,7 +49,7 @@
         <div class="free-key-section">
             <i class="fas fa-satellite-dish" style="font-size: 60px; color: var(--accent); margin-bottom: 20px;"></i>
             <h2 style="font-family:'Orbitron'; color:var(--accent); margin-bottom:10px;">HỆ THỐNG ĐỊNH TUYẾN</h2>
-            <p style="color:#888; font-size:14px; margin-bottom:20px; line-height:1.6;">Hệ thống sẽ gửi yêu cầu phân tán (Concurrent Fetch) qua mạng lưới Proxy Quốc tế để vượt tường lửa Cloudflare và ép Link4M cấp phát Link.</p>
+            <p style="color:#888; font-size:14px; margin-bottom:20px; line-height:1.6;">Hệ thống sẽ gửi yêu cầu xuyên qua các lớp Proxy để né Cloudflare và ép Link4M cấp phát Link rút gọn.</p>
             
             <button class="btn-bypass" id="btnCreateLink" onclick="generateLink4M()">
                 <i class="fas fa-external-link-alt"></i> BẮT ĐẦU ĐỤC TƯỜNG LỬA
@@ -95,78 +97,78 @@
             let destinationUrl = baseUrl + "/key.html?verify=" + uniqueToken;
             if(freeItem) destinationUrl += "&free_item=" + freeItem;
 
-            // Ghi Token lên DB
+            // 1. Ghi Token lên DB
             await db.ref('free_tokens/' + uniqueToken).set({ key: freeKey, status: 'pending', created_at: Date.now() });
 
-            // MẠNG LƯỚI PROXY ĐẠN ĐẠO (Đảm bảo 100% qua mặt Cloudflare)
             let targetApiUrl = `https://link4m.com/api-shorten/v2?api=${LINK4M_API}&url=${encodeURIComponent(destinationUrl)}`;
             
-            const corsProxies = [
-                "https://api.allorigins.win/get?url=", 
-                "https://api.allorigins.win/raw?url=",
-                "https://api.codetabs.com/v1/proxy?quest=",
-                "https://api.codetabs.com/v1/proxy/?quest=",
-                "https://corsproxy.io/?",
-                "https://thingproxy.freeboard.io/fetch/",
-                "https://yacdn.org/proxy/",
-                "" // Bắn thẳng dự phòng
+            // 2. MẠNG LƯỚI PROXY ĐÃ FIX LỖI CLOUDFLARE CRASH
+            const proxyList = [
+                `https://api.allorigins.win/get?url=${encodeURIComponent(targetApiUrl)}`,
+                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetApiUrl)}`,
+                targetApiUrl // Thử bắn thẳng làm phương án cuối
             ];
 
             let finalShortLink = null;
-            let isFailed = false;
 
-            // Tạo hiệu ứng Terminal Load ảo trong lúc API chạy ngầm
+            // 3. THANH TIẾN TRÌNH ẢO
             let progress = 0;
             let loadInterval = setInterval(() => {
-                progress += Math.floor(Math.random() * 5) + 3;
-                if (progress > 85 && !finalShortLink && !isFailed) progress = 85; 
+                progress += Math.floor(Math.random() * 8) + 2;
+                if (progress > 85 && !finalShortLink) progress = 85; 
                 if (progress > 100) progress = 100;
                 
                 pBar.style.width = progress + '%';
-                logTerminal(`Bắn Request qua node [IP: ${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.x.x]...`);
                 
                 if (progress >= 100) {
                     clearInterval(loadInterval);
                     if(finalShortLink) {
-                        logTerminal(`LẤY LINK THÀNH CÔNG! Đang đẩy trang...`, "ok");
-                        setTimeout(() => { window.location.href = finalShortLink; }, 800);
+                        logTerminal(`[100%] LẤY LINK THÀNH CÔNG! Đang chuyển trang...`, "ok");
+                        setTimeout(() => { window.location.href = finalShortLink; }, 500);
                     } else {
-                        logTerminal("TOÀN BỘ 500 REQUEST BỊ CHẶN! Vui lòng thử lại.", "err");
+                        logTerminal("Cloudflare chặn toàn bộ truy cập. Vui lòng thử lại.", "err");
                         pBar.style.background = "#ff4757";
                         setTimeout(() => {
-                            btn.style.display = 'block'; btn.innerHTML = `<i class="fas fa-redo"></i> THỬ LẠI LẦN NỮA`;
+                            btn.style.display = 'block'; btn.innerHTML = `<i class="fas fa-redo"></i> TẠO LẠI LINK`;
                             pWrap.style.display = 'none';
-                        }, 2500);
+                        }, 2000);
                     }
                 }
             }, 100);
 
-            // BẮN API ĐỒNG LOẠT (Cái nào trả về trước thì dùng luôn)
-            logTerminal("Đang nã API đồng loạt qua mạng lưới phân tán...", "ok");
-            
-            let fetchPromises = corsProxies.map(proxy => {
-                return new Promise((resolve, reject) => {
-                    let fetchUrl = proxy ? proxy + encodeURIComponent(targetApiUrl) : targetApiUrl;
-                    fetch(fetchUrl, { cache: "no-store" })
-                    .then(res => res.json())
-                    .then(data => {
-                        // AllOrigins trả về Object chứa chuỗi contents
-                        let parsed = data.contents ? JSON.parse(data.contents) : data;
-                        if(parsed.status === "success" || parsed.status === 200 || parsed.shortenedUrl) {
-                            resolve(parsed.shortenedUrl || parsed.url);
-                        } else {
-                            reject("API Blocked");
-                        }
-                    })
-                    .catch(err => reject(err));
-                });
-            });
+            // 4. VÒNG LẶP GỌI API CHỐNG CRASH
+            for(let i = 0; i < proxyList.length; i++) {
+                let currentProxy = proxyList[i];
+                logTerminal(`Đang thử vượt tường lửa qua Tuyến [${i+1}/3]...`);
+                
+                try {
+                    let response = await fetch(currentProxy);
+                    let textResult = await response.text(); // Lấy dưới dạng Text trước để tránh lỗi JSON.parse
+                    
+                    let jsonData;
+                    
+                    // Nếu là AllOrigins, cấu trúc JSON bị lồng 2 lớp
+                    if(currentProxy.includes('allorigins')) {
+                        let tempJson = JSON.parse(textResult);
+                        // Bọc try catch lúc ép kiểu để nếu Cloudflare quăng HTML ra thì nó ko bị crash app
+                        try { jsonData = JSON.parse(tempJson.contents); } 
+                        catch(e) { throw new Error("Cloudflare chặn AllOrigins"); }
+                    } else {
+                        try { jsonData = JSON.parse(textResult); } 
+                        catch(e) { throw new Error("Cloudflare chặn trực tiếp"); }
+                    }
 
-            // Chờ thằng lấy được link nhanh nhất báo công
-            try {
-                finalShortLink = await Promise.any(fetchPromises);
-            } catch(e) {
-                isFailed = true; // Toàn bộ proxy bị chặn
+                    // Nếu ép kiểu thành công và có Link
+                    if(jsonData && (jsonData.status === 'success' || jsonData.shortenedUrl || jsonData.url)) {
+                        finalShortLink = jsonData.shortenedUrl || jsonData.url;
+                        logTerminal(`Tuyến [${i+1}] đục thành công!`, "ok");
+                        break; // Có link thì thoát vòng lặp ngay lập tức!
+                    }
+
+                } catch (error) {
+                    logTerminal(`Tuyến [${i+1}] bị tường lửa chặn chặn lại. Đổi hướng...`, "err");
+                    continue; // Gặp lỗi thì kệ nó, chạy Proxy tiếp theo
+                }
             }
         }
     </script>
