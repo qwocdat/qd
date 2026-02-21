@@ -6,34 +6,17 @@
     <title>LỊCH SỬ GIAO DỊCH & KHO LƯU TRỮ | QUOCDAT SEC</title>
     
     <script>
-        // 1. KIỂM TRA ĐĂNG NHẬP
         var currentUser = localStorage.getItem('vip_username');
-        if(!currentUser || currentUser.trim() === "") { 
-            window.location.replace("login.html"); 
-        }
+        if(!currentUser || currentUser.trim() === "") { window.location.replace("login.html"); }
         var safeUserId = currentUser.replace(/[.#$\[\]]/g, '_');
 
-        // 2. HÀM GIAO DIỆN
-        window.goToPage = function(url) {
-            document.body.style.opacity = '0';
-            setTimeout(() => { window.location.href = url; }, 300);
-        }
-
-        // 3. HÀM COPY KEY
+        window.goToPage = function(url) { document.body.style.opacity = '0'; setTimeout(() => { window.location.href = url; }, 300); }
         window.copyToClipboard = function(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                showToast("Đã copy KEY: " + text);
-            }).catch(err => {
-                alert("Lỗi copy: " + text);
-            });
+            navigator.clipboard.writeText(text).then(() => { showToast("Đã copy KEY: " + text); }).catch(err => { alert("Lỗi copy: " + text); });
         }
-
-        // 4. TOAST THÔNG BÁO
         window.showToast = function(msg) {
-            let toast = document.getElementById('toastMsg');
-            toast.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
-            toast.classList.add('show');
-            setTimeout(() => { toast.classList.remove('show'); }, 3000);
+            let toast = document.getElementById('toastMsg'); toast.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
+            toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show'); }, 3000);
         }
     </script>
 
@@ -45,77 +28,57 @@
     <style>
         :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --accent: #00b8ff; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg) url('https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat fixed; color: #fff; padding-top: 70px; padding-bottom: 50px; transition: opacity 0.4s; }
-        .overlay-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,10,15,0.92); z-index: -1; }
-
-        /* HEADER */
-        header { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(10,10,15,0.98); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); z-index: 1000; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
-        .logo { font-family: 'Orbitron'; font-size: 18px; font-weight: 900; color: #fff; text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        body { background: var(--bg); color: #fff; padding-top: 70px; padding-bottom: 50px; transition: opacity 0.4s; }
+        
+        header { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(10,10,15,0.98); border-bottom: 1px solid var(--border); z-index: 1000; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+        .logo { font-family: 'Orbitron'; font-size: 18px; font-weight: 900; color: #fff; text-decoration: none; cursor: pointer; }
         .pc-wallet { background: rgba(0,255,136,0.1); border: 1px solid var(--primary); color: var(--primary); padding: 8px 15px; border-radius: 30px; font-size: 14px; font-family: 'Orbitron'; font-weight: bold; }
         
-        .toast { position: fixed; top: 90px; right: -300px; background: rgba(10,10,15,0.95); border-left: 4px solid var(--primary); border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); color: #fff; padding: 15px 20px; font-size: 13px; font-weight: bold; z-index: 99999; transition: 0.4s; display: flex; align-items: center; gap: 10px; }
+        .toast { position: fixed; top: 90px; right: -300px; background: rgba(10,10,15,0.95); border-left: 4px solid var(--primary); border-radius: 8px; color: #fff; padding: 15px 20px; font-size: 13px; font-weight: bold; z-index: 99999; transition: 0.4s; }
         .toast.show { right: 20px; }
 
-        /* CONTAINER */
         .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
         .page-header { text-align: center; margin-bottom: 40px; }
-        .page-header h1 { font-family: 'Orbitron'; font-size: 28px; color: var(--primary); text-transform: uppercase; margin-bottom: 10px; }
-        .page-header p { color: #888; font-size: 14px; }
+        .page-header h1 { font-family: 'Orbitron'; font-size: 28px; color: var(--primary); margin-bottom: 10px; }
 
-        /* TABS */
         .tab-nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; }
         .tab-btn { background: var(--card-bg); border: 1px solid var(--border); color: #888; padding: 12px 25px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         .tab-btn.active { background: rgba(0,255,136,0.1); color: var(--primary); border-color: var(--primary); }
-
         .tab-content { display: none; animation: fadeIn 0.4s; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* KHO ỨNG DỤNG ĐÃ MUA (LỊCH SỬ MUA HÀNG) */
         .grid-library { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .lib-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 15px; padding: 20px; position: relative; overflow: hidden; }
+        .lib-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 15px; padding: 20px; position: relative; }
         .lib-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--primary); }
-        .lib-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; border-bottom: 1px dashed var(--border); padding-bottom: 15px; }
+        .lib-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px dashed var(--border); padding-bottom: 15px; }
         .lib-title { font-family: 'Orbitron'; font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 5px; }
-        .lib-time { font-size: 11px; color: #666; }
-        .lib-price { color: #ff4757; font-family: monospace; font-weight: bold; font-size: 14px; }
         
         .key-box { background: rgba(241,196,15,0.1); border: 1px dashed #f1c40f; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .key-text { color: #f1c40f; font-family: monospace; font-size: 15px; font-weight: bold; letter-spacing: 1px; }
+        .key-text { color: #f1c40f; font-family: monospace; font-size: 15px; font-weight: bold; }
         .btn-copy { background: #f1c40f; color: #000; border: none; padding: 5px 10px; border-radius: 5px; font-size: 12px; font-weight: bold; cursor: pointer; }
 
-        .btn-download { display: block; width: 100%; text-align: center; background: var(--primary); color: #000; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; transition: 0.3s; }
-        .btn-download:hover { filter: brightness(1.2); }
+        /* Nút Chuyển Trang Trích Xuất Link */
+        .btn-extract { display: block; width: 100%; text-align: center; background: #1e90ff; color: #fff; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold; border: none; cursor: pointer; transition: 0.3s; }
+        .btn-extract:hover { background: #007bff; }
 
-        /* LỊCH SỬ NẠP TIỀN */
-        .history-table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 15px; overflow: hidden; border: 1px solid var(--border); }
-        .history-table th { background: #111; padding: 15px; text-align: left; font-size: 12px; color: #888; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        .history-table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 15px; border: 1px solid var(--border); }
+        .history-table th { background: #111; padding: 15px; text-align: left; font-size: 12px; color: #888; border-bottom: 1px solid var(--border); }
         .history-table td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
-        
-        .type-badge { padding: 4px 10px; border-radius: 5px; font-size: 11px; font-weight: bold; }
-        .badge-buy { background: rgba(255,71,87,0.1); color: #ff4757; border: 1px solid #ff4757; }
-        .badge-add { background: rgba(0,184,255,0.1); color: var(--accent); border: 1px solid var(--accent); }
-
         .empty-state { text-align: center; padding: 50px 20px; color: #666; background: var(--card-bg); border-radius: 15px; border: 1px solid var(--border); }
-        .empty-state i { font-size: 50px; margin-bottom: 15px; color: #333; }
     </style>
 </head>
 <body>
-
-    <div class="overlay-bg"></div>
     <div class="toast" id="toastMsg"></div>
-
     <header>
         <div class="logo" onclick="window.goToPage('index.html')"><i class="fas fa-arrow-left" style="color:#888; margin-right:10px;"></i> VỀ TRANG CHỦ</div>
-        <div class="header-actions">
-            <div class="pc-wallet" id="pcBal">0 đ</div> 
-        </div>
+        <div class="pc-wallet" id="pcBal">0 đ</div> 
     </header>
 
     <div class="container">
         <div class="page-header">
             <h1>LỊCH SỬ GIAO DỊCH</h1>
-            <p>Kho lưu trữ Tool đã mua, Mã KEY bản quyền và Lịch sử Nạp tiền của bạn.</p>
+            <p>Kho lưu trữ Tool đã mua, Mã KEY và Lịch sử số dư.</p>
         </div>
 
         <div class="tab-nav">
@@ -125,24 +88,14 @@
 
         <div id="tab-library" class="tab-content active">
             <div class="grid-library" id="libraryGrid">
-                <div class="empty-state">
-                    <i class="fas fa-spinner fa-spin" style="color:var(--primary);"></i>
-                    <p>Đang đồng bộ dữ liệu mua hàng từ máy chủ...</p>
-                </div>
+                <div class="empty-state"><i class="fas fa-spinner fa-spin" style="color:var(--primary);"></i><p>Đang đồng bộ dữ liệu...</p></div>
             </div>
         </div>
 
         <div id="tab-transactions" class="tab-content">
             <div style="overflow-x: auto;">
                 <table class="history-table">
-                    <thead>
-                        <tr>
-                            <th>Thời Gian</th>
-                            <th>Loại Giao Dịch</th>
-                            <th>Số Tiền</th>
-                            <th>Chi Tiết</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Thời Gian</th><th>Loại GD</th><th>Số Tiền</th><th>Chi Tiết</th></tr></thead>
                     <tbody id="transactionTable">
                         <tr><td colspan="4" style="text-align:center; padding:30px; color:#555;">Đang tải dữ liệu...</td></tr>
                     </tbody>
@@ -150,71 +103,49 @@
             </div>
         </div>
     </div>
-
-    <script>
-        // HÀM CHUYỂN TAB
+        <script>
         function switchTab(tabId, el) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            el.classList.add('active');
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            document.getElementById('tab-' + tabId).classList.add('active');
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active')); el.classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); document.getElementById('tab-' + tabId).classList.add('active');
         }
 
-        // KẾT NỐI FIREBASE
         const firebaseConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 1. ĐỒNG BỘ SỐ DƯ HIỆN TẠI LÊN HEADER
         if(safeUserId !== "guest") {
             db.ref('users/' + safeUserId).on('value', (snapshot) => {
-                if(snapshot.exists()) {
-                    let bal = snapshot.val().balance || 0;
-                    document.getElementById('pcBal').innerText = bal.toLocaleString('vi-VN') + " đ";
-                }
+                if(snapshot.exists()) document.getElementById('pcBal').innerText = (snapshot.val().balance || 0).toLocaleString('vi-VN') + " đ";
             });
         }
 
-        // 2. KÉO DỮ LIỆU LỊCH SỬ GIAO DỊCH (TRANSACTIONS)
         db.ref('transactions').orderByChild('user').equalTo(safeUserId).on('value', (snap) => {
             let libGrid = document.getElementById('libraryGrid');
             let transTable = document.getElementById('transactionTable');
-            
-            libGrid.innerHTML = '';
-            transTable.innerHTML = '';
+            libGrid.innerHTML = ''; transTable.innerHTML = '';
 
             if(snap.exists()) {
-                let allTrans = [];
-                snap.forEach(child => { allTrans.push(child.val()); });
-                allTrans.reverse(); // Mới nhất lên đầu
-                
+                let allTrans = []; snap.forEach(child => { allTrans.push(child.val()); }); allTrans.reverse();
                 let hasPurchases = false;
 
                 allTrans.forEach(t => {
                     let timeStr = new Date(t.time).toLocaleString('vi-VN', {hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit', year:'numeric'});
                     
-                    // ==========================================
-                    // XỬ LÝ TAB 1: KHO ĐỒ ĐÃ MUA (CÓ LINK TẢI VÀ KEY)
-                    // ==========================================
                     if(t.type === 'purchase') {
                         hasPurchases = true;
-                        let safeLink = t.download_link && t.download_link !== "" ? t.download_link : "#";
-                        let btnDownloadHtml = safeLink !== "#" 
-                            ? `<a href="${safeLink}" target="_blank" class="btn-download"><i class="fas fa-cloud-download-alt"></i> TẢI XUỐNG NGAY</a>`
-                            : `<button class="btn-download" style="background:#333; color:#888; cursor:not-allowed;"><i class="fas fa-exclamation-circle"></i> Đang chờ Admin cập nhật Link</button>`;
+                        
+                        // NÚT TRÍCH XUẤT LINK (Sẽ chuyển sang trang download.html)
+                        let btnDownloadHtml = `<button onclick="window.goToPage('download.html')" class="btn-extract"><i class="fas fa-external-link-square-alt"></i> VÀO CỔNG TRÍCH XUẤT LINK</button>`;
 
                         libGrid.innerHTML += `
                             <div class="lib-card">
                                 <div class="lib-header">
-                                    <div>
-                                        <div class="lib-title">${t.detail.replace('Mua: ', '')}</div>
-                                        <div class="lib-time"><i class="far fa-clock"></i> ${timeStr}</div>
-                                    </div>
-                                    <div class="lib-price">-${Number(t.amount).toLocaleString('vi-VN')} đ</div>
+                                    <div><div class="lib-title">${t.detail.replace('Mua: ', '').replace('Nhận Miễn Phí: ', '')}</div><div style="font-size:11px; color:#666;"><i class="far fa-clock"></i> ${timeStr}</div></div>
+                                    <div style="color:#ff4757; font-family:monospace; font-weight:bold;">-${Number(t.amount).toLocaleString('vi-VN')} đ</div>
                                 </div>
-                                <div style="font-size:12px; color:#aaa; margin-bottom:5px;">Mã bản quyền (License KEY):</div>
+                                <div style="font-size:12px; color:#aaa; margin-bottom:5px;">Mã bản quyền để lấy File (Copy mã này):</div>
                                 <div class="key-box">
-                                    <span class="key-text">${t.key_granted || 'Chưa có KEY'}</span>
+                                    <span class="key-text">${t.key_granted || 'Đang xử lý'}</span>
                                     <button class="btn-copy" onclick="copyToClipboard('${t.key_granted}')">COPY</button>
                                 </div>
                                 ${btnDownloadHtml}
@@ -222,37 +153,20 @@
                         `;
                     }
 
-                    // ==========================================
-                    // XỬ LÝ TAB 2: BẢNG BIẾN ĐỘNG SỐ DƯ
-                    // ==========================================
                     let isBuy = t.type === 'purchase';
-                    let badgeClass = isBuy ? 'badge-buy' : 'badge-add';
-                    let badgeText = isBuy ? 'Mua Hàng' : 'Nạp Tiền';
-                    let sign = isBuy ? '-' : '+';
-                    let moneyColor = isBuy ? '#ff4757' : 'var(--accent)';
-
                     transTable.innerHTML += `
                         <tr>
                             <td style="color:#888; font-size:12px;">${timeStr}</td>
-                            <td><span class="type-badge ${badgeClass}">${badgeText}</span></td>
-                            <td style="color:${moneyColor}; font-family:monospace; font-weight:bold; font-size:16px;">${sign}${Number(t.amount).toLocaleString('vi-VN')} đ</td>
+                            <td><span style="padding:4px 10px; border-radius:5px; font-size:11px; font-weight:bold; background:${isBuy ? 'rgba(255,71,87,0.1)' : 'rgba(0,184,255,0.1)'}; color:${isBuy ? '#ff4757' : 'var(--accent)'}; border:1px solid ${isBuy ? '#ff4757' : 'var(--accent)'};">${isBuy ? 'Mua Hàng' : 'Nạp Tiền'}</span></td>
+                            <td style="color:${isBuy ? '#ff4757' : 'var(--accent)'}; font-family:monospace; font-weight:bold; font-size:15px;">${isBuy ? '-' : '+'}${Number(t.amount).toLocaleString('vi-VN')} đ</td>
                             <td style="font-weight:bold; color:#ccc;">${t.detail}</td>
                         </tr>
                     `;
                 });
 
-                if(!hasPurchases) {
-                    libGrid.innerHTML = `
-                        <div class="empty-state" style="grid-column: 1 / -1;">
-                            <i class="fas fa-box-open"></i>
-                            <p>Kho lưu trữ trống. Bạn chưa mua sản phẩm nào.</p>
-                            <button onclick="window.goToPage('shop.html')" style="margin-top:15px; padding:10px 20px; background:var(--primary); color:#000; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">ĐI ĐẾN CỬA HÀNG</button>
-                        </div>
-                    `;
-                }
-
+                if(!hasPurchases) libGrid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-box-open" style="font-size:40px;"></i><p>Bạn chưa mua sản phẩm nào.</p></div>`;
             } else {
-                libGrid.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1;"><i class="fas fa-folder-open"></i><p>Bạn chưa có giao dịch nào.</p></div>`;
+                libGrid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-folder-open" style="font-size:40px;"></i><p>Bạn chưa có giao dịch nào.</p></div>`;
                 transTable.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:30px; color:#555;">Bạn chưa có giao dịch nào.</td></tr>`;
             }
         });
