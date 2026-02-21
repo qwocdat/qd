@@ -6,6 +6,7 @@
     <title>ADMIN PANEL | QUOCDAT SEC</title>
     
     <script>
+        // BẢO MẬT VÒNG NGOÀI
         var isAdminLoggedIn = sessionStorage.getItem('admin_auth_status');
         if (isAdminLoggedIn !== 'success') {
             var password = prompt("⛔ HỆ THỐNG BẢO MẬT CẤP CAO\n\nVui lòng nhập mật khẩu Quản Trị Viên:");
@@ -20,6 +21,7 @@
         var currentUser = localStorage.getItem('vip_username') || 'admin_system';
         var safeUserId = currentUser.replace(/[.#$\[\]]/g, '_');
 
+        // GIAO DIỆN & TIỆN ÍCH
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
         function switchTab(tabId, el) {
             document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
@@ -97,7 +99,7 @@
     </style>
 </head>
 <body>
-        <div class="sidebar" id="sidebar">
+    <div class="sidebar" id="sidebar">
         <div class="brand" style="display:flex; justify-content:space-between; align-items:center;">
             <div>QUOCDAT<span style="color:var(--primary)">.ADMIN</span></div>
             <i class="fas fa-times mobile-toggle" onclick="toggleSidebar()"></i>
@@ -130,6 +132,24 @@
                     <div class="stat-card"><div class="stat-icon" style="background:rgba(30,144,255,0.1); color:#1e90ff;"><i class="fas fa-users"></i></div><div><div style="font-size:11px; color:#888;">USER ĐĂNG KÝ</div><div id="statUsers" style="font-size:20px; font-weight:bold; font-family:'Orbitron';">0</div></div></div>
                     <div class="stat-card"><div class="stat-icon" style="background:rgba(255,71,87,0.1); color:var(--primary);"><i class="fas fa-box"></i></div><div><div style="font-size:11px; color:#888;">SẢN PHẨM</div><div id="statProducts" style="font-size:20px; font-weight:bold; font-family:'Orbitron';">0</div></div></div>
                 </div>
+
+                <div class="table-container" style="border-color: #1e90ff; margin-top: 30px;">
+                    <div class="table-header" style="background: rgba(30,144,255,0.1);">
+                        <h3 style="color: #1e90ff;"><i class="fas fa-code"></i> TRÌNH SOẠN THẢO MÃ NGUỒN GỐC</h3>
+                    </div>
+                    <div style="padding: 20px;">
+                        <p style="color:#888; font-size:13px; margin-bottom:15px;">Dán mã HTML/CSS/JS mới vào đây để ghi đè hoàn toàn giao diện của các trang.</p>
+                        <div class="form-group">
+                            <select id="pageSelect" onchange="loadRawCode()" style="margin-bottom: 15px; background: #000;">
+                                <option value="getkey_html">Trang getkey.html</option>
+                                <option value="key_html">Trang key.html</option>
+                                <option value="index_html">Trang index.html</option>
+                            </select>
+                        </div>
+                        <textarea id="rawCodeArea" rows="12" placeholder="Dán code HTML mới của bạn vào đây. Để trống nếu muốn khôi phục giao diện gốc..." style="width: 100%; background: #000; color: #00ff88; border: 1px solid #333; padding: 15px; border-radius: 8px; font-family: monospace; outline: none; margin-bottom: 15px; resize: vertical;"></textarea>
+                        <button class="btn-add" style="background: #1e90ff; width: 100%; padding: 15px;" onclick="saveRawCode()"><i class="fas fa-cloud-upload-alt"></i> CẬP NHẬT MÃ NGUỒN</button>
+                    </div>
+                </div>
             </div>
 
             <div id="tab-products" class="tab-pane">
@@ -150,7 +170,7 @@
                 <div class="table-container">
                     <div class="table-header"><h3>Theo Dõi Mã KEY Đã Cấp Phát</h3></div>
                     <table>
-                        <thead><tr><th>Thời Gian</th><th>Tài Khoản</th><th>Tên Sản Phẩm (Giá)</th><th>Mã KEY</th><th>Link Sẽ Nhả Khi Trích Xuất</th></tr></thead>
+                        <thead><tr><th>Thời Gian</th><th>Tài Khoản</th><th>Tên Sản Phẩm (Giá)</th><th>Mã KEY</th><th>Link Tải</th></tr></thead>
                         <tbody id="historyTableBody"><tr><td colspan="5" style="text-align:center;">Đang tải lịch sử...</td></tr></tbody>
                     </table>
                 </div>
@@ -175,11 +195,11 @@
     </div>
 
     <div class="modal-overlay" id="moneyModal">
-        <div class="modal-box"><div class="modal-head"><div class="modal-title" style="color:var(--accent);">CẬP NHẬT SỐ DƯ</div><button style="background:none; border:none; color:#fff;" onclick="closeModal('moneyModal')"><i class="fas fa-times"></i></button></div><div class="modal-body"><input type="hidden" id="uId"><div style="margin-bottom:15px; color:#fff;">Tài khoản: <strong id="uNameDisplay"></strong></div><div class="form-group"><label>Nhập số dư mới (VNĐ) *</label><input type="number" id="uNewBalance"></div></div><div class="modal-footer"><button style="padding:10px 20px; border-radius:8px; border:none; background:#333; color:#fff;" onclick="closeModal('moneyModal')">Hủy</button><button style="padding:10px 20px; border-radius:8px; border:none; background:var(--accent); font-weight:bold;" onclick="saveUserBalance()">CẬP NHẬT</button></div></div>
+        <div class="modal-box"><div class="modal-head"><div class="modal-title" style="color:var(--accent);">CẬP NHẬT SỐ DƯ</div><button style="background:none; border:none; color:#fff;" onclick="closeModal('moneyModal')"><i class="fas fa-times"></i></button></div><div class="modal-body"><input type="hidden" id="uId"><div style="margin-bottom:15px; color:#fff;">Tài khoản: <strong id="uNameDisplay"></strong></div><div class="form-group"><label>Nhập số dư mới (VNĐ) *</label><input type="number" id="uNewBalance"></div></div><div class="modal-footer"><button style="padding:10px 20px; border-radius:8px; border:none; background:#333; color:#fff;" onclick="closeModal('moneyModal')">Hủy</button><button style="padding:10px 20px; border-radius:8px; border:none; background:var(--accent); font-weight:bold; color:#000;" onclick="saveUserBalance()">CẬP NHẬT</button></div></div>
     </div>
 
     <div class="modal-overlay" id="banModal">
-        <div class="modal-box" style="border-color:#ff9f43;"><div class="modal-head" style="background:#2d1b00;"><div class="modal-title" style="color:#ff9f43;"><i class="fas fa-lock"></i> KHÓA TÀI KHOẢN</div><button style="background:none; border:none; color:#fff;" onclick="closeModal('banModal')"><i class="fas fa-times"></i></button></div><div class="modal-body"><input type="hidden" id="banUid"><div style="margin-bottom:15px; color:#fff;">Khóa user: <strong id="banNameDisplay" style="color:#ff9f43;"></strong></div><div class="form-group"><label>Lý do khóa *</label><input type="text" id="banReason" placeholder="VD: Sử dụng Bug..."></div><div class="form-group"><label>Khóa đến ngày giờ *</label><input type="datetime-local" id="banUntil"></div><div id="banStatusDisplay" style="margin-top:10px; font-size:12px; color:#ff4757; font-weight:bold; display:none;">Tài khoản này đang bị khóa!</div></div><div class="modal-footer"><button id="btnUnbanBtn" style="padding:10px 20px; border-radius:8px; border:none; background:#222; color:var(--accent); font-weight:bold; display:none;" onclick="unbanUser()">MỞ KHÓA</button><button style="padding:10px 20px; border-radius:8px; border:none; background:#ff9f43; font-weight:bold;" onclick="executeBan()">THỰC THI KHÓA</button></div></div>
+        <div class="modal-box" style="border-color:#ff9f43;"><div class="modal-head" style="background:#2d1b00;"><div class="modal-title" style="color:#ff9f43;"><i class="fas fa-lock"></i> KHÓA TÀI KHOẢN</div><button style="background:none; border:none; color:#fff;" onclick="closeModal('banModal')"><i class="fas fa-times"></i></button></div><div class="modal-body"><input type="hidden" id="banUid"><div style="margin-bottom:15px; color:#fff;">Khóa user: <strong id="banNameDisplay" style="color:#ff9f43;"></strong></div><div class="form-group"><label>Lý do khóa *</label><input type="text" id="banReason" placeholder="VD: Sử dụng Bug..."></div><div class="form-group"><label>Khóa đến ngày giờ *</label><input type="datetime-local" id="banUntil"></div><div id="banStatusDisplay" style="margin-top:10px; font-size:12px; color:#ff4757; font-weight:bold; display:none;">Tài khoản này đang bị khóa!</div></div><div class="modal-footer"><button id="btnUnbanBtn" style="padding:10px 20px; border-radius:8px; border:none; background:#222; color:var(--accent); font-weight:bold; display:none;" onclick="unbanUser()">MỞ KHÓA</button><button style="padding:10px 20px; border-radius:8px; border:none; background:#ff9f43; font-weight:bold; color:#000;" onclick="executeBan()">THỰC THI KHÓA</button></div></div>
     </div>
 
     <div class="toast" id="toastMsg">Thành công!</div>
@@ -189,6 +209,8 @@
         const db = firebase.database();
 
         let currentProducts = {};
+        
+        // --- CHỨC NĂNG SẢN PHẨM ---
         db.ref('products').on('value', (s) => {
             let tbody = document.getElementById('productTableBody'); tbody.innerHTML = ''; let pCount = 0;
             if(s.exists()) {
@@ -196,7 +218,7 @@
                 for(let id in currentProducts) {
                     let p = currentProducts[id]; pCount++;
                     let priceText = p.price > 0 ? formatMoney(p.price) : '<span style="color:var(--primary);">MIỄN PHÍ</span>';
-                    tbody.innerHTML += `<tr><td><strong style="color:var(--primary)">#${id.substring(0,4)}</strong></td><td style="font-weight:bold;">${p.name}</td><td style="color:var(--accent); font-weight:bold; font-family:monospace;">${priceText}</td><td><button class="action-btn edit" onclick="openProductModal('${id}')"><i class="fas fa-edit"></i></button><button class="action-btn delete" onclick="deleteProduct('${id}')"><i class="fas fa-trash"></i></button></td></tr>`;
+                    tbody.innerHTML += `<tr><td><strong style="color:var(--primary)">#${id.substring(0,4)}</strong></td><td style="font-weight:bold;">${p.name}</td><td style="color:var(--accent); font-weight:bold; font-family:monospace;">${priceText}</td><td><button class="action-btn edit" onclick="openProductModal('${id}')"><i class="fas fa-edit"></i></button><button class="action-btn delete" onclick="deleteProduct('${id}')" style="background:#ff4757; border-color:#ff4757;"><i class="fas fa-trash"></i></button></td></tr>`;
                 }
             } else { tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Trống</td></tr>`; }
             document.getElementById('statProducts').innerText = pCount;
@@ -204,98 +226,124 @@
 
         function openProductModal(id = null) {
             document.getElementById('pId').value = ''; document.getElementById('pName').value = ''; document.getElementById('pPrice').value = ''; document.getElementById('pDesc').value = ''; document.getElementById('pDownload').value = '';
-            if(id) { let p = currentProducts[id]; document.getElementById('pId').value = id; document.getElementById('pName').value = p.name; document.getElementById('pPrice').value = p.price; document.getElementById('pCategory').value = p.category; document.getElementById('pDesc').value = p.desc || ''; document.getElementById('pImg').value = p.img || 'fas fa-box'; document.getElementById('pDownload').value = p.download_link || ''; }
+            if(id) { 
+                let p = currentProducts[id]; 
+                document.getElementById('pId').value = id; 
+                document.getElementById('pName').value = p.name; 
+                document.getElementById('pPrice').value = p.price; 
+                document.getElementById('pCategory').value = p.category; 
+                document.getElementById('pDesc').value = p.desc || ''; 
+                document.getElementById('pImg').value = p.img || 'fas fa-box'; 
+                document.getElementById('pDownload').value = p.download_link || ''; 
+            }
             document.getElementById('productModal').style.display = 'flex';
         }
 
         function saveProduct() {
-            let id = document.getElementById('pId').value; let priceVal = document.getElementById('pPrice').value; let rawLink = document.getElementById('pDownload').value.trim();
+            let id = document.getElementById('pId').value; 
+            let priceVal = document.getElementById('pPrice').value; 
+            let rawLink = document.getElementById('pDownload').value.trim();
+            
             if(rawLink !== "" && !rawLink.startsWith('http://') && !rawLink.startsWith('https://')) { rawLink = 'https://' + rawLink; }
-            let data = { name: document.getElementById('pName').value, price: priceVal !== "" ? Number(priceVal) : "", category: document.getElementById('pCategory').value, desc: document.getElementById('pDesc').value, img: document.getElementById('pImg').value, download_link: rawLink };
+            
+            let data = { 
+                name: document.getElementById('pName').value, 
+                price: priceVal !== "" ? Number(priceVal) : "", 
+                category: document.getElementById('pCategory').value, 
+                desc: document.getElementById('pDesc').value, 
+                img: document.getElementById('pImg').value, 
+                download_link: rawLink 
+            };
+            
             if(!data.name || data.price === "" || data.price === null || !data.download_link) return alert("Điền đủ Tên, Giá (nhập 0 nếu Free) và Link tải!");
-            if(id) db.ref('products/' + id).update(data).then(() => { showAdminToast("Cập nhật SP xong"); closeModal('productModal'); });
-            else db.ref('products').push().set(data).then(() => { showAdminToast("Đã thêm SP"); closeModal('productModal'); });
-        }
-        function deleteProduct(id) { if(confirm("Xóa sản phẩm này?")) db.ref('products/'+id).remove(); }
-
-        let currentUsers = {};
-        db.ref('users').on('value', (s) => {
-            let tbody = document.getElementById('userTableBody'); tbody.innerHTML = ''; let uCount = 0, totalM = 0;
-            if(s.exists()) {
-                currentUsers = s.val();
-                for(let id in currentUsers) {
-                    let u = currentUsers[id]; uCount++; totalM += (u.balance || 0);
-                    let isBanned = u.banned && new Date(u.ban_until).getTime() > new Date().getTime();
-                    let statusHtml = isBanned ? `<span style="color:#ff4757; font-size:11px; font-weight:bold;"><i class="fas fa-lock"></i> Đã Khóa</span>` : `<span style="color:var(--accent); font-size:11px;"><i class="fas fa-check"></i> An Toàn</span>`;
-                    tbody.innerHTML += `<tr><td style="font-weight:bold;">${id.replace(/_/g, '.')}</td><td style="color:var(--accent); font-family:monospace; font-weight:bold;">${formatMoney(u.balance || 0)}</td><td>${statusHtml}</td><td><button class="action-btn money" onclick="openMoneyModal('${id}')"><i class="fas fa-coins"></i></button><button class="action-btn ban ${isBanned ? 'is-banned' : ''}" onclick="openBanModal('${id}')"><i class="fas fa-lock"></i></button><button class="action-btn delete" onclick="deleteUser('${id}')"><i class="fas fa-trash"></i></button></td></tr>`;
-                }
+            
+            if(id) {
+                db.ref('products/' + id).update(data).then(() => { showAdminToast("Cập nhật SP xong"); closeModal('productModal'); });
+            } else {
+                db.ref('products').push().set(data).then(() => { showAdminToast("Đã thêm SP mới"); closeModal('productModal'); });
             }
-            document.getElementById('statUsers').innerText = uCount; document.getElementById('statRevenue').innerText = formatMoney(totalM);
-        });
+        }
 
-        function openMoneyModal(id) { document.getElementById('uId').value = id; document.getElementById('uNameDisplay').innerText = id.replace(/_/g, '.'); document.getElementById('uNewBalance').value = currentUsers[id].balance || 0; document.getElementById('moneyModal').style.display = 'flex'; }
-        function saveUserBalance() { let id = document.getElementById('uId').value, bal = Number(document.getElementById('uNewBalance').value); db.ref('users/'+id).update({balance: bal}).then(() => { showAdminToast("Cập nhật tiền xong"); db.ref('transactions').push().set({ user: id, type: 'admin_update', amount: bal, detail: 'Admin cập nhật số dư', time: new Date().toISOString() }); closeModal('moneyModal'); }); }
-        function deleteUser(id) { if(confirm("XÓA TÀI KHOẢN?")) db.ref('users/'+id).remove(); }
-        function openBanModal(id) { /* Giữ nguyên hàm ban cũ */ document.getElementById('banUid').value = id; document.getElementById('banNameDisplay').innerText = id.replace(/_/g, '.'); let u = currentUsers[id]; let now = new Date(); now.setHours(now.getHours() + 24); now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); document.getElementById('banUntil').value = now.toISOString().slice(0,16); document.getElementById('banReason').value = ""; if(u.banned && new Date(u.ban_until).getTime() > new Date().getTime()) { document.getElementById('banStatusDisplay').style.display = 'block'; document.getElementById('btnUnbanBtn').style.display = 'block'; document.getElementById('banReason').value = u.ban_reason; let banD = new Date(u.ban_until); banD.setMinutes(banD.getMinutes() - banD.getTimezoneOffset()); document.getElementById('banUntil').value = banD.toISOString().slice(0,16); } else { document.getElementById('banStatusDisplay').style.display = 'none'; document.getElementById('btnUnbanBtn').style.display = 'none'; } document.getElementById('banModal').style.display = 'flex'; }
-        function executeBan() { let id = document.getElementById('banUid').value, reason = document.getElementById('banReason').value || "Vi phạm quy định", until = document.getElementById('banUntil').value; if(!until) return alert("Chọn ngày mở khóa!"); db.ref('users/'+id).update({ banned: true, ban_reason: reason, ban_until: new Date(until).toISOString() }).then(() => { showAdminToast("Đã Khóa User!", true); closeModal('banModal'); }); }
-        function unbanUser() { let id = document.getElementById('banUid').value; db.ref('users/'+id).update({ banned: false, ban_reason: null, ban_until: null }).then(() => { showAdminToast("Đã ân xá."); closeModal('banModal'); }); }
+        function deleteProduct(id) {
+            if(confirm("Bạn có chắc muốn xóa sản phẩm này?")) {
+                db.ref('products/' + id).remove().then(() => showAdminToast("Đã xóa sản phẩm"));
+            }
+        }
 
-        // 4. BẢNG THEO DÕI KEY & LINK ĐÍCH (MỚI NÂNG CẤP)
-        db.ref('transactions').orderByChild('time').on('value', (s) => {
-            let tbody = document.getElementById('historyTableBody'); tbody.innerHTML = '';
+        // --- CHỨC NĂNG NGƯỜI DÙNG ---
+        db.ref('users').on('value', (s) => {
+            let tbody = document.getElementById('userTableBody'); tbody.innerHTML = ''; let uCount = 0;
             if(s.exists()) {
-                let transList = []; s.forEach(child => { transList.push(child.val()); }); transList.reverse();
-                transList.forEach(t => {
-                    let time = new Date(t.time).toLocaleString('vi-VN');
-                    let uName = t.user.replace(/_/g, '.');
-                    
-                    // Nếu là Mua Hàng / Nhận Miễn Phí (có KEY)
-                    if(t.type === 'purchase') {
-                        let keyText = t.key_granted ? `<span style="color:#f1c40f; font-family:monospace; font-weight:bold; background:#222; padding:3px 8px; border-radius:5px;">${t.key_granted}</span>` : '-';
-                        let linkHtml = t.download_link && t.download_link !== '#' ? `<a href="${t.download_link}" target="_blank" style="color:#1e90ff; font-size:12px;"><i class="fas fa-link"></i> Xem Link Đích</a>` : `<span style="color:#ff4757; font-size:12px;">Chưa gắn link</span>`;
-                        let priceTag = t.amount > 0 ? `<span style="color:#ff4757;">(${formatMoney(t.amount)})</span>` : `<span style="color:var(--primary);">(Miễn Phí)</span>`;
-
-                        tbody.innerHTML += `<tr>
-                            <td style="font-size:12px; color:#888;">${time}</td>
-                            <td style="font-weight:bold;">${uName}</td>
-                            <td style="font-size:13px;">${t.detail.replace('Mua: ', '').replace('Nhận Miễn Phí: ', '')} <br>${priceTag}</td>
-                            <td>${keyText}</td>
-                            <td>${linkHtml}</td>
-                        </tr>`;
-                    } else {
-                        // Giao dịch nạp tiền thông thường
-                        tbody.innerHTML += `<tr>
-                            <td style="font-size:12px; color:#888;">${time}</td>
-                            <td style="font-weight:bold;">${uName}</td>
-                            <td style="font-size:13px; color:#aaa;">Nạp Tiền / Cập Nhật</td>
-                            <td style="color:var(--accent); font-weight:bold; font-family:monospace;">+${formatMoney(t.amount)}</td>
-                            <td>-</td>
-                        </tr>`;
-                    }
-                });
-            } else { tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Chưa có dữ liệu KEY nào.</td></tr>`; }
+                let users = s.val();
+                for(let id in users) {
+                    let u = users[id]; uCount++;
+                    let status = u.banned ? '<span style="color:#ff4757; font-weight:bold;"><i class="fas fa-lock"></i> KHÓA</span>' : '<span style="color:#00ff88;">Hoạt động</span>';
+                    tbody.innerHTML += `<tr><td><strong style="color:#00b8ff;">${id}</strong></td><td style="font-weight:bold; font-family:monospace;">${formatMoney(u.balance || 0)}</td><td>${status}</td><td><button class="action-btn money" onclick="openMoneyModal('${id}', ${u.balance || 0})"><i class="fas fa-coins"></i></button><button class="action-btn ban" onclick="openBanModal('${id}', ${u.banned || false}, '${u.banReason || ''}')"><i class="fas fa-gavel"></i></button></td></tr>`;
+                }
+            } else { tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Chưa có dữ liệu người dùng</td></tr>`; }
+            document.getElementById('statUsers').innerText = uCount;
         });
-    <script>
-        // Tạo giao diện khung sửa code
-        const editorHTML = `
-        <div class="card" style="border-color: #ff4757; margin-top: 30px;">
-            <h3 class="card-title" style="color: #ff4757;"><i class="fas fa-code"></i> TRÌNH SOẠN THẢO CODE GỐC</h3>
-            <p style="color:#888; font-size:13px; margin-bottom:15px;">Dán code HTML mới vào đây để thay đổi hoàn toàn giao diện.</p>
-            <div class="form-group">
-                <select id="pageSelect" onchange="loadRawCode()" style="margin-bottom: 15px; width: 100%; padding: 12px; background: #000; color: #fff; border: 1px solid #2a2a35; border-radius: 8px; outline: none;">
-                    <option value="getkey_html">Trang getkey.html</option>
-                    <option value="key_html">Trang key.html</option>
-                </select>
-            </div>
-            <textarea id="rawCodeArea" rows="15" placeholder="Dán code HTML mới của bạn vào đây..." style="width: 100%; background: #000; color: #00ff88; border: 1px solid #2a2a35; padding: 15px; border-radius: 8px; font-family: monospace; outline: none; margin-bottom: 15px;"></textarea>
-            <button onclick="saveRawCode()" style="background: #ff4757; color: white; width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">ÉP LƯU CODE MỚI LÊN MÁY CHỦ</button>
-        </div>
-        `;
-        
-        // Tự động chèn khung này vào bảng điều khiển Admin (bảo mật, không đăng nhập sẽ không thấy)
-        document.getElementById('adminPanel').insertAdjacentHTML('beforeend', editorHTML);
 
-        // Hàm kéo code từ Firebase
+        function openMoneyModal(id, balance) {
+            document.getElementById('uId').value = id;
+            document.getElementById('uNameDisplay').innerText = id;
+            document.getElementById('uNewBalance').value = balance;
+            document.getElementById('moneyModal').style.display = 'flex';
+        }
+
+        function saveUserBalance() {
+            let id = document.getElementById('uId').value;
+            let newBal = Number(document.getElementById('uNewBalance').value);
+            db.ref('users/' + id + '/balance').set(newBal).then(() => {
+                showAdminToast("Đã cập nhật số dư!"); closeModal('moneyModal');
+            });
+        }
+
+        function openBanModal(id, isBanned, reason) {
+            document.getElementById('banUid').value = id;
+            document.getElementById('banNameDisplay').innerText = id;
+            document.getElementById('banReason').value = isBanned ? reason : "";
+            document.getElementById('banStatusDisplay').style.display = isBanned ? 'block' : 'none';
+            document.getElementById('btnUnbanBtn').style.display = isBanned ? 'block' : 'none';
+            document.getElementById('banModal').style.display = 'flex';
+        }
+
+        function executeBan() {
+            let id = document.getElementById('banUid').value;
+            let reason = document.getElementById('banReason').value;
+            if(!reason) return alert("Vui lòng nhập lý do khóa!");
+            db.ref('users/' + id).update({ banned: true, banReason: reason }).then(() => {
+                showAdminToast("Đã khóa tài khoản!", true); closeModal('banModal');
+            });
+        }
+
+        function unbanUser() {
+            let id = document.getElementById('banUid').value;
+            db.ref('users/' + id).update({ banned: false, banReason: null }).then(() => {
+                showAdminToast("Đã mở khóa tài khoản!"); closeModal('banModal');
+            });
+        }
+
+        // --- CHỨC NĂNG LỊCH SỬ GIAO DỊCH & KEY ---
+        db.ref('transactions').on('value', (s) => {
+            let tbody = document.getElementById('historyTableBody'); tbody.innerHTML = ''; let totalRev = 0;
+            if(s.exists()) {
+                let trans = s.val();
+                let keys = Object.keys(trans).reverse(); // Mới nhất lên đầu
+                keys.forEach(id => {
+                    let t = trans[id];
+                    totalRev += (t.amount || 0);
+                    let time = new Date(t.time).toLocaleString('vi-VN');
+                    let keyDisp = t.key_granted ? `<span style="color:#f1c40f; font-weight:bold; font-family:monospace; background:#333; padding:2px 5px; border-radius:4px;">${t.key_granted}</span>` : 'N/A';
+                    let linkDisp = t.download_link ? `<a href="${t.download_link}" target="_blank" style="color:#1e90ff;">Xem Link</a>` : 'N/A';
+                    
+                    tbody.innerHTML += `<tr><td style="font-size:12px; color:#aaa;">${time}</td><td><strong style="color:#00b8ff;">${t.user}</strong></td><td>${t.detail} <br><span style="color:#ff4757; font-size:12px;">(${formatMoney(t.amount || 0)})</span></td><td>${keyDisp}</td><td>${linkDisp}</td></tr>`;
+                });
+            } else { tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Chưa có giao dịch nào</td></tr>`; }
+            document.getElementById('statRevenue').innerText = formatMoney(totalRev);
+        });
+
+        // --- CHỨC NĂNG TRÌNH SỬA CODE GỐC ---
         function loadRawCode() {
             let page = document.getElementById('pageSelect').value;
             db.ref('raw_code/' + page).once('value', snap => {
@@ -303,23 +351,19 @@
             });
         }
 
-        // Hàm lưu code lên Firebase
         function saveRawCode() {
             let page = document.getElementById('pageSelect').value;
             let code = document.getElementById('rawCodeArea').value;
-            if(confirm("CẢNH BÁO: Code này sẽ ghi đè lên trang " + page + ". Xác nhận lưu?")) {
+            if(confirm("CẢNH BÁO TỐI CAO: Mã này sẽ ghi đè lên toàn bộ giao diện của trang " + page + ". Tiếp tục?")) {
                 db.ref('raw_code/' + page).set(code).then(() => {
-                    alert("Đã lưu thành công! Khách vào web sẽ thấy giao diện mới.");
-                });
+                    alert("Cập nhật mã nguồn thành công! Khách vào web sẽ thấy giao diện mới.");
+                }).catch(err => alert("Lỗi hệ thống: " + err.message));
             }
         }
         
-        // Tự động tải code khi Admin đăng nhập
-        setTimeout(loadRawCode, 1500);
-    </script>
-    ```
+        // Load code tự động khi trang vừa khởi tạo xong
+        setTimeout(loadRawCode, 1000);
 
-Bạn dán đoạn này vào xong, tải file lên host, rồi đăng nhập lại Admin xem cái bảng Edit Code màu đỏ nó đã hiện ra ngầu đét chưa nhé!
-    
-   </body>
-     </html>
+    </script>
+</body>
+</html>
