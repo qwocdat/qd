@@ -3,22 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KẾT QUẢ XÁC MINH | QUOCDAT SEC</title>
+    <title>NHẬN KEY FREE | QUOCDAT SEC</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background: #0a0a0f; color: #fff; font-family: 'Inter', sans-serif; text-align: center; padding-top: 100px; }
-        .card { background: #15151e; max-width: 500px; margin: 0 auto; padding: 40px; border-radius: 20px; border: 1px solid #333; }
-        .key { display: block; font-family: 'Orbitron'; font-size: 28px; color: #f1c40f; margin: 20px 0; letter-spacing: 2px; }
-        .btn { background: #00ff88; color: #000; padding: 15px 30px; border-radius: 10px; text-decoration: none; font-weight: bold; display: inline-block; }
+        :root { --primary: #00ff88; --bg: #0a0a0f; }
+        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; text-align: center; padding: 50px 20px; }
+        .card { background: #15151e; max-width: 500px; margin: 0 auto; padding: 40px; border-radius: 20px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        select { width: 100%; background: #000; color: #fff; border: 1px solid #444; padding: 15px; border-radius: 10px; margin: 20px 0; font-size: 16px; outline: none; }
+        .key-display { display: none; background: rgba(241,196,15,0.1); border: 2px dashed #f1c40f; padding: 20px; border-radius: 12px; margin: 20px 0; }
+        .key-text { color: #f1c40f; font-family: 'Orbitron'; font-size: 24px; font-weight: bold; }
+        .btn { background: var(--primary); color: #000; padding: 15px 30px; border-radius: 10px; text-decoration: none; font-weight: bold; display: block; width: 100%; cursor: pointer; border: none; font-size: 16px; }
+        .timer { font-family: 'Orbitron'; color: #ff4757; font-size: 20px; margin-top: 15px; display: none; }
     </style>
 </head>
 <body>
-    <div class="card" id="box">
-        <i class="fas fa-spinner fa-spin" style="font-size: 40px; color: #00ff88;"></i>
-        <p>Đang kiểm tra bằng chứng xác minh...</p>
+    <div class="card">
+        <h2 style="font-family: 'Orbitron'; color: var(--primary);">NHẬN KEY MIỄN PHÍ</h2>
+        
+        <div id="setupSection">
+            <p style="color: #888; margin-top: 10px;">Chọn sản phẩm bạn muốn nhận Key dùng thử:</p>
+            <select id="productSelect">
+                <option value="">-- Đang tải sản phẩm --</option>
+            </select>
+            <button class="btn" id="createBtn" onclick="generateKey()">KHỞI TẠO KEY & TÍNH GIỜ</button>
+        </div>
+
+        <div id="keySection">
+            <div class="key-display" id="keyDisplay">
+                <span class="key-text" id="keyCode">QD-XXXXXX</span>
+            </div>
+            <div class="timer" id="timerDisplay">HẠN DÙNG: 20:00</div>
+            <a href="download.html" class="btn" style="margin-top: 20px;">ĐẾN CỔNG TRÍCH XUẤT</a>
+        </div>
     </div>
 
     <script>
@@ -26,40 +45,84 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            // ƯU TIÊN 1: Lấy từ URL. ƯU TIÊN 2: Lấy từ bộ nhớ trình duyệt
-            let token = urlParams.get('verify') || localStorage.getItem('qd_secure_token');
+        const urlParams = new URLSearchParams(window.location.search);
+        let token = urlParams.get('verify') || localStorage.getItem('qd_secure_token');
+        let currentUser = localStorage.getItem('vip_username');
 
-            if(!token) {
-                renderError("Không tìm thấy bằng chứng xác minh hợp lệ!");
-                return;
-            }
-
-            db.ref('free_tokens/' + token).once('value', (s) => {
-                if(s.exists()) {
-                    let d = s.val();
-                    document.getElementById('box').innerHTML = `
-                        <i class="fas fa-check-circle" style="font-size: 50px; color: #00ff88;"></i>
-                        <h2 style="margin-top:20px;">XÁC MINH THÀNH CÔNG</h2>
-                        <span class="key">${d.key}</span>
-                        <p style="color:#888;">Copy Key này dán vào Cổng Trích Xuất Link.</p>
-                        <a href="download.html" class="btn">ĐẾN CỔNG TRÍCH XUẤT</a>
-                    `;
-                    localStorage.removeItem('qd_secure_token'); // Xóa sau khi dùng xong
-                } else {
-                    renderError("Mã xác minh đã hết hạn hoặc không tồn tại!");
+        // 1. Tải danh sách sản phẩm Free
+        db.ref('products').once('value', (s) => {
+            const select = document.getElementById('productSelect');
+            select.innerHTML = '<option value="">-- Chọn sản phẩm --</option>';
+            s.forEach(child => {
+                let p = child.val();
+                if(p.price === 0) {
+                    select.innerHTML += `<option value="${child.key}">${p.name}</option>`;
                 }
             });
+        });
+
+        // 2. Hàm tạo Key và tính giờ
+        async function generateKey() {
+            const productId = document.getElementById('productSelect').value;
+            if(!productId) return alert("Vui lòng chọn sản phẩm!");
+            if(!token) return alert("Lỗi xác minh! Vui lòng quay lại getkey.html");
+
+            const btn = document.getElementById('createBtn');
+            btn.innerText = "ĐANG KHỞI TẠO..."; btn.disabled = true;
+
+            const freeKey = "QDFREE-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+            const now = Date.now();
+            const expiry = now + (20 * 60 * 1000); // 20 phút
+
+            // Cập nhật Firebase: Khi hết hạn, key sẽ có status 'expired'
+            await db.ref('free_tokens/' + token).update({
+                key: freeKey,
+                status: 'active',
+                activated_at: now,
+                expiry_at: expiry,
+                product_id: productId
+            });
+
+            // Ghi vào lịch sử giao dịch để link "sống" trong 20 phút
+            const pSnap = await db.ref('products/' + productId).once('value');
+            const pData = pSnap.val();
+            
+            await db.ref('transactions').push().set({
+                user: currentUser.replace(/[.#$\[\]]/g, '_'),
+                type: 'purchase',
+                amount: 0,
+                detail: 'Dùng thử: ' + pData.name,
+                key_granted: freeKey,
+                download_link: pData.download_link,
+                expiry_at: expiry, // Quan trọng: download.html sẽ check cái này
+                time: new Date().toISOString()
+            });
+
+            showKeyUI(freeKey, expiry);
         }
 
-        function renderError(msg) {
-            document.getElementById('box').innerHTML = `
-                <i class="fas fa-exclamation-triangle" style="font-size: 50px; color: #ff4757;"></i>
-                <h2 style="color:#ff4757; margin-top:20px;">XÁC THỰC THẤT BẠI</h2>
-                <p style="color:#888;">${msg}</p>
-                <a href="getkey.html" class="btn" style="background:#333; color:#fff; margin-top:20px;">THỬ LẠI</a>
-            `;
+        function showKeyUI(key, expiry) {
+            document.getElementById('setupSection').style.display = 'none';
+            document.getElementById('keyDisplay').style.display = 'block';
+            document.getElementById('timerDisplay').style.display = 'block';
+            document.getElementById('keyCode').innerText = key;
+            startCountdown(expiry);
+        }
+
+        function startCountdown(expiry) {
+            const display = document.getElementById('timerDisplay');
+            const interval = setInterval(() => {
+                const now = Date.now();
+                const diff = expiry - now;
+                if (diff <= 0) {
+                    clearInterval(interval);
+                    display.innerText = "KEY ĐÃ HẾT HẠN - LINK ĐÃ CHẾT";
+                    return;
+                }
+                const m = Math.floor(diff / 60000);
+                const s = Math.floor((diff % 60000) / 1000);
+                display.innerText = `HẠN DÙNG: ${m}:${s < 10 ? '0' : ''}${s}`;
+            }, 1000);
         }
     </script>
 </body>
