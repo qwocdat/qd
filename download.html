@@ -3,21 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CỔNG TRÍCH XUẤT LINK | QUOCDAT SEC</title>
+    <title>CỔNG TRÍCH XUẤT BẢO MẬT | QUOCDAT SEC</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
     <script>
-        const fbConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
+        const fbConfig = { 
+            apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", 
+            databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", 
+            projectId: "quocdat-b80c2" 
+        };
         if (!firebase.apps.length) firebase.initializeApp(fbConfig);
-        firebase.database().ref('raw_code/download_html').once('value', snap => {
+        const db = firebase.database();
+
+        // Ăng-ten lắng nghe lệnh sửa code từ Admin
+        db.ref('raw_code/download_html').once('value', snap => {
             let customCode = snap.val();
-            if (customCode && customCode.trim() !== "") { document.open(); document.write(customCode); document.close(); }
+            if (customCode && customCode.trim() !== "") { 
+                document.open(); document.write(customCode); document.close(); 
+            }
         });
     </script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -26,142 +35,116 @@
         body { background: var(--bg); color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
         
         .card { background: var(--card-bg); border: 1px solid var(--border); width: 100%; max-width: 500px; padding: 40px 30px; border-radius: 24px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        .title { font-family: 'Orbitron', sans-serif; color: var(--accent); font-size: 24px; margin-bottom: 10px; }
-        .subtitle { color: #888; font-size: 14px; margin-bottom: 25px; line-height: 1.5; }
+        .title { font-family: 'Orbitron', sans-serif; color: var(--accent); font-size: 22px; margin-bottom: 10px; }
+        .subtitle { color: #666; font-size: 13px; margin-bottom: 25px; }
         
         .input-group { position: relative; margin-bottom: 20px; }
-        .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #888; font-size: 18px; }
-        input[type="text"] { width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 18px 15px 18px 45px; border-radius: 12px; font-size: 16px; font-family: 'Orbitron', monospace; outline: none; transition: 0.3s; letter-spacing: 1px; text-transform: uppercase; }
-        input[type="text"]:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(0,255,136,0.2); }
+        input[type="text"] { width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 18px; border-radius: 12px; font-size: 16px; font-family: 'Orbitron'; outline: none; text-align: center; text-transform: uppercase; }
+        input[type="text"]:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(0,255,136,0.1); }
         
-        .btn { background: var(--primary); color: #000; padding: 18px; width: 100%; border-radius: 12px; border: none; font-weight: 900; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; font-size: 16px; box-shadow: 0 0 20px rgba(0,255,136,0.2); }
-        .btn:disabled { background: #222; color: #555; cursor: not-allowed; box-shadow: none; }
-        .btn:hover:not(:disabled) { filter: brightness(1.2); transform: translateY(-2px); }
+        .btn { background: var(--primary); color: #000; padding: 18px; width: 100%; border-radius: 12px; border: none; font-weight: 900; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; }
+        .btn:disabled { background: #222; color: #555; cursor: not-allowed; }
         
-        #errorMsg { color: var(--error); font-size: 14px; font-weight: bold; margin-top: 15px; display: none; background: rgba(255,71,87,0.1); padding: 10px; border-radius: 8px; border: 1px dashed var(--error); }
+        #errorMsg { color: var(--error); font-size: 13px; font-weight: bold; margin-top: 15px; display: none; padding: 10px; border-radius: 8px; background: rgba(255,71,87,0.05); border: 1px solid rgba(255,71,87,0.2); }
         
-        /* KHU VỰC KẾT QUẢ THÀNH CÔNG */
-        #resultBox { display: none; margin-top: 25px; border-top: 1px solid var(--border); padding-top: 25px; }
-        .success-icon { font-size: 50px; color: var(--primary); margin-bottom: 15px; text-shadow: 0 0 20px rgba(0,255,136,0.5); }
-        .product-name { font-family: 'Orbitron'; font-size: 18px; color: #fff; margin-bottom: 5px; }
-        .expiry-time { font-size: 12px; color: #f1c40f; margin-bottom: 20px; font-weight: bold; }
-        .btn-download { display: inline-block; background: #1e90ff; color: #fff; text-decoration: none; padding: 15px 30px; border-radius: 8px; font-weight: bold; font-family: 'Orbitron'; transition: 0.3s; box-shadow: 0 0 15px rgba(30,144,255,0.3); width: 100%; }
-        .btn-download:hover { background: #47a0ff; transform: scale(1.02); }
+        #resultBox { display: none; margin-top: 25px; border-top: 1px solid var(--border); padding-top: 25px; animation: slideUp 0.5s; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .success-icon { font-size: 40px; color: var(--primary); margin-bottom: 15px; }
+        .product-name { font-family: 'Orbitron'; font-size: 18px; color: #fff; margin-bottom: 15px; }
+        .btn-download { display: block; background: #1e90ff; color: #fff; text-decoration: none; padding: 16px; border-radius: 10px; font-weight: bold; font-family: 'Orbitron'; transition: 0.3s; }
+        .warning-text { font-size: 11px; color: #ff9f43; margin-top: 15px; font-weight: bold; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
-    <div class="card" id="mainCard">
-        <h2 class="title" id="pageTitle"><i class="fas fa-hdd"></i> CỔNG TRÍCH XUẤT</h2>
-        <p class="subtitle">Vui lòng nhập mã Key Bản Quyền hoặc Key Dùng Thử của bạn để lấy Link tải xuống hệ thống.</p>
+    <div class="card">
+        <h2 class="title"><i class="fas fa-shield-alt"></i> CỔNG TRÍCH XUẤT</h2>
+        <p class="subtitle">Nhập mã Key để nhận link tải. Mỗi Key chỉ sử dụng được 1 lần.</p>
         
-        <div class="input-group">
-            <i class="fas fa-key"></i>
-            <input type="text" id="keyInput" placeholder="Nhập mã KEY vào đây..." autocomplete="off">
+        <div id="inputArea">
+            <div class="input-group">
+                <input type="text" id="keyInput" placeholder="DÁN MÃ KEY TẠI ĐÂY..." autocomplete="off">
+            </div>
+            <button class="btn" id="btnSubmit" onclick="verifyAndDestroy()"><i class="fas fa-unlock-alt"></i> KIỂM TRA & LẤY LINK</button>
+            <div id="errorMsg"></div>
         </div>
-        
-        <button class="btn" id="btnSubmit" onclick="verifyKey()"><i class="fas fa-unlock-alt"></i> XÁC THỰC VÀ LẤY LINK</button>
-        
-        <div id="errorMsg"></div>
 
         <div id="resultBox">
             <i class="fas fa-check-circle success-icon"></i>
-            <p style="color:#888; font-size:12px; margin-bottom:5px;">Trích xuất thành công gói:</p>
-            <div class="product-name" id="pName">TÊN SẢN PHẨM</div>
-            <div class="expiry-time" id="pExpiry"><i class="fas fa-clock"></i> Hết hạn: Đang tính...</div>
-            <a href="#" target="_blank" class="btn-download" id="pLink"><i class="fas fa-cloud-download-alt"></i> TẢI XUỐNG NGAY</a>
+            <p style="color:#888; font-size:12px; margin-bottom:5px;">PHẦN MỀM CỦA BẠN:</p>
+            <div class="product-name" id="pName">---</div>
+            <a href="#" target="_blank" class="btn-download" id="pLink"><i class="fas fa-download"></i> TẢI XUỐNG NGAY</a>
+            <p class="warning-text"><i class="fas fa-exclamation-triangle"></i> CẢNH BÁO: KEY NÀY ĐÃ BỊ HỦY. ĐỪNG ĐÓNG TRANG NẾU CHƯA TẢI XONG!</p>
         </div>
     </div>
 
     <script>
-        const db = firebase.database();
-
-        // Tự động load tên Web từ Admin nếu có
-        db.ref('settings').once('value', snap => {
-            if(snap.val() && snap.val().site_name) {
-                document.title = "TRÍCH XUẤT | " + snap.val().site_name;
-            }
+        // Đồng bộ màu từ Admin
+        db.ref('settings').on('value', snap => {
+            let s = snap.val() || {};
+            if(s.theme_primary) document.documentElement.style.setProperty('--primary', s.theme_primary);
+            if(s.theme_bg) document.documentElement.style.setProperty('--bg', s.theme_bg);
         });
 
-        // Hỗ trợ ấn Enter để check Key
-        document.getElementById("keyInput").addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                verifyKey();
-            }
-        });
-
-        async function verifyKey() {
+        async function verifyAndDestroy() {
             let key = document.getElementById('keyInput').value.trim().toUpperCase();
             let btn = document.getElementById('btnSubmit');
             let errBox = document.getElementById('errorMsg');
             let resBox = document.getElementById('resultBox');
 
-            // Reset UI
-            errBox.style.display = 'none';
-            resBox.style.display = 'none';
-            
-            if(!key) {
-                showError("⚠️ Vui lòng nhập mã Key trước khi xác thực!");
-                return;
-            }
+            if(!key) return;
 
-            // Hiệu ứng loading
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ĐANG KIỂM TRA MÁY CHỦ...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ĐANG KIỂM TRA...';
+            errBox.style.display = 'none';
 
             try {
-                // Quét toàn bộ bảng Giao dịch để tìm Key trùng khớp
-                let snap = await db.ref('transactions').orderByChild('key_granted').equalTo(key).once('value');
+                // Tìm Key trong bảng Transactions
+                const snap = await db.ref('transactions').orderByChild('key_granted').equalTo(key).once('value');
                 
                 if(!snap.exists()) {
-                    showError("❌ Mã Key không tồn tại trên hệ thống hoặc đã bị hủy!");
-                    resetBtn();
+                    showError("Mã Key không tồn tại hoặc không hợp lệ!");
                     return;
                 }
 
+                let txKey = null;
                 let txData = null;
-                // Do Firebase trả về Object dạng { id_giao_dich: { data } }
-                snap.forEach(child => { txData = child.val(); });
+                snap.forEach(child => { txKey = child.key; txData = child.val(); });
 
-                // Kiểm tra xem Key đã hết hạn chưa
-                let now = Date.now();
-                if(txData.expiry_at < now) {
-                    showError("⏳ Mã Key này đã HẾT HẠN sử dụng! Vui lòng tạo Key mới.");
-                    resetBtn();
+                // 1. KIỂM TRA HẠN SỬ DỤNG
+                if(txData.expiry_at < Date.now()) {
+                    showError("Mã Key này đã hết hạn sử dụng (quá 20 phút)!");
                     return;
                 }
 
-                // Nếu mọi thứ OK -> Hiển thị kết quả
-                let detailStr = txData.detail || "Công cụ ẩn";
-                let nameOnly = detailStr.replace("Dùng thử: ", "").replace("Cấp KEY VIP: ", "");
-                
-                document.getElementById('pName').innerText = nameOnly;
-                document.getElementById('pLink').href = txData.download_link;
-                
-                // Format thời gian hiển thị
-                let expDate = new Date(txData.expiry_at);
-                document.getElementById('pExpiry').innerHTML = `<i class="fas fa-clock"></i> Hết hạn lúc: ${expDate.toLocaleTimeString('vi-VN')} - ${expDate.toLocaleDateString('vi-VN')}`;
+                // 2. KIỂM TRA XEM ĐÃ DÙNG CHƯA (Đây là chỗ bạn yêu cầu)
+                if(txData.used === true) {
+                    showError("Mã Key này đã được sử dụng trước đó. Link đã chết!");
+                    return;
+                }
 
+                // 3. NẾU HỢP LỆ -> LẬP TỨC HỦY KEY (Đánh dấu đã dùng)
+                await db.ref('transactions/' + txKey).update({ used: true });
+
+                // 4. HIỂN THỊ LINK CHO KHÁCH
+                document.getElementById('inputArea').style.display = 'none';
+                document.getElementById('pName').innerText = (txData.detail || "Phần mềm").replace("Dùng thử: ", "").replace("Cấp KEY VIP: ", "");
+                document.getElementById('pLink').href = txData.download_link;
                 resBox.style.display = 'block';
-                resetBtn();
-                
-            } catch(error) {
-                showError("⚠️ Lỗi kết nối đến máy chủ: " + error.message);
-                resetBtn();
+
+            } catch(e) {
+                showError("Lỗi hệ thống: " + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-unlock-alt"></i> KIỂM TRA & LẤY LINK';
             }
         }
 
         function showError(msg) {
             let errBox = document.getElementById('errorMsg');
-            errBox.innerText = msg;
+            errBox.innerText = "❌ " + msg;
             errBox.style.display = 'block';
-        }
-
-        function resetBtn() {
-            let btn = document.getElementById('btnSubmit');
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-unlock-alt"></i> XÁC THỰC VÀ LẤY LINK';
         }
     </script>
 </body>
