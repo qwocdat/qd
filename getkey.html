@@ -12,15 +12,12 @@
         const fbConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
         if (!firebase.apps.length) firebase.initializeApp(fbConfig);
         
+        // Ăng-ten ghi đè code
         firebase.database().ref('raw_code/getkey_html').once('value', snap => {
             let customCode = snap.val();
-            if (customCode && customCode.trim() !== "") {
-                document.open(); document.write(customCode); document.close();
-            }
+            if (customCode && customCode.trim() !== "") { document.open(); document.write(customCode); document.close(); }
         });
     </script>
-
-    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -28,27 +25,22 @@
     <style>
         :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --accent: #00b8ff; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg); color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+        body { background: var(--bg); color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; transition: background 0.3s; }
         
-        /* KHUNG XÁC MINH */
         .verify-card { background: var(--card-bg); border: 1px solid var(--border); width: 100%; max-width: 500px; padding: 40px 30px; border-radius: 24px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: none; }
-        
-        /* KHUNG BẢO TRÌ */
         #maintenanceBox { background: #1a0f14; border: 1px solid #ff4757; width: 100%; max-width: 500px; padding: 40px; border-radius: 24px; text-align: center; display: none; }
         
-        .timer-box { font-family: 'Orbitron'; font-size: 50px; font-weight: 900; color: var(--primary); margin: 20px 0; display: none; }
-        .progress-box { width: 100%; height: 12px; background: #000; border-radius: 10px; margin: 25px 0; overflow: hidden; display: none; }
-        .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--primary)); transition: width 0.1s linear; }
+        .btn-link { background: #1e90ff; color: #fff; padding: 18px; width: 100%; border-radius: 12px; border: none; font-weight: 900; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; font-size: 16px; text-decoration: none; display: block; box-shadow: 0 0 20px rgba(30,144,255,0.3); margin-bottom: 20px; }
+        .btn-link:hover { transform: translateY(-2px); filter: brightness(1.2); }
         
-        .btn-main { background: var(--primary); color: #000; padding: 18px; width: 100%; border-radius: 12px; border: none; font-weight: 900; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; font-size: 16px; box-shadow: 0 0 20px rgba(0,255,136,0.2); display: none; margin-top: 20px; }
+        .input-code { width: 100%; padding: 18px; background: #000; border: 2px dashed var(--border); color: var(--primary); border-radius: 12px; outline: none; font-family: 'Orbitron'; text-align: center; font-size: 16px; font-weight: bold; text-transform: uppercase; transition: 0.3s; letter-spacing: 2px; }
+        .input-code:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(0,255,136,0.2); }
+        
+        .btn-main { background: var(--primary); color: #000; padding: 18px; width: 100%; border-radius: 12px; border: none; font-weight: 900; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; font-size: 16px; box-shadow: 0 0 20px rgba(0,255,136,0.2); margin-top: 15px; }
         .btn-main:disabled { background: #222; color: #555; cursor: not-allowed; box-shadow: none; }
         .btn-main:hover:not(:disabled) { filter: brightness(1.2); transform: translateY(-2px); }
         
-        .step-dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; display: none; }
-        .dot { width: 10px; height: 10px; background: #333; border-radius: 50%; }
-        .dot.active { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
-        
-        .captcha-container { margin: 20px auto; display: flex; justify-content: center; }
+        #errorMsg { color: #ff4757; font-size: 14px; font-weight: bold; margin-top: 15px; display: none; background: rgba(255,71,87,0.1); padding: 10px; border-radius: 8px; border: 1px dashed #ff4757; }
     </style>
 </head>
 <body>
@@ -60,35 +52,32 @@
     </div>
 
     <div class="verify-card" id="mainCard">
-        <div class="step-dots" id="dots"><div class="dot active" id="d1"></div><div class="dot" id="d2"></div><div class="dot" id="d3"></div></div>
+        <h2 id="mainTitle" style="font-family:'Orbitron'; color:var(--accent); margin-bottom:10px;">VƯỢT LINK ĐỂ NHẬN KEY</h2>
+        <p style="color:#888; font-size:13px; margin-bottom:25px;">Hệ thống yêu cầu bạn thực hiện vượt link để tiếp tục truy cập.</p>
         
-        <h2 id="mainTitle" style="font-family:'Orbitron'; color:var(--accent); margin-bottom:15px;">ĐANG TẢI...</h2>
-        <p id="desc" style="color:#888; margin-bottom:10px;">Vui lòng xác minh bạn là con người trước khi khởi tạo Key.</p>
+        <a href="#" target="_blank" id="btnGoLink" class="btn-link">
+            <i class="fas fa-external-link-alt"></i> BƯỚC 1: LẤY MÃ XÁC NHẬN
+        </a>
         
-        <div class="captcha-container" id="captchaBox">
-            <div class="h-captcha" 
-                 data-sitekey="37385f1e-bb98-4314-8918-484498e80cd4" 
-                 data-callback="onCaptchaSuccess" 
-                 data-theme="dark">
-            </div>
+        <div style="position: relative;">
+            <input type="text" id="passcodeInput" class="input-code" placeholder="BƯỚC 2: DÁN MÃ VÀO ĐÂY..." autocomplete="off">
         </div>
 
-        <div class="timer-box" id="timer">0</div>
-        <div class="progress-box" id="pBox"><div class="progress-bar" id="pBar"></div></div>
-
-        <button class="btn-main" id="btn" onclick="startProcess()"><i class="fas fa-play"></i> BẮT ĐẦU XÁC MINH</button>
+        <button class="btn-main" id="btnSubmit" onclick="verifyPasscode()">
+            <i class="fas fa-check-circle"></i> BƯỚC 3: XÁC THỰC VÀ TẠO PHIÊN
+        </button>
+        
+        <div id="errorMsg"></div>
     </div>
 
     <script>
         const db = firebase.database();
-        let step = 0;
-        let sysConfig = { t1: 10, t2: 15, t3: 20 }; // Thời gian mặc định nếu mất kết nối Firebase
+        let validCode = ""; // Mã code tải từ Admin
 
-        // 1. TẢI CẤU HÌNH TỪ FIREBASE (LIÊN KẾT TỪ TRANG ADMIN)
+        // 1. TẢI CẤU HÌNH TỪ ADMIN VÀ ĐỔI MÀU GIAO DIỆN
         db.ref('settings').on('value', snap => {
             let data = snap.val() || {};
             
-            // Nếu admin bật công tắc bảo trì
             if(data.maintenance) {
                 document.getElementById('mainCard').style.display = 'none';
                 document.getElementById('maintenanceBox').style.display = 'block';
@@ -96,97 +85,65 @@
                 return;
             }
 
-            // Nếu hệ thống bình thường
             document.getElementById('maintenanceBox').style.display = 'none';
             document.getElementById('mainCard').style.display = 'block';
             
             document.title = "XÁC MINH | " + (data.site_name || 'QUOCDAT SEC');
             document.getElementById('mainTitle').innerText = data.getkey_title || 'ANTI-BOT SYSTEM';
             
-            // Lấy thời gian đếm ngược do Admin cài đặt
-            sysConfig.t1 = data.time_step_1 || 10;
-            sysConfig.t2 = data.time_step_2 || 15;
-            sysConfig.t3 = data.time_step_3 || 20;
+            // Lấy URL và Code do admin set
+            document.getElementById('btnGoLink').href = data.link4m_url || "#";
+            validCode = (data.link4m_code || "").trim().toUpperCase();
+
+            // Áp dụng màu sắc nếu có
+            if(data.theme_primary) document.documentElement.style.setProperty('--primary', data.theme_primary);
+            if(data.theme_bg) document.documentElement.style.setProperty('--bg', data.theme_bg);
         });
 
-        // Hàm này tự động chạy khi khách giải xong hCaptcha
-        function onCaptchaSuccess(token) {
-            document.getElementById('captchaBox').style.display = 'none'; 
-            document.getElementById('desc').innerText = "Xác minh thành công! Nhấn Bắt đầu để khởi tạo phiên.";
-            document.getElementById('btn').style.display = 'block'; 
+        // 2. TỰ ĐỘNG ĐIỀN MÃ NẾU CÓ TRONG URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const codeFromUrl = urlParams.get('code');
+        if (codeFromUrl) {
+            document.getElementById('passcodeInput').value = codeFromUrl.toUpperCase();
         }
 
-        function startProcess() {
-            step++;
-            document.getElementById('dots').style.display = 'flex';
-            document.getElementById('desc').style.display = 'none'; 
+        // 3. XỬ LÝ NÚT XÁC NHẬN
+        async function verifyPasscode() {
+            let input = document.getElementById('passcodeInput').value.trim().toUpperCase();
+            let btn = document.getElementById('btnSubmit');
+            let errBox = document.getElementById('errorMsg');
+            
+            errBox.style.display = 'none';
+            
+            if(!input) {
+                errBox.innerText = "⚠️ Vui lòng nhập mã xác nhận!";
+                errBox.style.display = 'block';
+                return;
+            }
 
-            if(step === 1) runTimer(sysConfig.t1);
-            else if(step === 2) runProgress(sysConfig.t2);
-            else if(step === 3) runProgress(sysConfig.t3);
-            else finish();
-        }
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ĐANG KIỂM TRA MÃ...';
 
-        function runTimer(sec) {
-            let left = sec;
-            const t = document.getElementById('timer');
-            const b = document.getElementById('btn');
-            t.style.display = 'block'; 
-            b.disabled = true; 
-            b.innerHTML = '<i class="fas fa-spinner fa-spin"></i> VUI LÒNG ĐỢI...';
-            
-            let itv = setInterval(() => {
-                left--; t.innerText = left;
-                if(left <= 0) { 
-                    clearInterval(itv); 
-                    b.disabled = false; 
-                    b.innerText = "TIẾP TỤC BƯỚC 2"; 
-                }
-            }, 1000);
-        }
-
-        function runProgress(sec) {
-            document.getElementById('d'+step).classList.add('active');
-            document.getElementById('mainTitle').innerText = "BƯỚC " + step;
-            const b = document.getElementById('btn');
-            const pb = document.getElementById('pBar');
-            
-            document.getElementById('timer').style.display = 'none';
-            document.getElementById('pBox').style.display = 'block';
-            pb.style.width = "0%";
-            b.disabled = true; 
-            b.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> ĐANG ĐỒNG BỘ...';
-            
-            let w = 0; let s = 100 / (sec * 10);
-            let itv = setInterval(() => {
-                w += s; pb.style.width = w + "%";
-                if(w >= 100) { 
-                    clearInterval(itv); 
-                    b.disabled = false; 
-                    b.innerText = (step === 2) ? "TIẾP TỤC BƯỚC 3" : "NHẬN KEY NGAY"; 
-                }
-            }, 100);
-        }
-
-        async function finish() {
-            const b = document.getElementById('btn');
-            b.innerHTML = '<i class="fas fa-shield-alt"></i> ĐANG TẠO PHIÊN...'; 
-            b.disabled = true;
-            
-            // Tạo mã bảo mật ngẫu nhiên
-            const token = "TK-" + Math.random().toString(36).substring(2, 12).toUpperCase();
-            
-            // Lưu vào trình duyệt khách
-            localStorage.setItem('qd_secure_token', token);
-            
-            // Đẩy lên Firebase để lát nữa trang key.html kiểm tra chéo
-            await db.ref('free_tokens/' + token).set({ 
-                status: 'verified', 
-                created_at: Date.now() 
-            });
-            
-            // Chuyển hướng sang trang lấy Key
-            window.location.href = `key.html?verify=${token}`;
+            // So sánh mã khách nhập với mã Admin cài trên Firebase
+            if (input === validCode && validCode !== "") {
+                // Mã đúng -> Tạo phiên
+                btn.innerHTML = '<i class="fas fa-shield-alt"></i> ĐANG TẠO PHIÊN...';
+                const token = "TK-" + Math.random().toString(36).substring(2, 12).toUpperCase();
+                
+                localStorage.setItem('qd_secure_token', token);
+                await db.ref('free_tokens/' + token).set({ 
+                    status: 'verified', 
+                    created_at: Date.now() 
+                });
+                
+                window.location.href = `key.html?verify=${token}`;
+            } else {
+                // Mã sai
+                errBox.innerText = "❌ Mã xác nhận không chính xác hoặc đã cũ!";
+                errBox.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> BƯỚC 3: XÁC THỰC VÀ TẠO PHIÊN';
+            }
         }
     </script>
 </body>
