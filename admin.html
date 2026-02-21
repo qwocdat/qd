@@ -80,6 +80,7 @@
         .action-btn { background: #222; border: 1px solid #333; color: #fff; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; margin-right: 5px; transition: 0.2s; }
         .action-btn.edit:hover { background: #1e90ff; border-color: #1e90ff; }
         .action-btn.money:hover { background: var(--accent); border-color: var(--accent); color: #000; }
+        .action-btn.ban:hover { background: #f1c40f; border-color: #f1c40f; color: #000; }
         .action-btn.ban.is-banned { background: #ff4757; border-color: #ff4757; color: #fff; animation: blink 1s infinite; }
         @keyframes blink { 50% { opacity: 0.5; } }
         
@@ -99,7 +100,7 @@
     </style>
 </head>
 <body>
-        <div class="sidebar" id="sidebar">
+       <div class="sidebar" id="sidebar">
         <div class="brand" style="display:flex; justify-content:space-between; align-items:center;">
             <div>QUOCDAT<span style="color:var(--primary)">.ADMIN</span></div>
             <i class="fas fa-times mobile-toggle" onclick="toggleSidebar()"></i>
@@ -109,7 +110,6 @@
             <div class="nav-item" onclick="switchTab('products', this)"><i class="fas fa-box-open"></i> Quản Lý Sản Phẩm</div>
             <div class="nav-item" onclick="switchTab('users', this)"><i class="fas fa-users"></i> Quản Lý User & Khóa</div>
             <div class="nav-item" onclick="switchTab('history', this)"><i class="fas fa-history"></i> Lịch Sử Giao Dịch</div>
-            
             <div class="nav-item" style="color:#ff4757; margin-top:20px; border-top:1px solid #222; padding-top:20px;" onclick="logoutAdmin()"><i class="fas fa-sign-out-alt"></i> Đăng Xuất</div>
         </div>
     </div>
@@ -187,8 +187,8 @@
                 <input type="hidden" id="pId">
                 <div class="form-group"><label>Tên Sản Phẩm *</label><input type="text" id="pName"></div>
                 <div class="form-group"><label>Danh Mục</label><select id="pCategory"><option value="Tool Social">Tool Social</option><option value="Script Game">Script Game</option><option value="Web Source">Mã Nguồn Web</option></select></div>
-                <div class="form-group"><label>Giá Bán (VNĐ) *</label><input type="number" id="pPrice"></div>
                 
+                <div class="form-group"><label>Giá Bán (VNĐ) - Nhập 0 nếu là Đồ Miễn Phí *</label><input type="number" id="pPrice" placeholder="Ví dụ: 0 hoặc 150000"></div>
                 <div class="form-group"><label>Link Tải Sản Phẩm (Mediafire/Drive) *</label><input type="text" id="pDownload" placeholder="Nhập Link để khách tải sau khi mua..."></div>
                 
                 <div class="form-group"><label>Mô Tả Ngắn</label><textarea id="pDesc" rows="2"></textarea></div>
@@ -235,208 +235,11 @@
 
     <div class="toast" id="toastMsg">Thành công!</div>
         <script>
-        // FIREBASE INIT
         const firebaseConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 1. QUẢN LÝ SẢN PHẨM & LINK TẢI
-        let currentProducts = {};
-        db.ref('products').on('value', (s) => {
-            let tbody = document.getElementById('productTableBody'); tbody.innerHTML = '';
-            let pCount = 0;
-            if(s.exists()) {
-                currentProducts = s.val();
-                for(let id in currentProducts) {
-                    let p = currentProducts[id];
-                    pCount++;
-                    tbody.innerHTML += `<tr>
-                        <td><strong style="color:var(--primary)">#${id.substring(0,4)}</strong></td>
-                        <td style="font-weight:bold;">${p.name}</td>
-                        <td style="color:var(--accent); font-weight:bold; font-family:monospace;">${formatMoney(p.price)}</td>
-                        <td>
-                            <button class="action-btn edit" onclick="openProductModal('${id}')"><i class="fas fa-edit"></i></button>
-                            <button class="action-btn delete" onclick="deleteProduct('${id}')"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>`;
-                }
-            } else {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Trống</td></tr>`;
-            }
-            document.getElementById('statProducts').innerText = pCount;
-        });
-
-        function openProductModal(id = null) {
-            document.getElementById('pId').value = ''; document.getElementById('pName').value = ''; document.getElementById('pPrice').value = ''; document.getElementById('pDesc').value = ''; document.getElementById('pDownload').value = '';
-            if(id) {
-                let p = currentProducts[id];
-                document.getElementById('pId').value = id; document.getElementById('pName').value = p.name; document.getElementById('pPrice').value = p.price; document.getElementById('pCategory').value = p.category; document.getElementById('pDesc').value = p.desc || ''; document.getElementById('pImg').value = p.img || 'fas fa-box';
-                // Đẩy dữ liệu Link tải cũ vào form (nếu có)
-                document.getElementById('pDownload').value = p.download_link || '';
-            }
-            document.getElementById('productModal').style.display = 'flex';
-        }
-
-        function saveProduct() {
-            let id = document.getElementById('pId').value;
-            let data = { 
-                name: document.getElementById('pName').value, 
-                price: Number(document.getElementById('pPrice').value), 
-                category: document.getElementById('pCategory').value, 
-                desc: document.getElementById('pDesc').value, 
-                img: document.getElementById('pImg').value,
-                download_link: document.getElementById('pDownload').value // Lưu Link tải
-            };
-            if(!data.name || !data.price || !data.download_link) return alert("Điền đủ Tên, Giá và Link tải!");
-            
-            if(id) db.ref('products/' + id).update(data).then(() => { showAdminToast("Cập nhật SP xong"); closeModal('productModal'); });
-            else db.ref('products').push().set(data).then(() => { showAdminToast("Đã thêm SP"); closeModal('productModal'); });
-        }
-
-        function deleteProduct(id) { if(confirm("Xóa sản phẩm này?")) db.ref('products/'+id).remove(); }
-
-        // 2. QUẢN LÝ USER
-        let currentUsers = {};
-        db.ref('users').on('value', (s) => {
-            let tbody = document.getElementById('userTableBody'); tbody.innerHTML = '';
-            let uCount = 0, totalM = 0;
-            if(s.exists()) {
-                currentUsers = s.val();
-                for(let id in currentUsers) {
-                    let u = currentUsers[id];
-                    uCount++; totalM += (u.balance || 0);
-                    let isBanned = u.banned && new Date(u.ban_until).getTime() > new Date().getTime();
-                    let statusHtml = isBanned ? `<span style="color:#ff4757; font-size:11px; font-weight:bold;"><i class="fas fa-lock"></i> Đã Khóa</span>` : `<span style="color:var(--accent); font-size:11px;"><i class="fas fa-check"></i> An Toàn</span>`;
-                    
-                    tbody.innerHTML += `<tr>
-                        <td style="font-weight:bold;">${id.replace(/_/g, '.')}</td>
-                        <td style="color:var(--accent); font-family:monospace; font-weight:bold;">${formatMoney(u.balance || 0)}</td>
-                        <td>${statusHtml}</td>
-                        <td>
-                            <button class="action-btn money" onclick="openMoneyModal('${id}')"><i class="fas fa-coins"></i></button>
-                            <button class="action-btn ban ${isBanned ? 'is-banned' : ''}" onclick="openBanModal('${id}')"><i class="fas fa-lock"></i></button>
-                            <button class="action-btn delete" onclick="deleteUser('${id}')"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>`;
-                }
-            }
-            document.getElementById('statUsers').innerText = uCount;
-            document.getElementById('statRevenue').innerText = formatMoney(totalM);
-        });
-
-        function openMoneyModal(id) { document.getElementById('uId').value = id; document.getElementById('uNameDisplay').innerText = id.replace(/_/g, '.'); document.getElementById('uNewBalance').value = currentUsers[id].balance || 0; document.getElementById('moneyModal').style.display = 'flex'; }
-        
-        // HÀM NẠP TIỀN CÓ GHI LỊCH SỬ GIAO DỊCH
-        function saveUserBalance() { 
-            let id = document.getElementById('uId').value;
-            let newBal = Number(document.getElementById('uNewBalance').value); 
-            
-            db.ref('users/'+id).update({balance: newBal}).then(() => { 
-                showAdminToast("Cập nhật tiền xong"); 
-                
-                // Ghi vào bảng Lịch sử (Admin chủ động thay đổi tiền)
-                db.ref('transactions').push().set({
-                    user: id,
-                    type: 'admin_update',
-                    amount: newBal,
-                    detail: 'Admin cập nhật số dư',
-                    time: new Date().toISOString()
-                });
-
-                closeModal('moneyModal'); 
-            }); 
-        }
-
-        function deleteUser(id) { if(confirm("XÓA TÀI KHOẢN? (Sẽ mất tiền của họ)")) db.ref('users/'+id).remove(); }
-
-        // BAN HỆ THỐNG
-        function openBanModal(id) {
-            document.getElementById('banUid').value = id; document.getElementById('banNameDisplay').innerText = id.replace(/_/g, '.');
-            let u = currentUsers[id];
-            let now = new Date(); now.setHours(now.getHours() + 24); now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            document.getElementById('banUntil').value = now.toISOString().slice(0,16);
-            document.getElementById('banReason').value = "";
-            if(u.banned && new Date(u.ban_until).getTime() > new Date().getTime()) {
-                document.getElementById('banStatusDisplay').style.display = 'block'; document.getElementById('btnUnbanBtn').style.display = 'block'; document.getElementById('banReason').value = u.ban_reason;
-                let banD = new Date(u.ban_until); banD.setMinutes(banD.getMinutes() - banD.getTimezoneOffset()); document.getElementById('banUntil').value = banD.toISOString().slice(0,16);
-            } else {
-                document.getElementById('banStatusDisplay').style.display = 'none'; document.getElementById('btnUnbanBtn').style.display = 'none';
-            }
-            document.getElementById('banModal').style.display = 'flex';
-        }
-
-        function executeBan() {
-            let id = document.getElementById('banUid').value, reason = document.getElementById('banReason').value || "Vi phạm quy định", until = document.getElementById('banUntil').value;
-            if(!until) return alert("Chọn ngày mở khóa!");
-            db.ref('users/'+id).update({ banned: true, ban_reason: reason, ban_until: new Date(until).toISOString() }).then(() => { showAdminToast("Đã Khóa User!", true); closeModal('banModal'); });
-        }
-        function unbanUser() {
-            let id = document.getElementById('banUid').value;
-            db.ref('users/'+id).update({ banned: false, ban_reason: null, ban_until: null }).then(() => { showAdminToast("Đã ân xá."); closeModal('banModal'); });
-        }
-
-        // 3. LOAD LỊCH SỬ GIAO DỊCH TOÀN HỆ THỐNG
-        db.ref('transactions').orderByChild('time').on('value', (s) => {
-            let tbody = document.getElementById('historyTableBody');
-            tbody.innerHTML = '';
-            if(s.exists()) {
-                let transList = [];
-                s.forEach(child => { transList.push(child.val()); });
-                transList.reverse(); // Đảo ngược để mới nhất lên đầu
-                
-                transList.forEach(t => {
-                    let time = new Date(t.time).toLocaleString('vi-VN');
-                    let uName = t.user.replace(/_/g, '.');
-                    let color = t.type === 'purchase' ? '#ff4757' : 'var(--accent)';
-                    let typeText = t.type === 'purchase' ? 'Mua Sản Phẩm' : 'Nạp / Cập Nhật';
-                    
-                    // Nếu là Mua sản phẩm, phần Chi tiết sẽ hiển thị KEY đã cấp
-                    let detailHtml = t.detail;
-                    if(t.type === 'purchase' && t.key_granted) {
-                        detailHtml = `${t.detail}<br><span style="font-size:11px; color:#f1c40f; font-family:monospace;">KEY: ${t.key_granted}</span>`;
-                    }
-
-                    tbody.innerHTML += `<tr>
-                        <td style="font-size:12px; color:#888;">${time}</td>
-                        <td style="font-weight:bold;">${uName}</td>
-                        <td><span style="background:rgba(255,255,255,0.1); padding:3px 8px; border-radius:5px; font-size:11px;">${typeText}</span></td>
-                        <td style="color:${color}; font-weight:bold; font-family:monospace;">${t.type === 'purchase' ? '-' : '+'}${formatMoney(t.amount)}</td>
-                        <td style="font-size:12px;">${detailHtml}</td>
-                    </tr>`;
-                });
-            } else {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Chưa có giao dịch nào phát sinh.</td></tr>`;
-            }
-        });
-    </script>
-</body>
-</html>
-    <script>
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
-        function switchTab(tabId, element) {
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            element.classList.add('active');
-            document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
-            document.getElementById('tab-' + tabId).classList.add('active');
-            let titles = {'dashboard':'TỔNG QUAN HỆ THỐNG', 'products':'QUẢN LÝ SẢN PHẨM', 'users':'QUẢN LÝ NGƯỜI DÙNG', 'history':'LỊCH SỬ GIAO DỊCH'};
-            document.getElementById('pageTitle').innerText = titles[tabId];
-        }
-        function logoutAdmin() { sessionStorage.removeItem('admin_auth_status'); window.location.replace('index.html'); }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-        function formatMoney(num) { return Number(num).toLocaleString('vi-VN') + " đ"; }
-        function showAdminToast(msg, isError = false) {
-            let toast = document.getElementById('toastMsg');
-            toast.style.borderLeftColor = isError ? '#ff4757' : '#00ff88';
-            toast.innerHTML = `<i class="fas ${isError ? 'fa-times-circle' : 'fa-check-circle'}"></i> ${msg}`;
-            toast.classList.add('show');
-            setTimeout(() => { toast.classList.remove('show'); }, 3000);
-        }
-
-        const firebaseConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        // 1. SẢN PHẨM
+        // 1. SẢN PHẨM & LINK TẢI
         let currentProducts = {};
         db.ref('products').on('value', (s) => {
             let tbody = document.getElementById('productTableBody'); tbody.innerHTML = '';
@@ -469,12 +272,12 @@
             document.getElementById('productModal').style.display = 'flex';
         }
 
+        // ĐÃ SỬA LỖI ĐIỀN GIÁ = 0 VÀ TỰ ĐỘNG THÊM HTTPS VÀO LINK
         function saveProduct() {
             let id = document.getElementById('pId').value;
             let priceVal = document.getElementById('pPrice').value;
             let rawLink = document.getElementById('pDownload').value.trim();
             
-            // BẢO VỆ LINK TẢI: NẾU ADMIN QUÊN GÕ HTTPS:// THÌ CODE SẼ TỰ ĐỘNG THÊM VÀO ĐỂ KHÔNG BỊ LỖI CHUYỂN TRANG
             if(rawLink !== "" && !rawLink.startsWith('http://') && !rawLink.startsWith('https://')) {
                 rawLink = 'https://' + rawLink;
             }
@@ -493,7 +296,7 @@
 
         function deleteProduct(id) { if(confirm("Xóa sản phẩm này?")) db.ref('products/'+id).remove(); }
 
-        // 2. USER
+        // 2. USER VÀ BAN ACCOUNT
         let currentUsers = {};
         db.ref('users').on('value', (s) => {
             let tbody = document.getElementById('userTableBody'); tbody.innerHTML = ''; let uCount = 0, totalM = 0;
@@ -549,4 +352,5 @@
             } else { tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Chưa có giao dịch.</td></tr>`; }
         });
     </script>
-
+</body>
+</html>
