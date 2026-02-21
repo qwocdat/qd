@@ -3,31 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>QUOCDAT SEC | TỔNG KHO TÀI NGUYÊN MMO VÀ SCRIPT VIP</title>
-    
+    <title>QUOCDAT SEC | HỆ THỐNG TÀI NGUYÊN MMO CHUYÊN NGHIỆP</title>
+
     <script>
-        // 1. KIỂM TRA ĐĂNG NHẬP
+        // KIỂM TRA ĐĂNG NHẬP
         var currentUser = localStorage.getItem('vip_username');
-        if(!currentUser || currentUser.trim() === "") { 
-            window.location.href = "login.html"; 
+        if (!currentUser || currentUser.trim() === "") {
+            window.location.href = "login.html";
         }
 
-        // 2. CÁC HÀM ĐIỀU KHIỂN GIAO DIỆN
-        window.openNav = function() { document.getElementById('mobileNav').style.right = '0px'; }
-        window.closeNav = function() { document.getElementById('mobileNav').style.right = '-100%'; }
-        window.logout = function() { localStorage.clear(); window.location.href = "login.html"; }
-        window.openModal = function(id) { window.closeNav(); document.getElementById(id).style.display = 'flex'; }
-        window.closeModal = function(id) { document.getElementById(id).style.display = 'none'; }
-        window.closeOutside = function(event, id) { if(event.target.id === id) window.closeModal(id); }
-        window.goToPage = function(url) {
+        // CÁC HÀM ĐIỀU KHIỂN GIAO DIỆN
+        window.openNav = function () { document.getElementById('mobileNav').style.right = '0px'; }
+        window.closeNav = function () { document.getElementById('mobileNav').style.right = '-100%'; }
+        window.logout = function () { localStorage.clear(); window.location.href = "login.html"; }
+        window.openModal = function (id) { window.closeNav(); document.getElementById(id).style.display = 'flex'; }
+        window.closeModal = function (id) { document.getElementById(id).style.display = 'none'; }
+        window.closeOutside = function (event, id) { if (event.target.id === id) window.closeModal(id); }
+        window.goToPage = function (url) {
             document.body.style.opacity = '0';
             setTimeout(() => { window.location.href = url; }, 300);
         }
-
-        // 3. TOAST NOTIFICATION
-        window.showToast = function(message, type = 'success') {
+        window.showToast = function (message, type = 'success') {
             let toast = document.getElementById('toast');
-            if(!toast) {
+            if (!toast) {
                 toast = document.createElement('div');
                 toast.id = 'toast';
                 document.body.appendChild(toast);
@@ -42,225 +40,714 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
-        :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --accent: #00b8ff; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg) url('https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat fixed; color: #fff; overflow-x: hidden; padding-top: 70px; padding-bottom: 50px; transition: opacity 0.4s; }
-        .overlay-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,10,15,0.95); z-index: -1; }
-        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary: #00ff88;
+            --primary-dark: #00cc66;
+            --accent: #00b8ff;
+            --bg: #0a0a0f;
+            --card-bg: #15151e;
+            --border: #2a2a35;
+            --text: #e0e0e0;
+            --text-muted: #a0a0a0;
+        }
+
+        body {
+            background: var(--bg) url('https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat fixed;
+            color: #fff;
+            overflow-x: hidden;
+            padding-top: 70px;
+            padding-bottom: 50px;
+            transition: opacity 0.4s;
+            scroll-behavior: smooth;
+        }
+
+        .overlay-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.95);
+            z-index: -1;
+        }
+
         /* PRELOADER */
-        #preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050508; z-index: 9999999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.5s; }
-        .loader-bar { width: 220px; height: 3px; background: #222; border-radius: 10px; overflow: hidden; margin: 25px 0; border: 1px solid #333; }
-        #lFill { width: 0%; height: 100%; background: var(--primary); box-shadow: 0 0 15px var(--primary); }
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #050508;
+            z-index: 9999999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s;
+        }
+
+        .loader-logo {
+            font-family: 'Orbitron';
+            font-size: 32px;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 20px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        .loader-bar {
+            width: 240px;
+            height: 4px;
+            background: #222;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+            border: 1px solid #333;
+        }
+
+        #lFill {
+            width: 0%;
+            height: 100%;
+            background: var(--primary);
+            box-shadow: 0 0 20px var(--primary);
+            transition: width 0.1s linear;
+        }
+
+        #lTxt {
+            font-family: 'Orbitron';
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 20px;
+        }
 
         /* HEADER */
-        header { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(10,10,15,0.98); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); z-index: 1000; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
-        .logo { font-family: 'Orbitron'; font-size: 18px; font-weight: 900; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 8px; cursor: pointer; }
-        .pc-wallet { background: rgba(0,255,136,0.1); border: 1px solid var(--primary); color: var(--primary); padding: 8px 15px; border-radius: 30px; font-size: 12px; font-family: 'Orbitron'; font-weight: 700; display: none; }
-        .hamburger { font-size: 26px; color: #fff; cursor: pointer; }
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background: rgba(10, 10, 15, 0.98);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
 
-        /* HERO & BUTTONS */
-        .hero { min-height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 40px 20px; }
-        .hero h1 { font-size: 38px; font-family: 'Orbitron'; font-weight: 900; line-height: 1.1; margin-bottom: 20px; text-transform: uppercase; }
-        .hero h1 span { color: var(--primary); text-shadow: 0 0 20px rgba(0,255,136,0.4); }
-        .btn-group { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
-        .btn-lg { padding: 18px 35px; border-radius: 14px; font-weight: 900; font-family: 'Orbitron'; font-size: 14px; display: inline-flex; align-items: center; gap: 10px; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; border: none; }
-        .btn-main { background: var(--primary); color: #000; box-shadow: 0 5px 25px rgba(0,255,136,0.4); }
-        .btn-sub { background: #0a0a0f; color: #fff; border: 2px solid var(--border); }
+        .logo {
+            font-family: 'Orbitron';
+            font-size: 20px;
+            font-weight: 900;
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
 
-        /* BỐ CỤC */
-        .section { padding: 50px 20px; max-width: 1200px; margin: 0 auto; }
-        .sec-title { text-align: center; font-family: 'Orbitron'; font-size: 24px; margin-bottom: 40px; text-transform: uppercase; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
-        .card { background: var(--card-bg); padding: 30px; border-radius: 20px; border: 1px solid var(--border); transition: 0.3s; }
-        .card:hover { border-color: var(--primary); box-shadow: 0 0 20px rgba(0,255,136,0.2); }
-        .card i.main-icon { color: var(--primary); font-size: 30px; margin-bottom: 20px; display: block; }
-        .card h3 { font-family: 'Orbitron'; font-size: 18px; margin-bottom: 12px; color: #fff; }
-        .card .price { font-size: 22px; font-weight: 900; color: var(--primary); margin: 15px 0; }
-        .btn-small { background: transparent; border: 1px solid var(--border); color: #fff; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .btn-small:hover { background: var(--primary); color: #000; border-color: var(--primary); }
+        .logo i {
+            color: var(--primary);
+            font-size: 24px;
+        }
 
-        /* SKILLS BARS */
-        .skills-container { background: var(--card-bg); border-radius: 24px; padding: 35px; border: 1px solid var(--border); }
-        .skill-item { margin-bottom: 20px; }
-        .skill-info { display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; margin-bottom: 8px; color: #ddd; font-family: 'Orbitron'; }
-        .progress-bg { width: 100%; height: 10px; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #333; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--primary)); width: 0; transition: width 2s cubic-bezier(0.1, 0.5, 0.1, 1); }
+        .pc-wallet {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-family: 'Orbitron';
+            font-weight: 700;
+            display: none;
+        }
 
-        /* TESTIMONIALS & STATS */
-        .testimonials { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
-        .testimonial-item { background: rgba(255,255,255,0.02); border: 1px solid #1a1a24; border-radius: 20px; padding: 25px; max-width: 300px; }
-        .testimonial-item i { color: var(--primary); font-size: 24px; margin-bottom: 10px; }
-        .stats-grid { display: flex; justify-content: space-around; flex-wrap: wrap; background: var(--card-bg); border-radius: 30px; padding: 40px 20px; border: 1px solid var(--border); }
-        .stat-item { text-align: center; }
-        .stat-number { font-family: 'Orbitron'; font-size: 36px; font-weight: 900; color: var(--primary); }
-        .stat-label { color: #888; font-size: 14px; }
+        .hamburger {
+            font-size: 28px;
+            color: #fff;
+            cursor: pointer;
+        }
 
-        /* PHÁP LÝ & CÔNG TY */
-        .legal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-top: 20px; }
-        .legal-box { background: rgba(255,255,255,0.02); padding: 25px; border-radius: 15px; border: 1px solid #1a1a24; }
-        .legal-title { font-family: 'Orbitron'; font-size: 14px; color: var(--primary); margin-bottom: 20px; border-bottom: 1px solid #1a1a24; padding-bottom: 15px; text-transform: uppercase; }
-        .legal-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 12px; }
-        .legal-row span:first-child { color: #555; font-weight: bold; }
-        .legal-row span:last-child { color: #ccc; text-align: right; }
+        @media (min-width: 992px) {
+            .pc-wallet {
+                display: block;
+            }
+            .hamburger {
+                display: none;
+            }
+        }
+
+        /* FLOATING MENU */
+        .floating-menu {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 500;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .float-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #111;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .float-btn:hover {
+            background: var(--primary);
+            color: #000;
+            transform: scale(1.1);
+        }
 
         /* SIDEBAR */
-        .mobile-nav { position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; background: #0a0a0f; z-index: 3000; transition: 0.4s; border-left: 1px solid var(--border); overflow-y: auto; }
-        .nav-profile { background: #1a1a24; padding: 45px 20px; text-align: center; border-bottom: 1px solid var(--border); }
-        .avatar { width: 65px; height: 65px; background: var(--primary); color: #000; font-size: 28px; font-weight: bold; border-radius: 50%; margin: 0 auto 15px; display: flex; justify-content: center; align-items: center; border: 4px solid #000; font-family: 'Orbitron'; }
-        .menu-link { display: flex; align-items: center; gap: 12px; color: #fff; text-decoration: none; padding: 14px; border-radius: 10px; font-weight: 600; margin-bottom: 8px; cursor: pointer; }
-        .menu-link.highlight { background: rgba(0,255,136,0.1); color: var(--primary); }
+        .mobile-nav {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 280px;
+            height: 100vh;
+            background: #0a0a0f;
+            z-index: 3000;
+            transition: 0.4s;
+            border-left: 1px solid var(--border);
+            overflow-y: auto;
+        }
+
+        .nav-profile {
+            background: #1a1a24;
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .avatar {
+            width: 70px;
+            height: 70px;
+            background: var(--primary);
+            color: #000;
+            font-size: 32px;
+            font-weight: bold;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 4px solid #000;
+            font-family: 'Orbitron';
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #fff;
+            text-decoration: none;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            margin: 0 8px 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .menu-link:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .menu-link.highlight {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--primary);
+        }
 
         /* MODALS */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 99999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
-        .ios-modal { width: 310px; background: #1c1c1e; border-radius: 20px; padding: 30px 20px; text-align: center; border: 1px solid #333; }
-        .policy-modal { max-width: 400px; max-height: 70vh; overflow-y: auto; text-align: left; }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 99999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .ios-modal {
+            width: 320px;
+            background: #1c1c1e;
+            border-radius: 24px;
+            padding: 30px 20px;
+            text-align: center;
+            border: 1px solid #333;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            animation: zoomIn 0.2s;
+        }
+
+        .policy-modal {
+            max-width: 420px;
+            max-height: 70vh;
+            overflow-y: auto;
+            text-align: left;
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
 
         /* TOAST */
-        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1c1c1e; color: #fff; padding: 12px 24px; border-radius: 50px; font-weight: 600; z-index: 100000; transition: 0.3s; opacity: 0; visibility: hidden; border-left: 4px solid var(--primary); }
-        #toast.toast-show { opacity: 1; visibility: visible; bottom: 40px; }
-        #toast.toast-success { border-left-color: var(--primary); }
-        #toast.toast-error { border-left-color: #ff4757; }
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1c1c1e;
+            color: #fff;
+            padding: 12px 28px;
+            border-radius: 50px;
+            font-weight: 600;
+            z-index: 100000;
+            transition: 0.3s;
+            opacity: 0;
+            visibility: hidden;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            white-space: nowrap;
+        }
 
-        @media (min-width: 992px) { .pc-wallet { display: block; } .hamburger { display: none; } }
-    </style>
-</head>
-<body>
+        #toast.toast-show {
+            opacity: 1;
+            visibility: visible;
+            bottom: 40px;
+        }
 
-    <div id="preloader">
-        <div class="loader-box">
-            <div style="font-family:'Orbitron'; font-size:26px; font-weight:900; color:#fff; margin-bottom:20px;">QUOCDAT<span style="color:var(--primary);">.SEC</span></div>
-            <div class="loader-bar"><div id="lFill"></div></div>
-            <div id="lTxt" style="font-family:'Orbitron'; color:var(--primary); font-weight:bold;">0%</div>
-            <div style="font-family:monospace; font-size:10px; color:#444; margin-top:15px;">> Finalizing synchronization...</div>
-        </div>
-    </div>
+        #toast.toast-error {
+            border-left-color: #ff4757;
+        }
 
-    <script>
-        (function() {
-            let p = 0;
-            let timer = setInterval(() => {
-                p += 4; if(p > 100) p = 100;
-                document.getElementById('lFill').style.width = p + '%';
-                document.getElementById('lTxt').innerText = p + '%';
-                if(p >= 100) {
-                    clearInterval(timer);
-                    setTimeout(() => {
-                        document.getElementById('preloader').style.display = 'none'; 
-                        document.getElementById('s1').style.width = '77%';
-                        document.getElementById('s2').style.width = '50%';
-                        document.getElementById('s3').style.width = '40%';
-                        document.getElementById('s4').style.width = '36%';
-                        document.getElementById('s5').style.width = '20%';
-                    }, 200);
-                }
-            }, 15); // tổng ~1.5s
-        })();
-    </script>
+        /* HERO */
+        .hero {
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px 20px;
+            position: relative;
+            overflow: hidden;
+        }
 
-    <div class="overlay-bg"></div>
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0,255,136,0.1) 0%, transparent 70%);
+            animation: rotate 30s linear infinite;
+            z-index: -1;
+        }
 
-    <header>
-        <div class="logo" onclick="window.goToPage('index.html')">
-            <i class="fas fa-shield-halved" style="color:var(--primary)"></i> QUOCDAT.SEC
-        </div>
-        <div class="header-right">
-            <div class="pc-wallet" id="pcBal">0 đ</div>
-            <i class="fas fa-bars-staggered hamburger" onclick="window.openNav()"></i>
-        </div>
-    </header>
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
 
-    <!-- FLOATING MENU -->
-    <div class="floating-menu" style="position:fixed; bottom:20px; right:20px; z-index:500; display:flex; flex-direction:column; gap:10px;">
-        <a onclick="window.goToPage('naptien.html')" class="float-btn" style="width:48px; height:48px; border-radius:50%; background:var(--accent); display:flex; justify-content:center; align-items:center; color:#fff;"><i class="fas fa-wallet"></i></a>
-        <a onclick="window.goToPage('getkey.html')" class="float-btn" style="width:48px; height:48px; border-radius:50%; background:#111; border:1px solid #333; display:flex; justify-content:center; align-items:center; color:#fff;"><i class="fas fa-key"></i></a>
-        <a onclick="window.goToPage('shop.html')" class="float-btn" style="width:48px; height:48px; border-radius:50%; background:#111; border:1px solid #333; display:flex; justify-content:center; align-items:center; color:#fff;"><i class="fas fa-store"></i></a>
-    </div>
+        .hero h1 {
+            font-size: 48px;
+            font-family: 'Orbitron';
+            font-weight: 900;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            text-shadow: 0 0 20px rgba(0,255,136,0.3);
+        }
 
-    <!-- SIDEBAR -->
-    <div class="mobile-nav" id="mobileNav">
-        <div style="padding:20px; text-align:right;"><i class="fas fa-xmark" style="font-size:30px; color:#333;" onclick="window.closeNav()"></i></div>
-        <div class="nav-profile">
-            <div class="avatar" id="nA">?</div>
-            <div id="nU" style="font-family:'Orbitron'; font-weight:bold; font-size:16px;">Tên User</div>
-            <div id="nB" style="font-size:22px; color:var(--primary); font-weight:900; margin:10px 0; font-family:monospace;">0 đ</div>
-            <button style="background:rgba(255,255,255,0.05); color:#fff; border:1px solid #333; padding:10px 20px; border-radius:10px; font-size:12px;" onclick="window.openModal('infoModal')">CHI TIẾT TÀI KHOẢN</button>
-        </div>
-        <div class="nav-links">
-            <a onclick="window.goToPage('index.html')" class="menu-link highlight"><i class="fas fa-house"></i> TRANG CHỦ</a>
-            <a onclick="window.goToPage('shop.html')" class="menu-link"><i class="fas fa-cart-shopping"></i> CỬA HÀNG TOOL</a>
-            <a onclick="window.goToPage('getkey.html')" class="menu-link"><i class="fas fa-unlock-keyhole"></i> LẤY KEY VIP</a>
-            <a onclick="window.goToPage('naptien.html')" class="menu-link" style="color:var(--accent);"><i class="fas fa-credit-card"></i> NẠP TIỀN TỰ ĐỘNG</a>
-            <div class="menu-link" style="color:#ffb86c;" onclick="window.openModal('historyModal')"><i class="fas fa-clock-rotate-left"></i> LỊCH SỬ MUA HÀNG</div>
-            <div class="menu-link" style="color:#ff4757; margin-top:30px; border-top: 1px solid #1a1a24;" onclick="window.logout()"><i class="fas fa-power-off"></i> ĐĂNG XUẤT</div>
-        </div>
-    </div>
+        .hero h1 span {
+            color: var(--primary);
+            display: inline-block;
+            animation: glitch 3s infinite;
+        }
 
-    <!-- MODALS -->
-    <div class="modal-overlay" id="infoModal" onclick="window.closeOutside(event, 'infoModal')">
-        <div class="ios-modal">
-            <i class="fas fa-user-gear" style="font-size:45px; color:var(--primary); margin-bottom:15px;"></i>
-            <div style="font-weight:bold; color:#fff; font-size:18px;">HỒ SƠ NGƯỜI DÙNG</div>
-            <div style="text-align:left; background:#000; padding:20px; border-radius:15px; margin:20px 0; border:1px solid #222;">
-                <div class="legal-row"><span>Tên User:</span> <strong id="mU" style="color:var(--primary);">Đang tải...</strong></div>
-                <div class="legal-row"><span>Số dư:</span> <strong id="mB" style="color:var(--primary);">0 đ</strong></div>
-                <div class="legal-row"><span>Cấp bậc:</span> <strong style="color:var(--accent);">Pro VIP</strong></div>
-            </div>
-            <button style="background:var(--primary); color:#000; border:none; width:100%; padding:15px; border-radius:15px; font-weight:900;" onclick="window.closeModal('infoModal')">XÁC NHẬN</button>
-        </div>
-    </div>
+        @keyframes glitch {
+            2%, 64% { transform: skew(2deg, 0); }
+            4%, 60% { transform: skew(-2deg, 0); }
+            62% { transform: skew(0, 0); }
+        }
 
-    <div class="modal-overlay" id="historyModal" onclick="window.closeOutside(event, 'historyModal')">
-        <div class="ios-modal" style="max-width:350px;">
-            <div style="font-weight:bold; color:#ffb86c; font-size:18px; margin-bottom:15px;">LỊCH SỬ GIAO DỊCH</div>
-            <div style="background:#000; padding:15px; border-radius:15px; margin:20px 0; border:1px solid #222; max-height:200px; overflow-y:auto;">
-                <div style="display:flex; justify-content:space-between; color:#0f0; font-size:12px; border-bottom:1px solid #222; padding:8px 0;">Mua Tool FB 27/02 <span>-250k</span></div>
-                <div style="display:flex; justify-content:space-between; color:#0f0; font-size:12px; border-bottom:1px solid #222; padding:8px 0;">Nạp tiền 26/02 <span>+500k</span></div>
-                <div style="display:flex; justify-content:space-between; color:#aaa; font-size:12px; padding:8px 0;">Mua Key Instagram <span>-120k</span></div>
-            </div>
-            <button style="background:#333; color:#fff; border:none; width:100%; padding:15px; border-radius:15px; font-weight:bold;" onclick="window.closeModal('historyModal')">ĐÓNG</button>
-        </div>
-    </div>
+        .hero p {
+            font-size: 18px;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin-bottom: 30px;
+        }
 
-    <!-- Modal chính sách nhanh -->
-    <div class="modal-overlay" id="policyModal" onclick="window.closeOutside(event, 'policyModal')">
-        <div class="ios-modal policy-modal">
-            <div style="font-weight:bold; color:var(--primary); font-size:18px; margin-bottom:15px;">CHÍNH SÁCH BẢO MẬT</div>
-            <div style="font-size:12px; color:#ccc; line-height:1.6;">
-                <p>Chúng tôi cam kết bảo mật thông tin cá nhân của khách hàng. Mọi dữ liệu chỉ được sử dụng nội bộ và không chia sẻ với bên thứ ba.</p>
-                <p>Giao dịch được mã hóa và bảo vệ. Quý khách có thể yêu cầu xóa tài khoản bất cứ lúc nào.</p>
-            </div>
-            <button style="background:var(--primary); color:#000; border:none; width:100%; padding:15px; border-radius:15px; font-weight:900; margin-top:20px;" onclick="window.closeModal('policyModal')">ĐÃ HIỂU</button>
-        </div>
-    </div>
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
 
-    <main>
-        <!-- HERO -->
-        <section class="hero">
-            <h1>GIẢI PHÁP <span>TỰ ĐỘNG HÓA</span><br>TÀI NGUYÊN SCRIPT MMO</h1>
-            <p>Hệ thống cung cấp mã nguồn Web, Tool Auto chuyên nghiệp uy tín hàng đầu Việt Nam.</p>
-            <div class="btn-group">
-                <button class="btn-lg btn-main" onclick="window.goToPage('shop.html')"><i class="fas fa-shopping-bag"></i> ĐẾN CỬA HÀNG</button>
-                <button class="btn-lg btn-sub" onclick="window.goToPage('getkey.html')"><i class="fas fa-bolt"></i> LẤY KEY FREE</button>
-            </div>
-        </section>
+        .btn-lg {
+            padding: 16px 36px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-family: 'Orbitron';
+            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            border: none;
+        }
 
-        <!-- SẢN PHẨM NỔI BẬT (mới) -->
-        <section class="section">
-            <h2 class="sec-title">SẢN PHẨM <span>BÁN CHẠY</span></h2>
-            <div class="grid">
-                <div class="card">
-                    <i class="fas fa-facebook main-icon"></i>
-                    <h3>Tool Auto Facebook</h3>
-                    <p>Đăng bài, kết bạn, like comment tự động.</p>
-                    <div class="price">599.000 đ</div>
-                    <button class="btn-small" onclick="window.goToPage('shop.html')">MUA NGAY</button>
-                </div>
-                <div class="card">
-                    <i class="fas fa-instagram main-icon"></i>
-                    <h3>IG Auto Grow</h3>
-                    <p>Tăng follow, tương tác instagram thông minh.</p>
-                    <div class="price">799.000 đ</div>
-                    <button class="btn-small" onclick="window.goToPage('shop.html')">MUA NGAY</button>
-              
+        .btn-main {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 5px 25px rgba(0, 255, 136, 0.4);
+        }
+
+        .btn-main:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.6);
+        }
+
+        .btn-sub {
+            background: transparent;
+            color: #fff;
+            border: 2px solid var(--border);
+        }
+
+        .btn-sub:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* SECTION CHUNG */
+        .section {
+            padding: 80px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .sec-title {
+            text-align: center;
+            font-family: 'Orbitron';
+            font-size: 32px;
+            margin-bottom: 60px;
+            text-transform: uppercase;
+            position: relative;
+        }
+
+        .sec-title:after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 3px;
+            background: var(--primary);
+            margin: 20px auto 0;
+            border-radius: 2px;
+        }
+
+        .sec-title span {
+            color: var(--primary);
+        }
+
+        /* GRID */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            transition: 0.3s;
+            backdrop-filter: blur(5px);
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 255, 136, 0.15);
+        }
+
+        .card i.main-icon {
+            color: var(--primary);
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .card h3 {
+            font-family: 'Orbitron';
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .price {
+            font-size: 26px;
+            font-weight: 900;
+            color: var(--primary);
+            margin: 15px 0;
+        }
+
+        .btn-small {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 14px;
+        }
+
+        .btn-small:hover {
+            background: var(--primary);
+            color: #000;
+            border-color: var(--primary);
+        }
+
+        /* ABOUT SECTION */
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+
+        .about-content h3 {
+            font-family: 'Orbitron';
+            font-size: 24px;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .about-content p {
+            color: var(--text-muted);
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .about-stats {
+            display: flex;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .stat-box {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: 'Orbitron';
+            font-size: 36px;
+            font-weight: 900;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .about-image {
+            position: relative;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .about-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: 0.5s;
+        }
+
+        .about-image:hover img {
+            transform: scale(1.05);
+        }
+
+        /* FEATURES */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .feature-item {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 30px 20px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .feature-item:hover {
+            border-color: var(--accent);
+        }
+
+        .feature-item i {
+            font-size: 40px;
+            color: var(--accent);
+            margin-bottom: 15px;
+        }
+
+        .feature-item h4 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .feature-item p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* SKILLS BARS */
+        .skills-container {
+            background: var(--card-bg);
+            border-radius: 30px;
+            padding: 40px;
+            border: 1px solid var(--border);
+        }
+
+        .skill-item {
+            margin-bottom: 25px;
+        }
+
+        .skill-info {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #ddd;
+            font-family: 'Orbitron';
+        }
+
+        .progress-bg {
+            width: 100%;
+            height: 12px;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--primary));
+            width: 0;
+            transition: width 2s cubic-bezier(0.1, 0.5, 0.1, 1);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        /* TESTIMONIALS */
+        .testimonials {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            justify-content: center;
+        }
+
+        .testimonial-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid #1a1a24;
+            border-radius: 24px;
+            padding: 30px;
+            max-width: 320px;
+            transition: 0.3s;
+        }
+
+        .testimonial-item:hover {
+            border-color: var(--primary);
+        }
+
+        .testimonial-item i {
+            color: var(--primary);
+            font-size: 28px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .testimonial-item p {
+            font-style: italic;
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .testimonial-item h4 {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* STATS GRID */
+        .stats-grid {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            background: var(--card-bg);
+            border-radius: 40px;
+            padding: 50px 30px;
+            border: 1px solid var(--border);
+            gap: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: 'Orbitron';
+   l
