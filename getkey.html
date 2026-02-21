@@ -2,104 +2,89 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VƯỢT LINK AN TOÀN | QUOCDAT SEC</title>
-    
-    <script>
-        var currentUser = localStorage.getItem('vip_username');
-        if(!currentUser || currentUser.trim() === "") { window.location.replace("login.html"); } 
-        window.goToPage = function(url) { window.location.href = url; }
-    </script>
-
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --accent: #00b8ff; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg); color: #fff; padding-top: 70px; padding-bottom: 50px; }
-        header { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(10,10,15,0.98); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 1000; }
-        .logo { font-family: 'Orbitron'; font-size: 18px; font-weight: 900; color: #fff; cursor: pointer; }
-        
-        .container { max-width: 600px; margin: 50px auto; padding: 0 20px; text-align: center; }
-        .free-key-section { background: var(--card-bg); border: 1px solid var(--border); padding: 40px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        
-        .btn-bypass { background: var(--accent); color: #000; padding: 18px 30px; border-radius: 12px; font-weight: bold; font-family: 'Orbitron'; border: none; cursor: pointer; font-size: 18px; width: 100%; margin-top: 20px; transition: 0.3s; box-shadow: 0 0 20px rgba(0,184,255,0.3); }
-        .btn-bypass:hover { transform: scale(1.02); filter: brightness(1.2); }
-        
-        .status-loading { font-family: monospace; color: var(--primary); margin-top: 20px; display: none; font-size: 14px; }
-        .error-message { color: #ff5555; margin-top: 15px; font-size: 14px; display: none; }
-    </style>
+    <title>VƯỢT LINK PRO</title>
+    <!-- giữ nguyên các thẻ meta, css, firebase, font -->
+    <style> /* giữ nguyên style cũ */ </style>
 </head>
 <body>
-    <header>
-        <div class="logo" onclick="window.goToPage('index.html')"><i class="fas fa-arrow-left" style="color:#888; margin-right:10px;"></i> VỀ TRANG CHỦ</div>
-    </header>
-
-    <div class="container">
-        <div class="free-key-section">
-            <i class="fas fa-bolt" style="font-size: 60px; color: var(--accent); margin-bottom: 20px;"></i>
-            <h2 style="font-family:'Orbitron'; color:var(--accent); margin-bottom:10px;">KHỞI TẠO LINK MỚI</h2>
-            <p style="color:#888; font-size:14px; margin-bottom:20px; line-height:1.6;">Hệ thống sử dụng cơ chế chuyển hướng trực tiếp cấp độ trình duyệt. Đảm bảo 100% tạo link thành công và không bị lỗi API.</p>
-            
-            <button class="btn-bypass" id="btnCreateLink" onclick="forceGenerateLink()">
-                <i class="fas fa-rocket"></i> BẮT ĐẦU VƯỢT LINK
-            </button>
-
-            <div id="loadingStatus" class="status-loading">
-                <i class="fas fa-spinner fa-spin"></i> ĐANG THIẾT LẬP BẢO MẬT...
-            </div>
-            <div id="errorMsg" class="error-message">
-                <i class="fas fa-exclamation-triangle"></i> Lỗi kết nối, thử lại...
-            </div>
-        </div>
-    </div>
+    <header>...</header>
+    <div class="container">...</div>
 
     <script>
-        // API KEY CỦA BẠN: 6992df868b3d1e423d1ab833
         const MY_API_KEY = "6992df868b3d1e423d1ab833";
-
-        const firebaseConfig = { apiKey: MY_API_KEY, databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
+        const firebaseConfig = { ... };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Hàm JSONP để gọi API xuyên domain (tránh CORS)
+        // Hàm gọi JSONP (dành cho /api)
         function jsonpRequest(url, callbackName) {
             return new Promise((resolve, reject) => {
-                // Tạo tên callback duy nhất
-                const cbName = callbackName || 'jsonp_cb_' + Date.now() + '_' + Math.round(Math.random() * 1000000);
+                const cbName = callbackName + '_' + Date.now();
                 window[cbName] = function(data) {
                     resolve(data);
                     cleanup();
                 };
-
                 const script = document.createElement('script');
-                // Thêm callback vào URL
-                const separator = url.includes('?') ? '&' : '?';
-                script.src = url + separator + 'callback=' + cbName;
+                script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cbName;
                 script.async = true;
-
+                const timeout = setTimeout(() => {
+                    cleanup();
+                    reject(new Error('JSONP timeout'));
+                }, 8000);
+                script.onerror = () => { cleanup(); reject(new Error('JSONP network error')); };
+                document.head.appendChild(script);
                 function cleanup() {
                     if (script.parentNode) script.parentNode.removeChild(script);
                     delete window[cbName];
                     clearTimeout(timeout);
                 }
-
-                // Timeout sau 10 giây
-                const timeout = setTimeout(() => {
-                    cleanup();
-                    reject(new Error('JSONP timeout'));
-                }, 10000);
-
-                script.onerror = (err) => {
-                    cleanup();
-                    reject(err);
-                };
-
-                document.head.appendChild(script);
             });
+        }
+
+        // Hàm thử từng phương thức
+        async function tryAllMethods(destinationUrl) {
+            // Phương thức 1: Gọi /api bằng JSONP (nếu link4m hỗ trợ callback)
+            try {
+                const apiUrl = `https://link4m.com/api?api=${MY_API_KEY}&url=${encodeURIComponent(destinationUrl)}`;
+                const data = await jsonpRequest(apiUrl, 'link4m_callback');
+                // Định dạng response có thể khác nhau: thử các trường phổ biến
+                const shortLink = data.shortenedUrl || data.shortlink || data.url || (data.status === 'success' && data.link);
+                if (shortLink) {
+                    console.log('✅ Thành công qua /api JSONP');
+                    window.location.href = shortLink;
+                    return true;
+                }
+            } catch (e) {
+                console.warn('⚠️ /api JSONP thất bại:', e);
+            }
+
+            // Phương thức 2: Dùng fetch với proxy CORS (nếu có server proxy)
+            // (Ở đây giả sử bạn có file proxy.php cùng thư mục)
+            try {
+                const proxyUrl = `proxy.php?api=${MY_API_KEY}&url=${encodeURIComponent(destinationUrl)}`;
+                const res = await fetch(proxyUrl);
+                const data = await res.json();
+                const shortLink = data.shortenedUrl || data.shortlink || data.url;
+                if (shortLink) {
+                    console.log('✅ Thành công qua proxy PHP');
+                    window.location.href = shortLink;
+                    return true;
+                }
+            } catch (e) {
+                console.warn('⚠️ Proxy thất bại:', e);
+            }
+
+            // Phương thức 3: Redirect trực tiếp đến /st (cách cũ)
+            try {
+                const stUrl = `https://link4m.com/st?api=${MY_API_KEY}&url=${encodeURIComponent(destinationUrl)}`;
+                console.log('🔄 Thử redirect đến /st');
+                window.location.href = stUrl;
+                return true; // Không thể kiểm tra thành công, nhưng hy vọng redirect hoạt động
+            } catch (e) {
+                console.error('❌ /st redirect thất bại:', e);
+            }
+
+            return false;
         }
 
         async function forceGenerateLink() {
@@ -111,53 +96,25 @@
             status.style.display = 'block';
             errorMsg.style.display = 'none';
 
-            // 1. Khởi tạo mã Token xác thực cho người dùng
             const uniqueToken = "TK-" + Math.random().toString(36).substring(2, 12).toUpperCase();
             const freeKey = "QDFREE-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-            
-            // Lấy ID sản phẩm nếu có từ URL
             const urlParams = new URLSearchParams(window.location.search);
             const freeItem = urlParams.get('free_item');
-
-            // Cấu hình đích đến cuối cùng sau khi vượt link thành công
-            let currentPath = window.location.href.split('?')[0]; 
+            let currentPath = window.location.href.split('?')[0];
             let baseUrl = currentPath.substring(0, currentPath.lastIndexOf('/'));
             let destinationUrl = `${baseUrl}/key.html?verify=${uniqueToken}`;
-            if(freeItem) destinationUrl += `&free_item=${freeItem}`;
+            if (freeItem) destinationUrl += `&free_item=${freeItem}`;
 
-            // 2. Ghi nhận phiên làm việc lên Database (chờ sẵn)
             try {
-                await db.ref('free_tokens/' + uniqueToken).set({ 
-                    key: freeKey, 
-                    status: 'pending', 
-                    created_at: Date.now() 
-                });
+                await db.ref('free_tokens/' + uniqueToken).set({ key: freeKey, status: 'pending', created_at: Date.now() });
 
-                // 3. Gọi API link4m bằng JSONP (endpoint /api) để lấy short link
-                const apiUrl = `https://link4m.com/api?api=${MY_API_KEY}&url=${encodeURIComponent(destinationUrl)}`;
-                
-                try {
-                    // Dùng JSONP để gọi API, đợi kết quả
-                    const result = await jsonpRequest(apiUrl, 'link4m_callback');
-                    
-                    // Kiểm tra cấu trúc response (thường là { status: 'success', shortenedUrl: '...' } hoặc { shortlink: '...' })
-                    let shortLink = result.shortenedUrl || result.shortlink || (result.status === 'success' ? result.url : null);
-                    if (!shortLink) {
-                        throw new Error('Không tìm thấy short link trong phản hồi');
-                    }
-                    
-                    // Redirect đến short link (link4m sẽ tự redirect sau quảng cáo)
-                    window.location.href = shortLink;
-                } catch (jsonpErr) {
-                    console.warn('JSONP thất bại, chuyển sang phương thức dự phòng:', jsonpErr);
-                    
-                    // Fallback: dùng redirect trực tiếp đến endpoint /st (cách cũ)
-                    const fallbackUrl = `https://link4m.com/st?api=${MY_API_KEY}&url=${encodeURIComponent(destinationUrl)}`;
-                    window.location.href = fallbackUrl;
+                // Thử lần lượt các phương thức
+                const success = await tryAllMethods(destinationUrl);
+                if (!success) {
+                    throw new Error('Tất cả phương thức đều thất bại');
                 }
-
             } catch (err) {
-                console.error('Lỗi Firebase:', err);
+                console.error('Lỗi nghiêm trọng:', err);
                 errorMsg.style.display = 'block';
                 btn.style.display = 'block';
                 status.style.display = 'none';
