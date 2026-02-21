@@ -32,7 +32,6 @@
         .btn-bypass:hover { filter: brightness(1.2); }
         .btn-bypass:disabled { background: #333; color: #888; cursor: not-allowed; }
 
-        /* GIAO DIỆN TERMINAL & THANH TIẾN TRÌNH */
         .progress-wrapper { width: 100%; background: #000; border: 1px solid #333; border-radius: 10px; height: 18px; margin-top: 25px; overflow: hidden; display: none; position: relative; }
         .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--primary)); transition: width 0.2s ease; box-shadow: 0 0 15px var(--accent); }
         
@@ -64,14 +63,13 @@
         </div>
     </div>
         <script>
-        // API CỦA BẠN (Hoạt động tốt)
         const LINK4M_API = "6992df868b3d1e423d1ab833"; 
 
         const firebaseConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 200 PROXY CHÂU Á (HIỆU ỨNG ẢO)
+        // 200 PROXY CHÂU Á (HIỆU ỨNG ẢO ĐỂ LÀM MÀU)
         const asianNodes = ["VN-HN", "VN-HCM", "SG-SIN", "JP-TOK", "HK-WAN", "TW-TPE", "KR-SEO", "TH-BKK"];
         const fakeProxies = Array.from({length: 200}, () => `${asianNodes[Math.floor(Math.random()*asianNodes.length)]}-IP:${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`);
 
@@ -108,59 +106,32 @@
             await db.ref('free_tokens/' + uniqueToken).set({ key: freeKey, status: 'pending', created_at: Date.now() });
             logTerminal("Khởi tạo Token thành công.", "ok");
 
-            let targetApiUrl = `https://link4m.com/api-shorten/v2?api=${LINK4M_API}&url=${encodeURIComponent(destinationUrl)}`;
+            // HAI PHƯƠNG ÁN API ĐÃ THÀNH CÔNG TỪ HÔM QUA
+            let apiUrl_V2 = `https://link4m.com/api-shorten/v2?api=${LINK4M_API}&url=${encodeURIComponent(destinationUrl)}`;
+            let apiUrl_V1 = `https://link4m.com/api?api=${LINK4M_API}&url=${encodeURIComponent(destinationUrl)}`;
             let finalTargetUrl = null;
-            let apiFailed = false;
 
-            // ===============================================
-            // 2. LÕI API HOẠT ĐỘNG TỐT (Chạy ngầm phía sau)
-            // ===============================================
-            fetch(targetApiUrl)
-            .then(res => res.json())
-            .then(data => {
-                if(data.status === "success" || data.shortenedUrl || data.url) {
-                    finalTargetUrl = data.shortenedUrl || data.url;
-                } else {
-                    throw new Error("Direct fail");
-                }
-            })
-            .catch(() => {
-                // Nếu bị CORS chặn, tự động dùng AllOrigins để lách
-                fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetApiUrl)}`)
-                .then(res => res.json())
-                .then(data => {
-                    let parsedData = JSON.parse(data.contents);
-                    if(parsedData.status === "success" || parsedData.shortenedUrl || parsedData.url) {
-                        finalTargetUrl = parsedData.shortenedUrl || parsed.url;
-                    } else {
-                        apiFailed = true;
-                    }
-                }).catch(() => { apiFailed = true; });
-            });
-
-            // ===============================================
-            // 3. HIỆU ỨNG GIAO DIỆN (Đồng bộ với lõi API)
-            // ===============================================
+            // 2. CHẠY GIAO DIỆN ĐỒNG BỘ VỚI API
             let progress = 0;
             let loadInterval = setInterval(() => {
-                progress += Math.floor(Math.random() * 5) + 3;
+                progress += Math.floor(Math.random() * 8) + 4;
                 
-                // Giữ thanh chạy ở 90% nếu API chưa trả kết quả về
-                if (progress > 90 && !finalTargetUrl && !apiFailed) progress = 90; 
+                // Giữ thanh chạy ở 90% nếu API chưa chạy xong
+                if (progress > 90 && !finalTargetUrl) progress = 90; 
                 if (progress > 100) progress = 100;
                 
                 pBar.style.width = progress + '%';
-                
                 let randomIP = fakeProxies[Math.floor(Math.random() * fakeProxies.length)];
                 logTerminal(`Đang quét Proxy: [${randomIP}] ... [${progress}%]`);
                 
+                // Khi chạm mốc 100%
                 if (progress >= 100) {
                     clearInterval(loadInterval);
                     if (finalTargetUrl) {
                         logTerminal(`TẠO LINK THÀNH CÔNG! Đang chuyển hướng... [100%]`, "ok");
-                        setTimeout(() => { window.location.href = finalTargetUrl; }, 800);
+                        setTimeout(() => { window.location.href = finalTargetUrl; }, 600);
                     } else {
-                        logTerminal("LỖI KẾT NỐI MÁY CHỦ. Vui lòng thử lại!", "err");
+                        logTerminal("LỖI KẾT NỐI DO TRÌNH DUYỆT HOẶC MẠNG. Vui lòng tắt Adblock và thử lại!", "err");
                         pBar.style.background = "#ff4757";
                         setTimeout(() => {
                             btn.style.display = 'block';
@@ -169,7 +140,32 @@
                         }, 2000);
                     }
                 }
-            }, 120); 
+            }, 100); 
+
+            // ===============================================
+            // 3. LÕI API HOẠT ĐỘNG (Bắn ngầm ở dưới)
+            // ===============================================
+            try {
+                // Thử bắn V2
+                let res1 = await fetch(apiUrl_V2);
+                let data1 = await res1.json();
+                if(data1.status !== "error" && data1.shortenedUrl) {
+                    finalTargetUrl = data1.shortenedUrl;
+                } else {
+                    throw new Error("V2 Fail");
+                }
+            } catch (e1) {
+                // Nếu V2 lỗi, bắn ngay V1 (phương án dự phòng đã thành công)
+                try {
+                    let res2 = await fetch(apiUrl_V1);
+                    let data2 = await res2.json();
+                    if(data2.shortenedUrl || data2.url) {
+                        finalTargetUrl = data2.shortenedUrl || data2.url;
+                    }
+                } catch (e2) {
+                    // Cả 2 đều lỗi thì finalTargetUrl vẫn là null -> Giao diện sẽ báo lỗi đỏ
+                }
+            }
         }
     </script>
 </body>
