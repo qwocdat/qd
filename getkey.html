@@ -7,38 +7,54 @@
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --accent: #00b8ff; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+        
         .verify-card { background: var(--card-bg); border: 1px solid var(--border); width: 100%; max-width: 500px; padding: 40px 30px; border-radius: 24px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        .step-indicator { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; }
+        
+        .step-indicator { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; display: none; }
         .dot { width: 12px; height: 12px; border-radius: 50%; background: #333; transition: 0.3s; }
         .dot.active { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
-        h2 { font-family: 'Orbitron'; color: var(--accent); font-size: 20px; margin-bottom: 10px; }
-        p { color: #888; font-size: 14px; margin-bottom: 30px; }
-        .timer-display { font-family: 'Orbitron'; font-size: 48px; font-weight: 900; color: var(--primary); margin-bottom: 20px; }
+
+        h2 { font-family: 'Orbitron'; color: var(--accent); font-size: 20px; margin-bottom: 10px; text-transform: uppercase; }
+        p { color: #888; font-size: 14px; margin-bottom: 30px; line-height: 1.6; }
+
+        .timer-display { font-family: 'Orbitron'; font-size: 48px; font-weight: 900; color: var(--primary); margin-bottom: 20px; display: none; }
+
         .progress-container { width: 100%; height: 10px; background: #000; border-radius: 20px; margin-bottom: 30px; overflow: hidden; display: none; }
         .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--primary)); }
-        .btn-action { background: var(--primary); color: #000; padding: 18px; width: 100%; border-radius: 12px; border: none; font-weight: 900; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; font-size: 16px; }
+
+        .btn-action { background: var(--primary); color: #000; padding: 18px; width: 100%; border-radius: 12px; border: none; font-weight: 900; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; font-size: 16px; letter-spacing: 1px; }
         .btn-action:disabled { background: #222; color: #555; cursor: not-allowed; }
+        .btn-action:hover:not(:disabled) { filter: brightness(1.2); transform: translateY(-2px); }
     </style>
 </head>
 <body>
+
     <div class="verify-card">
-        <div class="step-indicator">
+        <div class="step-indicator" id="stepIndicator">
             <div class="dot active" id="dot1"></div>
             <div class="dot" id="dot2"></div>
             <div class="dot" id="dot3"></div>
         </div>
-        <h2 id="titleText">Xác Minh Bước 1</h2>
-        <p id="descText">Hệ thống đang kiểm tra an toàn thiết bị...</p>
+
+        <h2 id="titleText">Xác Minh Key Free</h2>
+        <p id="descText">Hệ thống xác minh 3 bước để đảm bảo bạn không phải Robot.</p>
+
         <div class="timer-display" id="timer">10</div>
-        <div class="progress-container" id="pContainer"><div class="progress-bar" id="pBar"></div></div>
-        <button class="btn-action" id="actionBtn" disabled onclick="handleNextStep()">ĐANG KIỂM TRA...</button>
+
+        <div class="progress-container" id="pContainer">
+            <div class="progress-bar" id="pBar"></div>
+        </div>
+
+        <button class="btn-action" id="actionBtn" onclick="initVerification()">
+            <i class="fas fa-play"></i> BẮT ĐẦU XÁC MINH
+        </button>
     </div>
 
     <script>
@@ -46,10 +62,16 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let currentStep = 1;
+        let currentStep = 0;
         let countdown;
 
-        window.onload = () => runStep(1, 10);
+        function initVerification() {
+            currentStep = 1;
+            document.getElementById('stepIndicator').style.display = 'flex';
+            document.getElementById('titleText').innerText = "Xác Minh Bước 1";
+            document.getElementById('descText').innerText = "Hệ thống đang kiểm tra an toàn thiết bị...";
+            runStep(1, 10);
+        }
 
         function runStep(step, seconds) {
             let timeLeft = seconds;
@@ -59,7 +81,7 @@
             const pBar = document.getElementById('pBar');
 
             btn.disabled = true;
-            btn.innerText = "VUI LÒNG ĐỢI...";
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ĐANG XỬ LÝ...`;
 
             if(step === 1) {
                 timerDisplay.style.display = 'block';
@@ -67,18 +89,26 @@
                 countdown = setInterval(() => {
                     timeLeft--;
                     timerDisplay.innerText = timeLeft;
-                    if(timeLeft <= 0) { clearInterval(countdown); btn.disabled = false; btn.innerText = "TIẾP TỤC BƯỚC 2"; }
+                    if(timeLeft <= 0) { 
+                        clearInterval(countdown); 
+                        btn.disabled = false; 
+                        btn.innerText = "TIẾP TỤC BƯỚC 2"; 
+                    }
                 }, 1000);
             } else {
                 timerDisplay.style.display = 'none';
                 pContainer.style.display = 'block';
                 pBar.style.width = "0%";
                 let width = 0;
-                let speed = 100 / (seconds * 10);
+                let stepSpeed = 100 / (seconds * 10);
                 countdown = setInterval(() => {
-                    width += speed;
+                    width += stepSpeed;
                     pBar.style.width = width + "%";
-                    if(width >= 100) { clearInterval(countdown); btn.disabled = false; btn.innerText = (step === 2) ? "TIẾP TỤC BƯỚC 3" : "NHẬN KEY NGAY"; }
+                    if(width >= 100) { 
+                        clearInterval(countdown); 
+                        btn.disabled = false; 
+                        btn.innerText = (step === 2) ? "TIẾP TỤC BƯỚC 3" : "HOÀN TẤT XÁC MINH"; 
+                    }
                 }, 100);
             }
         }
@@ -91,30 +121,33 @@
                 runStep(2, 15);
             } else if(currentStep === 3) {
                 document.getElementById('dot3').classList.add('active');
-                document.getElementById('titleText').innerText = "Bước Cuối Cùng";
+                document.getElementById('titleText').innerText = "Xác Minh Bước Cuối";
                 runStep(3, 20);
             } else {
                 finish();
             }
         }
 
+        // Thay đổi sự kiện bấm nút sau khi bắt đầu
+        document.getElementById('actionBtn').onclick = function() {
+            if(currentStep === 0) initVerification();
+            else handleNextStep();
+        };
+
         async function finish() {
             const btn = document.getElementById('actionBtn');
-            btn.innerText = "ĐANG TẠO KEY..."; btn.disabled = true;
+            btn.innerText = "ĐANG ĐIỀU HƯỚNG..."; btn.disabled = true;
 
             const token = "TK-" + Math.random().toString(36).substring(2, 12).toUpperCase();
-            const key = "QDFREE-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-
-            // QUAN TRỌNG: Lưu vào bộ nhớ trình duyệt để key.html tự đọc
             localStorage.setItem('qd_secure_token', token);
             
-            await db.ref('free_tokens/' + token).set({ key: key, status: 'pending', created_at: Date.now() });
+            // Lưu trạng thái đã vượt qua thử thách
+            await db.ref('free_tokens/' + token).set({ 
+                status: 'verified', 
+                created_at: Date.now() 
+            });
 
-            const urlParams = new URLSearchParams(window.location.search);
-            const freeItem = urlParams.get('free_item');
-            let dest = `key.html?verify=${token}`;
-            if(freeItem) dest += `&free_item=${freeItem}`;
-            window.location.href = dest;
+            window.location.href = `key.html?verify=${token}`;
         }
     </script>
 </body>
