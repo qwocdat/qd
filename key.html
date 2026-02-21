@@ -3,226 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NHẬN KEY MIỄN PHÍ | QUOCDAT SEC</title>
-    
-    <script>
-        var currentUser = localStorage.getItem('vip_username');
-        var safeUserId = "guest";
-        if(!currentUser || currentUser.trim() === "") { window.location.replace("login.html"); } 
-        else { safeUserId = currentUser.replace(/[.#$\[\]]/g, '_'); }
-
-        window.goToPage = function(url) { window.location.href = url; }
-        window.copyKey = function(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                let toast = document.getElementById('toastMsg');
-                toast.innerHTML = `<i class="fas fa-copy"></i> Đã Copy: ${text}`;
-                toast.classList.add('show');
-                setTimeout(() => { toast.classList.remove('show'); }, 3000);
-            });
-        }
-    </script>
-
+    <title>KẾT QUẢ XÁC MINH | QUOCDAT SEC</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
-        :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --accent: #00b8ff; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg); color: #fff; padding-top: 70px; padding-bottom: 50px; }
-        
-        header { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(10,10,15,0.98); border-bottom: 1px solid var(--border); z-index: 1000; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
-        .logo { font-family: 'Orbitron'; font-size: 18px; font-weight: 900; color: #fff; text-decoration: none; cursor: pointer; }
-        
-        .toast { position: fixed; top: 90px; right: -300px; background: rgba(10,10,15,0.95); border-left: 4px solid var(--primary); border-radius: 8px; color: #fff; padding: 15px 20px; font-size: 13px; font-weight: bold; z-index: 99999; transition: 0.4s; }
-        .toast.show { right: 20px; }
-
-        .container { max-width: 600px; margin: 50px auto; padding: 0 20px; text-align: center; }
-
-        .result-box { background: var(--card-bg); padding: 40px 20px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: none; }
-        
-        .k-box { background: rgba(241,196,15,0.1); border: 2px dashed #f1c40f; padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; max-width: 500px; margin: 0 auto; }
-        .k-text { color: #f1c40f; font-family: monospace; font-size: 22px; font-weight: bold; letter-spacing: 2px; }
-        .k-btn { background: #f1c40f; color: #000; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; }
-
-        .btn-bypass { background: var(--accent); color: #000; padding: 15px 30px; border-radius: 12px; font-weight: bold; font-family: 'Orbitron'; border: none; cursor: pointer; font-size: 16px; margin-top: 20px; transition: 0.3s; width: 100%; }
-        .btn-bypass:hover { filter: brightness(1.2); }
-
-        .status-msg { font-size: 15px; font-weight: bold; margin-bottom: 15px; line-height: 1.5; }
-        .status-error { color: #ff4757; }
-        
-        /* CẢNH BÁO ANTI-BYPASS */
-        .anti-bypass-screen { background: rgba(255,71,87,0.1); border: 2px dashed #ff4757; padding: 40px 20px; border-radius: 20px; display: none; }
+        body { background: #0a0a0f; color: #fff; font-family: 'Inter', sans-serif; text-align: center; padding-top: 100px; }
+        .card { background: #15151e; max-width: 500px; margin: 0 auto; padding: 40px; border-radius: 20px; border: 1px solid #333; }
+        .key { display: block; font-family: 'Orbitron'; font-size: 28px; color: #f1c40f; margin: 20px 0; letter-spacing: 2px; }
+        .btn { background: #00ff88; color: #000; padding: 15px 30px; border-radius: 10px; text-decoration: none; font-weight: bold; display: inline-block; }
     </style>
 </head>
 <body>
-
-    <div class="toast" id="toastMsg"></div>
-
-    <header>
-        <div class="logo" onclick="window.goToPage('index.html')"><i class="fas fa-arrow-left" style="color:#888; margin-right:10px;"></i> VỀ TRANG CHỦ</div>
-    </header>
-
-    <div class="container">
-        
-        <div id="antiBypassScreen" class="anti-bypass-screen">
-            <i class="fas fa-shield-alt" style="font-size: 60px; color: #ff4757; margin-bottom: 20px;"></i>
-            <h2 style="font-family:'Orbitron'; color:#ff4757; margin-bottom:10px;">TRUY CẬP TRÁI PHÉP</h2>
-            <p style="color:#aaa; font-size:14px; margin-bottom:20px;">Bạn đang cố gắng truy cập thẳng vào trang nhận Key mà chưa vượt link hệ thống. Hành động này đã bị ngăn chặn!</p>
-            <button class="btn-bypass" style="background:#ff4757; color:#fff;" onclick="window.goToPage('getkey.html')">
-                <i class="fas fa-link"></i> QUAY LẠI TẠO LINK VƯỢT
-            </button>
-        </div>
-
-        <div id="stepResult" class="result-box">
-            
-            <div id="statusChecking" class="status-msg" style="color:#fff;"><i class="fas fa-spinner fa-spin"></i> Đang xác thực Token từ máy chủ...</div>
-            
-            <div id="statePending" style="display: none;">
-                <i class="fas fa-check-circle" style="font-size: 50px; color: var(--primary); margin-bottom: 20px;"></i>
-                <h3 style="color:var(--primary); margin-bottom: 10px; font-family:'Orbitron';">XÁC THỰC THÀNH CÔNG</h3>
-                <p style="color:#aaa; font-size:13px; margin-bottom:20px;">Vui lòng bấm nút bên dưới để Khởi tạo Key dùng thử. Key sẽ có hiệu lực trong đúng <strong>20 Phút</strong>.</p>
-                <button class="btn-bypass" onclick="activateFreeKey()"><i class="fas fa-power-off"></i> KHỞI TẠO KEY BẢN QUYỀN</button>
-            </div>
-
-            <div id="stateActive" style="display: none;">
-                <p style="color:var(--primary); font-size:14px; margin-bottom:15px; font-weight:bold;">Mã Key dùng thử miễn phí của bạn:</p>
-                <div class="k-box">
-                    <span class="k-text" id="freeKeyCode">...</span>
-                    <button class="k-btn" onclick="copyKey(document.getElementById('freeKeyCode').innerText)">COPY</button>
-                </div>
-                <div style="margin-top: 25px; font-size: 16px; color: #ff4757; font-weight: bold; font-family:'Orbitron';">
-                    ⏳ THỜI GIAN CÒN LẠI: <span id="countdownTimer" style="font-size:28px; display:block; margin-top:5px;">20:00</span>
-                </div>
-                <p style="font-size:12px; color:#666; margin-top:15px;">Hãy mang Key này dán vào Cổng Trích Xuất để nhận Link tải Tool.</p>
-            </div>
-
-            <div id="stateError" style="display: none;">
-                <div id="errorMessage" class="status-msg status-error"></div>
-                <button class="btn-bypass" style="background:#333; color:#fff;" onclick="window.goToPage('getkey.html')"><i class="fas fa-redo"></i> TẠO LINK VƯỢT MỚI</button>
-            </div>
-
-        </div>
+    <div class="card" id="box">
+        <i class="fas fa-spinner fa-spin" style="font-size: 40px; color: #00ff88;"></i>
+        <p>Đang kiểm tra bằng chứng xác minh...</p>
     </div>
-        <script>
+
+    <script>
         const firebaseConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        const urlParams = new URLSearchParams(window.location.search);
-        let currentToken = urlParams.get('verify');
-        let freeItemId = urlParams.get('free_item'); 
-        let timerInterval = null;
-
-        // KIỂM TRA NGAY KHI VỪA VÀO TRANG (ANTI-BYPASS)
         window.onload = function() {
-            if(!currentToken || currentToken.trim() === "") {
-                // Đuổi cổ ra ngoài nếu không có Token
-                document.getElementById('antiBypassScreen').style.display = 'block';
-                document.getElementById('stepResult').style.display = 'none';
-            } else {
-                // Bắt đầu xử lý Token
-                document.getElementById('antiBypassScreen').style.display = 'none';
-                document.getElementById('stepResult').style.display = 'block';
-                checkTokenState();
+            const urlParams = new URLSearchParams(window.location.search);
+            // ƯU TIÊN 1: Lấy từ URL. ƯU TIÊN 2: Lấy từ bộ nhớ trình duyệt
+            let token = urlParams.get('verify') || localStorage.getItem('qd_secure_token');
+
+            if(!token) {
+                renderError("Không tìm thấy bằng chứng xác minh hợp lệ!");
+                return;
             }
-        };
 
-        function checkTokenState() {
-            db.ref('free_tokens/' + currentToken).on('value', (snapshot) => {
-                if(!snapshot.exists()) {
-                    showError("CẢNH BÁO BẢO MẬT: Mã Token này không tồn tại trên hệ thống hoặc là Token giả mạo!");
-                    return;
-                }
-                
-                let data = snapshot.val();
-
-                if(data.status === 'expired') {
-                    showError("Link này đã hết hạn sử dụng (Quá 20 phút) hoặc đã bị khóa.");
-                } 
-                else if(data.status === 'pending') {
-                    showPending();
-                } 
-                else if(data.status === 'active') {
-                    let elapsed = Date.now() - data.activated_at;
-                    let remainingMs = (20 * 60 * 1000) - elapsed; 
-                    
-                    if(remainingMs <= 0) {
-                        db.ref('free_tokens/' + currentToken).update({ status: 'expired' });
-                    } else {
-                        showActive(data.key, remainingMs);
-                    }
+            db.ref('free_tokens/' + token).once('value', (s) => {
+                if(s.exists()) {
+                    let d = s.val();
+                    document.getElementById('box').innerHTML = `
+                        <i class="fas fa-check-circle" style="font-size: 50px; color: #00ff88;"></i>
+                        <h2 style="margin-top:20px;">XÁC MINH THÀNH CÔNG</h2>
+                        <span class="key">${d.key}</span>
+                        <p style="color:#888;">Copy Key này dán vào Cổng Trích Xuất Link.</p>
+                        <a href="download.html" class="btn">ĐẾN CỔNG TRÍCH XUẤT</a>
+                    `;
+                    localStorage.removeItem('qd_secure_token'); // Xóa sau khi dùng xong
+                } else {
+                    renderError("Mã xác minh đã hết hạn hoặc không tồn tại!");
                 }
             });
         }
 
-        window.activateFreeKey = function() {
-            let activeTime = Date.now();
-            db.ref('free_tokens/' + currentToken).update({ status: 'active', activated_at: activeTime });
-
-            // Ghi vào lịch sử giao dịch (0đ) để khách lấy link ở trang download.html
-            if(freeItemId && safeUserId !== "guest") {
-                db.ref('products/' + freeItemId).once('value').then(pSnap => {
-                    if(pSnap.exists()) {
-                        let pData = pSnap.val();
-                        db.ref('free_tokens/' + currentToken).once('value').then(tSnap => {
-                            let k = tSnap.val().key;
-                            db.ref('transactions').push().set({
-                                user: safeUserId, type: 'purchase', amount: 0, 
-                                detail: 'Nhận Miễn Phí: ' + pData.name, key_granted: k, 
-                                download_link: pData.download_link || '#', time: new Date().toISOString()
-                            });
-                        });
-                    }
-                });
-            }
-        };
-
-        function showPending() {
-            document.getElementById('statusChecking').style.display = 'none';
-            document.getElementById('stateError').style.display = 'none';
-            document.getElementById('stateActive').style.display = 'none';
-            document.getElementById('statePending').style.display = 'block';
-        }
-
-        function showActive(keyText, remainingMs) {
-            document.getElementById('statusChecking').style.display = 'none';
-            document.getElementById('statePending').style.display = 'none';
-            document.getElementById('stateError').style.display = 'none';
-            document.getElementById('stateActive').style.display = 'block';
-            document.getElementById('freeKeyCode').innerText = keyText;
-
-            if(timerInterval) clearInterval(timerInterval);
-            startTimer(remainingMs);
-        }
-
-        function showError(msg) {
-            if(timerInterval) clearInterval(timerInterval);
-            document.getElementById('statusChecking').style.display = 'none';
-            document.getElementById('statePending').style.display = 'none';
-            document.getElementById('stateActive').style.display = 'none';
-            document.getElementById('stateError').style.display = 'block';
-            document.getElementById('errorMessage').innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${msg}`;
-        }
-
-        function startTimer(duration) {
-            let timer = duration;
-            timerInterval = setInterval(function () {
-                let minutes = parseInt((timer / 1000) / 60, 10);
-                let seconds = parseInt((timer / 1000) % 60, 10);
-
-                minutes = minutes < 10 ? "0" + minutes : minutes;
-                seconds = seconds < 10 ? "0" + seconds : seconds;
-
-                document.getElementById('countdownTimer').textContent = minutes + ":" + seconds;
-
-                if (timer <= 0) {
-                    clearInterval(timerInterval);
-                    db.ref('free_tokens/' + currentToken).update({ status: 'expired' });
-                }
-                timer -= 1000;
-            }, 1000);
+        function renderError(msg) {
+            document.getElementById('box').innerHTML = `
+                <i class="fas fa-exclamation-triangle" style="font-size: 50px; color: #ff4757;"></i>
+                <h2 style="color:#ff4757; margin-top:20px;">XÁC THỰC THẤT BẠI</h2>
+                <p style="color:#888;">${msg}</p>
+                <a href="getkey.html" class="btn" style="background:#333; color:#fff; margin-top:20px;">THỬ LẠI</a>
+            `;
         }
     </script>
 </body>
