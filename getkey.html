@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>XÁC MINH AN TOÀN | QUOCDAT SEC</title>
+    <title id="pageTitle">Đang tải cấu hình...</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    
     <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
@@ -17,7 +16,9 @@
         :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --accent: #00b8ff; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
-        .verify-card { background: var(--card-bg); border: 1px solid var(--border); width: 100%; max-width: 500px; padding: 40px 30px; border-radius: 24px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .verify-card { background: var(--card-bg); border: 1px solid var(--border); width: 100%; max-width: 500px; padding: 40px 30px; border-radius: 24px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: none; }
+        
+        #maintenanceBox { background: #1a0f14; border: 1px solid #ff4757; width: 100%; max-width: 500px; padding: 40px; border-radius: 24px; text-align: center; display: none; }
         
         .timer-box { font-family: 'Orbitron'; font-size: 50px; font-weight: 900; color: var(--primary); margin: 20px 0; display: none; }
         .progress-box { width: 100%; height: 12px; background: #000; border-radius: 10px; margin: 25px 0; overflow: hidden; display: none; }
@@ -25,46 +26,67 @@
         
         .btn-main { background: var(--primary); color: #000; padding: 18px; width: 100%; border-radius: 12px; border: none; font-weight: 900; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; font-size: 16px; box-shadow: 0 0 20px rgba(0,255,136,0.2); display: none; margin-top: 20px; }
         .btn-main:disabled { background: #222; color: #555; cursor: not-allowed; box-shadow: none; }
-        .btn-main:hover:not(:disabled) { filter: brightness(1.2); transform: translateY(-2px); }
-        
         .step-dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; display: none; }
         .dot { width: 10px; height: 10px; background: #333; border-radius: 50%; }
         .dot.active { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
-        
         .captcha-container { margin: 20px auto; display: flex; justify-content: center; }
     </style>
 </head>
 <body>
-    <div class="verify-card">
+
+    <div id="maintenanceBox">
+        <i class="fas fa-tools" style="font-size: 50px; color: #ff4757; margin-bottom: 20px;"></i>
+        <h2 style="font-family:'Orbitron'; color:#ff4757;">HỆ THỐNG ĐANG BẢO TRÌ</h2>
+        <p style="color:#888; margin-top:15px; line-height:1.6;">Quản trị viên đang tiến hành nâng cấp. Vui lòng quay lại sau ít phút.</p>
+    </div>
+
+    <div class="verify-card" id="mainCard">
         <div class="step-dots" id="dots"><div class="dot active" id="d1"></div><div class="dot" id="d2"></div><div class="dot" id="d3"></div></div>
         
-        <h2 id="title" style="font-family:'Orbitron'; color:var(--accent); margin-bottom:15px;">ANTI-BOT SYSTEM</h2>
+        <h2 id="mainTitle" style="font-family:'Orbitron'; color:var(--accent); margin-bottom:15px;">ĐANG TẢI...</h2>
         <p id="desc" style="color:#888; margin-bottom:10px;">Vui lòng xác minh bạn là con người trước khi khởi tạo Key.</p>
         
         <div class="captcha-container" id="captchaBox">
-            <div class="h-captcha" 
-                 data-sitekey="37385f1e-bb98-4314-8918-484498e80cd4" 
-                 data-callback="onCaptchaSuccess" 
-                 data-theme="dark">
-            </div>
+            <div class="h-captcha" data-sitekey="37385f1e-bb98-4314-8918-484498e80cd4" data-callback="onCaptchaSuccess" data-theme="dark"></div>
         </div>
 
-        <div class="timer-box" id="timer">10</div>
+        <div class="timer-box" id="timer">0</div>
         <div class="progress-box" id="pBox"><div class="progress-bar" id="pBar"></div></div>
 
         <button class="btn-main" id="btn" onclick="startProcess()"><i class="fas fa-play"></i> BẮT ĐẦU XÁC MINH</button>
     </div>
 
     <script>
-        const firebaseConfig = { 
-            apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", 
-            databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", 
-            projectId: "quocdat-b80c2" 
-        };
+        const firebaseConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         let step = 0;
+        let sysConfig = { t1: 10, t2: 15, t3: 20 }; // Mặc định
+
+        // 1. TẢI CẤU HÌNH TỪ FIREBASE (LIÊN KẾT ADMIN)
+        db.ref('settings').on('value', snap => {
+            let data = snap.val() || {};
+            
+            // Nếu bảo trì -> Khóa web
+            if(data.maintenance) {
+                document.getElementById('mainCard').style.display = 'none';
+                document.getElementById('maintenanceBox').style.display = 'block';
+                document.title = "ĐANG BẢO TRÌ | " + (data.site_name || 'QUOCDAT');
+                return;
+            }
+
+            // Nếu bình thường -> Đổ dữ liệu Admin vào
+            document.getElementById('maintenanceBox').style.display = 'none';
+            document.getElementById('mainCard').style.display = 'block';
+            
+            document.title = "XÁC MINH | " + (data.site_name || 'QUOCDAT SEC');
+            document.getElementById('mainTitle').innerText = data.getkey_title || 'ANTI-BOT SYSTEM';
+            
+            sysConfig.t1 = data.time_step_1 || 10;
+            sysConfig.t2 = data.time_step_2 || 15;
+            sysConfig.t3 = data.time_step_3 || 20;
+        });
 
         function onCaptchaSuccess(token) {
             document.getElementById('captchaBox').style.display = 'none';
@@ -77,9 +99,9 @@
             document.getElementById('dots').style.display = 'flex';
             document.getElementById('desc').style.display = 'none'; 
 
-            if(step === 1) runTimer(10);
-            else if(step === 2) runProgress(15);
-            else if(step === 3) runProgress(20);
+            if(step === 1) runTimer(sysConfig.t1); // Chạy time do admin set
+            else if(step === 2) runProgress(sysConfig.t2);
+            else if(step === 3) runProgress(sysConfig.t3);
             else finish();
         }
 
@@ -87,62 +109,37 @@
             let left = sec;
             const t = document.getElementById('timer');
             const b = document.getElementById('btn');
-            t.style.display = 'block'; 
-            b.disabled = true; 
-            b.innerHTML = '<i class="fas fa-spinner fa-spin"></i> VUI LÒNG ĐỢI...';
+            t.style.display = 'block'; b.disabled = true; b.innerHTML = '<i class="fas fa-spinner fa-spin"></i> VUI LÒNG ĐỢI...';
             
             let itv = setInterval(() => {
                 left--; t.innerText = left;
-                if(left <= 0) { 
-                    clearInterval(itv); 
-                    b.disabled = false; 
-                    b.innerText = "TIẾP TỤC BƯỚC 2"; 
-                }
+                if(left <= 0) { clearInterval(itv); b.disabled = false; b.innerText = "TIẾP TỤC BƯỚC 2"; }
             }, 1000);
         }
 
         function runProgress(sec) {
             document.getElementById('d'+step).classList.add('active');
-            document.getElementById('title').innerText = "BƯỚC " + step;
+            document.getElementById('mainTitle').innerText = "BƯỚC " + step;
             const b = document.getElementById('btn');
             const pb = document.getElementById('pBar');
             
-            document.getElementById('timer').style.display = 'none';
-            document.getElementById('pBox').style.display = 'block';
-            pb.style.width = "0%";
-            b.disabled = true; 
-            b.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> ĐANG ĐỒNG BỘ...';
+            document.getElementById('timer').style.display = 'none'; document.getElementById('pBox').style.display = 'block'; pb.style.width = "0%";
+            b.disabled = true; b.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> ĐANG ĐỒNG BỘ...';
             
             let w = 0; let s = 100 / (sec * 10);
             let itv = setInterval(() => {
                 w += s; pb.style.width = w + "%";
-                if(w >= 100) { 
-                    clearInterval(itv); 
-                    b.disabled = false; 
-                    b.innerText = (step === 2) ? "TIẾP TỤC BƯỚC 3" : "NHẬN KEY NGAY"; 
-                }
+                if(w >= 100) { clearInterval(itv); b.disabled = false; b.innerText = (step === 2) ? "TIẾP TỤC BƯỚC 3" : "NHẬN KEY NGAY"; }
             }, 100);
         }
 
         async function finish() {
             const b = document.getElementById('btn');
-            b.innerHTML = '<i class="fas fa-shield-alt"></i> ĐANG TẠO PHIÊN...'; 
-            b.disabled = true;
-            
+            b.innerHTML = '<i class="fas fa-shield-alt"></i> ĐANG TẠO PHIÊN...'; b.disabled = true;
             const token = "TK-" + Math.random().toString(36).substring(2, 12).toUpperCase();
-            
             localStorage.setItem('qd_secure_token', token);
-            
-            await db.ref('free_tokens/' + token).set({ 
-                status: 'verified', 
-                created_at: Date.now() 
-            });
-            
-            const urlParams = new URLSearchParams(window.location.search);
-            const freeItem = urlParams.get('free_item');
-            let dest = `key.html?verify=${token}`;
-            if(freeItem) dest += `&free_item=${freeItem}`;
-            window.location.href = dest;
+            await db.ref('free_tokens/' + token).set({ status: 'verified', created_at: Date.now() });
+            window.location.href = `key.html?verify=${token}`;
         }
     </script>
 </body>
