@@ -3,27 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>QUẢN LÝ KEY BẢN QUYỀN | QUOCDAT SEC</title>
+    <title>LẤY KEY MIỄN PHÍ | QUOCDAT SEC</title>
     
     <script>
         var currentUser = localStorage.getItem('vip_username');
-        var safeUserId = "guest";
         if(!currentUser || currentUser.trim() === "") { window.location.replace("login.html"); } 
-        else { safeUserId = currentUser.replace(/[.#$\[\]]/g, '_'); }
-
-        window.goToPage = function(url) {
-            document.body.style.opacity = '0';
-            setTimeout(() => { window.location.href = url; }, 300);
-        }
-
-        window.copyKey = function(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                let toast = document.getElementById('toastMsg');
-                toast.innerHTML = `<i class="fas fa-copy"></i> Đã Copy: ${text}`;
-                toast.classList.add('show');
-                setTimeout(() => { toast.classList.remove('show'); }, 3000);
-            });
-        }
+        window.goToPage = function(url) { window.location.href = url; }
     </script>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -34,150 +19,75 @@
     <style>
         :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --accent: #00b8ff; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg); color: #fff; padding-top: 70px; padding-bottom: 50px; transition: opacity 0.4s; }
-        
-        header { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(10,10,15,0.98); border-bottom: 1px solid var(--border); z-index: 1000; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+        body { background: var(--bg); color: #fff; padding-top: 70px; padding-bottom: 50px; }
+        header { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(10,10,15,0.98); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
         .logo { font-family: 'Orbitron'; font-size: 18px; font-weight: 900; color: #fff; text-decoration: none; cursor: pointer; }
-        .pc-wallet { background: rgba(0,255,136,0.1); border: 1px solid var(--primary); color: var(--primary); padding: 8px 15px; border-radius: 30px; font-size: 14px; font-family: 'Orbitron'; font-weight: bold; }
         
-        .toast { position: fixed; top: 90px; right: -300px; background: rgba(10,10,15,0.95); border-left: 4px solid var(--primary); border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); color: #fff; padding: 15px 20px; font-size: 13px; font-weight: bold; z-index: 99999; transition: 0.4s; }
-        .toast.show { right: 20px; }
-
-        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
-        .page-title { text-align: center; font-family: 'Orbitron'; font-size: 26px; color: var(--primary); margin-bottom: 10px; text-transform: uppercase; }
-        .page-desc { text-align: center; color: #888; font-size: 14px; margin-bottom: 40px; }
-
-        .grid-keys { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        
-        .key-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 15px; padding: 20px; position: relative; overflow: hidden; }
-        .key-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #f1c40f; }
-        .k-title { font-family: 'Orbitron'; font-size: 16px; font-weight: bold; margin-bottom: 15px; color: #fff; }
-        
-        .k-box { background: rgba(241,196,15,0.1); border: 1px dashed #f1c40f; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .k-text { color: #f1c40f; font-family: monospace; font-size: 18px; font-weight: bold; letter-spacing: 2px; }
-        .k-btn { background: #f1c40f; color: #000; border: none; padding: 8px 15px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .k-btn:hover { background: #fff; }
-
-        .free-key-section { margin-top: 50px; background: rgba(0,184,255,0.05); border: 1px solid var(--border); padding: 30px; border-radius: 20px; text-align: center; }
-        .btn-bypass { background: var(--accent); color: #000; padding: 15px 30px; border-radius: 12px; font-weight: bold; font-family: 'Orbitron'; border: none; cursor: pointer; font-size: 15px; margin-top: 20px; }
-        
-        .empty-state { text-align: center; padding: 50px 20px; color: #666; background: var(--card-bg); border-radius: 15px; border: 1px solid var(--border); grid-column: 1 / -1; }
+        .container { max-width: 600px; margin: 50px auto; padding: 0 20px; text-align: center; }
+        .free-key-section { background: var(--card-bg); border: 1px solid var(--border); padding: 40px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .btn-bypass { background: var(--accent); color: #000; padding: 15px 30px; border-radius: 12px; font-weight: bold; font-family: 'Orbitron'; border: none; cursor: pointer; font-size: 16px; width: 100%; margin-top: 20px; transition: 0.3s; }
+        .btn-bypass:hover { filter: brightness(1.2); }
+        .btn-bypass:disabled { background: #333; color: #888; cursor: not-allowed; }
     </style>
 </head>
 <body>
-        <div class="toast" id="toastMsg"></div>
-
     <header>
         <div class="logo" onclick="window.goToPage('index.html')"><i class="fas fa-arrow-left" style="color:#888; margin-right:10px;"></i> VỀ TRANG CHỦ</div>
-        <div class="pc-wallet" id="pcBal">0 đ</div>
     </header>
 
     <div class="container">
-        <div class="page-title"><i class="fas fa-key"></i> KHO KEY BẢN QUYỀN</div>
-        <div class="page-desc">Tất cả mã KEY kích hoạt Tool Auto / Script Game bạn đã mua được đồng bộ tại đây.</div>
-
-        <h3 style="font-family:'Orbitron'; font-size:16px; margin-bottom:20px; color:#fff; border-left: 3px solid var(--primary); padding-left: 10px;">KEY TOOL ĐÃ MUA</h3>
-        <div class="grid-keys" id="keyGrid">
-            <div class="empty-state">
-                <i class="fas fa-spinner fa-spin" style="font-size:40px; color:var(--primary); margin-bottom:15px;"></i>
-                <p>Đang đồng bộ dữ liệu KEY từ máy chủ Firebase...</p>
-            </div>
-        </div>
-
         <div class="free-key-section">
-            <h3 style="font-family:'Orbitron'; font-size:20px; color:var(--accent); margin-bottom:10px;">LẤY KEY SỬ DỤNG MIỄN PHÍ</h3>
-            <p style="color:#888; font-size:14px; max-width: 600px; margin: 0 auto;">Dành cho các phiên bản Tool dùng thử. Vui lòng vượt link rút gọn để ủng hộ Admin duy trì Server. Key Free có thời hạn sử dụng 24H.</p>
-            <button class="btn-bypass" onclick="openBypassLink()"><i class="fas fa-link"></i> VƯỢT LINK LẤY KEY NGÀY</button>
-            <div id="freeKeyResult" style="display:none; margin-top:20px;">
-                <div class="k-box" style="max-width:400px; margin:0 auto; border-color:var(--accent); background:rgba(0,184,255,0.1);">
-                    <span class="k-text" style="color:var(--accent);" id="freeKeyCode">QD-FREE-XXXX</span>
-                    <button class="k-btn" style="background:var(--accent);" onclick="copyKey(document.getElementById('freeKeyCode').innerText)">COPY</button>
-                </div>
-            </div>
+            <i class="fas fa-link" style="font-size: 60px; color: var(--accent); margin-bottom: 20px;"></i>
+            <h2 style="font-family:'Orbitron'; color:var(--accent); margin-bottom:10px;">VƯỢT LINK LẤY KEY FREE</h2>
+            <p style="color:#888; font-size:14px; margin-bottom:20px; line-height:1.6;">Link chứa Token chống truy cập trái phép. Sau khi vượt link xong, hệ thống sẽ cấp phát giao diện Khởi tạo Key (Tồn tại 20 Phút).</p>
+            
+            <button class="btn-bypass" id="btnCreateLink" onclick="generateLink4M()">
+                <i class="fas fa-external-link-alt"></i> TẠO LINK RÚT GỌN NGAY
+            </button>
         </div>
     </div>
-        <script>
-        // HÀM MÔ PHỎNG VƯỢT LINK LẤY KEY FREE
-        function openBypassLink() {
-            let btn = document.querySelector('.btn-bypass');
-            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ĐANG TẠO LINK...`;
-            btn.style.background = "#333";
-            btn.style.color = "#fff";
-            
-            // Giả lập sau 2 giây sẽ cấp Key Free
-            setTimeout(() => {
-                btn.style.display = 'none';
-                let randomKey = "QDFREE-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-                document.getElementById('freeKeyCode').innerText = randomKey;
-                document.getElementById('freeKeyResult').style.display = 'block';
-                showToast("Vượt link thành công! Nhận Key 24H.");
-            }, 2000);
-        }
 
-        // KẾT NỐI FIREBASE ĐỂ LẤY SỐ DƯ & KEY VIP
+    <script>
+        // API CỦA BẠN
+        const LINK4M_API = "6992df868b3d1e423d1ab833"; 
+
         const firebaseConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 1. ĐỒNG BỘ SỐ DƯ LÊN GÓC PHẢI
-        if(safeUserId !== "guest") {
-            db.ref('users/' + safeUserId).on('value', (snapshot) => {
-                if(snapshot.exists()) {
-                    let bal = snapshot.val().balance || 0;
-                    document.getElementById('pcBal').innerText = bal.toLocaleString('vi-VN') + " đ";
-                }
+        function generateLink4M() {
+            let btn = document.getElementById('btnCreateLink'); 
+            btn.disabled = true; 
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ĐANG KHỞI TẠO LINK...`;
+            
+            // Sinh Token
+            let uniqueToken = "TK-" + Math.random().toString(36).substring(2, 10).toUpperCase();
+            let freeKey = "QDFREE-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+            
+            let currentPath = window.location.href.split('?')[0]; 
+            let baseUrl = currentPath.substring(0, currentPath.lastIndexOf('/'));
+            let destinationUrl = baseUrl + "/key.html?verify=" + uniqueToken;
+
+            // Đẩy Token lên Firebase với trạng thái "pending" (Chờ khởi tạo)
+            db.ref('free_tokens/' + uniqueToken).set({ 
+                key: freeKey, 
+                status: 'pending', // Trạng thái: pending -> active -> expired
+                created_at: Date.now() 
+            }).then(() => {
+                let apiUrl = `https://link4m.com/api-shorten/v2?api=${LINK4M_API}&url=${encodeURIComponent(destinationUrl)}`;
+                fetch(apiUrl).then(response => response.json()).then(data => {
+                    if(data.status === "success" || data.status === 200 || data.shortenedUrl) {
+                        window.location.href = data.shortenedUrl || data.url; 
+                    } else {
+                        alert("Lỗi kết nối Link4M. Vui lòng kiểm tra lại!"); 
+                        btn.disabled = false; btn.innerHTML = `<i class="fas fa-external-link-alt"></i> TẠO LINK LẠI`;
+                    }
+                }).catch(err => {
+                    alert("Không thể gọi API Link4M."); 
+                    btn.disabled = false; btn.innerHTML = `<i class="fas fa-external-link-alt"></i> TẠO LINK LẠI`;
+                });
             });
         }
-
-        // 2. TỰ ĐỘNG ĐỒNG BỘ KEY TỪ BẢNG LỊCH SỬ MUA HÀNG CỦA USER
-        db.ref('transactions').orderByChild('user').equalTo(safeUserId).on('value', (snap) => {
-            let grid = document.getElementById('keyGrid');
-            grid.innerHTML = '';
-
-            if(snap.exists()) {
-                let allTrans = [];
-                snap.forEach(child => { allTrans.push(child.val()); });
-                allTrans.reverse(); // Ưu tiên Key mới mua lên đầu
-                
-                let hasKey = false;
-
-                allTrans.forEach(t => {
-                    // Lọc ra các giao dịch là "Mua hàng" và có chứa MÃ KEY
-                    if(t.type === 'purchase' && t.key_granted && t.key_granted !== "") {
-                        hasKey = true;
-                        // Cắt chữ "Mua: " ra khỏi tên sản phẩm cho đẹp
-                        let prodName = t.detail.replace('Mua: ', '');
-                        
-                        grid.innerHTML += `
-                            <div class="key-card">
-                                <div class="k-title"><i class="fas fa-shield-alt" style="color:#f1c40f; margin-right:8px;"></i> ${prodName}</div>
-                                <div style="font-size:12px; color:#888; margin-bottom:10px;">Mã kích hoạt VIP (Lifetime):</div>
-                                <div class="k-box">
-                                    <span class="k-text">${t.key_granted}</span>
-                                    <button class="k-btn" onclick="copyKey('${t.key_granted}')">COPY</button>
-                                </div>
-                            </div>
-                        `;
-                    }
-                });
-
-                if(!hasKey) {
-                    grid.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-folder-open" style="font-size:40px; margin-bottom:15px; color:#444;"></i>
-                            <p>Bạn chưa mua sản phẩm nào có chứa mã KEY.</p>
-                        </div>
-                    `;
-                }
-            } else {
-                grid.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-ghost" style="font-size:40px; margin-bottom:15px; color:#444;"></i>
-                        <p>Không tìm thấy dữ liệu mua hàng của bạn.</p>
-                    </div>
-                `;
-            }
-        });
     </script>
 </body>
 </html>
