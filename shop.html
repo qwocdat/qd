@@ -7,20 +7,10 @@
     
     <script>
         var currentUser = localStorage.getItem('vip_username');
-        if(!currentUser) { window.location.replace("login.html"); }
-        window.goToPage = function(url) { window.location.href = url; }
+        if(!currentUser || currentUser.trim() === "") { window.location.replace("login.html"); }
+        var safeUserId = currentUser.replace(/[.#$\[\]]/g, '_');
         
-        // Giỏ hàng Demo
-        let cartCount = 0;
-        window.addToCart = function(productName) {
-            cartCount++;
-            document.getElementById('cartBadge').innerText = cartCount;
-            document.getElementById('cartBadge').style.display = 'flex';
-            let toast = document.getElementById('toastMsg');
-            toast.innerHTML = `<i class="fas fa-check-circle"></i> Đã thêm ${productName}`;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
+        window.goToPage = function(url) { window.location.href = url; }
     </script>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -33,29 +23,28 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: #fff; padding-top: 70px; padding-bottom: 50px; }
         
-        /* HEADER */
         header { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(10,10,15,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 1000; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
         .logo { font-family: 'Orbitron'; font-size: 18px; font-weight: 900; color: #fff; text-decoration: none; cursor:pointer;}
-        .cart-icon { position: relative; font-size: 20px; cursor: pointer; }
-        .cart-badge { position: absolute; top: -8px; right: -10px; background: #ff4757; color: #fff; font-size: 10px; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; display: none; justify-content: center; align-items: center; border: 2px solid #0a0a0f; }
+        .pc-wallet { background: rgba(0,255,136,0.1); border: 1px solid var(--primary); color: var(--primary); padding: 8px 15px; border-radius: 30px; font-size: 14px; font-family: 'Orbitron'; font-weight: bold; }
 
-        /* HERO SHOP */
         .shop-hero { padding: 40px 20px; text-align: center; border-bottom: 1px dashed var(--border); background: #050508; }
         .shop-hero h1 { font-family: 'Orbitron'; font-size: 26px; color: var(--primary); text-transform: uppercase; margin-bottom: 10px; }
         
-        /* GRID SẢN PHẨM */
         .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
         .p-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
         
         .p-card { background: var(--card-bg); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; transition: 0.3s; animation: fadeInUp 0.5s ease; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .p-card:hover { border-color: var(--primary); transform: translateY(-5px); }
         
-        .p-img { height: 130px; background: #111; display: flex; justify-content: center; align-items: center; font-size: 40px; color: #555; position: relative; }
+        .p-img { height: 130px; background: #111; display: flex; justify-content: center; align-items: center; font-size: 40px; color: #555; position: relative; border-bottom: 1px solid var(--border); }
         .p-cat { position: absolute; top: 10px; left: 10px; background: #222; color: #fff; font-size: 10px; padding: 4px 8px; border-radius: 5px; font-weight: bold; }
         .p-info { padding: 20px; flex: 1; display: flex; flex-direction: column; }
         .p-title { font-family: 'Orbitron'; font-size: 15px; margin-bottom: 8px; font-weight: bold; }
         .p-price-row { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 15px; border-top: 1px dashed var(--border); }
-        .btn-add-cart { background: rgba(0,255,136,0.1); border: 1px solid var(--primary); color: var(--primary); padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; }
+        
+        .btn-add-cart { background: rgba(0,255,136,0.1); border: 1px solid var(--primary); color: var(--primary); padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.3s; }
+        .btn-add-cart:hover { background: var(--primary); color: #000; }
 
         .toast { position: fixed; top: 90px; right: -300px; background: rgba(10,10,15,0.95); border-left: 4px solid var(--primary); border-radius: 8px; color: #fff; padding: 15px 20px; font-size: 13px; font-weight: bold; z-index: 99999; transition: 0.4s; display: flex; align-items: center; gap: 10px; }
         .toast.show { right: 20px; }
@@ -67,23 +56,19 @@
 
     <header>
         <div class="logo" onclick="window.goToPage('index.html')"><i class="fas fa-arrow-left" style="color:#888; margin-right:10px;"></i> QUOCDAT STORE</div>
-        <div style="display:flex; gap:20px; align-items:center;">
-            <div class="cart-icon" onclick="window.goToPage('cart.html')">
-                <i class="fas fa-shopping-cart"></i><div class="cart-badge" id="cartBadge">0</div>
-            </div>
-        </div>
+        <div class="pc-wallet" id="pcBal">0 đ</div>
     </header>
 
     <div class="shop-hero">
         <h1>CỬA HÀNG TÀI NGUYÊN VIP</h1>
-        <p style="color:#888; font-size:13px;">Dữ liệu được đồng bộ trực tiếp từ máy chủ. Giao dịch tự động 100%.</p>
+        <p style="color:#888; font-size:13px;">Giao dịch tự động 100%. Mua xong nhận Link Tải & Key ngay lập tức.</p>
     </div>
 
     <div class="container">
         <div class="p-grid" id="shopGrid">
             <div style="text-align:center; color:#555; grid-column: 1 / -1; padding: 50px;">
                 <i class="fas fa-spinner fa-spin" style="font-size:30px; margin-bottom:15px; color:var(--primary);"></i><br>
-                Đang tải dữ liệu sản phẩm từ Admin...
+                Đang tải dữ liệu sản phẩm từ hệ thống...
             </div>
         </div>
     </div>
@@ -93,9 +78,19 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        function formatMoney(num) { return Number(num).toLocaleString('vi-VN') + " đ"; }
+        let currentBalance = 0;
 
-        // KÉO SẢN PHẨM TỪ FIREBASE ĐỂ HIỂN THỊ
+        // ĐỒNG BỘ SỐ DƯ
+        if(safeUserId !== "guest") {
+            db.ref('users/' + safeUserId).on('value', (snap) => {
+                if(snap.exists()) {
+                    currentBalance = snap.val().balance || 0;
+                    document.getElementById('pcBal').innerText = currentBalance.toLocaleString('vi-VN') + " đ";
+                }
+            });
+        }
+
+        // KÉO SẢN PHẨM & HIỂN THỊ
         db.ref('products').on('value', (snapshot) => {
             let grid = document.getElementById('shopGrid');
             grid.innerHTML = '';
@@ -104,7 +99,15 @@
                 let data = snapshot.val();
                 for(let id in data) {
                     let p = data[id];
-                    let cardHtml = `
+                    let safeName = p.name.replace(/'/g, "\\'"); 
+                    let safeLink = p.download_link ? p.download_link.replace(/'/g, "\\'") : '#';
+                    
+                    // Logic hiển thị chữ MIỄN PHÍ nếu giá = 0
+                    let priceDisplay = p.price > 0 ? `<span style="color:var(--accent); font-family:monospace; font-size:18px; font-weight:bold;">${Number(p.price).toLocaleString('vi-VN')} đ</span>` : `<span style="color:var(--primary); font-family:monospace; font-size:18px; font-weight:bold;">MIỄN PHÍ</span>`;
+                    
+                    let btnText = p.price > 0 ? "Mua Ngay" : "Nhận Free";
+
+                    grid.innerHTML += `
                         <div class="p-card">
                             <div class="p-img">
                                 <span class="p-cat">${p.category}</span>
@@ -114,72 +117,57 @@
                                 <div class="p-title">${p.name}</div>
                                 <p style="font-size:12px; color:#888; margin-bottom:15px; flex:1;">${p.desc || 'Công cụ hỗ trợ MMO mạnh mẽ nhất hiện nay.'}</p>
                                 <div class="p-price-row">
-                                    <span style="color:var(--accent); font-family:monospace; font-size:18px; font-weight:bold;">${formatMoney(p.price)}</span>
-                                    <button class="btn-add-cart" onclick="window.addToCart('${p.name}')"><i class="fas fa-cart-plus"></i> Chọn Mua</button>
+                                    ${priceDisplay}
+                                    <button class="btn-add-cart" onclick="buyProduct('${id}', '${safeName}', ${p.price}, '${safeLink}')"><i class="fas fa-cart-plus"></i> ${btnText}</button>
                                 </div>
                             </div>
                         </div>
                     `;
-                    grid.innerHTML += cardHtml;
                 }
             } else {
-                grid.innerHTML = `<div style="text-align:center; color:#555; grid-column: 1 / -1; padding: 50px;">Admin hiện chưa đăng bán sản phẩm nào.</div>`;
+                grid.innerHTML = `<div style="text-align:center; color:#555; grid-column: 1 / -1; padding: 50px;">Kho hàng đang trống.</div>`;
             }
         });
+
+        // HÀM MUA HÀNG & TỰ ĐỘNG CHUYỂN TRANG
+        window.buyProduct = function(id, name, price, link) {
+            // Kiểm tra tiền
+            if(currentBalance < price && price > 0) {
+                let toast = document.getElementById('toastMsg');
+                toast.style.borderLeftColor = '#ff4757';
+                toast.innerHTML = `<i class="fas fa-times-circle" style="color:#ff4757"></i> Số dư không đủ!`;
+                toast.classList.add('show');
+                setTimeout(() => { toast.classList.remove('show'); window.location.href = 'naptien.html'; }, 1500);
+                return;
+            }
+
+            let priceText = price > 0 ? Number(price).toLocaleString('vi-VN') + ' đ' : 'MIỄN PHÍ';
+            if(confirm(`Xác nhận mua [${name}] với giá ${priceText} ?`)) {
+                
+                // Trừ tiền nếu giá > 0
+                if(price > 0) {
+                    db.ref('users/' + safeUserId).update({ balance: currentBalance - price });
+                }
+                
+                // Sinh mã Key ngẫu nhiên
+                let newKey = "QDSEC-" + Math.random().toString(36).substring(2, 10).toUpperCase();
+                
+                // Ghi vào Lịch sử
+                db.ref('transactions').push().set({
+                    user: safeUserId,
+                    type: 'purchase',
+                    amount: price,
+                    detail: 'Mua: ' + name,
+                    key_granted: newKey,
+                    download_link: link,
+                    time: new Date().toISOString()
+                }).then(() => {
+                    // MUA XONG ĐÁ THẲNG SANG TRANG LỊCH SỬ KHO ĐỒ
+                    alert("Giao dịch thành công! Đang chuyển đến Kho đồ để lấy KEY...");
+                    window.location.href = "lichsugiaodich.html";
+                });
+            }
+        };
     </script>
 </body>
 </html>
-<div id="banIOS_Overlay" style="position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); z-index: 999999999; display: none; align-items: center; justify-content: center; flex-direction: column;">
-    <div style="background: rgba(30,30,30,0.9); width: 300px; border-radius: 18px; text-align: center; border: 1px solid #444; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; box-shadow: 0 20px 40px rgba(0,0,0,0.8);">
-        <div style="padding: 25px 20px;">
-            <div style="color:#fff; font-weight:600; font-size:17px; margin-bottom:10px;">Tài Khoản Bị Khóa</div>
-            <div style="color:#aaa; font-size:13px; line-height:1.4;">Tài khoản của bạn đã bị vô hiệu hóa vì lý do:</div>
-            <div id="banIOS_Reason" style="color:#ff4757; font-weight:bold; font-size:14px; margin: 10px 0;">Sử dụng Bug</div>
-            <div style="color:#aaa; font-size:13px;">Sẽ được mở khóa vào:</div>
-            <div id="banIOS_Time" style="color:#fff; font-weight:bold; font-size:14px; margin-top:5px;">20/10/2026 15:00</div>
-        </div>
-        <button style="border-top: 1px solid #444; color: #0a84ff; padding: 15px; font-weight: 600; cursor: pointer; width: 100%; background: transparent; border-left:none; border-right:none; border-bottom:none; font-size: 16px; outline:none;" onclick="window.executeLogout()">Đăng xuất</button>
-    </div>
-</div>
-
-<script>
-    // LẮNG NGHE LỆNH KHÓA TỪ ADMIN
-    document.addEventListener("DOMContentLoaded", function() {
-        if(currentUser && safeUserId !== "guest") {
-            let banRef = firebase.database().ref('users/' + safeUserId);
-            banRef.on('value', (snapshot) => {
-                if(snapshot.exists()) {
-                    let uData = snapshot.val();
-                    // Nếu tài khoản bị đánh dấu khóa
-                    if(uData.banned && uData.ban_until) {
-                        let now = new Date().getTime();
-                        let banTime = new Date(uData.ban_until).getTime();
-                        
-                        // Kiểm tra xem đã hết hạn khóa chưa
-                        if(banTime > now) {
-                            // Chưa hết hạn -> MỞ BỨC TƯỜNG CHẶN IOS
-                            document.getElementById('banIOS_Reason').innerText = uData.ban_reason || "Vi phạm chính sách.";
-                            
-                            // Chuyển giờ về định dạng Việt Nam
-                            let displayTime = new Date(uData.ban_until).toLocaleString('vi-VN', { hour: '2-digit', minute:'2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
-                            document.getElementById('banIOS_Time').innerText = displayTime;
-                            
-                            document.getElementById('banIOS_Overlay').style.display = 'flex';
-                            document.body.style.overflow = 'hidden'; // Chặn cuộn trang
-                        } else {
-                            // Đã quá hạn khóa -> Tự động ân xá
-                            banRef.update({ banned: false, ban_reason: null, ban_until: null });
-                            document.getElementById('banIOS_Overlay').style.display = 'none';
-                            document.body.style.overflow = 'auto';
-                        }
-                    } else {
-                        // Bình thường
-                        document.getElementById('banIOS_Overlay').style.display = 'none';
-                        document.body.style.overflow = 'auto';
-                    }
-                }
-            });
-        }
-    });
-</script>
-
