@@ -28,14 +28,11 @@
         .container { max-width: 600px; margin: 50px auto; padding: 0 20px; text-align: center; }
         .free-key-section { background: var(--card-bg); border: 1px solid var(--border); padding: 40px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         
-        .btn-bypass { background: var(--accent); color: #000; padding: 15px 30px; border-radius: 12px; font-weight: bold; font-family: 'Orbitron'; border: none; cursor: pointer; font-size: 16px; width: 100%; margin-top: 20px; transition: 0.3s; }
+        .btn-bypass { background: var(--accent); color: #000; padding: 18px 30px; border-radius: 12px; font-weight: bold; font-family: 'Orbitron'; border: none; cursor: pointer; font-size: 18px; width: 100%; margin-top: 20px; transition: 0.3s; }
         .btn-bypass:hover { filter: brightness(1.2); }
         .btn-bypass:disabled { background: #333; color: #888; cursor: not-allowed; }
 
-        .terminal-text { font-family: monospace; font-size: 13px; color: var(--accent); text-align: left; margin-top: 20px; display: none; background: #000; padding: 15px; border-radius: 8px; border: 1px dashed #333; height: 180px; overflow-y: hidden; line-height: 1.8; }
-        .t-success { color: var(--primary); font-weight: bold; }
-        .t-error { color: #ff4757; }
-        .t-warn { color: #f1c40f; }
+        .loading-text { font-family: monospace; font-size: 14px; color: var(--primary); margin-top: 20px; display: none; }
     </style>
 </head>
 <body>
@@ -45,42 +42,41 @@
 
     <div class="container">
         <div class="free-key-section">
-            <i class="fas fa-satellite-dish" style="font-size: 60px; color: var(--accent); margin-bottom: 20px;"></i>
-            <h2 style="font-family:'Orbitron'; color:var(--accent); margin-bottom:10px;">API ROUTING SYSTEM</h2>
-            <p style="color:#888; font-size:14px; margin-bottom:20px; line-height:1.6;">Vui lòng tắt trình chặn quảng cáo (Adblock) nếu có. Hệ thống sẽ kết nối với Link4M để lấy Link bảo mật.</p>
+            <i class="fas fa-bolt" style="font-size: 60px; color: var(--accent); margin-bottom: 20px;"></i>
+            <h2 style="font-family:'Orbitron'; color:var(--accent); margin-bottom:10px;">LẤY LINK SIÊU TỐC</h2>
+            <p style="color:#888; font-size:14px; margin-bottom:30px; line-height:1.6;">Hệ thống sẽ kết nối trực tiếp với Link4M. Quá trình này diễn ra ngay lập tức chưa tới 1 giây.</p>
             
-            <button class="btn-bypass" id="btnCreateLink" onclick="startBypass()">
-                <i class="fas fa-external-link-alt"></i> BẮT ĐẦU LẤY LINK
+            <button class="btn-bypass" id="btnCreateLink" onclick="generateLink4M()">
+                <i class="fas fa-paper-plane"></i> TẠO LINK NGAY
             </button>
 
-            <div id="terminalText" class="terminal-text"></div>
+            <div id="loadingMsg" class="loading-text">
+                <i class="fas fa-spinner fa-spin"></i> Đang tải dữ liệu...
+            </div>
         </div>
     </div>
-        <script>
+
+    <script>
+        // API GỐC CỦA BẠN (TRỰC TIẾP, KHÔNG CHỈNH SỬA)
         const LINK4M_API = "6992df868b3d1e423d1ab833"; 
 
         const firebaseConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        function logTerminal(msg, type="") {
-            let term = document.getElementById('terminalText');
-            let colorClass = type === "err" ? "t-error" : (type === "ok" ? "t-success" : (type === "warn" ? "t-warn" : ""));
-            term.innerHTML += `<span class="${colorClass}">> ${msg}</span><br>`;
-            term.scrollTop = term.scrollHeight; 
-        }
-
-        async function startBypass() {
+        function generateLink4M() {
             let btn = document.getElementById('btnCreateLink'); 
-            let term = document.getElementById('terminalText');
+            let loadMsg = document.getElementById('loadingMsg');
 
-            btn.style.display = 'none'; term.style.display = 'block';
-            term.innerHTML = "> Đang khởi tạo Token bảo mật...<br>";
+            btn.disabled = true; 
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ĐANG XỬ LÝ...`;
+            loadMsg.style.display = 'block';
 
+            // 1. CHUẨN BỊ TOKEN
             const urlParams = new URLSearchParams(window.location.search);
             const freeItem = urlParams.get('free_item');
 
-            let uniqueToken = "TK-" + Math.random().toString(36).substring(2, 10).toUpperCase();
+            let uniqueToken = "TK-" + Math.random().toString(36).substring(2, 12).toUpperCase();
             let freeKey = "QDFREE-" + Math.random().toString(36).substring(2, 8).toUpperCase();
             
             let currentPath = window.location.href.split('?')[0]; 
@@ -88,69 +84,29 @@
             let destinationUrl = baseUrl + "/key.html?verify=" + uniqueToken;
             if(freeItem) destinationUrl += "&free_item=" + freeItem;
 
-            // 1. Ghi Token lên Database
-            try {
-                await db.ref('free_tokens/' + uniqueToken).set({ key: freeKey, status: 'pending', created_at: Date.now() });
-                logTerminal("Đã cấp phát Token lên Server.", "ok");
-            } catch(e) {
-                logTerminal("Ghi Token thất bại, vui lòng tải lại trang!", "err");
-                return;
-            }
+            // 2. GHI LÊN FIREBASE VÀ GỌI THẲNG API (CHẠY SONG SONG CHO NHANH)
+            db.ref('free_tokens/' + uniqueToken).set({ key: freeKey, status: 'pending', created_at: Date.now() });
 
-            // 2. CHUẨN BỊ URL GỌI API LINK4M
             let targetApiUrl = `https://link4m.com/api-shorten/v2?api=${LINK4M_API}&url=${encodeURIComponent(destinationUrl)}`;
-            let finalShortLink = null;
 
-            logTerminal("Đang gọi API Link4M qua mạng lưới CORS Proxy...");
-
-            // 3. MẠNG LƯỚI 4 PROXY THỰC TẾ KHÔNG BỊ CHẶN
-            const proxyList = [
-                `https://api.allorigins.win/raw?url=${encodeURIComponent(targetApiUrl)}`,
-                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetApiUrl)}`,
-                `https://corsproxy.io/?${encodeURIComponent(targetApiUrl)}`,
-                targetApiUrl // Thử gọi thẳng nếu Proxy chết
-            ];
-
-            // 4. CHẠY VÒNG LẶP GỌI PROXY ĐẾN KHI NÀO RA LINK THÌ THÔI
-            for(let i = 0; i < proxyList.length; i++) {
-                logTerminal(`Đang thử Server Proxy [${i+1}/4]...`, "warn");
-                
-                try {
-                    // Fetch dữ liệu
-                    let res = await fetch(proxyList[i], { method: 'GET', mode: 'cors' });
-                    let text = await res.text();
-                    
-                    // Thử ép kiểu JSON (Nếu Cloudflare chặn nó sẽ ném ra HTML -> lỗi JSON -> văng xuống catch)
-                    let jsonData = JSON.parse(text);
-
-                    // Link4M trả về JSON chuẩn
-                    if(jsonData && (jsonData.status === 'success' || jsonData.shortenedUrl || jsonData.url)) {
-                        finalShortLink = jsonData.shortenedUrl || jsonData.url;
-                        logTerminal(`[Thành Công] Đã trích xuất được Link!`, "ok");
-                        break; // Có link là dừng vòng lặp ngay lập tức
-                    } else if (jsonData && jsonData.status === 'error') {
-                        // Lỗi từ Link4M (Ví dụ: Sai API, URL lỗi)
-                        logTerminal(`Link4M báo lỗi: ${jsonData.message}`, "err");
-                        break;
-                    }
-                } catch(e) {
-                    logTerminal(`Proxy [${i+1}] bị tường lửa chặn. Đang đổi trạm...`, "err");
+            // 3. FETCH TRỰC TIẾP (TỐC ĐỘ BÀN THỜ)
+            fetch(targetApiUrl)
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === "success" || data.status === 200 || data.shortenedUrl) {
+                    loadMsg.innerHTML = `<i class="fas fa-check-circle"></i> Thành công! Đang chuyển trang...`;
+                    window.location.href = data.shortenedUrl || data.url; 
+                } else {
+                    alert("Lỗi từ Link4M: " + (data.message || "Không xác định"));
+                    btn.disabled = false; btn.innerHTML = `<i class="fas fa-paper-plane"></i> THỬ LẠI`;
+                    loadMsg.style.display = 'none';
                 }
-            }
-
-            // 5. KẾT QUẢ CUỐI CÙNG
-            if(finalShortLink) {
-                logTerminal("Đang chuyển trang sang Link4M an toàn...", "ok");
-                setTimeout(() => { window.location.href = finalShortLink; }, 1000);
-            } else {
-                logTerminal("TẤT CẢ SERVER PROXY BỊ CHẶN HOẶC DO BẠN ĐANG BẬT ADBLOCK.", "err");
-                logTerminal("Vui lòng tắt chặn quảng cáo và thử lại!", "warn");
-                
-                setTimeout(() => { 
-                    btn.style.display = 'block'; 
-                    btn.innerHTML = `<i class="fas fa-redo"></i> TẠO LẠI LINK`;
-                }, 2000);
-            }
+            })
+            .catch(err => {
+                alert("Không thể kết nối đến Link4M. Vui lòng thử lại!");
+                btn.disabled = false; btn.innerHTML = `<i class="fas fa-paper-plane"></i> THỬ LẠI`;
+                loadMsg.style.display = 'none';
+            });
         }
     </script>
 </body>
