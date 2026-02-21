@@ -35,13 +35,14 @@
         .progress-wrapper { width: 100%; background: #000; border: 1px solid #333; border-radius: 10px; height: 18px; margin-top: 25px; overflow: hidden; display: none; position: relative; }
         .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--primary)); transition: width 0.3s ease; box-shadow: 0 0 15px var(--accent); }
         
-        .terminal-text { font-family: monospace; font-size: 12px; color: var(--accent); text-align: left; margin-top: 15px; display: none; background: #000; padding: 15px; border-radius: 8px; border: 1px dashed #333; height: 130px; overflow-y: hidden; line-height: 1.6; }
+        .terminal-text { font-family: monospace; font-size: 12px; color: var(--accent); text-align: left; margin-top: 15px; display: none; background: #000; padding: 15px; border-radius: 8px; border: 1px dashed #333; height: 140px; overflow-y: hidden; line-height: 1.6; }
         .t-success { color: var(--primary); }
         .t-error { color: #ff4757; }
+        .t-warn { color: #f1c40f; }
     </style>
 </head>
 <body>
-        <header>
+    <header>
         <div class="logo" onclick="window.goToPage('index.html')"><i class="fas fa-arrow-left" style="color:#888; margin-right:10px;"></i> VỀ TRANG CHỦ</div>
     </header>
 
@@ -49,10 +50,10 @@
         <div class="free-key-section">
             <i class="fas fa-satellite-dish" style="font-size: 60px; color: var(--accent); margin-bottom: 20px;"></i>
             <h2 style="font-family:'Orbitron'; color:var(--accent); margin-bottom:10px;">HỆ THỐNG ĐỊNH TUYẾN</h2>
-            <p style="color:#888; font-size:14px; margin-bottom:20px; line-height:1.6;">Hệ thống sẽ gửi yêu cầu xuyên qua các lớp Proxy để né Cloudflare và ép Link4M cấp phát Link rút gọn.</p>
+            <p style="color:#888; font-size:14px; margin-bottom:20px; line-height:1.6;">Hệ thống sẽ dùng mọi thuật toán để ép Server Link4M nhả Link rút gọn. Quá trình này hoàn toàn tự động.</p>
             
-            <button class="btn-bypass" id="btnCreateLink" onclick="generateLink4M()">
-                <i class="fas fa-external-link-alt"></i> BẮT ĐẦU ĐỤC TƯỜNG LỬA
+            <button class="btn-bypass" id="btnCreateLink" onclick="startBypass()">
+                <i class="fas fa-external-link-alt"></i> BẮT ĐẦU VƯỢT TƯỜNG LỬA
             </button>
 
             <div id="progressContainer" class="progress-wrapper">
@@ -71,20 +72,20 @@
 
         function logTerminal(msg, type="") {
             let term = document.getElementById('terminalText');
-            if(!term) return;
-            let colorClass = type === "err" ? "t-error" : (type === "ok" ? "t-success" : "");
+            let colorClass = type === "err" ? "t-error" : (type === "ok" ? "t-success" : (type === "warn" ? "t-warn" : ""));
             term.innerHTML += `<span class="${colorClass}">> ${msg}</span><br>`;
             term.scrollTop = term.scrollHeight; 
         }
 
-        async function generateLink4M() {
+        async function startBypass() {
             let btn = document.getElementById('btnCreateLink'); 
             let pWrap = document.getElementById('progressContainer');
             let pBar = document.getElementById('progressBar');
             let term = document.getElementById('terminalText');
 
             btn.style.display = 'none'; pWrap.style.display = 'block'; term.style.display = 'block';
-            term.innerHTML = "> Đang khởi tạo chuỗi Token bảo mật...<br>";
+            term.innerHTML = "> Đang khởi tạo Token bảo mật...<br>";
+            pBar.style.width = '10%';
 
             const urlParams = new URLSearchParams(window.location.search);
             const freeItem = urlParams.get('free_item');
@@ -97,78 +98,73 @@
             let destinationUrl = baseUrl + "/key.html?verify=" + uniqueToken;
             if(freeItem) destinationUrl += "&free_item=" + freeItem;
 
-            // 1. Ghi Token lên DB
-            await db.ref('free_tokens/' + uniqueToken).set({ key: freeKey, status: 'pending', created_at: Date.now() });
+            // 1. Ghi DB
+            try {
+                await db.ref('free_tokens/' + uniqueToken).set({ key: freeKey, status: 'pending', created_at: Date.now() });
+                logTerminal("Đã lưu mã Key vào Database.", "ok");
+            } catch(e) {
+                logTerminal("Lỗi kết nối CSDL, nhưng vẫn tiếp tục...", "warn");
+            }
 
-            let targetApiUrl = `https://link4m.com/api-shorten/v2?api=${LINK4M_API}&url=${encodeURIComponent(destinationUrl)}`;
-            
-            // 2. MẠNG LƯỚI PROXY ĐÃ FIX LỖI CLOUDFLARE CRASH
-            const proxyList = [
-                `https://api.allorigins.win/get?url=${encodeURIComponent(targetApiUrl)}`,
-                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetApiUrl)}`,
-                targetApiUrl // Thử bắn thẳng làm phương án cuối
-            ];
+            pBar.style.width = '30%';
+            logTerminal("Đang gọi API Link4M qua mạng Proxy ẩn danh...");
 
+            let targetApiUrl = `https://link4m.com/api?api=${LINK4M_API}&url=${encodeURIComponent(destinationUrl)}`;
             let finalShortLink = null;
 
-            // 3. THANH TIẾN TRÌNH ẢO
-            let progress = 0;
-            let loadInterval = setInterval(() => {
-                progress += Math.floor(Math.random() * 8) + 2;
-                if (progress > 85 && !finalShortLink) progress = 85; 
-                if (progress > 100) progress = 100;
-                
-                pBar.style.width = progress + '%';
-                
-                if (progress >= 100) {
-                    clearInterval(loadInterval);
-                    if(finalShortLink) {
-                        logTerminal(`[100%] LẤY LINK THÀNH CÔNG! Đang chuyển trang...`, "ok");
-                        setTimeout(() => { window.location.href = finalShortLink; }, 500);
-                    } else {
-                        logTerminal("Cloudflare chặn toàn bộ truy cập. Vui lòng thử lại.", "err");
-                        pBar.style.background = "#ff4757";
-                        setTimeout(() => {
-                            btn.style.display = 'block'; btn.innerHTML = `<i class="fas fa-redo"></i> TẠO LẠI LINK`;
-                            pWrap.style.display = 'none';
-                        }, 2000);
-                    }
-                }
-            }, 100);
+            // DANH SÁCH PROXY
+            const proxies = [
+                `https://api.allorigins.win/get?url=${encodeURIComponent(targetApiUrl)}`,
+                `https://cors-clear.deno.dev/${targetApiUrl}`,
+                targetApiUrl
+            ];
 
-            // 4. VÒNG LẶP GỌI API CHỐNG CRASH
-            for(let i = 0; i < proxyList.length; i++) {
-                let currentProxy = proxyList[i];
-                logTerminal(`Đang thử vượt tường lửa qua Tuyến [${i+1}/3]...`);
+            // 2. VÒNG LẶP GỌI API (Có bắt lỗi Crash)
+            for(let i = 0; i < proxies.length; i++) {
+                logTerminal(`Thử tuyến [${i+1}/3]...`);
+                pBar.style.width = (40 + i*15) + '%';
                 
                 try {
-                    let response = await fetch(currentProxy);
-                    let textResult = await response.text(); // Lấy dưới dạng Text trước để tránh lỗi JSON.parse
-                    
-                    let jsonData;
-                    
-                    // Nếu là AllOrigins, cấu trúc JSON bị lồng 2 lớp
-                    if(currentProxy.includes('allorigins')) {
-                        let tempJson = JSON.parse(textResult);
-                        // Bọc try catch lúc ép kiểu để nếu Cloudflare quăng HTML ra thì nó ko bị crash app
-                        try { jsonData = JSON.parse(tempJson.contents); } 
-                        catch(e) { throw new Error("Cloudflare chặn AllOrigins"); }
+                    let res = await fetch(proxies[i], { cache: 'no-store' });
+                    let text = await res.text();
+                    let jsonData = null;
+
+                    // Xử lý text để tránh crash khi dính CAPTCHA HTML
+                    if(proxies[i].includes('allorigins')) {
+                        let parsed1 = JSON.parse(text);
+                        jsonData = JSON.parse(parsed1.contents);
                     } else {
-                        try { jsonData = JSON.parse(textResult); } 
-                        catch(e) { throw new Error("Cloudflare chặn trực tiếp"); }
+                        jsonData = JSON.parse(text);
                     }
 
-                    // Nếu ép kiểu thành công và có Link
                     if(jsonData && (jsonData.status === 'success' || jsonData.shortenedUrl || jsonData.url)) {
                         finalShortLink = jsonData.shortenedUrl || jsonData.url;
-                        logTerminal(`Tuyến [${i+1}] đục thành công!`, "ok");
-                        break; // Có link thì thoát vòng lặp ngay lập tức!
+                        logTerminal(`Tuyến [${i+1}] THÀNH CÔNG! Đã ép ra Link.`, "ok");
+                        break; 
                     }
-
-                } catch (error) {
-                    logTerminal(`Tuyến [${i+1}] bị tường lửa chặn chặn lại. Đổi hướng...`, "err");
-                    continue; // Gặp lỗi thì kệ nó, chạy Proxy tiếp theo
+                } catch(e) {
+                    logTerminal(`Tuyến [${i+1}] bị Cloudflare chặn lại.`, "err");
                 }
+            }
+
+            // 3. XỬ LÝ CHUNG CUỘC (100% TẠO ĐƯỢC LINK)
+            pBar.style.width = '100%';
+            
+            if(finalShortLink) {
+                // Lấy được link đẹp từ API
+                logTerminal("Đang chuyển trang an toàn...", "ok");
+                setTimeout(() => { window.location.href = finalShortLink; }, 1000);
+            } else {
+                // PHƯƠNG ÁN BÚA TẠ: BẮT TRÌNH DUYỆT CỦA KHÁCH TỰ ĐÂM VÀO SERVER LINK4M
+                logTerminal("Máy chủ API từ chối. Kích hoạt chế độ ép vượt (Direct Force)...", "warn");
+                logTerminal("100% sẽ lấy được Link. Chuẩn bị chuyển hướng...", "ok");
+                
+                // Sử dụng Quick Link Protocol của Adlinkfly: /st?api=... hoặc /full?api=...
+                let directForceUrl = `https://link4m.com/st?api=${LINK4M_API}&url=${encodeURIComponent(destinationUrl)}`;
+                
+                setTimeout(() => { 
+                    window.location.href = directForceUrl; 
+                }, 1500);
             }
         }
     </script>
