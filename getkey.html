@@ -3,21 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title id="pageTitle">HỆ THỐNG XÁC MINH | QUOCDAT SEC</title>
+    <title id="pageTitle">XÁC MINH HỆ THỐNG | QUOCDAT SEC</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
+    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+
     <script>
-        const fbConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
+        const fbConfig = { 
+            apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", 
+            databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", 
+            projectId: "quocdat-b80c2" 
+        };
         if (!firebase.apps.length) firebase.initializeApp(fbConfig);
-        firebase.database().ref('raw_code/getkey_html').once('value', snap => {
+        const db = firebase.database();
+
+        db.ref('raw_code/getkey_html').once('value', snap => {
             let customCode = snap.val();
-            if (customCode && customCode.trim() !== "") { document.open(); document.write(customCode); document.close(); }
+            if (customCode && customCode.trim() !== "") {
+                document.open(); document.write(customCode); document.close();
+            }
         });
     </script>
 
-    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -25,52 +34,71 @@
         :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --accent: #00b8ff; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; transition: 0.3s; }
+        
         .card-box { background: var(--card-bg); border: 1px solid var(--border); width: 100%; max-width: 500px; padding: 40px 30px; border-radius: 24px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: none; }
+        
         .timer-box { font-family: 'Orbitron'; font-size: 50px; font-weight: 900; color: var(--primary); margin: 20px 0; display: none; }
         .progress-box { width: 100%; height: 12px; background: #000; border-radius: 10px; margin: 25px 0; overflow: hidden; display: none; }
         .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--primary)); transition: width 0.1s linear; }
+        
         .btn-main { background: var(--primary); color: #000; padding: 18px; width: 100%; border-radius: 12px; border: none; font-weight: 900; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; font-size: 16px; box-shadow: 0 0 20px rgba(0,255,136,0.2); margin-top: 20px; text-decoration: none; display: inline-block; }
         .btn-main:hover:not(:disabled) { filter: brightness(1.2); transform: translateY(-2px); }
+        .btn-main:disabled { background: #222; color: #555; cursor: not-allowed; box-shadow: none; }
+        
         .step-dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; display: none; }
         .dot { width: 10px; height: 10px; background: #333; border-radius: 50%; }
         .dot.active { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
+        
+        .captcha-container { margin: 20px auto; display: flex; justify-content: center; min-height: 78px; }
     </style>
 </head>
 <body>
 
     <div class="card-box" id="maintenanceBox">
         <i class="fas fa-tools" style="font-size: 50px; color: #ff4757; margin-bottom: 20px;"></i>
-        <h2 style="font-family:'Orbitron'; color:#ff4757;">BẢO TRÌ HỆ THỐNG</h2>
-        <p style="color:#888; margin-top:15px;">Vui lòng quay lại sau.</p>
+        <h2 style="font-family:'Orbitron'; color:#ff4757;">HỆ THỐNG BẢO TRÌ</h2>
+        <p style="color:#888; margin-top:15px;">Vui lòng quay lại sau ít phút.</p>
     </div>
 
     <div class="card-box" id="link4mBox">
-        <i class="fas fa-shield-alt" style="font-size: 50px; color: var(--accent); margin-bottom: 20px;"></i>
-        <h2 style="font-family:'Orbitron'; color:var(--accent); margin-bottom:15px;">YÊU CẦU VƯỢT LINK</h2>
-        <p style="color:#888; margin-bottom:10px;">Vui lòng hoàn thành vượt link để mở khóa bước xác minh cuối cùng.</p>
-        <a href="https://link4m.com/NhvsSDH" class="btn-main"><i class="fas fa-external-link-alt"></i> BẮT ĐẦU VƯỢT LINK</a>
+        <i class="fas fa-link" style="font-size: 50px; color: var(--accent); margin-bottom: 20px;"></i>
+        <h2 style="font-family:'Orbitron'; color:var(--accent); margin-bottom:15px;">MỞ KHÓA LIÊN KẾT</h2>
+        <p style="color:#888; margin-bottom:10px;">Vui lòng vượt qua liên kết rút gọn bên dưới để tiến hành lấy Key sử dụng.</p>
+        <a href="https://link4m.com/NhvsSDH" class="btn-main"><i class="fas fa-external-link-alt"></i> TỚI TRANG VƯỢT LINK</a>
     </div>
 
     <div class="card-box" id="mainCard">
         <div class="step-dots" id="dots"><div class="dot active" id="d1"></div><div class="dot" id="d2"></div><div class="dot" id="d3"></div></div>
-        <h2 id="mainTitle" style="font-family:'Orbitron'; color:var(--primary); margin-bottom:15px;">XÁC MINH</h2>
-        <p id="desc" style="color:#888; margin-bottom:10px;">Xác nhận bạn không phải Robot.</p>
+        
+        <h2 id="mainTitle" style="font-family:'Orbitron'; color:var(--primary); margin-bottom:15px;">XÁC MINH BOT</h2>
+        <p id="desc" style="color:#888; margin-bottom:10px;">Vui lòng hoàn thành hCaptcha bên dưới.</p>
+        
         <div class="captcha-container" id="captchaBox">
-            <div class="h-captcha" data-sitekey="37385f1e-bb98-4314-8918-484498e80cd4" data-callback="onCaptchaSuccess" data-theme="dark"></div>
+            <div class="h-captcha" 
+                 data-sitekey="37385f1e-bb98-4314-8918-484498e80cd4" 
+                 data-callback="onCaptchaSuccess" 
+                 data-theme="dark">
+            </div>
         </div>
+
         <div class="timer-box" id="timer">0</div>
         <div class="progress-box" id="pBox"><div class="progress-bar" id="pBar"></div></div>
+
         <button class="btn-main" id="btn" onclick="startProcess()" style="display:none;"><i class="fas fa-play"></i> TIẾP TỤC</button>
     </div>
 
     <script>
-        const db = firebase.database();
-        let step = 0; let sysConfig = { t1: 10, t2: 15, t3: 20 };
+        let step = 0;
+        let sysConfig = { t1: 10, t2: 15, t3: 20 };
+        
+        // KIỂM TRA CHÌA KHÓA URL
         const urlParams = new URLSearchParams(window.location.search);
         const hasPassedLink = urlParams.get('pass') === 'ok';
 
+        // LẮNG NGHE CÀI ĐẶT TỪ ADMIN
         db.ref('settings').on('value', snap => {
             let data = snap.val() || {};
+            
             if(data.theme_primary) document.documentElement.style.setProperty('--primary', data.theme_primary);
             if(data.theme_bg) document.documentElement.style.setProperty('--bg', data.theme_bg);
 
@@ -81,19 +109,33 @@
             } else {
                 document.getElementById('maintenanceBox').style.display = 'none';
                 document.getElementById('mainTitle').innerText = data.getkey_title || 'ANTI-BOT SYSTEM';
-                if (!hasPassedLink) { document.getElementById('link4mBox').style.display = 'block'; }
-                else { document.getElementById('mainCard').style.display = 'block'; }
+                
+                // HIỂN THỊ THEO LUỒNG LINK4M
+                if (!hasPassedLink) {
+                    document.getElementById('link4mBox').style.display = 'block';
+                    document.getElementById('mainCard').style.display = 'none';
+                } else {
+                    document.getElementById('link4mBox').style.display = 'none';
+                    document.getElementById('mainCard').style.display = 'block';
+                }
             }
-            sysConfig.t1 = data.time_step_1 || 10; sysConfig.t2 = data.time_step_2 || 15; sysConfig.t3 = data.time_step_3 || 20;
+            sysConfig.t1 = data.time_step_1 || 10;
+            sysConfig.t2 = data.time_step_2 || 15;
+            sysConfig.t3 = data.time_step_3 || 20;
         });
 
-        function onCaptchaSuccess() { 
+        // KHI GIẢI XONG HCAPTCHA
+        function onCaptchaSuccess(token) {
             document.getElementById('captchaBox').style.display = 'none';
-            document.getElementById('btn').style.display = 'block'; 
+            document.getElementById('desc').innerText = "Xác thực thành công! Nhấn Tiếp tục để bắt đầu đếm ngược.";
+            document.getElementById('btn').style.display = 'block';
         }
 
         function startProcess() {
-            step++; document.getElementById('dots').style.display = 'flex';
+            step++;
+            document.getElementById('dots').style.display = 'flex';
+            document.getElementById('desc').style.display = 'none'; 
+
             if(step === 1) runTimer(sysConfig.t1);
             else if(step === 2) runProgress(sysConfig.t2);
             else if(step === 3) runProgress(sysConfig.t3);
@@ -101,32 +143,40 @@
         }
 
         function runTimer(sec) {
-            let left = sec; const t = document.getElementById('timer'); const b = document.getElementById('btn');
-            t.style.display = 'block'; b.disabled = true;
+            let left = sec;
+            const t = document.getElementById('timer'); const b = document.getElementById('btn');
+            t.style.display = 'block'; b.disabled = true; b.innerHTML = '<i class="fas fa-spinner fa-spin"></i> VUI LÒNG ĐỢI...';
+            
             let itv = setInterval(() => {
                 left--; t.innerText = left;
-                if(left <= 0) { clearInterval(itv); b.disabled = false; b.innerText = "BƯỚC TIẾP THEO"; }
+                if(left <= 0) { clearInterval(itv); b.disabled = false; b.innerText = "TIẾP TỤC BƯỚC 2"; }
             }, 1000);
         }
 
         function runProgress(sec) {
             document.getElementById('d'+step).classList.add('active');
+            document.getElementById('mainTitle').innerText = "BƯỚC " + step;
             const b = document.getElementById('btn'); const pb = document.getElementById('pBar');
-            document.getElementById('timer').style.display = 'none'; document.getElementById('pBox').style.display = 'block';
-            b.disabled = true; let w = 0; let s = 100 / (sec * 10);
+            document.getElementById('timer').style.display = 'none'; document.getElementById('pBox').style.display = 'block'; pb.style.width = "0%";
+            b.disabled = true; b.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> ĐANG ĐỒNG BỘ...';
+            
+            let w = 0; let s = 100 / (sec * 10);
             let itv = setInterval(() => {
                 w += s; pb.style.width = w + "%";
-                if(w >= 100) { clearInterval(itv); b.disabled = false; b.innerText = "TIẾP TỤC"; }
+                if(w >= 100) { clearInterval(itv); b.disabled = false; b.innerText = (step === 2) ? "TIẾP TỤC BƯỚC 3" : "NHẬN KEY NGAY"; }
             }, 100);
         }
 
         async function finish() {
+            const b = document.getElementById('btn');
+            b.innerHTML = '<i class="fas fa-shield-alt"></i> ĐANG TẠO PHIÊN...'; b.disabled = true;
+            
             const token = "TK-" + Math.random().toString(36).substring(2, 12).toUpperCase();
             localStorage.setItem('qd_secure_token', token);
             await db.ref('free_tokens/' + token).set({ status: 'verified', created_at: Date.now() });
+            
             window.location.href = `key.html?verify=${token}`;
         }
     </script>
 </body>
-            </html>
-            
+</html>
