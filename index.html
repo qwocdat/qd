@@ -6,36 +6,64 @@
     <title>QUOCDAT SEC | TỔNG KHO TÀI NGUYÊN MMO VÀ SCRIPT VIP</title>
     
     <script>
-        // 1. KIỂM TRA ĐĂNG NHẬP (CHẠY ĐẦU TIÊN)
+        // 1. Kiểm tra đăng nhập (Bảo mật luồng)
         var currentUser = localStorage.getItem('vip_username');
         if(!currentUser || currentUser.trim() === "") { 
             window.location.replace("login.html"); 
         }
 
-        // 2. HÀM ĐIỀU KHIỂN GIAO DIỆN (BẤT TỬ)
-        window.openNav = function() { document.getElementById('mobileNav').style.right = '0px'; }
-        window.closeNav = function() { document.getElementById('mobileNav').style.right = '-100%'; }
-        window.openModal = function(id) { window.closeNav(); document.getElementById(id).style.display = 'flex'; }
-        window.closeModal = function(id) { document.getElementById(id).style.display = 'none'; }
-        window.closeOutside = function(event, id) { if(event.target.id === id) window.closeModal(id); }
+        // 2. Các hàm điều khiển Giao diện Toàn cục (Global Window)
+        window.openNav = function() { 
+            document.getElementById('mobileNav').style.right = '0px'; 
+        };
+        
+        window.closeNav = function() { 
+            document.getElementById('mobileNav').style.right = '-100%'; 
+        };
+        
+        window.openModal = function(id) { 
+            window.closeNav(); 
+            document.getElementById(id).style.display = 'flex'; 
+        };
+        
+        window.closeModal = function(id) { 
+            document.getElementById(id).style.display = 'none'; 
+        };
+        
+        window.closeOutside = function(event, id) { 
+            if(event.target.id === id) window.closeModal(id); 
+        };
+        
         window.goToPage = function(url) {
             document.body.style.opacity = '0';
-            setTimeout(() => { window.location.href = url; }, 300);
-        }
+            setTimeout(() => { 
+                window.location.href = url; 
+            }, 300);
+        };
         
-        window.confirmLogout = function() { window.openModal('logoutModal'); }
-        window.executeLogout = function() { localStorage.clear(); window.location.href = "login.html"; }
+        window.confirmLogout = function() { 
+            window.openModal('logoutModal'); 
+        };
+        
+        window.executeLogout = function() { 
+            localStorage.clear(); 
+            window.location.href = "login.html"; 
+        };
 
-        // GIỎ HÀNG & TOAST
+        // 3. Hệ thống Giỏ hàng & Toast Thông báo
         let cartCount = 0;
+        
         window.showToast = function(msg) {
             let toast = document.getElementById('toastMsg');
             if(toast) {
                 toast.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
                 toast.classList.add('show');
-                setTimeout(() => { toast.classList.remove('show'); }, 3000);
+                setTimeout(() => { 
+                    toast.classList.remove('show'); 
+                }, 3000);
             }
-        }
+        };
+        
         window.addToCart = function(productName) {
             cartCount++;
             let badge = document.getElementById('cartBadge');
@@ -44,15 +72,18 @@
                 badge.style.display = 'flex';
             }
             window.showToast(`Đã thêm "${productName}" vào giỏ hàng!`);
-        }
+        };
         
-        // FAQ TOGGLE
+        // 4. Khối FAQ (Câu hỏi thường gặp)
         window.toggleFAQ = function(el) {
             el.classList.toggle('active');
             let content = el.nextElementSibling;
-            if (content.style.maxHeight) { content.style.maxHeight = null; } 
-            else { content.style.maxHeight = content.scrollHeight + "px"; }
-        }
+            if (content.style.maxHeight) { 
+                content.style.maxHeight = null; 
+            } else { 
+                content.style.maxHeight = content.scrollHeight + "px"; 
+            }
+        };
     </script>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -61,203 +92,631 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --accent: #00b8ff; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg) url('https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat fixed; color: #fff; overflow-x: hidden; padding-top: 70px; transition: opacity 0.4s; }
-        .overlay-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,10,15,0.92); z-index: -1; }
+        :root { 
+            --primary: #00ff88; 
+            --bg: #0a0a0f; 
+            --card-bg: #15151e; 
+            --border: #2a2a35; 
+            --accent: #00b8ff; 
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Inter', sans-serif; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        body { 
+            background: var(--bg) url('https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat fixed; 
+            color: #fff; 
+            overflow-x: hidden; 
+            padding-top: 70px; 
+            transition: opacity 0.4s; 
+        }
+
+        .overlay-bg { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(10,10,15,0.92); 
+            z-index: -1; 
+        }
         
-        /* PRELOADER 3S */
-        #preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050508; z-index: 9999999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.5s; }
-        .loader-bar { width: 250px; height: 3px; background: #222; border-radius: 10px; overflow: hidden; margin: 20px 0; border: 1px solid #333; }
-        #lFill { width: 0%; height: 100%; background: var(--primary); box-shadow: 0 0 15px var(--primary); }
-        .skeleton { position: relative; overflow: hidden; background: #222 !important; color: transparent !important; }
+        /* HIỆU ỨNG ENTRY CHUNG CHO CÁC KHỐI */
+        .entry { 
+            opacity: 0; 
+            transform: translateY(30px); 
+            transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); 
+        }
 
-        /* HIỆU ỨNG ENTRY */
-        .entry { opacity: 0; transform: translateY(30px); transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        body.loaded .entry { opacity: 1; transform: translateY(0); }
-        .d1 { transition-delay: 0.1s; } .d2 { transition-delay: 0.2s; } .d3 { transition-delay: 0.3s; }
+        body.loaded .entry { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
 
-        /* HEADER & TOAST */
-        header { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(10,10,15,0.98); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); z-index: 1000; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
-        .logo { font-family: 'Orbitron'; font-size: 18px; font-weight: 900; color: #fff; text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-        .header-actions { display: flex; align-items: center; gap: 20px; }
-        .cart-icon { position: relative; font-size: 20px; color: #fff; cursor: pointer; }
-        .cart-badge { position: absolute; top: -8px; right: -10px; background: #ff4757; color: #fff; font-size: 10px; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; display: none; justify-content: center; align-items: center; border: 2px solid #0a0a0f; }
-        .hamburger { font-size: 24px; color: #fff; cursor: pointer; }
-        
-        .toast { position: fixed; top: 90px; right: -300px; background: rgba(10,10,15,0.95); border-left: 4px solid var(--primary); border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); color: #fff; padding: 15px 20px; font-size: 13px; font-weight: bold; z-index: 99999; transition: 0.4s; display: flex; align-items: center; gap: 10px; }
-        .toast.show { right: 20px; }
+        .d1 { transition-delay: 0.1s; } 
+        .d2 { transition-delay: 0.2s; } 
+        .d3 { transition-delay: 0.3s; }
 
-        /* HERO & COUNTERS */
-        .hero { min-height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 50px 20px; }
-        .hero h1 { font-size: clamp(28px, 6vw, 40px); font-family: 'Orbitron'; font-weight: 900; line-height: 1.2; text-transform: uppercase; margin-bottom: 20px; }
-        .hero h1 span { color: var(--primary); text-shadow: 0 0 20px rgba(0,255,136,0.3); }
-        .btn-group { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
-        .btn-lg { padding: 15px 30px; border-radius: 12px; font-weight: 900; font-family: 'Orbitron'; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s; cursor: pointer; border: none; text-transform: uppercase; }
-        .btn-main { background: var(--primary); color: #000; box-shadow: 0 5px 20px rgba(0,255,136,0.3); }
-        .btn-sub { background: transparent; color: #fff; border: 1px solid var(--border); }
-        
-        .counter-wrap { display: flex; justify-content: center; gap: 30px; margin-top: 40px; flex-wrap: wrap; }
-        .counter-box { text-align: center; }
-        .count-num { font-size: 30px; font-family: 'Orbitron'; color: var(--accent); font-weight: bold; }
+        /* ================== PRELOADER ================== */
+        #preloader { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: #050508; 
+            z-index: 9999999; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            transition: 0.5s; 
+        }
 
-        /* SECTIONS & GRIDS */
-        .section { padding: 50px 20px; max-width: 1200px; margin: 0 auto; }
-        .sec-title { text-align: center; font-family: 'Orbitron'; font-size: 24px; margin-bottom: 40px; text-transform: uppercase; }
-        .sec-title span { color: var(--primary); }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        
-        /* CARD DỊCH VỤ */
-        .card { background: var(--card-bg); padding: 30px; border-radius: 16px; border: 1px solid var(--border); transition: 0.3s; }
-        .card:hover { border-color: var(--primary); transform: translateY(-5px); }
-        .card i.main-icon { color: var(--primary); font-size: 30px; margin-bottom: 15px; display: block; }
-        .card h3 { font-family: 'Orbitron'; font-size: 18px; margin-bottom: 10px; color: #fff; }
+        .loader-bar { 
+            width: 250px; 
+            height: 4px; 
+            background: #222; 
+            border-radius: 10px; 
+            overflow: hidden; 
+            margin: 20px 0; 
+            border: 1px solid #333; 
+        }
 
-        /* SẢN PHẨM BÁN CHẠY */
-        .filter-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; justify-content: space-between; }
-        .search-box { flex: 1; min-width: 250px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; display: flex; align-items: center; padding: 0 15px; }
-        .search-box input { background: transparent; border: none; color: #fff; padding: 12px; width: 100%; outline: none; }
-        .cat-pills { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; }
-        .cat-pill { padding: 10px 20px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 30px; font-size: 12px; font-weight: bold; white-space: nowrap; }
-        .cat-pill.active { background: var(--primary); color: #000; }
-        
-        .p-card { background: var(--card-bg); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; transition: 0.3s; }
-        .p-card:hover { border-color: var(--primary); }
-        .p-img { height: 130px; background: #111; display: flex; justify-content: center; align-items: center; font-size: 40px; position: relative; }
-        .p-badge { position: absolute; top: 10px; left: 10px; background: #ff4757; color: #fff; font-size: 10px; padding: 3px 8px; border-radius: 5px; font-weight: bold; }
-        .p-info { padding: 20px; flex: 1; display: flex; flex-direction: column; }
-        .p-title { font-family: 'Orbitron'; font-size: 15px; margin-bottom: 8px; font-weight: bold; }
-        .p-price-row { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 15px; border-top: 1px dashed var(--border); }
-        .btn-add-cart { background: rgba(0,184,255,0.1); border: 1px solid var(--accent); color: var(--accent); padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; }
+        #lFill { 
+            width: 0%; 
+            height: 100%; 
+            background: var(--primary); 
+            box-shadow: 0 0 15px var(--primary); 
+        }
 
-        /* QUY TRÌNH (STEPS) */
-        .step-grid { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
-        .step-item { flex: 1; min-width: 250px; background: rgba(255,255,255,0.03); padding: 25px; border-radius: 15px; position: relative; border: 1px solid #1a1a24; }
-        .step-num { position: absolute; top: -15px; left: 20px; background: var(--primary); color: #000; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 900; font-family: 'Orbitron'; }
+        .skeleton { 
+            position: relative; 
+            overflow: hidden; 
+            background: #222 !important; 
+            color: transparent !important; 
+        }
 
-        /* ĐÁNH GIÁ (REVIEWS) */
-        .review-box { background: #111; padding: 25px; border-radius: 18px; border: 1px solid #222; }
-        .review-user { display: flex; align-items: center; gap: 12px; margin-top: 15px; border-top: 1px solid #222; padding-top: 15px; }
-        .user-ava { width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; color: #fff; }
+        /* ================== HEADER ================== */
+        header { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 70px; 
+            background: rgba(10,10,15,0.98); 
+            backdrop-filter: blur(15px); 
+            border-bottom: 1px solid var(--border); 
+            z-index: 1000; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 0 20px; 
+        }
 
-        /* FAQ */
-        .faq-box { margin-bottom: 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--card-bg); }
-        .faq-btn { width: 100%; padding: 15px 20px; text-align: left; background: transparent; border: none; color: #fff; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .faq-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-        .faq-content p { padding: 0 20px 15px; font-size: 13px; color: #888; line-height: 1.6; }
+        .logo { 
+            font-family: 'Orbitron'; 
+            font-size: 18px; 
+            font-weight: 900; 
+            color: #fff; 
+            text-decoration: none; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+        }
 
-        /* TIN TỨC */
-        .blog-card { background: var(--card-bg); border-radius: 15px; border: 1px solid var(--border); padding: 20px; }
-        .blog-date { font-size: 11px; color: var(--primary); margin-bottom: 10px; font-family: monospace; }
-        .blog-title { font-size: 15px; font-weight: bold; margin-bottom: 10px; }
+        .header-actions { 
+            display: flex; 
+            align-items: center; 
+            gap: 20px; 
+        }
 
-        /* KỸ NĂNG & TIẾN TRÌNH */
-        .skills-container { background: var(--card-bg); border-radius: 20px; padding: 30px; border: 1px solid var(--border); }
-        .skill-item { margin-bottom: 20px; }
-        .skill-info { display: flex; justify-content: space-between; font-weight: bold; font-size: 12px; margin-bottom: 8px; color: #ddd; font-family: 'Orbitron'; }
-        .progress-bg { width: 100%; height: 8px; background: #000; border-radius: 5px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--primary)); width: 0; transition: 1.5s ease-out; }
+        .cart-icon { 
+            position: relative; 
+            font-size: 20px; 
+            color: #fff; 
+            cursor: pointer; 
+        }
 
-        /* PHÁP LÝ & CÔNG TY */
-        .legal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
-        .legal-box { background: rgba(255,255,255,0.02); padding: 25px; border-radius: 15px; border: 1px solid #1a1a24; }
-        .legal-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 12px; border-bottom: 1px dashed #1a1a24; padding-bottom: 8px; }
-        .legal-row span:last-child { color: #ccc; }
+        .cart-badge { 
+            position: absolute; 
+            top: -8px; 
+            right: -10px; 
+            background: #ff4757; 
+            color: #fff; 
+            font-size: 10px; 
+            font-weight: bold; 
+            width: 18px; 
+            height: 18px; 
+            border-radius: 50%; 
+            display: none; 
+            justify-content: center; 
+            align-items: center; 
+            border: 2px solid #0a0a0f; 
+        }
 
-        /* SIDEBAR, FOOTER, MODAL */
-        .mobile-nav { position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; background: #0a0a0f; z-index: 3000; transition: 0.4s; border-left: 1px solid var(--border); overflow-y: auto; }
-        .nav-profile { padding: 40px 20px 20px; text-align: center; border-bottom: 1px solid var(--border); }
-        .avatar { width: 60px; height: 60px; background: var(--primary); color: #000; font-size: 26px; font-weight: bold; border-radius: 50%; margin: 0 auto 10px; display: flex; justify-content: center; align-items: center; border: 2px solid #fff; font-family: 'Orbitron'; }
-        .menu-link { display: flex; align-items: center; gap: 12px; color: #fff; text-decoration: none; padding: 14px; border-radius: 10px; font-weight: 600; margin-bottom: 5px; cursor: pointer; }
-        
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 99999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .ios-modal { width: 310px; background: #1c1c1e; border-radius: 20px; padding: 25px; text-align: center; border: 1px solid #333; }
-        
-        footer { background: #050508; border-top: 1px solid var(--border); padding: 50px 20px; text-align: center; }
-        .footer-links { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
-        .footer-links a { color: #666; font-size: 13px; text-decoration: none; }
-        
-        .floating-menu { position: fixed; bottom: 20px; right: 20px; z-index: 500; display: flex; flex-direction: column; gap: 10px; }
-        .float-btn { width: 45px; height: 45px; border-radius: 50%; background: #111; border: 1px solid #333; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 18px; cursor: pointer; }
-    </style>
-</head>
-<body>
+        .hamburger { 
+            font-size: 24px; 
+            color: #fff; 
+            cursor: pointer; 
+        }
 
-    <div id="preloader">
-        <div class="loader-logo" style="font-family:'Orbitron'; font-size:26px; font-weight:900; color:#fff;">QUOCDAT<span style="color:var(--primary);">.SEC</span></div>
-        <div class="loader-bar"><div id="lFill"></div></div>
-        <div id="lTxt" style="font-family:'Orbitron'; color:var(--primary); font-weight:bold;">0%</div>
-    </div>
-    
-    <script>
-        (function() {
-            let p = 0; let t = setInterval(() => {
-                p += 2; if(p>100) p = 100;
-                let b = document.getElementById('lFill'); if(b) b.style.width = p+'%';
-                let txt = document.getElementById('lTxt'); if(txt) txt.innerText = p+'%';
-                if(p>=100){
-                    clearInterval(t);
-                    setTimeout(() => {
-                        let s = document.getElementById('preloader');
-                        if(s) s.style.opacity = '0';
-                        setTimeout(() => { 
-                            if(s) s.style.display = 'none'; 
-                            document.body.classList.add('loaded'); // Kích hoạt Entry Animation
-                            // Kích hoạt Skill Bars
-                            let w = ['77%','50%','40%','36%','20%'];
-                            for(let i=1; i<=5; i++) {
-                                let el = document.getElementById('s'+i);
-                                if(el) el.style.width = w[i-1];
-                            }
-                            runCounters(); // Kích hoạt đếm số
-                        }, 400);
-                    }, 200);
-                }
-            }, 30);
-        })();
-    </script>
+        /* ================== TOAST ================== */
+        .toast { 
+            position: fixed; 
+            top: 90px; 
+            right: -300px; 
+            background: rgba(10,10,15,0.95); 
+            border-left: 4px solid var(--primary); 
+            border-radius: 8px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
+            color: #fff; 
+            padding: 15px 20px; 
+            font-size: 13px; 
+            font-weight: bold; 
+            z-index: 99999; 
+            transition: 0.4s; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
 
-    <div class="overlay-bg"></div>
-    <div class="toast" id="toastMsg"></div>
+        .toast.show { 
+            right: 20px; 
+        }
 
-    <header>
-        <div class="logo" onclick="window.goToPage('index.html')"><i class="fas fa-shield-halved" style="color:var(--primary)"></i> QUOCDAT</div>
-        <div class="header-actions">
-            <div class="pc-wallet skeleton" id="pcBal">0 đ</div>
-            <div class="cart-icon" onclick="window.goToPage('cart.html')">
-                <i class="fas fa-shopping-cart"></i><div class="cart-badge" id="cartBadge">0</div>
-            </div>
-            <i class="fas fa-bars-staggered hamburger" onclick="window.openNav()"></i>
-        </div>
-    </header>
+        /* ================== HERO & COUNTERS ================== */
+        .hero { 
+            min-height: 60vh; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            text-align: center; 
+            padding: 50px 20px; 
+        }
 
-    <div class="floating-menu">
-        <a onclick="window.goToPage('naptien.html')" class="float-btn" style="background:var(--accent); border:none;"><i class="fas fa-wallet"></i></a>
-        <a onclick="window.goToPage('getkey.html')" class="float-btn"><i class="fas fa-key"></i></a>
-        <a onclick="window.goToPage('shop.html')" class="float-btn"><i class="fas fa-store"></i></a>
-    </div>
+        .hero h1 { 
+            font-size: clamp(28px, 6vw, 40px); 
+            font-family: 'Orbitron'; 
+            font-weight: 900; 
+            line-height: 1.2; 
+            text-transform: uppercase; 
+            margin-bottom: 20px; 
+        }
 
-    <div class="mobile-nav" id="mobileNav">
-        <div style="padding:15px; text-align:right;"><i class="fas fa-xmark" style="font-size:28px; color:#555; cursor:pointer;" onclick="window.closeNav()"></i></div>
-        <div class="nav-profile">
-            <div class="avatar" id="nA">?</div>
-            <div id="nU" style="font-family:'Orbitron'; font-weight:bold; font-size:16px;">User</div>
-            <div id="nB" class="skeleton" style="font-size:22px; color:var(--primary); font-weight:900; margin:10px 0; font-family:monospace;">0 đ</div>
-            <button style="background:#222; color:#fff; border:1px solid #444; padding:8px; border-radius:8px; width:100%; font-size:12px; cursor:pointer;" onclick="window.openModal('infoModal')">Hồ sơ cá nhân</button>
-        </div>
-        <div class="nav-links">
-            <a onclick="window.goToPage('index.html')" class="menu-link" style="background:rgba(0,255,136,0.1); color:var(--primary);"><i class="fas fa-house"></i> Trang Chủ</a>
-            <a onclick="window.goToPage('shop.html')" class="menu-link"><i class="fas fa-store"></i> Cửa Hàng Script</a>
-            <a onclick="window.goToPage('getkey.html')" class="menu-link"><i class="fas fa-key"></i> Lấy Key VIP</a>
-            <a onclick="window.goToPage('naptien.html')" class="menu-link" style="color:var(--accent);"><i class="fas fa-credit-card"></i> Nạp Tiền Tự Động</a>
-            <div class="menu-link" style="color:#ffb86c;" onclick="window.openModal('historyModal')"><i class="fas fa-history"></i> Lịch Sử Mua Hàng</div>
-            <a href="#" class="menu-link" style="border-top:1px dashed #333; margin-top:15px; color:#aaa;"><i class="fas fa-user-shield"></i> Quản Trị Admin</a>
-            <div class="menu-link" style="color:#ff4757; margin-top:15px; background:rgba(255,71,87,0.1);" onclick="window.confirmLogout()"><i class="fas fa-power-off"></i> Đăng Xuất</div>
-        </div>
-    </div>
+        .hero h1 span { 
+            color: var(--primary); 
+            text-shadow: 0 0 20px rgba(0,255,136,0.3); 
+        }
 
-    <div class="modal-overlay" id="infoModal" onclick="window.closeOutside(event, 'infoModal')">
-        <div class="ios-modal">
-            <i class="fas fa-user-check" style="font-size:40px; color:var(--primary); margin-bottom:15px;"></i>
-            <div style="font-weight:bold; font-size:18px; margin-bottom:15px;">HỒ SƠ HỆ THỐNG</div>
-            <div style="text-align:left; background:#000; padding:15px; border-radius:12px; margin-bottom:15px; font-s
+        .btn-group { 
+            display: flex; 
+            gap: 15px; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            margin-top: 10px; 
+        }
+
+        .btn-lg { 
+            padding: 15px 30px; 
+            border-radius: 12px; 
+            font-weight: 900; 
+            font-family: 'Orbitron'; 
+            font-size: 13px; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px; 
+            transition: 0.3s; 
+            cursor: pointer; 
+            border: none; 
+            text-transform: uppercase; 
+        }
+
+        .btn-main { 
+            background: var(--primary); 
+            color: #000; 
+            box-shadow: 0 5px 20px rgba(0,255,136,0.3); 
+        }
+
+        .btn-sub { 
+            background: transparent; 
+            color: #fff; 
+            border: 1px solid var(--border); 
+        }
+
+        .counter-wrap { 
+            display: flex; 
+            justify-content: center; 
+            gap: 30px; 
+            margin-top: 50px; 
+            flex-wrap: wrap; 
+        }
+
+        .counter-box { 
+            text-align: center; 
+        }
+
+        .count-num { 
+            font-size: 35px; 
+            font-family: 'Orbitron'; 
+            color: var(--accent); 
+            font-weight: bold; 
+        }
+
+        /* ================== GENERAL SECTIONS ================== */
+        .section { 
+            padding: 50px 20px; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+        }
+
+        .sec-title { 
+            text-align: center; 
+            font-family: 'Orbitron'; 
+            font-size: 24px; 
+            margin-bottom: 40px; 
+            text-transform: uppercase; 
+        }
+
+        .sec-title span { 
+            color: var(--primary); 
+        }
+
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 20px; 
+        }
+
+        /* DỊCH VỤ CARDS */
+        .card { 
+            background: var(--card-bg); 
+            padding: 30px; 
+            border-radius: 16px; 
+            border: 1px solid var(--border); 
+            transition: 0.3s; 
+        }
+
+        .card:hover { 
+            border-color: var(--primary); 
+            transform: translateY(-5px); 
+        }
+
+        .card i.main-icon { 
+            color: var(--primary); 
+            font-size: 30px; 
+            margin-bottom: 15px; 
+            display: block; 
+        }
+
+        .card h3 { 
+            font-family: 'Orbitron'; 
+            font-size: 18px; 
+            margin-bottom: 10px; 
+            color: #fff; 
+        }
+
+        /* ================== SẢN PHẨM ================== */
+        .filter-bar { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 10px; 
+            margin-bottom: 30px; 
+            justify-content: space-between; 
+        }
+
+        .search-box { 
+            flex: 1; 
+            min-width: 250px; 
+            background: rgba(255,255,255,0.05); 
+            border: 1px solid var(--border); 
+            border-radius: 10px; 
+            display: flex; 
+            align-items: center; 
+            padding: 0 15px; 
+        }
+
+        .search-box input { 
+            background: transparent; 
+            border: none; 
+            color: #fff; 
+            padding: 12px; 
+            width: 100%; 
+            outline: none; 
+        }
+
+        .cat-pills { 
+            display: flex; 
+            gap: 10px; 
+            overflow-x: auto; 
+            scrollbar-width: none; 
+        }
+
+        .cat-pill { 
+            padding: 10px 20px; 
+            background: var(--card-bg); 
+            border: 1px solid var(--border); 
+            border-radius: 30px; 
+            font-size: 12px; 
+            font-weight: bold; 
+            white-space: nowrap; 
+            cursor: pointer;
+        }
+
+        .cat-pill.active { 
+            background: var(--primary); 
+            color: #000; 
+        }
+
+        .p-card { 
+            background: var(--card-bg); 
+            border-radius: 16px; 
+            border: 1px solid var(--border); 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            transition: 0.3s; 
+        }
+
+        .p-card:hover { 
+            border-color: var(--primary); 
+        }
+
+        .p-img { 
+            height: 140px; 
+            background: #111; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-size: 45px; 
+            position: relative; 
+        }
+
+        .p-badge { 
+            position: absolute; 
+            top: 10px; 
+            left: 10px; 
+            background: #ff4757; 
+            color: #fff; 
+            font-size: 10px; 
+            padding: 4px 10px; 
+            border-radius: 5px; 
+            font-weight: bold; 
+        }
+
+        .p-info { 
+            padding: 20px; 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+        }
+
+        .p-title { 
+            font-family: 'Orbitron'; 
+            font-size: 16px; 
+            margin-bottom: 10px; 
+            font-weight: bold; 
+        }
+
+        .p-price-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-top: auto; 
+            padding-top: 15px; 
+            border-top: 1px dashed var(--border); 
+        }
+
+        .btn-add-cart { 
+            background: rgba(0,184,255,0.1); 
+            border: 1px solid var(--accent); 
+            color: var(--accent); 
+            padding: 8px 15px; 
+            border-radius: 8px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            font-size: 12px; 
+            transition: 0.3s;
+        }
+
+        .btn-add-cart:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        /* ================== QUY TRÌNH MUA HÀNG ================== */
+        .step-grid { 
+            display: flex; 
+            justify-content: space-between; 
+            gap: 20px; 
+            flex-wrap: wrap; 
+        }
+
+        .step-item { 
+            flex: 1; 
+            min-width: 250px; 
+            background: rgba(255,255,255,0.03); 
+            padding: 30px; 
+            border-radius: 15px; 
+            position: relative; 
+            border: 1px solid #1a1a24; 
+        }
+
+        .step-num { 
+            position: absolute; 
+            top: -15px; 
+            left: 20px; 
+            background: var(--primary); 
+            color: #000; 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-weight: 900; 
+            font-family: 'Orbitron'; 
+            font-size: 18px;
+        }
+
+        /* ================== ĐÁNH GIÁ (REVIEWS) ================== */
+        .review-box { 
+            background: #111; 
+            padding: 25px; 
+            border-radius: 18px; 
+            border: 1px solid #222; 
+        }
+
+        .review-user { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            margin-top: 20px; 
+            border-top: 1px solid #222; 
+            padding-top: 15px; 
+        }
+
+        .user-ava { 
+            width: 45px; 
+            height: 45px; 
+            border-radius: 50%; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-weight: bold; 
+            font-size: 18px;
+            color: #000; 
+        }
+
+        /* ================== FAQ ================== */
+        .faq-box { 
+            margin-bottom: 15px; 
+            border: 1px solid var(--border); 
+            border-radius: 12px; 
+            background: var(--card-bg); 
+        }
+
+        .faq-btn { 
+            width: 100%; 
+            padding: 20px; 
+            text-align: left; 
+            background: transparent; 
+            border: none; 
+            color: #fff; 
+            font-weight: bold; 
+            font-size: 15px;
+            cursor: pointer; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+
+        .faq-content { 
+            max-height: 0; 
+            overflow: hidden; 
+            transition: max-height 0.3s ease-out; 
+        }
+
+        .faq-content p { 
+            padding: 0 20px 20px; 
+            font-size: 14px; 
+            color: #888; 
+            line-height: 1.6; 
+        }
+
+        /* ================== BÀI VIẾT (BLOG) ================== */
+        .blog-card { 
+            background: var(--card-bg); 
+            border-radius: 15px; 
+            border: 1px solid var(--border); 
+            padding: 25px; 
+        }
+
+        .blog-date { 
+            font-size: 12px; 
+            color: var(--primary); 
+            margin-bottom: 12px; 
+            font-family: monospace; 
+        }
+
+        .blog-title { 
+            font-size: 16px; 
+            font-weight: bold; 
+            margin-bottom: 15px; 
+            line-height: 1.4;
+        }
+
+        /* ================== ĐỐI TÁC ================== */
+        .partners-container {
+            display: flex; 
+            justify-content: center; 
+            gap: 30px; 
+            flex-wrap: wrap; 
+            opacity: 0.4; 
+            font-family: 'Orbitron'; 
+            font-weight: bold; 
+            font-size: 22px;
+        }
+
+        /* ================== KỸ NĂNG & THANH TRÌNH ĐỘ ================== */
+        .skills-container { 
+            background: var(--card-bg); 
+            border-radius: 20px; 
+            padding: 40px; 
+            border: 1px solid var(--border); 
+        }
+
+        .skill-item { 
+            margin-bottom: 25px; 
+        }
+
+        .skill-info { 
+            display: flex; 
+            justify-content: space-between; 
+            font-weight: bold; 
+            font-size: 13px; 
+            margin-bottom: 10px; 
+            color: #ddd; 
+            font-family: 'Orbitron'; 
+        }
+
+        .progress-bg { 
+            width: 100%; 
+            height: 10px; 
+            background: #000; 
+            border-radius: 5px; 
+            overflow: hidden; 
+            border: 1px solid #222;
+        }
+
+        .progress-fill { 
+            height: 100%; 
+            background: linear-gradient(90deg, var(--accent), var(--primary)); 
+            width: 0; 
+            transition: width 1.5s ease-out; 
+        }
+
+        /* ================== THÔNG TIN PHÁP LÝ ================== */
+        .legal-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 30px; 
+        }
+
+        .legal-box { 
+            background: rgba(255,255,255,0.02); 
+            padding: 30px; 
+            border-radius: 15px; 
+            border: 1px solid #1a1a24; 
+        }
+
+        .legal-row { 
+            display: flex; 
+            justify-content: 
