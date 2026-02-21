@@ -3,277 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KHO TÀI LIỆU VIP | QUOCDAT SEC</title>
+    <title>CỬA HÀNG SCRIPT | QUOCDAT SEC</title>
     
     <script>
         var currentUser = localStorage.getItem('vip_username');
-        if(!currentUser) { window.location.href = "login.html"; }
+        if(!currentUser) { window.location.replace("login.html"); }
+        window.goToPage = function(url) { window.location.href = url; }
+        
+        // Giỏ hàng Demo
+        let cartCount = 0;
+        window.addToCart = function(productName) {
+            cartCount++;
+            document.getElementById('cartBadge').innerText = cartCount;
+            document.getElementById('cartBadge').style.display = 'flex';
+            let toast = document.getElementById('toastMsg');
+            toast.innerHTML = `<i class="fas fa-check-circle"></i> Đã thêm ${productName}`;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
     </script>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* CSS LÀM LẠI HOÀN TOÀN - CHUẨN APP MOBILE */
-        :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: #fff; padding-top: 70px; padding-bottom: 30px; }
+        :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --accent: #00b8ff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: #fff; padding-top: 70px; padding-bottom: 50px; }
         
-        /* HEADER NỔI */
+        /* HEADER */
         header { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(10,10,15,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 1000; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
-        .logo { font-family: 'Orbitron'; font-size: 20px; font-weight: 900; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 8px; }
-        .logo i { color: var(--primary); }
-        .user-wallet { background: rgba(0,255,136,0.1); border: 1px solid var(--primary); color: var(--primary); padding: 6px 12px; border-radius: 20px; font-weight: 700; font-size: 13px; font-family: 'Orbitron'; }
-        
-        /* DANH MỤC TRƯỢT NGANG (Scroll ngang mượt mà, không choáng chỗ) */
-        .category-scroll { display: flex; overflow-x: auto; gap: 10px; padding: 15px 20px; scroll-scrollbar-width: none; border-bottom: 1px solid var(--border); }
-        .category-scroll::-webkit-scrollbar { display: none; }
-        .cat-btn { background: var(--card-bg); border: 1px solid var(--border); color: #aaa; padding: 8px 16px; border-radius: 20px; white-space: nowrap; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.3s; }
-        .cat-btn.active { background: var(--primary); color: #000; border-color: var(--primary); }
+        .logo { font-family: 'Orbitron'; font-size: 18px; font-weight: 900; color: #fff; text-decoration: none; cursor:pointer;}
+        .cart-icon { position: relative; font-size: 20px; cursor: pointer; }
+        .cart-badge { position: absolute; top: -8px; right: -10px; background: #ff4757; color: #fff; font-size: 10px; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; display: none; justify-content: center; align-items: center; border: 2px solid #0a0a0f; }
 
-        /* LƯỚI SẢN PHẨM CHUẨN SHOPEE/APP (2 CỘT TRÊN ĐIỆN THOẠI) */
-        .shop-container { padding: 20px; }
-        .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        @media (min-width: 768px) { .product-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; } }
+        /* HERO SHOP */
+        .shop-hero { padding: 40px 20px; text-align: center; border-bottom: 1px dashed var(--border); background: #050508; }
+        .shop-hero h1 { font-family: 'Orbitron'; font-size: 26px; color: var(--primary); text-transform: uppercase; margin-bottom: 10px; }
         
-        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; position: relative; }
-        .card-thumb { height: 120px; background: #0f0f15; display: flex; justify-content: center; align-items: center; font-size: 40px; }
-        .badge-hot { position: absolute; top: 8px; right: 8px; background: #ff4757; color: #fff; font-size: 10px; font-weight: bold; padding: 3px 8px; border-radius: 10px; }
-        .badge-free { position: absolute; top: 8px; right: 8px; background: #1e90ff; color: #fff; font-size: 10px; font-weight: bold; padding: 3px 8px; border-radius: 10px; }
+        /* GRID SẢN PHẨM */
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .p-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
         
-        .card-body { padding: 12px; display: flex; flex-direction: column; flex: 1; }
-        .card-title { font-size: 13px; font-weight: 700; color: #fff; line-height: 1.4; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .card-stats { font-size: 11px; color: #888; margin-bottom: 12px; display: flex; justify-content: space-between; }
-        .card-price { font-family: 'Orbitron'; font-size: 15px; font-weight: bold; color: var(--primary); margin-top: auto; margin-bottom: 10px; }
-        .card-price.free { color: #1e90ff; }
+        .p-card { background: var(--card-bg); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; transition: 0.3s; animation: fadeInUp 0.5s ease; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* NÚT BẤM (Thiết kế to, rõ, dễ bấm) */
-        .btn-action { width: 100%; padding: 10px; border: none; border-radius: 8px; font-weight: bold; font-size: 12px; display: flex; justify-content: center; align-items: center; gap: 5px; cursor: pointer; position: relative; z-index: 10; }
-        .btn-buy { background: var(--primary); color: #000; }
-        .btn-get { background: #1e90ff; color: #fff; }
+        .p-img { height: 130px; background: #111; display: flex; justify-content: center; align-items: center; font-size: 40px; color: #555; position: relative; }
+        .p-cat { position: absolute; top: 10px; left: 10px; background: #222; color: #fff; font-size: 10px; padding: 4px 8px; border-radius: 5px; font-weight: bold; }
+        .p-info { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+        .p-title { font-family: 'Orbitron'; font-size: 15px; margin-bottom: 8px; font-weight: bold; }
+        .p-price-row { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 15px; border-top: 1px dashed var(--border); }
+        .btn-add-cart { background: rgba(0,255,136,0.1); border: 1px solid var(--primary); color: var(--primary); padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; }
 
-        /* MODAL IOS (CHUẨN) */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .ios-modal { width: 300px; background: #1c1c1e; border-radius: 14px; text-align: center; overflow: hidden; border: 1px solid #333; }
-        .ios-content { padding: 20px; }
-        .ios-title { font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 5px; }
-        .ios-desc { font-size: 13px; color: #aaa; margin-bottom: 10px; }
-        .ios-item { font-size: 14px; font-weight: bold; color: #fff; margin-bottom: 10px; }
-        .ios-price { font-family: 'Orbitron'; font-size: 20px; color: var(--primary); font-weight: bold; }
-        .ios-input { width: 100%; padding: 12px; background: #000; border: 1px solid #444; border-radius: 8px; color: #fff; text-align: center; font-family: monospace; font-size: 14px; outline: none; margin-top: 10px; }
-        .ios-input:focus { border-color: #1e90ff; }
-        .ios-actions { display: flex; border-top: 1px solid #333; }
-        .ios-btn { flex: 1; padding: 15px; border: none; background: transparent; font-size: 15px; cursor: pointer; }
-        .ios-btn-cancel { color: #ff4757; border-right: 1px solid #333; }
-        .ios-btn-confirm { color: #0a84ff; font-weight: bold; }
-        .ios-btn-confirm.buy { color: var(--primary); }
-
-        /* NÚT HOME NỔI Ở GÓC MÀN HÌNH */
-        .floating-menu { position: fixed; bottom: 20px; right: 20px; z-index: 500; display: flex; flex-direction: column; gap: 10px; }
-        .float-btn { width: 45px; height: 45px; border-radius: 50%; background: #111; border: 1px solid #333; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 18px; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .float-btn.naptien { background: #1e90ff; color: #fff; border: none; }
+        .toast { position: fixed; top: 90px; right: -300px; background: rgba(10,10,15,0.95); border-left: 4px solid var(--primary); border-radius: 8px; color: #fff; padding: 15px 20px; font-size: 13px; font-weight: bold; z-index: 99999; transition: 0.4s; display: flex; align-items: center; gap: 10px; }
+        .toast.show { right: 20px; }
     </style>
 </head>
 <body>
 
+    <div class="toast" id="toastMsg"></div>
+
     <header>
-        <a href="index.html" class="logo"><i class="fas fa-shield-alt"></i> SHOP VIP</a>
-        <div class="user-wallet" id="topBalance">Đang tải...</div>
-    </header>
-
-    <div class="floating-menu">
-        <a href="naptien.html" class="float-btn naptien"><i class="fas fa-wallet"></i></a>
-        <a href="getkey.html" class="float-btn"><i class="fas fa-key"></i></a>
-        <a href="index.html" class="float-btn"><i class="fas fa-home"></i></a>
-    </div>
-
-    <div class="category-scroll">
-        <div class="cat-btn active">🔥 Tất Cả 30 Tool</div>
-        <div class="cat-btn">🐍 Python VIP</div>
-        <div class="cat-btn">🎮 Hack Game</div>
-        <div class="cat-btn">🎁 Tool Miễn Phí</div>
-    </div>
-
-    <div class="shop-container">
-        <div class="product-grid" id="productGrid"></div>
-    </div>
-
-    <div class="modal-overlay" id="buyModal">
-        <div class="ios-modal">
-            <div class="ios-content">
-                <div class="ios-title">Xác Nhận Thanh Toán</div>
-                <div class="ios-desc">Bạn đang mua sản phẩm:</div>
-                <div class="ios-item" id="buyName">Tên Tool</div>
-                <div class="ios-price" id="buyPrice">0đ</div>
-            </div>
-            <div class="ios-actions">
-                <button class="ios-btn ios-btn-cancel" onclick="document.getElementById('buyModal').style.display='none'">Hủy</button>
-                <button class="ios-btn ios-btn-confirm buy" onclick="processPayment()">Mua Ngay</button>
+        <div class="logo" onclick="window.goToPage('index.html')"><i class="fas fa-arrow-left" style="color:#888; margin-right:10px;"></i> QUOCDAT STORE</div>
+        <div style="display:flex; gap:20px; align-items:center;">
+            <div class="cart-icon" onclick="window.goToPage('cart.html')">
+                <i class="fas fa-shopping-cart"></i><div class="cart-badge" id="cartBadge">0</div>
             </div>
         </div>
+    </header>
+
+    <div class="shop-hero">
+        <h1>CỬA HÀNG TÀI NGUYÊN VIP</h1>
+        <p style="color:#888; font-size:13px;">Dữ liệu được đồng bộ trực tiếp từ máy chủ. Giao dịch tự động 100%.</p>
     </div>
 
-    <div class="modal-overlay" id="keyModal">
-        <div class="ios-modal">
-            <div class="ios-content">
-                <div class="ios-title" style="color:#1e90ff">Yêu Cầu Key Mở Khóa</div>
-                <div class="ios-desc">Nhập Key tương ứng để tải:</div>
-                <div class="ios-item" id="keyName" style="color:#1e90ff">Tên Tool</div>
-                <input type="text" id="inputKey" class="ios-input" placeholder="quocdat_...">
-                <div id="keyErr" style="color:#ff4757; font-size:12px; margin-top:8px; display:none; font-weight:bold;">❌ Mã Key sai hoặc hết hạn!</div>
-            </div>
-            <div class="ios-actions">
-                <button class="ios-btn ios-btn-cancel" onclick="document.getElementById('keyModal').style.display='none'">Hủy</button>
-                <button class="ios-btn ios-btn-confirm" onclick="processKey()">Tải File</button>
+    <div class="container">
+        <div class="p-grid" id="shopGrid">
+            <div style="text-align:center; color:#555; grid-column: 1 / -1; padding: 50px;">
+                <i class="fas fa-spinner fa-spin" style="font-size:30px; margin-bottom:15px; color:var(--primary);"></i><br>
+                Đang tải dữ liệu sản phẩm từ Admin...
             </div>
         </div>
     </div>
 
     <script>
-        // 1. DATA 30 SẢN PHẨM (MẢNG DỮ LIỆU ĐẢM BẢO KHÔNG THỂ THIẾU HAY LỖI THẺ HTML)
-        const products = [
-            { id: 'tool01', title: 'Tool Obfuscate Python V8.0', price: 250000, icon: 'fab fa-python', color: '#00ff88', isVIP: true },
-            { id: 'tool02', title: 'Source Web Bán Key Tự Động', price: 500000, icon: 'fas fa-code', color: '#ff4757', isVIP: true },
-            { id: 'tool03', title: 'Script Blox Fruit Auto Farm', price: 0, icon: 'fas fa-gamepad', color: '#1e90ff', isVIP: false },
-            { id: 'tool04', title: 'Tool Auto Golike/Tiktok Cày Tiền', price: 150000, icon: 'fas fa-robot', color: '#ff00ff', isVIP: false },
-            { id: 'tool05', title: 'Code HTML Landing Page Đẹp', price: 0, icon: 'fab fa-html5', color: '#1e90ff', isVIP: false },
-            { id: 'tool06', title: 'Bot Telegram Quản Lý Nhóm', price: 150000, icon: 'fab fa-telegram', color: '#00a8ff', isVIP: false },
-            { id: 'tool07', title: 'Fix Lag Roblox Chống Văng iOS', price: 0, icon: 'fas fa-tachometer-alt', color: '#1e90ff', isVIP: false },
-            { id: 'tool08', title: 'Script Auto Reg Mail Rác SLL', price: 200000, icon: 'fas fa-envelope', color: '#ff4757', isVIP: true },
-            { id: 'tool09', title: 'Tool Check Live/Die Clone FB', price: 100000, icon: 'fab fa-facebook', color: '#1877f2', isVIP: false },
-            { id: 'tool10', title: 'Python Basic Obfuscator V1', price: 0, icon: 'fas fa-shield-alt', color: '#1e90ff', isVIP: false },
-            { id: 'tool11', title: 'Source Web Nạp Thẻ Cào PHP', price: 300000, icon: 'fas fa-money-bill-wave', color: '#00ff88', isVIP: false },
-            { id: 'tool12', title: 'Tool Spam SMS/Zalo Call Troll', price: 0, icon: 'fas fa-sms', color: '#1e90ff', isVIP: false },
-            { id: 'tool13', title: 'Python Bypass AntiCheat Game', price: 400000, icon: 'fas fa-user-secret', color: '#ff4757', isVIP: true },
-            { id: 'tool14', title: 'Tool Auto Nuôi Nick Shopee X', price: 300000, icon: 'fas fa-shopping-bag', color: '#ff5722', isVIP: false },
-            { id: 'tool15', title: 'Script Get Token FB Full Quyền', price: 0, icon: 'fas fa-key', color: '#1e90ff', isVIP: false },
-            { id: 'tool16', title: 'Source Code Shop Bán Acc Laravel', price: 450000, icon: 'fas fa-store', color: '#ff4757', isVIP: true },
-            { id: 'tool17', title: 'Tool Cày View Tiktok Ẩn Proxy', price: 250000, icon: 'fab fa-tiktok', color: '#fff', isVIP: false },
-            { id: 'tool18', title: 'Auto Clicker PC Siêu Nhẹ 1MB', price: 0, icon: 'fas fa-mouse-pointer', color: '#1e90ff', isVIP: false },
-            { id: 'tool19', title: 'Code Check Scam Tự Động Bot', price: 200000, icon: 'fas fa-search-dollar', color: '#00ff88', isVIP: false },
-            { id: 'tool20', title: 'Script Report FB Xóa Kênh Die', price: 0, icon: 'fas fa-ban', color: '#1e90ff', isVIP: false },
-            { id: 'tool21', title: 'Tool Auto Đào Coin Treo VPS', price: 350000, icon: 'fab fa-bitcoin', color: '#ffb300', isVIP: true },
-            { id: 'tool22', title: 'Source Code Web Phim Chuẩn SEO', price: 400000, icon: 'fas fa-film', color: '#e50914', isVIP: false },
-            { id: 'tool23', title: 'Script Hack Map Moba Hiện Địch', price: 0, icon: 'fas fa-map-marked-alt', color: '#1e90ff', isVIP: false },
-            { id: 'tool24', title: 'Tool Auto Reg Clone Instagram', price: 250000, icon: 'fab fa-instagram', color: '#e1306c', isVIP: false },
-            { id: 'tool25', title: 'Phần Mềm Lọc SĐT/Email Siêu Tốc', price: 0, icon: 'fas fa-file-excel', color: '#1e90ff', isVIP: false },
-            { id: 'tool26', title: 'Source Bot Discord Nghe Nhạc 24/7', price: 100000, icon: 'fab fa-discord', color: '#5865F2', isVIP: false },
-            { id: 'tool27', title: 'Script Auto Cày Giờ Xem YouTube', price: 200000, icon: 'fab fa-youtube', color: '#ff0000', isVIP: true },
-            { id: 'tool28', title: 'Bộ 50 Template CV Xin Việc Coder', price: 0, icon: 'fas fa-id-card', color: '#1e90ff', isVIP: false },
-            { id: 'tool29', title: 'Tool Auto Cày App Đọc Báo VN', price: 150000, icon: 'fas fa-newspaper', color: '#00ff88', isVIP: false },
-            { id: 'tool30', title: 'Full Source Web MMO Đa Năng Tự Động', price: 800000, icon: 'fas fa-laptop-code', color: '#ff4757', isVIP: true }
-        ];
+        const firebaseConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-        // 2. TỰ ĐỘNG IN 30 SẢN PHẨM RA MÀN HÌNH MỘT CÁCH HOÀN HẢO
-        document.addEventListener("DOMContentLoaded", function() {
-            const grid = document.getElementById('productGrid');
-            let htmlContent = "";
+        function formatMoney(num) { return Number(num).toLocaleString('vi-VN') + " đ"; }
 
-            products.forEach(p => {
-                let isFree = p.price === 0;
-                let badge = p.isVIP ? `<div class="badge-hot">VIP</div>` : (isFree ? `<div class="badge-free">FREE</div>` : '');
-                let priceDisplay = isFree ? `<div class="card-price free">Miễn Phí</div>` : `<div class="card-price">${p.price.toLocaleString('vi-VN')}đ</div>`;
-                
-                // Gắn hàm click truyền ID và Giá an toàn
-                let btnHTML = isFree 
-                    ? `<button class="btn-action btn-get" onclick="showKeyModal('${p.id}', '${p.title}')"><i class="fas fa-unlock"></i> GET KEY</button>`
-                    : `<button class="btn-action btn-buy" onclick="showBuyModal('${p.id}', '${p.title}', ${p.price})"><i class="fas fa-cart-plus"></i> MUA NGAY</button>`;
-
-                htmlContent += `
-                <div class="card">
-                    <div class="card-thumb" style="color:${p.color}">
-                        <i class="${p.icon}"></i> ${badge}
-                    </div>
-                    <div class="card-body">
-                        <div class="card-title">${p.title}</div>
-                        <div class="card-stats"><span><i class="fas fa-download"></i> 99+</span><span>Ver 1.0</span></div>
-                        ${priceDisplay}
-                        ${btnHTML}
-                    </div>
-                </div>`;
-            });
-            grid.innerHTML = htmlContent;
-        });
-
-        // 3. BIẾN LƯU TRẠNG THÁI GIAO DỊCH
-        let activeID = "";
-        let activeTitle = "";
-        let activePrice = 0;
-        let globalBalance = 0; // Sẽ được cập nhật từ Firebase
-
-        // 4. HÀM BẬT MODAL (ĐÃ TEST - CHẠM LÀ NẢY)
-        function showBuyModal(id, title, price) {
-            activeID = id; activeTitle = title; activePrice = price;
-            document.getElementById('buyName').innerText = title;
-            document.getElementById('buyPrice').innerText = price.toLocaleString('vi-VN') + "đ";
-            document.getElementById('buyModal').style.display = 'flex';
-        }
-
-        function showKeyModal(id, title) {
-            activeID = id; activeTitle = title;
-            document.getElementById('keyName').innerText = title;
-            document.getElementById('inputKey').value = "";
-            document.getElementById('keyErr').style.display = "none";
-            document.getElementById('keyModal').style.display = 'flex';
-        }
-
-        // 5. XỬ LÝ CHECK KEY (ĐỒNG BỘ MÃ BĂM VỚI TRANG KEY.HTML)
-        function processKey() {
-            let uKey = document.getElementById('inputKey').value.trim();
-            try {
-                let now = Math.floor(Date.now() / 1000);
-                let timeStep = Math.floor(now / 900); // Mã thay đổi mỗi 15 phút
-                let hash = CryptoJS.MD5("QUOC_DAT_SECRET_2026" + timeStep + activeID).toString();
-                let validKey = "quocdat_" + hash.substring(0, 10);
-
-                if(uKey === validKey) {
-                    document.getElementById('keyModal').style.display = 'none';
-                    alert("✅ Mở khóa thành công!\nSản phẩm: " + activeTitle + "\nFile đang được tải xuống máy của bạn.");
-                } else {
-                    document.getElementById('keyErr').style.display = "block";
+        // KÉO SẢN PHẨM TỪ FIREBASE ĐỂ HIỂN THỊ
+        db.ref('products').on('value', (snapshot) => {
+            let grid = document.getElementById('shopGrid');
+            grid.innerHTML = '';
+            
+            if(snapshot.exists()) {
+                let data = snapshot.val();
+                for(let id in data) {
+                    let p = data[id];
+                    let cardHtml = `
+                        <div class="p-card">
+                            <div class="p-img">
+                                <span class="p-cat">${p.category}</span>
+                                <i class="${p.img || 'fas fa-box'}" style="color:var(--primary);"></i>
+                            </div>
+                            <div class="p-info">
+                                <div class="p-title">${p.name}</div>
+                                <p style="font-size:12px; color:#888; margin-bottom:15px; flex:1;">${p.desc || 'Công cụ hỗ trợ MMO mạnh mẽ nhất hiện nay.'}</p>
+                                <div class="p-price-row">
+                                    <span style="color:var(--accent); font-family:monospace; font-size:18px; font-weight:bold;">${formatMoney(p.price)}</span>
+                                    <button class="btn-add-cart" onclick="window.addToCart('${p.name}')"><i class="fas fa-cart-plus"></i> Chọn Mua</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    grid.innerHTML += cardHtml;
                 }
-            } catch(e) { alert("Lỗi bộ giải mã!"); }
-        }
-
-        // ================= FIREBASE BẢO MẬT GIAO DỊCH =================
-        try {
-            const config = {
-                apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc",
-                databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app",
-                projectId: "quocdat-b80c2"
-            };
-            firebase.initializeApp(config);
-            const db = firebase.database();
-
-            // Lấy số dư realtime
-            db.ref('users/' + currentUser).on('value', (s) => {
-                globalBalance = s.exists() ? (s.val().balance || 0) : 0;
-                document.getElementById('topBalance').innerText = globalBalance.toLocaleString('vi-VN') + " đ";
-            });
-
-            // Thanh toán
-            window.processPayment = function() {
-                if(globalBalance >= activePrice) {
-                    let newBal = globalBalance - activePrice;
-                    db.ref('users/' + currentUser).update({ balance: newBal }).then(() => {
-                        document.getElementById('buyModal').style.display = 'none';
-                        alert(`✅ GIAO DỊCH THÀNH CÔNG!\n- Mua: ${activeTitle}\n- Giá: ${activePrice.toLocaleString('vi-VN')} đ\n- Số dư mới: ${newBal.toLocaleString('vi-VN')} đ\n\nTiến trình tải sẽ bắt đầu ngay.`);
-                    });
-                } else {
-                    alert(`❌ LỖI THANH TOÁN!\nSố dư của bạn: ${globalBalance.toLocaleString('vi-VN')} đ\nCần thêm: ${(activePrice - globalBalance).toLocaleString('vi-VN')} đ`);
-                    if(confirm("Đến trang Nạp Tiền tự động ngay?")) {
-                        window.location.href = "naptien.html";
-                    }
-                }
+            } else {
+                grid.innerHTML = `<div style="text-align:center; color:#555; grid-column: 1 / -1; padding: 50px;">Admin hiện chưa đăng bán sản phẩm nào.</div>`;
             }
-        } catch(e) {
-            document.getElementById('topBalance').innerText = "Lỗi kết nối";
-        }
+        });
     </script>
 </body>
-                    </html>
-                    
+</html>
