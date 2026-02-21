@@ -46,13 +46,12 @@
         .btn-add-cart { background: rgba(0,255,136,0.1); border: 1px solid var(--primary); color: var(--primary); padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.3s; }
         .btn-add-cart:hover { background: var(--primary); color: #000; }
 
-        .toast { position: fixed; top: 90px; right: -300px; background: rgba(10,10,15,0.95); border-left: 4px solid var(--primary); border-radius: 8px; color: #fff; padding: 15px 20px; font-size: 13px; font-weight: bold; z-index: 99999; transition: 0.4s; display: flex; align-items: center; gap: 10px; }
+        .toast { position: fixed; top: 90px; right: -300px; background: rgba(10,10,15,0.95); border-left: 4px solid var(--primary); border-radius: 8px; color: #fff; padding: 15px 20px; font-size: 13px; font-weight: bold; z-index: 99999; transition: 0.4s; display: flex; align-items: center; gap: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         .toast.show { right: 20px; }
     </style>
 </head>
 <body>
-
-    <div class="toast" id="toastMsg"></div>
+        <div class="toast" id="toastMsg"></div>
 
     <header>
         <div class="logo" onclick="window.goToPage('index.html')"><i class="fas fa-arrow-left" style="color:#888; margin-right:10px;"></i> QUOCDAT STORE</div>
@@ -72,15 +71,14 @@
             </div>
         </div>
     </div>
-
-    <script>
+        <script>
         const firebaseConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         let currentBalance = 0;
 
-        // ĐỒNG BỘ SỐ DƯ
+        // 1. ĐỒNG BỘ SỐ DƯ TÀI KHOẢN
         if(safeUserId !== "guest") {
             db.ref('users/' + safeUserId).on('value', (snap) => {
                 if(snap.exists()) {
@@ -90,7 +88,7 @@
             });
         }
 
-        // KÉO SẢN PHẨM & HIỂN THỊ
+        // 2. KÉO SẢN PHẨM & HIỂN THỊ
         db.ref('products').on('value', (snapshot) => {
             let grid = document.getElementById('shopGrid');
             grid.innerHTML = '';
@@ -103,9 +101,10 @@
                     let safeLink = p.download_link ? p.download_link.replace(/'/g, "\\'") : '#';
                     
                     // Logic hiển thị chữ MIỄN PHÍ nếu giá = 0
-                    let priceDisplay = p.price > 0 ? `<span style="color:var(--accent); font-family:monospace; font-size:18px; font-weight:bold;">${Number(p.price).toLocaleString('vi-VN')} đ</span>` : `<span style="color:var(--primary); font-family:monospace; font-size:18px; font-weight:bold;">MIỄN PHÍ</span>`;
+                    let priceNum = Number(p.price);
+                    let priceDisplay = priceNum > 0 ? `<span style="color:var(--accent); font-family:monospace; font-size:18px; font-weight:bold;">${priceNum.toLocaleString('vi-VN')} đ</span>` : `<span style="color:var(--primary); font-family:monospace; font-size:18px; font-weight:bold;">MIỄN PHÍ</span>`;
                     
-                    let btnText = p.price > 0 ? "Mua Ngay" : "Nhận Free";
+                    let btnText = priceNum > 0 ? "Mua Ngay" : "Nhận Free";
 
                     grid.innerHTML += `
                         <div class="p-card">
@@ -118,7 +117,7 @@
                                 <p style="font-size:12px; color:#888; margin-bottom:15px; flex:1;">${p.desc || 'Công cụ hỗ trợ MMO mạnh mẽ nhất hiện nay.'}</p>
                                 <div class="p-price-row">
                                     ${priceDisplay}
-                                    <button class="btn-add-cart" onclick="buyProduct('${id}', '${safeName}', ${p.price}, '${safeLink}')"><i class="fas fa-cart-plus"></i> ${btnText}</button>
+                                    <button class="btn-add-cart" onclick="buyProduct('${id}', '${safeName}', ${priceNum}, '${safeLink}')"><i class="fas fa-cart-plus"></i> ${btnText}</button>
                                 </div>
                             </div>
                         </div>
@@ -129,10 +128,21 @@
             }
         });
 
-        // HÀM MUA HÀNG & TỰ ĐỘNG CHUYỂN TRANG
+        // 3. HÀM MUA HÀNG (ĐÃ TÍCH HỢP CHUYỂN HƯỚNG VƯỢT LINK CHO HÀNG MIỄN PHÍ)
         window.buyProduct = function(id, name, price, link) {
-            // Kiểm tra tiền
-            if(currentBalance < price && price > 0) {
+            
+            // NẾU LÀ HÀNG FREE (Giá = 0) -> ĐÁ SANG TRANG GET KEY KÈM MÃ SẢN PHẨM
+            if(price === 0 || price === "0") {
+                let toast = document.getElementById('toastMsg');
+                toast.innerHTML = `<i class="fas fa-link"></i> Hàng Miễn phí! Vui lòng vượt link...`;
+                toast.classList.add('show');
+                // Chuyển sang getkey.html kèm ID sản phẩm để tí nữa trả hàng
+                setTimeout(() => { window.location.href = `getkey.html?free_item=${id}`; }, 1500);
+                return;
+            }
+
+            // NẾU LÀ HÀNG CÓ PHÍ -> KIỂM TRA TIỀN
+            if(currentBalance < price) {
                 let toast = document.getElementById('toastMsg');
                 toast.style.borderLeftColor = '#ff4757';
                 toast.innerHTML = `<i class="fas fa-times-circle" style="color:#ff4757"></i> Số dư không đủ!`;
@@ -141,29 +151,26 @@
                 return;
             }
 
-            let priceText = price > 0 ? Number(price).toLocaleString('vi-VN') + ' đ' : 'MIỄN PHÍ';
-            if(confirm(`Xác nhận mua [${name}] với giá ${priceText} ?`)) {
+            // XÁC NHẬN MUA BẰNG TIỀN TRONG VÍ
+            if(confirm(`Xác nhận mua [${name}] với giá ${Number(price).toLocaleString('vi-VN')} đ ?`)) {
                 
-                // Trừ tiền nếu giá > 0
-                if(price > 0) {
-                    db.ref('users/' + safeUserId).update({ balance: currentBalance - price });
-                }
+                // Trừ tiền trên Firebase
+                db.ref('users/' + safeUserId).update({ balance: currentBalance - price });
                 
-                // Sinh mã Key ngẫu nhiên
+                // Sinh mã Key bản quyền VIP vĩnh viễn (Random)
                 let newKey = "QDSEC-" + Math.random().toString(36).substring(2, 10).toUpperCase();
                 
-                // Ghi vào Lịch sử
+                // Ghi vào Lịch sử Giao dịch
                 db.ref('transactions').push().set({
-                    user: safeUserId,
-                    type: 'purchase',
-                    amount: price,
+                    user: safeUserId, 
+                    type: 'purchase', 
+                    amount: price, 
                     detail: 'Mua: ' + name,
-                    key_granted: newKey,
-                    download_link: link,
+                    key_granted: newKey, 
+                    download_link: link, 
                     time: new Date().toISOString()
                 }).then(() => {
-                    // MUA XONG ĐÁ THẲNG SANG TRANG LỊCH SỬ KHO ĐỒ
-                    alert("Giao dịch thành công! Đang chuyển đến Kho đồ để lấy KEY...");
+                    alert("Giao dịch thành công! Đang chuyển đến Kho đồ để lấy KEY và Link tải...");
                     window.location.href = "lichsugiaodich.html";
                 });
             }
