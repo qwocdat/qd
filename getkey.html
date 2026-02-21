@@ -33,12 +33,11 @@
         .btn-bypass:disabled { background: #333; color: #888; cursor: not-allowed; }
 
         .progress-wrapper { width: 100%; background: #000; border: 1px solid #333; border-radius: 10px; height: 18px; margin-top: 25px; overflow: hidden; display: none; position: relative; }
-        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--primary)); transition: width 0.3s ease; box-shadow: 0 0 15px var(--accent); }
+        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--primary)); transition: width 0.2s ease; box-shadow: 0 0 15px var(--accent); }
         
-        .terminal-text { font-family: monospace; font-size: 12px; color: var(--accent); text-align: left; margin-top: 15px; display: none; background: #000; padding: 15px; border-radius: 8px; border: 1px dashed #333; height: 160px; overflow-y: hidden; line-height: 1.6; }
+        .terminal-text { font-family: monospace; font-size: 13px; color: var(--accent); text-align: left; margin-top: 15px; display: none; background: #000; padding: 15px; border-radius: 8px; border: 1px dashed #333; height: 160px; overflow-y: hidden; line-height: 1.6; }
         .t-success { color: var(--primary); font-weight: bold; }
         .t-error { color: #ff4757; }
-        .t-warn { color: #f1c40f; }
     </style>
 </head>
 <body>
@@ -48,35 +47,29 @@
 
     <div class="container">
         <div class="free-key-section">
-            <i class="fas fa-network-wired" style="font-size: 60px; color: var(--accent); margin-bottom: 20px;"></i>
-            <h2 style="font-family:'Orbitron'; color:var(--accent); margin-bottom:10px;">HỆ THỐNG ĐỊNH TUYẾN</h2>
-            <p style="color:#888; font-size:14px; margin-bottom:20px; line-height:1.6;">Hệ thống sẽ kết nối qua 200 Proxy Châu Á để vượt rào cản Cloudflare. Tự động lấy Link4M bảo mật.</p>
+            <i class="fas fa-server" style="font-size: 60px; color: var(--accent); margin-bottom: 20px;"></i>
+            <h2 style="font-family:'Orbitron'; color:var(--accent); margin-bottom:10px;">HỆ THỐNG MÁY CHỦ</h2>
+            <p style="color:#888; font-size:14px; margin-bottom:20px; line-height:1.6;">Kết nối thông qua Máy chủ Vercel. Chống mọi loại Adblock và Cloudflare.</p>
             
             <button class="btn-bypass" id="btnCreateLink" onclick="generateLink4M()">
-                <i class="fas fa-external-link-alt"></i> QUÉT PROXY & LẤY LINK
+                <i class="fas fa-external-link-alt"></i> BẮT ĐẦU ĐỤC TƯỜNG LỬA
             </button>
 
             <div id="progressContainer" class="progress-wrapper">
                 <div id="progressBar" class="progress-fill"></div>
             </div>
-            
             <div id="terminalText" class="terminal-text"></div>
         </div>
     </div>
 
     <script>
-        const LINK4M_API = "6992df868b3d1e423d1ab833"; 
-
         const firebaseConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        const asianNodes = ["VN-HN", "VN-HCM", "SG-SIN", "JP-TOK", "HK-WAN", "TW-TPE", "KR-SEO", "TH-BKK"];
-        const fakeProxies = Array.from({length: 200}, () => `${asianNodes[Math.floor(Math.random()*asianNodes.length)]}-IP:${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`);
-
         function logTerminal(msg, type="") {
             let term = document.getElementById('terminalText');
-            let colorClass = type === "err" ? "t-error" : (type === "ok" ? "t-success" : (type === "warn" ? "t-warn" : ""));
+            let colorClass = type === "err" ? "t-error" : (type === "ok" ? "t-success" : "");
             term.innerHTML += `<span class="${colorClass}">> ${msg}</span><br>`;
             term.scrollTop = term.scrollHeight; 
         }
@@ -87,10 +80,8 @@
             let pBar = document.getElementById('progressBar');
             let term = document.getElementById('terminalText');
 
-            btn.style.display = 'none';
-            pWrap.style.display = 'block';
-            term.style.display = 'block';
-            term.innerHTML = "> Khởi tạo hệ thống Anti-Share...<br>";
+            btn.style.display = 'none'; pWrap.style.display = 'block'; term.style.display = 'block';
+            term.innerHTML = "> Đang khởi tạo Token bảo mật...<br>";
 
             const urlParams = new URLSearchParams(window.location.search);
             const freeItem = urlParams.get('free_item');
@@ -103,81 +94,56 @@
             let destinationUrl = baseUrl + "/key.html?verify=" + uniqueToken;
             if(freeItem) destinationUrl += "&free_item=" + freeItem;
 
-            try {
-                await db.ref('free_tokens/' + uniqueToken).set({ key: freeKey, status: 'pending', created_at: Date.now() });
-                logTerminal("Ghi nhận Token thành công.", "ok");
-            } catch (err) {
-                logTerminal("Lỗi kết nối cơ sở dữ liệu, tiếp tục chạy dự phòng...", "warn");
-            }
+            // 1. Ghi Token lên Firebase
+            await db.ref('free_tokens/' + uniqueToken).set({ key: freeKey, status: 'pending', created_at: Date.now() });
+            logTerminal("Ghi nhận Token thành công.", "ok");
 
-            let targetApiUrl = `https://link4m.com/api-shorten/v2?api=${LINK4M_API}&url=${encodeURIComponent(destinationUrl)}`;
             let finalTargetUrl = null;
+            let isApiFailed = false;
 
-            // XỬ LÝ GỌI API CỰC KỲ AN TOÀN TRÁNH CRASH TRÌNH DUYỆT
-            const proxyRoutes = [
-                targetApiUrl,
-                `https://api.allorigins.win/get?url=${encodeURIComponent(targetApiUrl)}`,
-                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetApiUrl)}`
-            ];
-
-            logTerminal("Khởi chạy máy quét vượt tường lửa Link4M...");
-
-            (async function fetchLink() {
-                for(let route of proxyRoutes) {
-                    try {
-                        let res = await fetch(route);
-                        let text = await res.text();
-                        let jsonResult = null;
-                        
-                        try {
-                            if (route.includes('allorigins')) {
-                                jsonResult = JSON.parse(JSON.parse(text).contents);
-                            } else {
-                                jsonResult = JSON.parse(text);
-                            }
-                        } catch (parseErr) {
-                            continue; // Bỏ qua mượt mà nếu Cloudflare trả về mã HTML
-                        }
-
-                        if (jsonResult && (jsonResult.shortenedUrl || jsonResult.url)) {
-                            finalTargetUrl = jsonResult.shortenedUrl || jsonResult.url;
-                            break;
-                        }
-                    } catch (netErr) {
-                        continue; // Bỏ qua mượt mà nếu rớt mạng hoặc bị Adblock chặn
-                    }
+            // 2. GỌI API THÔNG QUA MÁY CHỦ VERCEL (Đường dẫn: /api/link)
+            logTerminal("Đang thiết lập kết nối qua Serverless Backend...");
+            
+            fetch(`/api/link?url=${encodeURIComponent(destinationUrl)}`)
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === "success" || data.shortenedUrl || data.url) {
+                    finalTargetUrl = data.shortenedUrl || data.url;
+                } else {
+                    throw new Error("API Link4M báo lỗi");
                 }
-            })();
+            })
+            .catch(err => {
+                isApiFailed = true;
+            });
 
-            // GIAO DIỆN TERMINAL ĐỒNG BỘ
+            // 3. HIỆU ỨNG GIAO DIỆN
             let progress = 0;
             let loadInterval = setInterval(() => {
-                progress += Math.floor(Math.random() * 6) + 3;
+                progress += Math.floor(Math.random() * 8) + 4;
                 
-                if (progress > 88 && !finalTargetUrl) progress = 88; 
+                if (progress > 85 && !finalTargetUrl && !isApiFailed) progress = 85; 
                 if (progress > 100) progress = 100;
                 
                 pBar.style.width = progress + '%';
-                let randomIP = fakeProxies[Math.floor(Math.random() * fakeProxies.length)];
-                logTerminal(`Đang truy xuất thông qua: [${randomIP}] ... [${progress}%]`);
+                logTerminal(`Máy chủ đang xử lý dữ liệu... [${progress}%]`);
                 
                 if (progress >= 100) {
                     clearInterval(loadInterval);
                     if (finalTargetUrl) {
-                        logTerminal(`LẤY LINK THÀNH CÔNG! Đang thiết lập bảo mật... [100%]`, "ok");
+                        logTerminal(`[100%] TẠO LINK MỚI THÀNH CÔNG! Đang chuyển trang...`, "ok");
                         setTimeout(() => { window.location.href = finalTargetUrl; }, 800);
                     } else {
-                        logTerminal("KẾT NỐI BỊ TỪ CHỐI BỞI CLOUDFLARE LINK4M.", "err");
-                        logTerminal("Hãy đảm bảo bạn đã tắt Adblock hoặc thử lại sau ít phút!", "warn");
+                        logTerminal("LỖI KẾT NỐI TỪ LINK4M HOẶC LỖI TẠO FILE API.", "err");
                         pBar.style.background = "#ff4757";
                         setTimeout(() => {
                             btn.style.display = 'block';
-                            btn.innerHTML = `<i class="fas fa-redo"></i> QUÉT LẠI MẠNG LƯỚI`;
+                            btn.innerHTML = `<i class="fas fa-redo"></i> THỬ LẠI LẦN NỮA`;
                             pWrap.style.display = 'none';
                         }, 2000);
                     }
                 }
-            }, 100); 
+            }, 100);
         }
     </script>
 </body>
