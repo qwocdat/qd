@@ -6,13 +6,13 @@
     <title>QUOCDAT SEC | TỔNG KHO TÀI NGUYÊN MMO VÀ SCRIPT VIP</title>
     
     <script>
-        // 1. LẤY THÔNG TIN ĐĂNG NHẬP NGAY LẬP TỨC (ƯU TIÊN SỐ 1)
+        // 1. KIỂM TRA ĐĂNG NHẬP
         var currentUser = localStorage.getItem('vip_username');
         if(!currentUser || currentUser.trim() === "") { 
             window.location.href = "login.html"; 
         }
 
-        // 2. CÁC HÀM ĐIỀU KHIỂN GIAO DIỆN BẤT TỬ
+        // 2. CÁC HÀM ĐIỀU KHIỂN GIAO DIỆN
         window.openNav = function() { document.getElementById('mobileNav').style.right = '0px'; }
         window.closeNav = function() { document.getElementById('mobileNav').style.right = '-100%'; }
         window.logout = function() { localStorage.clear(); window.location.href = "login.html"; }
@@ -22,6 +22,19 @@
         window.goToPage = function(url) {
             document.body.style.opacity = '0';
             setTimeout(() => { window.location.href = url; }, 300);
+        }
+
+        // 3. TOAST NOTIFICATION
+        window.showToast = function(message, type = 'success') {
+            let toast = document.getElementById('toast');
+            if(!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast';
+                document.body.appendChild(toast);
+            }
+            toast.className = `toast-show toast-${type}`;
+            toast.innerText = message;
+            setTimeout(() => { toast.className = ''; }, 3000);
         }
     </script>
 
@@ -36,7 +49,7 @@
         body { background: var(--bg) url('https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat fixed; color: #fff; overflow-x: hidden; padding-top: 70px; padding-bottom: 50px; transition: opacity 0.4s; }
         .overlay-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,10,15,0.95); z-index: -1; }
         
-        /* PRELOADER 3S */
+        /* PRELOADER */
         #preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050508; z-index: 9999999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.5s; }
         .loader-bar { width: 220px; height: 3px; background: #222; border-radius: 10px; overflow: hidden; margin: 25px 0; border: 1px solid #333; }
         #lFill { width: 0%; height: 100%; background: var(--primary); box-shadow: 0 0 15px var(--primary); }
@@ -56,13 +69,17 @@
         .btn-main { background: var(--primary); color: #000; box-shadow: 0 5px 25px rgba(0,255,136,0.4); }
         .btn-sub { background: #0a0a0f; color: #fff; border: 2px solid var(--border); }
 
-        /* BỐ CỤC QUY CỦ */
+        /* BỐ CỤC */
         .section { padding: 50px 20px; max-width: 1200px; margin: 0 auto; }
         .sec-title { text-align: center; font-family: 'Orbitron'; font-size: 24px; margin-bottom: 40px; text-transform: uppercase; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
-        .card { background: var(--card-bg); padding: 30px; border-radius: 20px; border: 1px solid var(--border); }
+        .card { background: var(--card-bg); padding: 30px; border-radius: 20px; border: 1px solid var(--border); transition: 0.3s; }
+        .card:hover { border-color: var(--primary); box-shadow: 0 0 20px rgba(0,255,136,0.2); }
         .card i.main-icon { color: var(--primary); font-size: 30px; margin-bottom: 20px; display: block; }
         .card h3 { font-family: 'Orbitron'; font-size: 18px; margin-bottom: 12px; color: #fff; }
+        .card .price { font-size: 22px; font-weight: 900; color: var(--primary); margin: 15px 0; }
+        .btn-small { background: transparent; border: 1px solid var(--border); color: #fff; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-small:hover { background: var(--primary); color: #000; border-color: var(--primary); }
 
         /* SKILLS BARS */
         .skills-container { background: var(--card-bg); border-radius: 24px; padding: 35px; border: 1px solid var(--border); }
@@ -70,6 +87,15 @@
         .skill-info { display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; margin-bottom: 8px; color: #ddd; font-family: 'Orbitron'; }
         .progress-bg { width: 100%; height: 10px; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #333; }
         .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--primary)); width: 0; transition: width 2s cubic-bezier(0.1, 0.5, 0.1, 1); }
+
+        /* TESTIMONIALS & STATS */
+        .testimonials { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+        .testimonial-item { background: rgba(255,255,255,0.02); border: 1px solid #1a1a24; border-radius: 20px; padding: 25px; max-width: 300px; }
+        .testimonial-item i { color: var(--primary); font-size: 24px; margin-bottom: 10px; }
+        .stats-grid { display: flex; justify-content: space-around; flex-wrap: wrap; background: var(--card-bg); border-radius: 30px; padding: 40px 20px; border: 1px solid var(--border); }
+        .stat-item { text-align: center; }
+        .stat-number { font-family: 'Orbitron'; font-size: 36px; font-weight: 900; color: var(--primary); }
+        .stat-label { color: #888; font-size: 14px; }
 
         /* PHÁP LÝ & CÔNG TY */
         .legal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-top: 20px; }
@@ -79,7 +105,7 @@
         .legal-row span:first-child { color: #555; font-weight: bold; }
         .legal-row span:last-child { color: #ccc; text-align: right; }
 
-        /* SIDEBAR DASHBOARD */
+        /* SIDEBAR */
         .mobile-nav { position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; background: #0a0a0f; z-index: 3000; transition: 0.4s; border-left: 1px solid var(--border); overflow-y: auto; }
         .nav-profile { background: #1a1a24; padding: 45px 20px; text-align: center; border-bottom: 1px solid var(--border); }
         .avatar { width: 65px; height: 65px; background: var(--primary); color: #000; font-size: 28px; font-weight: bold; border-radius: 50%; margin: 0 auto 15px; display: flex; justify-content: center; align-items: center; border: 4px solid #000; font-family: 'Orbitron'; }
@@ -89,6 +115,13 @@
         /* MODALS */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 99999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
         .ios-modal { width: 310px; background: #1c1c1e; border-radius: 20px; padding: 30px 20px; text-align: center; border: 1px solid #333; }
+        .policy-modal { max-width: 400px; max-height: 70vh; overflow-y: auto; text-align: left; }
+
+        /* TOAST */
+        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1c1c1e; color: #fff; padding: 12px 24px; border-radius: 50px; font-weight: 600; z-index: 100000; transition: 0.3s; opacity: 0; visibility: hidden; border-left: 4px solid var(--primary); }
+        #toast.toast-show { opacity: 1; visibility: visible; bottom: 40px; }
+        #toast.toast-success { border-left-color: var(--primary); }
+        #toast.toast-error { border-left-color: #ff4757; }
 
         @media (min-width: 992px) { .pc-wallet { display: block; } .hamburger { display: none; } }
     </style>
@@ -108,7 +141,7 @@
         (function() {
             let p = 0;
             let timer = setInterval(() => {
-                p += 2; if(p > 100) p = 100;
+                p += 4; if(p > 100) p = 100;
                 document.getElementById('lFill').style.width = p + '%';
                 document.getElementById('lTxt').innerText = p + '%';
                 if(p >= 100) {
@@ -120,9 +153,9 @@
                         document.getElementById('s3').style.width = '40%';
                         document.getElementById('s4').style.width = '36%';
                         document.getElementById('s5').style.width = '20%';
-                    }, 300);
+                    }, 200);
                 }
-            }, 30);
+            }, 15); // tổng ~1.5s
         })();
     </script>
 
@@ -138,12 +171,14 @@
         </div>
     </header>
 
+    <!-- FLOATING MENU -->
     <div class="floating-menu" style="position:fixed; bottom:20px; right:20px; z-index:500; display:flex; flex-direction:column; gap:10px;">
         <a onclick="window.goToPage('naptien.html')" class="float-btn" style="width:48px; height:48px; border-radius:50%; background:var(--accent); display:flex; justify-content:center; align-items:center; color:#fff;"><i class="fas fa-wallet"></i></a>
         <a onclick="window.goToPage('getkey.html')" class="float-btn" style="width:48px; height:48px; border-radius:50%; background:#111; border:1px solid #333; display:flex; justify-content:center; align-items:center; color:#fff;"><i class="fas fa-key"></i></a>
         <a onclick="window.goToPage('shop.html')" class="float-btn" style="width:48px; height:48px; border-radius:50%; background:#111; border:1px solid #333; display:flex; justify-content:center; align-items:center; color:#fff;"><i class="fas fa-store"></i></a>
     </div>
 
+    <!-- SIDEBAR -->
     <div class="mobile-nav" id="mobileNav">
         <div style="padding:20px; text-align:right;"><i class="fas fa-xmark" style="font-size:30px; color:#333;" onclick="window.closeNav()"></i></div>
         <div class="nav-profile">
@@ -162,6 +197,7 @@
         </div>
     </div>
 
+    <!-- MODALS -->
     <div class="modal-overlay" id="infoModal" onclick="window.closeOutside(event, 'infoModal')">
         <div class="ios-modal">
             <i class="fas fa-user-gear" style="font-size:45px; color:var(--primary); margin-bottom:15px;"></i>
@@ -176,17 +212,31 @@
     </div>
 
     <div class="modal-overlay" id="historyModal" onclick="window.closeOutside(event, 'historyModal')">
-        <div class="ios-modal">
+        <div class="ios-modal" style="max-width:350px;">
             <div style="font-weight:bold; color:#ffb86c; font-size:18px; margin-bottom:15px;">LỊCH SỬ GIAO DỊCH</div>
-            <div style="background:#000; padding:40px 10px; border-radius:15px; margin:20px 0; border:1px solid #222;">
-                <i class="fas fa-box-open" style="font-size:35px; color:#333; margin-bottom:15px;"></i><br>
-                <span style="color:#666; font-size:12px;">Đang đồng bộ dữ liệu giao dịch...</span>
+            <div style="background:#000; padding:15px; border-radius:15px; margin:20px 0; border:1px solid #222; max-height:200px; overflow-y:auto;">
+                <div style="display:flex; justify-content:space-between; color:#0f0; font-size:12px; border-bottom:1px solid #222; padding:8px 0;">Mua Tool FB 27/02 <span>-250k</span></div>
+                <div style="display:flex; justify-content:space-between; color:#0f0; font-size:12px; border-bottom:1px solid #222; padding:8px 0;">Nạp tiền 26/02 <span>+500k</span></div>
+                <div style="display:flex; justify-content:space-between; color:#aaa; font-size:12px; padding:8px 0;">Mua Key Instagram <span>-120k</span></div>
             </div>
-            <button style="background:#333; color:#fff; border:none; width:100%; padding:15px; border-radius:15px; font-weight:bold;" onclick="window.closeModal('historyModal')">QUAY LẠI</button>
+            <button style="background:#333; color:#fff; border:none; width:100%; padding:15px; border-radius:15px; font-weight:bold;" onclick="window.closeModal('historyModal')">ĐÓNG</button>
+        </div>
+    </div>
+
+    <!-- Modal chính sách nhanh -->
+    <div class="modal-overlay" id="policyModal" onclick="window.closeOutside(event, 'policyModal')">
+        <div class="ios-modal policy-modal">
+            <div style="font-weight:bold; color:var(--primary); font-size:18px; margin-bottom:15px;">CHÍNH SÁCH BẢO MẬT</div>
+            <div style="font-size:12px; color:#ccc; line-height:1.6;">
+                <p>Chúng tôi cam kết bảo mật thông tin cá nhân của khách hàng. Mọi dữ liệu chỉ được sử dụng nội bộ và không chia sẻ với bên thứ ba.</p>
+                <p>Giao dịch được mã hóa và bảo vệ. Quý khách có thể yêu cầu xóa tài khoản bất cứ lúc nào.</p>
+            </div>
+            <button style="background:var(--primary); color:#000; border:none; width:100%; padding:15px; border-radius:15px; font-weight:900; margin-top:20px;" onclick="window.closeModal('policyModal')">ĐÃ HIỂU</button>
         </div>
     </div>
 
     <main>
+        <!-- HERO -->
         <section class="hero">
             <h1>GIẢI PHÁP <span>TỰ ĐỘNG HÓA</span><br>TÀI NGUYÊN SCRIPT MMO</h1>
             <p>Hệ thống cung cấp mã nguồn Web, Tool Auto chuyên nghiệp uy tín hàng đầu Việt Nam.</p>
@@ -196,94 +246,21 @@
             </div>
         </section>
 
+        <!-- SẢN PHẨM NỔI BẬT (mới) -->
         <section class="section">
-            <h2 class="sec-title">DỊCH VỤ <span>NỔI BẬT</span></h2>
+            <h2 class="sec-title">SẢN PHẨM <span>BÁN CHẠY</span></h2>
             <div class="grid">
                 <div class="card">
-                    <i class="fas fa-robot main-icon"></i>
-                    <h3>Tool Automation</h3>
-                    <p>Phần mềm tự động hóa đa nền tảng, giúp tối ưu hóa công việc MMO mà không cần can thiệp thủ công.</p>
+                    <i class="fas fa-facebook main-icon"></i>
+                    <h3>Tool Auto Facebook</h3>
+                    <p>Đăng bài, kết bạn, like comment tự động.</p>
+                    <div class="price">599.000 đ</div>
+                    <button class="btn-small" onclick="window.goToPage('shop.html')">MUA NGAY</button>
                 </div>
                 <div class="card">
-                    <i class="fas fa-code-branch main-icon"></i>
-                    <h3>Mã Nguồn Web</h3>
-                    <p>Source Code Web Bán Acc, Nạp Thẻ chuẩn SEO với giao diện hiện đại, tích hợp thanh toán tự động.</p>
-                </div>
-            </div>
-        </section>
-
-        <section class="section">
-            <h2 class="sec-title">NĂNG LỰC <span>CÔNG NGHỆ</span></h2>
-            <div class="skills-container">
-                <div class="skill-item">
-                    <div class="skill-info"><span>HTML / CSS</span><span>77%</span></div>
-                    <div class="progress-bg"><div class="progress-fill" id="s1"></div></div>
-                </div>
-                <div class="skill-item">
-                    <div class="skill-info"><span>JAVASCRIPT</span><span>50%</span></div>
-                    <div class="progress-bg"><div class="progress-fill" id="s2"></div></div>
-                </div>
-                <div class="skill-item">
-                    <div class="skill-info"><span>PHP</span><span>40%</span></div>
-                    <div class="progress-bg"><div class="progress-fill" id="s3"></div></div>
-                </div>
-                <div class="skill-item">
-                    <div class="skill-info"><span>PYTHON</span><span>36%</span></div>
-                    <div class="progress-bg"><div class="progress-fill" id="s4"></div></div>
-                </div>
-                <div class="skill-item">
-                    <div class="skill-info"><span>LUA</span><span>20%</span></div>
-                    <div class="progress-bg"><div class="progress-fill" id="s5"></div></div>
-                </div>
-            </div>
-        </section>
-
-        <section class="section">
-            <h2 class="sec-title">XÁC THỰC <span>DOANH NGHIỆP</span></h2>
-            <div class="legal-grid">
-                <div class="legal-box">
-                    <div class="legal-title">THÔNG TIN PHÁP LÝ</div>
-                    <div class="legal-row"><span>Chủ sở hữu:</span> <span>QUỐC ĐẠT (Admin)</span></div>
-                    <div class="legal-row"><span>Mã số thuế:</span> <span>0316829xxx</span></div>
-                    <div class="legal-row"><span>Giấy phép KD:</span> <span>41G802xxxx</span></div>
-                </div>
-                <div class="legal-box">
-                    <div class="legal-title">TRỤ SỞ & LIÊN HỆ</div>
-                    <div class="legal-row"><span>Địa chỉ:</span> <span>Innovation Bldg, Q1, TP. HCM</span></div>
-                    <div class="legal-row"><span>Hotline:</span> <span>0988.xxx.xxx</span></div>
-                    <div class="legal-row"><span>Telegram:</span> <span>@quocdatsec</span></div>
-                </div>
-            </div>
-        </section>
-
-        <footer>
-            <div style="text-align:center; font-family:'Orbitron'; font-size:18px; margin-bottom:20px;">QUOCDAT<span style="color:var(--primary);">.SEC</span></div>
-            <div style="text-align:center; font-size:11px; color:#444; letter-spacing:1px;">© 2026 QUOCDAT SEC SYSTEM. ALL RIGHTS RESERVED.</div>
-        </footer>
-    </main>
-
-    <script>
-        // HÀM GÁN TÊN VÀ AVATAR NGAY KHI VỪA VÀO
-        (function initProfile() {
-            if(currentUser) {
-                let name = currentUser.trim();
-                let avaChar = name.charAt(0).toUpperCase();
-                
-                // Gán vào Sidebar
-                document.getElementById('nU').innerText = name;
-                document.getElementById('nA').innerText = avaChar;
-                
-                // Gán vào Modal
-                document.getElementById('mU').innerText = name;
-            }
-        })();
-
-        // KẾT NỐI FIREBASE ĐỒNG BỘ SỐ DƯ LIÊN TỤC
-        try {
-            const config = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
-            if (!firebase.apps.length) firebase.initializeApp(config);
-            
-            // Lắng nghe sự thay đổi số dư
-            firebase.database().ref('users/' + currentUser).on('value', (snapshot) => {
-                if(snapshot.exists()) {
-                    let b
+                    <i class="fas fa-instagram main-icon"></i>
+                    <h3>IG Auto Grow</h3>
+                    <p>Tăng follow, tương tác instagram thông minh.</p>
+                    <div class="price">799.000 đ</div>
+                    <button class="btn-small" onclick="window.goToPage('shop.html')">MUA NGAY</button>
+              
