@@ -30,6 +30,7 @@
         .btn-bypass:hover { transform: scale(1.02); filter: brightness(1.2); }
         
         .status-loading { font-family: monospace; color: var(--primary); margin-top: 20px; display: none; font-size: 14px; }
+        .error-message { color: #ff5555; margin-top: 15px; font-size: 14px; display: none; }
     </style>
 </head>
 <body>
@@ -50,6 +51,9 @@
             <div id="loadingStatus" class="status-loading">
                 <i class="fas fa-spinner fa-spin"></i> ĐANG THIẾT LẬP BẢO MẬT...
             </div>
+            <div id="errorMsg" class="error-message">
+                <i class="fas fa-exclamation-triangle"></i> Lỗi kết nối, thử lại...
+            </div>
         </div>
     </div>
 
@@ -61,12 +65,51 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // Hàm JSONP để gọi API xuyên domain (tránh CORS)
+        function jsonpRequest(url, callbackName) {
+            return new Promise((resolve, reject) => {
+                // Tạo tên callback duy nhất
+                const cbName = callbackName || 'jsonp_cb_' + Date.now() + '_' + Math.round(Math.random() * 1000000);
+                window[cbName] = function(data) {
+                    resolve(data);
+                    cleanup();
+                };
+
+                const script = document.createElement('script');
+                // Thêm callback vào URL
+                const separator = url.includes('?') ? '&' : '?';
+                script.src = url + separator + 'callback=' + cbName;
+                script.async = true;
+
+                function cleanup() {
+                    if (script.parentNode) script.parentNode.removeChild(script);
+                    delete window[cbName];
+                    clearTimeout(timeout);
+                }
+
+                // Timeout sau 10 giây
+                const timeout = setTimeout(() => {
+                    cleanup();
+                    reject(new Error('JSONP timeout'));
+                }, 10000);
+
+                script.onerror = (err) => {
+                    cleanup();
+                    reject(err);
+                };
+
+                document.head.appendChild(script);
+            });
+        }
+
         async function forceGenerateLink() {
             const btn = document.getElementById('btnCreateLink');
             const status = document.getElementById('loadingStatus');
+            const errorMsg = document.getElementById('errorMsg');
 
             btn.style.display = 'none';
             status.style.display = 'block';
+            errorMsg.style.display = 'none';
 
             // 1. Khởi tạo mã Token xác thực cho người dùng
             const uniqueToken = "TK-" + Math.random().toString(36).substring(2, 12).toUpperCase();
@@ -82,7 +125,7 @@
             let destinationUrl = `${baseUrl}/key.html?verify=${uniqueToken}`;
             if(freeItem) destinationUrl += `&free_item=${freeItem}`;
 
-            // 2. Ghi nhận phiên làm việc lên Database (Chờ sẵn)
+            // 2. Ghi nhận phiên làm việc lên Database (chờ sẵn)
             try {
                 await db.ref('free_tokens/' + uniqueToken).set({ 
                     key: freeKey, 
@@ -90,17 +133,32 @@
                     created_at: Date.now() 
                 });
 
-                // 3. CƠ CHẾ SỐ 1: DÙNG FULL-PAGE SCRIPT (KHÔNG DÙNG API FETCH)
-                // Đây là cách "Húc" link mạnh nhất của Link4M, trình duyệt sẽ tự gánh việc tạo link
-                const forceUrl = `https://link4m.com/st?api=${MY_API_KEY}&url=${encodeURIComponent(destinationUrl)}`;
+                // 3. Gọi API link4m bằng JSONP (endpoint /api) để lấy short link
+                const apiUrl = `https://link4m.com/api?api=${MY_API_KEY}&url=${encodeURIComponent(destinationUrl)}`;
                 
-                // Đợi 1 giây cho Database ghi xong rồi bay luôn
-                setTimeout(() => {
-                    window.location.href = forceUrl;
-                }, 1000);
+                try {
+                    // Dùng JSONP để gọi API, đợi kết quả
+                    const result = await jsonpRequest(apiUrl, 'link4m_callback');
+                    
+                    // Kiểm tra cấu trúc response (thường là { status: 'success', shortenedUrl: '...' } hoặc { shortlink: '...' })
+                    let shortLink = result.shortenedUrl || result.shortlink || (result.status === 'success' ? result.url : null);
+                    if (!shortLink) {
+                        throw new Error('Không tìm thấy short link trong phản hồi');
+                    }
+                    
+                    // Redirect đến short link (link4m sẽ tự redirect sau quảng cáo)
+                    window.location.href = shortLink;
+                } catch (jsonpErr) {
+                    console.warn('JSONP thất bại, chuyển sang phương thức dự phòng:', jsonpErr);
+                    
+                    // Fallback: dùng redirect trực tiếp đến endpoint /st (cách cũ)
+                    const fallbackUrl = `https://link4m.com/st?api=${MY_API_KEY}&url=${encodeURIComponent(destinationUrl)}`;
+                    window.location.href = fallbackUrl;
+                }
 
             } catch (err) {
-                alert("Lỗi kết nối Server! Vui lòng thử lại.");
+                console.error('Lỗi Firebase:', err);
+                errorMsg.style.display = 'block';
                 btn.style.display = 'block';
                 status.style.display = 'none';
             }
