@@ -21,14 +21,13 @@
         var currentUser = localStorage.getItem('vip_username') || 'admin_system';
         var safeUserId = currentUser.replace(/[.#$\[\]]/g, '_');
 
-        // HÀM UI CƠ BẢN ĐỂ SẴN
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
         function switchTab(tabId, el) {
             document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
             el.classList.add('active');
             document.querySelectorAll('.tab-pane').forEach(e => e.classList.remove('active'));
             document.getElementById('tab-' + tabId).classList.add('active');
-            let titles = {'dashboard':'TỔNG QUAN HỆ THỐNG', 'products':'QUẢN LÝ SẢN PHẨM', 'users':'QUẢN LÝ NGƯỜI DÙNG', 'settings':'CÀI ĐẶT HỆ THỐNG'};
+            let titles = {'dashboard':'TỔNG QUAN HỆ THỐNG', 'products':'QUẢN LÝ SẢN PHẨM', 'users':'QUẢN LÝ NGƯỜI DÙNG', 'history':'LỊCH SỬ GIAO DỊCH'};
             document.getElementById('pageTitle').innerText = titles[tabId];
         }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
@@ -54,7 +53,6 @@
         body { background: var(--bg); color: #fff; display: flex; height: 100vh; overflow: hidden; }
         ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #000; } ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
         
-        /* SIDEBAR */
         .sidebar { width: 260px; background: #0a0a0f; border-right: 1px solid var(--border); display: flex; flex-direction: column; transition: 0.3s; z-index: 1000; }
         .brand { padding: 20px; font-family: 'Orbitron'; font-size: 20px; font-weight: 900; color: #fff; text-align: center; border-bottom: 1px solid var(--border); }
         .brand span { color: var(--primary); }
@@ -62,14 +60,12 @@
         .nav-item { display: flex; align-items: center; gap: 15px; padding: 15px; color: #aaa; text-decoration: none; border-radius: 10px; margin-bottom: 5px; font-weight: 600; cursor: pointer; transition: 0.3s; }
         .nav-item.active { background: rgba(255,71,87,0.1); color: var(--primary); }
         
-        /* MAIN */
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         .topbar { height: 70px; background: rgba(10,10,15,0.9); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
         .content-area { padding: 20px; overflow-y: auto; flex: 1; }
         .tab-pane { display: none; } .tab-pane.active { display: block; animation: fadeIn 0.4s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* UI ELEMENTS */
         .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
         .stat-card { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid var(--border); display: flex; align-items: center; gap: 15px; }
         .stat-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 20px; }
@@ -77,22 +73,20 @@
         .table-container { background: var(--card-bg); border-radius: 15px; border: 1px solid var(--border); overflow-x: auto; margin-bottom: 20px; }
         .table-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         .btn-add { background: var(--primary); color: #fff; padding: 10px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
         th { background: #1a1a24; padding: 15px; text-align: left; font-size: 12px; color: #888; text-transform: uppercase; }
         td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
         
         .action-btn { background: #222; border: 1px solid #333; color: #fff; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; margin-right: 5px; transition: 0.2s; }
         .action-btn.edit:hover { background: #1e90ff; border-color: #1e90ff; }
         .action-btn.money:hover { background: var(--accent); border-color: var(--accent); color: #000; }
-        .action-btn.ban:hover { background: #f1c40f; border-color: #f1c40f; color: #000; }
         .action-btn.ban.is-banned { background: #ff4757; border-color: #ff4757; color: #fff; animation: blink 1s infinite; }
         @keyframes blink { 50% { opacity: 0.5; } }
         
-        /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .modal-box { width: 90%; max-width: 500px; background: #15151e; border-radius: 15px; border: 1px solid #333; overflow: hidden; }
         .modal-head { padding: 20px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; background: #111; }
-        .modal-body { padding: 20px; }
+        .modal-body { padding: 20px; max-height: 70vh; overflow-y: auto;}
         .form-group { margin-bottom: 15px; } 
         .form-group label { display: block; font-size: 12px; color: #aaa; margin-bottom: 8px; font-weight: bold; }
         .form-group input, .form-group select, .form-group textarea { width: 100%; background: #0a0a0f; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; outline: none; }
@@ -114,6 +108,8 @@
             <div class="nav-item active" onclick="switchTab('dashboard', this)"><i class="fas fa-chart-pie"></i> Tổng Quan</div>
             <div class="nav-item" onclick="switchTab('products', this)"><i class="fas fa-box-open"></i> Quản Lý Sản Phẩm</div>
             <div class="nav-item" onclick="switchTab('users', this)"><i class="fas fa-users"></i> Quản Lý User & Khóa</div>
+            <div class="nav-item" onclick="switchTab('history', this)"><i class="fas fa-history"></i> Lịch Sử Giao Dịch</div>
+            
             <div class="nav-item" style="color:#ff4757; margin-top:20px; border-top:1px solid #222; padding-top:20px;" onclick="logoutAdmin()"><i class="fas fa-sign-out-alt"></i> Đăng Xuất</div>
         </div>
     </div>
@@ -124,7 +120,7 @@
                 <i class="fas fa-bars mobile-toggle" onclick="toggleSidebar()"></i>
                 <div class="page-title" id="pageTitle">TỔNG QUAN HỆ THỐNG</div>
             </div>
-            <a href="index.html" style="color:#fff; text-decoration:none; font-size:12px; border:1px solid #333; padding:8px 15px; border-radius:8px; background:#111;">Về Trang Chủ <i class="fas fa-external-link-alt"></i></a>
+            <a href="index.html" style="color:#fff; text-decoration:none; font-size:12px; border:1px solid #333; padding:8px 15px; border-radius:8px; background:#111;">Về Trang Chủ</a>
         </div>
 
         <div class="content-area">
@@ -149,7 +145,7 @@
             <div id="tab-products" class="tab-pane">
                 <div class="table-container">
                     <div class="table-header">
-                        <h3>Kho Sản Phẩm</h3>
+                        <h3>Kho Sản Phẩm Của Bạn</h3>
                         <button class="btn-add" onclick="openProductModal()"><i class="fas fa-plus"></i> Thêm Mới</button>
                     </div>
                     <table>
@@ -168,10 +164,20 @@
                     </table>
                 </div>
             </div>
+
+            <div id="tab-history" class="tab-pane">
+                <div class="table-container">
+                    <div class="table-header"><h3>Biến Động Dòng Tiền & Bán Hàng</h3></div>
+                    <table>
+                        <thead><tr><th>Thời Gian</th><th>Tài Khoản</th><th>Loại GD</th><th>Số Tiền</th><th>Chi Tiết / Mã KEY</th></tr></thead>
+                        <tbody id="historyTableBody"><tr><td colspan="5" style="text-align:center;">Đang tải lịch sử...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
     </div>
-
-    <div class="modal-overlay" id="productModal">
+        <div class="modal-overlay" id="productModal">
         <div class="modal-box">
             <div class="modal-head">
                 <div class="modal-title" id="pModalTitle" style="color:var(--primary)">THÊM SẢN PHẨM</div>
@@ -182,6 +188,9 @@
                 <div class="form-group"><label>Tên Sản Phẩm *</label><input type="text" id="pName"></div>
                 <div class="form-group"><label>Danh Mục</label><select id="pCategory"><option value="Tool Social">Tool Social</option><option value="Script Game">Script Game</option><option value="Web Source">Mã Nguồn Web</option></select></div>
                 <div class="form-group"><label>Giá Bán (VNĐ) *</label><input type="number" id="pPrice"></div>
+                
+                <div class="form-group"><label>Link Tải Sản Phẩm (Mediafire/Drive) *</label><input type="text" id="pDownload" placeholder="Nhập Link để khách tải sau khi mua..."></div>
+                
                 <div class="form-group"><label>Mô Tả Ngắn</label><textarea id="pDesc" rows="2"></textarea></div>
                 <div class="form-group"><label>Icon (FontAwesome)</label><input type="text" id="pImg" value="fas fa-box"></div>
             </div>
@@ -194,19 +203,13 @@
 
     <div class="modal-overlay" id="moneyModal">
         <div class="modal-box">
-            <div class="modal-head">
-                <div class="modal-title" style="color:var(--accent);">CẬP NHẬT SỐ DƯ</div>
-                <button style="background:none; border:none; color:#fff;" onclick="closeModal('moneyModal')"><i class="fas fa-times"></i></button>
-            </div>
+            <div class="modal-head"><div class="modal-title" style="color:var(--accent);">CẬP NHẬT SỐ DƯ</div><button style="background:none; border:none; color:#fff;" onclick="closeModal('moneyModal')"><i class="fas fa-times"></i></button></div>
             <div class="modal-body">
                 <input type="hidden" id="uId">
                 <div style="margin-bottom:15px; color:#fff;">Tài khoản: <strong id="uNameDisplay"></strong></div>
                 <div class="form-group"><label>Nhập số dư mới (VNĐ) *</label><input type="number" id="uNewBalance"></div>
             </div>
-            <div class="modal-footer">
-                <button style="padding:10px 20px; border-radius:8px; border:none; background:#333; color:#fff;" onclick="closeModal('moneyModal')">Hủy</button>
-                <button style="padding:10px 20px; border-radius:8px; border:none; background:var(--accent); font-weight:bold;" onclick="saveUserBalance()">CẬP NHẬT</button>
-            </div>
+            <div class="modal-footer"><button style="padding:10px 20px; border-radius:8px; border:none; background:#333; color:#fff;" onclick="closeModal('moneyModal')">Hủy</button><button style="padding:10px 20px; border-radius:8px; border:none; background:var(--accent); font-weight:bold;" onclick="saveUserBalance()">CẬP NHẬT</button></div>
         </div>
     </div>
 
@@ -231,13 +234,13 @@
     </div>
 
     <div class="toast" id="toastMsg">Thành công!</div>
-                                <script>
+        <script>
         // FIREBASE INIT
         const firebaseConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // SẢN PHẨM
+        // 1. QUẢN LÝ SẢN PHẨM & LINK TẢI
         let currentProducts = {};
         db.ref('products').on('value', (s) => {
             let tbody = document.getElementById('productTableBody'); tbody.innerHTML = '';
@@ -264,24 +267,35 @@
         });
 
         function openProductModal(id = null) {
-            document.getElementById('pId').value = ''; document.getElementById('pName').value = ''; document.getElementById('pPrice').value = ''; document.getElementById('pDesc').value = '';
+            document.getElementById('pId').value = ''; document.getElementById('pName').value = ''; document.getElementById('pPrice').value = ''; document.getElementById('pDesc').value = ''; document.getElementById('pDownload').value = '';
             if(id) {
                 let p = currentProducts[id];
                 document.getElementById('pId').value = id; document.getElementById('pName').value = p.name; document.getElementById('pPrice').value = p.price; document.getElementById('pCategory').value = p.category; document.getElementById('pDesc').value = p.desc || ''; document.getElementById('pImg').value = p.img || 'fas fa-box';
+                // Đẩy dữ liệu Link tải cũ vào form (nếu có)
+                document.getElementById('pDownload').value = p.download_link || '';
             }
             document.getElementById('productModal').style.display = 'flex';
         }
 
         function saveProduct() {
-            let id = document.getElementById('pId').value, data = { name: document.getElementById('pName').value, price: Number(document.getElementById('pPrice').value), category: document.getElementById('pCategory').value, desc: document.getElementById('pDesc').value, img: document.getElementById('pImg').value };
-            if(!data.name || !data.price) return alert("Điền đủ tên và giá!");
+            let id = document.getElementById('pId').value;
+            let data = { 
+                name: document.getElementById('pName').value, 
+                price: Number(document.getElementById('pPrice').value), 
+                category: document.getElementById('pCategory').value, 
+                desc: document.getElementById('pDesc').value, 
+                img: document.getElementById('pImg').value,
+                download_link: document.getElementById('pDownload').value // Lưu Link tải
+            };
+            if(!data.name || !data.price || !data.download_link) return alert("Điền đủ Tên, Giá và Link tải!");
+            
             if(id) db.ref('products/' + id).update(data).then(() => { showAdminToast("Cập nhật SP xong"); closeModal('productModal'); });
             else db.ref('products').push().set(data).then(() => { showAdminToast("Đã thêm SP"); closeModal('productModal'); });
         }
 
         function deleteProduct(id) { if(confirm("Xóa sản phẩm này?")) db.ref('products/'+id).remove(); }
 
-        // USER
+        // 2. QUẢN LÝ USER
         let currentUsers = {};
         db.ref('users').on('value', (s) => {
             let tbody = document.getElementById('userTableBody'); tbody.innerHTML = '';
@@ -311,28 +325,42 @@
         });
 
         function openMoneyModal(id) { document.getElementById('uId').value = id; document.getElementById('uNameDisplay').innerText = id.replace(/_/g, '.'); document.getElementById('uNewBalance').value = currentUsers[id].balance || 0; document.getElementById('moneyModal').style.display = 'flex'; }
-        function saveUserBalance() { let id = document.getElementById('uId').value, bal = Number(document.getElementById('uNewBalance').value); db.ref('users/'+id).update({balance: bal}).then(() => { showAdminToast("Cập nhật tiền xong"); closeModal('moneyModal'); }); }
+        
+        // HÀM NẠP TIỀN CÓ GHI LỊCH SỬ GIAO DỊCH
+        function saveUserBalance() { 
+            let id = document.getElementById('uId').value;
+            let newBal = Number(document.getElementById('uNewBalance').value); 
+            
+            db.ref('users/'+id).update({balance: newBal}).then(() => { 
+                showAdminToast("Cập nhật tiền xong"); 
+                
+                // Ghi vào bảng Lịch sử (Admin chủ động thay đổi tiền)
+                db.ref('transactions').push().set({
+                    user: id,
+                    type: 'admin_update',
+                    amount: newBal,
+                    detail: 'Admin cập nhật số dư',
+                    time: new Date().toISOString()
+                });
+
+                closeModal('moneyModal'); 
+            }); 
+        }
+
         function deleteUser(id) { if(confirm("XÓA TÀI KHOẢN? (Sẽ mất tiền của họ)")) db.ref('users/'+id).remove(); }
 
         // BAN HỆ THỐNG
         function openBanModal(id) {
-            document.getElementById('banUid').value = id;
-            document.getElementById('banNameDisplay').innerText = id.replace(/_/g, '.');
+            document.getElementById('banUid').value = id; document.getElementById('banNameDisplay').innerText = id.replace(/_/g, '.');
             let u = currentUsers[id];
-            
             let now = new Date(); now.setHours(now.getHours() + 24); now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             document.getElementById('banUntil').value = now.toISOString().slice(0,16);
             document.getElementById('banReason').value = "";
-
             if(u.banned && new Date(u.ban_until).getTime() > new Date().getTime()) {
-                document.getElementById('banStatusDisplay').style.display = 'block';
-                document.getElementById('btnUnbanBtn').style.display = 'block';
-                document.getElementById('banReason').value = u.ban_reason;
-                let banD = new Date(u.ban_until); banD.setMinutes(banD.getMinutes() - banD.getTimezoneOffset());
-                document.getElementById('banUntil').value = banD.toISOString().slice(0,16);
+                document.getElementById('banStatusDisplay').style.display = 'block'; document.getElementById('btnUnbanBtn').style.display = 'block'; document.getElementById('banReason').value = u.ban_reason;
+                let banD = new Date(u.ban_until); banD.setMinutes(banD.getMinutes() - banD.getTimezoneOffset()); document.getElementById('banUntil').value = banD.toISOString().slice(0,16);
             } else {
-                document.getElementById('banStatusDisplay').style.display = 'none';
-                document.getElementById('btnUnbanBtn').style.display = 'none';
+                document.getElementById('banStatusDisplay').style.display = 'none'; document.getElementById('btnUnbanBtn').style.display = 'none';
             }
             document.getElementById('banModal').style.display = 'flex';
         }
@@ -342,11 +370,44 @@
             if(!until) return alert("Chọn ngày mở khóa!");
             db.ref('users/'+id).update({ banned: true, ban_reason: reason, ban_until: new Date(until).toISOString() }).then(() => { showAdminToast("Đã Khóa User!", true); closeModal('banModal'); });
         }
-
         function unbanUser() {
             let id = document.getElementById('banUid').value;
             db.ref('users/'+id).update({ banned: false, ban_reason: null, ban_until: null }).then(() => { showAdminToast("Đã ân xá."); closeModal('banModal'); });
         }
+
+        // 3. LOAD LỊCH SỬ GIAO DỊCH TOÀN HỆ THỐNG
+        db.ref('transactions').orderByChild('time').on('value', (s) => {
+            let tbody = document.getElementById('historyTableBody');
+            tbody.innerHTML = '';
+            if(s.exists()) {
+                let transList = [];
+                s.forEach(child => { transList.push(child.val()); });
+                transList.reverse(); // Đảo ngược để mới nhất lên đầu
+                
+                transList.forEach(t => {
+                    let time = new Date(t.time).toLocaleString('vi-VN');
+                    let uName = t.user.replace(/_/g, '.');
+                    let color = t.type === 'purchase' ? '#ff4757' : 'var(--accent)';
+                    let typeText = t.type === 'purchase' ? 'Mua Sản Phẩm' : 'Nạp / Cập Nhật';
+                    
+                    // Nếu là Mua sản phẩm, phần Chi tiết sẽ hiển thị KEY đã cấp
+                    let detailHtml = t.detail;
+                    if(t.type === 'purchase' && t.key_granted) {
+                        detailHtml = `${t.detail}<br><span style="font-size:11px; color:#f1c40f; font-family:monospace;">KEY: ${t.key_granted}</span>`;
+                    }
+
+                    tbody.innerHTML += `<tr>
+                        <td style="font-size:12px; color:#888;">${time}</td>
+                        <td style="font-weight:bold;">${uName}</td>
+                        <td><span style="background:rgba(255,255,255,0.1); padding:3px 8px; border-radius:5px; font-size:11px;">${typeText}</span></td>
+                        <td style="color:${color}; font-weight:bold; font-family:monospace;">${t.type === 'purchase' ? '-' : '+'}${formatMoney(t.amount)}</td>
+                        <td style="font-size:12px;">${detailHtml}</td>
+                    </tr>`;
+                });
+            } else {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Chưa có giao dịch nào phát sinh.</td></tr>`;
+            }
+        });
     </script>
 </body>
 </html>
