@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VƯỢT LINK BẢO MẬT | QUOCDAT SEC</title>
+    <title>VƯỢT LINK AN TOÀN | QUOCDAT SEC</title>
     
     <script>
         var currentUser = localStorage.getItem('vip_username');
-        var safeUserId = "guest";
         if(!currentUser || currentUser.trim() === "") { window.location.replace("login.html"); } 
-        else { safeUserId = currentUser.replace(/[.#$\[\]]/g, '_'); }
         window.goToPage = function(url) { window.location.href = url; }
     </script>
 
@@ -23,21 +21,15 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: #fff; padding-top: 70px; padding-bottom: 50px; }
         header { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(10,10,15,0.98); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 1000; }
-        .logo { font-family: 'Orbitron'; font-size: 18px; font-weight: 900; color: #fff; text-decoration: none; cursor: pointer; }
+        .logo { font-family: 'Orbitron'; font-size: 18px; font-weight: 900; color: #fff; cursor: pointer; }
         
         .container { max-width: 600px; margin: 50px auto; padding: 0 20px; text-align: center; }
         .free-key-section { background: var(--card-bg); border: 1px solid var(--border); padding: 40px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         
-        .btn-bypass { background: var(--accent); color: #000; padding: 15px 30px; border-radius: 12px; font-weight: bold; font-family: 'Orbitron'; border: none; cursor: pointer; font-size: 16px; width: 100%; margin-top: 20px; transition: 0.3s; }
-        .btn-bypass:hover { filter: brightness(1.2); }
-        .btn-bypass:disabled { background: #333; color: #888; cursor: not-allowed; }
-
-        .progress-wrapper { width: 100%; background: #000; border: 1px solid #333; border-radius: 10px; height: 18px; margin-top: 25px; overflow: hidden; display: none; position: relative; }
-        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--primary)); transition: width 0.2s ease; box-shadow: 0 0 15px var(--accent); }
+        .btn-bypass { background: var(--accent); color: #000; padding: 18px 30px; border-radius: 12px; font-weight: bold; font-family: 'Orbitron'; border: none; cursor: pointer; font-size: 18px; width: 100%; margin-top: 20px; transition: 0.3s; box-shadow: 0 0 20px rgba(0,184,255,0.3); }
+        .btn-bypass:hover { transform: scale(1.02); filter: brightness(1.2); }
         
-        .terminal-text { font-family: monospace; font-size: 13px; color: var(--accent); text-align: left; margin-top: 15px; display: none; background: #000; padding: 15px; border-radius: 8px; border: 1px dashed #333; height: 160px; overflow-y: hidden; line-height: 1.6; }
-        .t-success { color: var(--primary); font-weight: bold; }
-        .t-error { color: #ff4757; }
+        .status-loading { font-family: monospace; color: var(--primary); margin-top: 20px; display: none; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -47,103 +39,71 @@
 
     <div class="container">
         <div class="free-key-section">
-            <i class="fas fa-server" style="font-size: 60px; color: var(--accent); margin-bottom: 20px;"></i>
-            <h2 style="font-family:'Orbitron'; color:var(--accent); margin-bottom:10px;">HỆ THỐNG MÁY CHỦ</h2>
-            <p style="color:#888; font-size:14px; margin-bottom:20px; line-height:1.6;">Kết nối thông qua Máy chủ Vercel. Chống mọi loại Adblock và Cloudflare.</p>
+            <i class="fas fa-bolt" style="font-size: 60px; color: var(--accent); margin-bottom: 20px;"></i>
+            <h2 style="font-family:'Orbitron'; color:var(--accent); margin-bottom:10px;">KHỞI TẠO LINK MỚI</h2>
+            <p style="color:#888; font-size:14px; margin-bottom:20px; line-height:1.6;">Hệ thống sử dụng cơ chế chuyển hướng trực tiếp cấp độ trình duyệt. Đảm bảo 100% tạo link thành công và không bị lỗi API.</p>
             
-            <button class="btn-bypass" id="btnCreateLink" onclick="generateLink4M()">
-                <i class="fas fa-external-link-alt"></i> BẮT ĐẦU ĐỤC TƯỜNG LỬA
+            <button class="btn-bypass" id="btnCreateLink" onclick="forceGenerateLink()">
+                <i class="fas fa-rocket"></i> BẮT ĐẦU VƯỢT LINK
             </button>
 
-            <div id="progressContainer" class="progress-wrapper">
-                <div id="progressBar" class="progress-fill"></div>
+            <div id="loadingStatus" class="status-loading">
+                <i class="fas fa-spinner fa-spin"></i> ĐANG THIẾT LẬP BẢO MẬT...
             </div>
-            <div id="terminalText" class="terminal-text"></div>
         </div>
     </div>
 
     <script>
-        const firebaseConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
+        // API KEY CỦA BẠN: 6992df868b3d1e423d1ab833
+        const MY_API_KEY = "6992df868b3d1e423d1ab833";
+
+        const firebaseConfig = { apiKey: MY_API_KEY, databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        function logTerminal(msg, type="") {
-            let term = document.getElementById('terminalText');
-            let colorClass = type === "err" ? "t-error" : (type === "ok" ? "t-success" : "");
-            term.innerHTML += `<span class="${colorClass}">> ${msg}</span><br>`;
-            term.scrollTop = term.scrollHeight; 
-        }
+        async function forceGenerateLink() {
+            const btn = document.getElementById('btnCreateLink');
+            const status = document.getElementById('loadingStatus');
 
-        async function generateLink4M() {
-            let btn = document.getElementById('btnCreateLink'); 
-            let pWrap = document.getElementById('progressContainer');
-            let pBar = document.getElementById('progressBar');
-            let term = document.getElementById('terminalText');
+            btn.style.display = 'none';
+            status.style.display = 'block';
 
-            btn.style.display = 'none'; pWrap.style.display = 'block'; term.style.display = 'block';
-            term.innerHTML = "> Đang khởi tạo Token bảo mật...<br>";
-
+            // 1. Khởi tạo mã Token xác thực cho người dùng
+            const uniqueToken = "TK-" + Math.random().toString(36).substring(2, 12).toUpperCase();
+            const freeKey = "QDFREE-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+            
+            // Lấy ID sản phẩm nếu có từ URL
             const urlParams = new URLSearchParams(window.location.search);
             const freeItem = urlParams.get('free_item');
 
-            let uniqueToken = "TK-" + Math.random().toString(36).substring(2, 10).toUpperCase();
-            let freeKey = "QDFREE-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-            
+            // Cấu hình đích đến cuối cùng sau khi vượt link thành công
             let currentPath = window.location.href.split('?')[0]; 
             let baseUrl = currentPath.substring(0, currentPath.lastIndexOf('/'));
-            let destinationUrl = baseUrl + "/key.html?verify=" + uniqueToken;
-            if(freeItem) destinationUrl += "&free_item=" + freeItem;
+            let destinationUrl = `${baseUrl}/key.html?verify=${uniqueToken}`;
+            if(freeItem) destinationUrl += `&free_item=${freeItem}`;
 
-            // 1. Ghi Token lên Firebase
-            await db.ref('free_tokens/' + uniqueToken).set({ key: freeKey, status: 'pending', created_at: Date.now() });
-            logTerminal("Ghi nhận Token thành công.", "ok");
+            // 2. Ghi nhận phiên làm việc lên Database (Chờ sẵn)
+            try {
+                await db.ref('free_tokens/' + uniqueToken).set({ 
+                    key: freeKey, 
+                    status: 'pending', 
+                    created_at: Date.now() 
+                });
 
-            let finalTargetUrl = null;
-            let isApiFailed = false;
-
-            // 2. GỌI API THÔNG QUA MÁY CHỦ VERCEL (Đường dẫn: /api/link)
-            logTerminal("Đang thiết lập kết nối qua Serverless Backend...");
-            
-            fetch(`/api/link?url=${encodeURIComponent(destinationUrl)}`)
-            .then(res => res.json())
-            .then(data => {
-                if(data.status === "success" || data.shortenedUrl || data.url) {
-                    finalTargetUrl = data.shortenedUrl || data.url;
-                } else {
-                    throw new Error("API Link4M báo lỗi");
-                }
-            })
-            .catch(err => {
-                isApiFailed = true;
-            });
-
-            // 3. HIỆU ỨNG GIAO DIỆN
-            let progress = 0;
-            let loadInterval = setInterval(() => {
-                progress += Math.floor(Math.random() * 8) + 4;
+                // 3. CƠ CHẾ SỐ 1: DÙNG FULL-PAGE SCRIPT (KHÔNG DÙNG API FETCH)
+                // Đây là cách "Húc" link mạnh nhất của Link4M, trình duyệt sẽ tự gánh việc tạo link
+                const forceUrl = `https://link4m.com/st?api=${MY_API_KEY}&url=${encodeURIComponent(destinationUrl)}`;
                 
-                if (progress > 85 && !finalTargetUrl && !isApiFailed) progress = 85; 
-                if (progress > 100) progress = 100;
-                
-                pBar.style.width = progress + '%';
-                logTerminal(`Máy chủ đang xử lý dữ liệu... [${progress}%]`);
-                
-                if (progress >= 100) {
-                    clearInterval(loadInterval);
-                    if (finalTargetUrl) {
-                        logTerminal(`[100%] TẠO LINK MỚI THÀNH CÔNG! Đang chuyển trang...`, "ok");
-                        setTimeout(() => { window.location.href = finalTargetUrl; }, 800);
-                    } else {
-                        logTerminal("LỖI KẾT NỐI TỪ LINK4M HOẶC LỖI TẠO FILE API.", "err");
-                        pBar.style.background = "#ff4757";
-                        setTimeout(() => {
-                            btn.style.display = 'block';
-                            btn.innerHTML = `<i class="fas fa-redo"></i> THỬ LẠI LẦN NỮA`;
-                            pWrap.style.display = 'none';
-                        }, 2000);
-                    }
-                }
-            }, 100);
+                // Đợi 1 giây cho Database ghi xong rồi bay luôn
+                setTimeout(() => {
+                    window.location.href = forceUrl;
+                }, 1000);
+
+            } catch (err) {
+                alert("Lỗi kết nối Server! Vui lòng thử lại.");
+                btn.style.display = 'block';
+                status.style.display = 'none';
+            }
         }
     </script>
 </body>
