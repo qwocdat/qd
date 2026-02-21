@@ -3,125 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NHẬN KEY FREE | QUOCDAT SEC</title>
+    <title>NHẬN KEY DÙNG THỬ | QUOCDAT SEC</title>
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        :root { --primary: #00ff88; --bg: #0a0a0f; }
-        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; text-align: center; padding: 50px 20px; }
-        .card { background: #15151e; max-width: 500px; margin: 0 auto; padding: 40px; border-radius: 20px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        select { width: 100%; background: #000; color: #fff; border: 1px solid #444; padding: 15px; border-radius: 10px; margin: 20px 0; font-size: 16px; outline: none; }
-        .key-display { display: none; background: rgba(241,196,15,0.1); border: 2px dashed #f1c40f; padding: 20px; border-radius: 12px; margin: 20px 0; }
-        .key-text { color: #f1c40f; font-family: 'Orbitron'; font-size: 24px; font-weight: bold; }
-        .btn { background: var(--primary); color: #000; padding: 15px 30px; border-radius: 10px; text-decoration: none; font-weight: bold; display: block; width: 100%; cursor: pointer; border: none; font-size: 16px; }
-        .timer { font-family: 'Orbitron'; color: #ff4757; font-size: 20px; margin-top: 15px; display: none; }
+        :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --accent: #00b8ff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        
+        body { 
+            background: var(--bg); color: #fff; 
+            display: flex; align-items: center; justify-content: center; 
+            min-height: 100vh; padding: 20px; 
+        }
+        
+        .card { 
+            background: var(--card-bg); border: 1px solid var(--border); 
+            width: 100%; max-width: 500px; padding: 40px 30px; 
+            border-radius: 24px; text-align: center; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5); 
+        }
+        
+        .title { font-family: 'Orbitron', sans-serif; color: var(--primary); font-size: 24px; margin-bottom: 10px; }
+        .subtitle { color: #888; font-size: 14px; margin-bottom: 25px; }
+        
+        select { 
+            width: 100%; background: #000; color: #fff; 
+            border: 1px solid var(--border); padding: 16px; 
+            border-radius: 12px; margin-bottom: 20px; 
+            font-size: 16px; outline: none; transition: 0.3s;
+            appearance: none; -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2300ff88%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px top 50%;
+            background-size: 12px auto;
+        }
+        
+        select:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(0,255,136,0.2); }
+        
+        .k-box { 
+            display: none; background: rgba(0,255,136,0.1); 
+            border: 2px dashed var(--primary); padding: 25px; 
+            border-radius: 12px; margin: 25px 0; 
+        }
+        
+        .key-value { font-family: 'Orbitron', sans-serif; font-size: 28px; color: #f1c40f; letter-spacing: 2px; font-weight: 900; }
+        
+        .btn { 
+            background: var(--primary); color: #000; 
+            padding: 18px; width: 100%; border-radius: 12px; 
+            border: none; font-weight: 900; font-family: 'Orbitron'; 
+            cursor: pointer; transition: 0.3s; font-size: 16px; 
+            text-decoration: none; display: inline-block;
+            box-shadow: 0 0 20px rgba(0,255,136,0.2); 
+        }
+        
+        .btn:hover { filter: brightness(1.2); transform: translateY(-2px); }
+        .btn-secondary { background: #2a2a35; color: #fff; box-shadow: none; margin-top: 15px; }
+        .btn-secondary:hover { background: #333; }
+        
+        .timer-display { 
+            color: #ff4757; font-weight: 900; 
+            font-family: 'Orbitron', sans-serif; 
+            margin-top: 15px; font-size: 20px; 
+            display: none; text-shadow: 0 0 10px rgba(255,71,87,0.3);
+        }
+        
+        .note { font-size: 13px; color: #666; margin-top: 15px; line-height: 1.5; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2 style="font-family: 'Orbitron'; color: var(--primary);">NHẬN KEY MIỄN PHÍ</h2>
+    <div class="card" id="box">
+        <h2 class="title"><i class="fas fa-shield-check"></i> CỔNG NHẬN KEY</h2>
         
-        <div id="setupSection">
-            <p style="color: #888; margin-top: 10px;">Chọn sản phẩm bạn muốn nhận Key dùng thử:</p>
-            <select id="productSelect">
-                <option value="">-- Đang tải sản phẩm --</option>
+        <div id="setup">
+            <p class="subtitle">Vui lòng chọn công cụ bạn muốn kích hoạt trải nghiệm.</p>
+            <select id="pSel">
+                <option value="">-- Đang tải dữ liệu hệ thống --</option>
             </select>
-            <button class="btn" id="createBtn" onclick="generateKey()">KHỞI TẠO KEY & TÍNH GIỜ</button>
+            <button class="btn" onclick="gen()"><i class="fas fa-key"></i> KHỞI TẠO KEY BẢN QUYỀN</button>
         </div>
 
-        <div id="keySection">
-            <div class="key-display" id="keyDisplay">
-                <span class="key-text" id="keyCode">QD-XXXXXX</span>
+        <div id="result" style="display:none;">
+            <p class="subtitle" style="color: #00ff88;">Phiên bảo mật đã được tạo thành công!</p>
+            <div class="k-box" id="keyContainer">
+                <span id="kVal" class="key-value"></span>
             </div>
-            <div class="timer" id="timerDisplay">HẠN DÙNG: 20:00</div>
-            <a href="download.html" class="btn" style="margin-top: 20px;">ĐẾN CỔNG TRÍCH XUẤT</a>
+            
+            <p id="timer" class="timer-display"></p>
+            <p class="note">Link tải sẽ tự động hủy kích hoạt khi mã Key trên hết hạn. Vui lòng sử dụng ngay.</p>
+            
+            <a href="download.html" class="btn btn-secondary"><i class="fas fa-download"></i> ĐẾN CỔNG TRÍCH XUẤT</a>
         </div>
     </div>
 
     <script>
-        const firebaseConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
+        const firebaseConfig = { 
+            apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", 
+            databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", 
+            projectId: "quocdat-b80c2" 
+        };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         const urlParams = new URLSearchParams(window.location.search);
         let token = urlParams.get('verify') || localStorage.getItem('qd_secure_token');
-        let currentUser = localStorage.getItem('vip_username');
 
-        // 1. Tải danh sách sản phẩm Free
-        db.ref('products').once('value', (s) => {
-            const select = document.getElementById('productSelect');
-            select.innerHTML = '<option value="">-- Chọn sản phẩm --</option>';
-            s.forEach(child => {
-                let p = child.val();
-                if(p.price === 0) {
-                    select.innerHTML += `<option value="${child.key}">${p.name}</option>`;
-                }
+        // Load sản phẩm
+        db.ref('products').once('value', s => {
+            let h = '<option value="">-- Lựa chọn hệ thống --</option>';
+            s.forEach(c => { 
+                if(c.val().price === 0) h += `<option value="${c.key}">${c.val().name}</option>`; 
             });
+            document.getElementById('pSel').innerHTML = h;
         });
 
-        // 2. Hàm tạo Key và tính giờ
-        async function generateKey() {
-            const productId = document.getElementById('productSelect').value;
-            if(!productId) return alert("Vui lòng chọn sản phẩm!");
-            if(!token) return alert("Lỗi xác minh! Vui lòng quay lại getkey.html");
+        async function gen() {
+            let pid = document.getElementById('pSel').value;
+            if(!pid) return alert("Hệ thống yêu cầu bạn chọn một công cụ trước khi tiếp tục!");
+            if(!token) {
+                alert("Mã bảo mật không hợp lệ hoặc đã hết hạn! Vui lòng quay lại xác minh.");
+                window.location.href = "getkey.html";
+                return;
+            }
 
-            const btn = document.getElementById('createBtn');
-            btn.innerText = "ĐANG KHỞI TẠO..."; btn.disabled = true;
+            let key = "QDFREE-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+            let exp = Date.now() + 1200000; // 20 phút
 
-            const freeKey = "QDFREE-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-            const now = Date.now();
-            const expiry = now + (20 * 60 * 1000); // 20 phút
-
-            // Cập nhật Firebase: Khi hết hạn, key sẽ có status 'expired'
-            await db.ref('free_tokens/' + token).update({
-                key: freeKey,
-                status: 'active',
-                activated_at: now,
-                expiry_at: expiry,
-                product_id: productId
-            });
-
-            // Ghi vào lịch sử giao dịch để link "sống" trong 20 phút
-            const pSnap = await db.ref('products/' + productId).once('value');
-            const pData = pSnap.val();
+            await db.ref('free_tokens/' + token).update({ key, status: 'active', expiry_at: exp });
             
+            let pSnap = await db.ref('products/' + pid).once('value');
+            let pData = pSnap.val();
+
             await db.ref('transactions').push().set({
-                user: currentUser.replace(/[.#$\[\]]/g, '_'),
-                type: 'purchase',
-                amount: 0,
+                user: (localStorage.getItem('vip_username') || 'guest').replace(/[.#$\[\]]/g, '_'),
+                type: 'purchase', 
+                amount: 0, 
                 detail: 'Dùng thử: ' + pData.name,
-                key_granted: freeKey,
-                download_link: pData.download_link,
-                expiry_at: expiry, // Quan trọng: download.html sẽ check cái này
+                key_granted: key, 
+                download_link: pData.download_link, 
+                expiry_at: exp, 
                 time: new Date().toISOString()
             });
 
-            showKeyUI(freeKey, expiry);
-        }
+            document.getElementById('setup').style.display = 'none';
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('keyContainer').style.display = 'block';
+            document.getElementById('kVal').innerText = key;
+            
+            const tDisp = document.getElementById('timer');
+            tDisp.style.display = 'block';
 
-        function showKeyUI(key, expiry) {
-            document.getElementById('setupSection').style.display = 'none';
-            document.getElementById('keyDisplay').style.display = 'block';
-            document.getElementById('timerDisplay').style.display = 'block';
-            document.getElementById('keyCode').innerText = key;
-            startCountdown(expiry);
-        }
-
-        function startCountdown(expiry) {
-            const display = document.getElementById('timerDisplay');
-            const interval = setInterval(() => {
-                const now = Date.now();
-                const diff = expiry - now;
-                if (diff <= 0) {
-                    clearInterval(interval);
-                    display.innerText = "KEY ĐÃ HẾT HẠN - LINK ĐÃ CHẾT";
+            setInterval(() => {
+                let d = exp - Date.now();
+                if(d <= 0) {
+                    tDisp.innerText = "KEY ĐÃ HẾT HẠN - KẾT NỐI BỊ NGẮT";
+                    tDisp.style.color = "#ff4757";
                     return;
                 }
-                const m = Math.floor(diff / 60000);
-                const s = Math.floor((diff % 60000) / 1000);
-                display.innerText = `HẠN DÙNG: ${m}:${s < 10 ? '0' : ''}${s}`;
+                let m = Math.floor(d / 60000);
+                let s = Math.floor((d % 60000) / 1000);
+                tDisp.innerText = `THỜI GIAN CÒN LẠI: ${m}:${s < 10 ? '0' : ''}${s}`;
             }, 1000);
         }
     </script>
