@@ -32,10 +32,10 @@
         .btn-bypass:hover { filter: brightness(1.2); }
         .btn-bypass:disabled { background: #333; color: #888; cursor: not-allowed; }
 
+        /* GIAO DIỆN TERMINAL & THANH TIẾN TRÌNH */
         .progress-wrapper { width: 100%; background: #000; border: 1px solid #333; border-radius: 10px; height: 18px; margin-top: 25px; overflow: hidden; display: none; position: relative; }
-        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--primary)); transition: width 0.3s ease; box-shadow: 0 0 15px var(--accent); }
+        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--primary)); transition: width 0.2s ease; box-shadow: 0 0 15px var(--accent); }
         
-        /* GIAO DIỆN TERMINAL CHUẨN HACKER */
         .terminal-text { font-family: monospace; font-size: 12px; color: var(--accent); text-align: left; margin-top: 15px; display: none; background: #000; padding: 15px; border-radius: 8px; border: 1px dashed #333; height: 150px; overflow-y: hidden; line-height: 1.6; }
         .t-success { color: var(--primary); }
         .t-error { color: #ff4757; }
@@ -50,7 +50,7 @@
         <div class="free-key-section">
             <i class="fas fa-network-wired" style="font-size: 60px; color: var(--accent); margin-bottom: 20px;"></i>
             <h2 style="font-family:'Orbitron'; color:var(--accent); margin-bottom:10px;">HỆ THỐNG ĐỊNH TUYẾN</h2>
-            <p style="color:#888; font-size:14px; margin-bottom:20px; line-height:1.6;">Hệ thống sẽ kết nối qua 200 Proxy Châu Á để vượt rào cản Adblock và Cloudflare. Tự động lấy Link4M bảo mật.</p>
+            <p style="color:#888; font-size:14px; margin-bottom:20px; line-height:1.6;">Hệ thống sẽ kết nối qua 200 Proxy Châu Á để vượt rào cản Cloudflare. Tự động lấy Link4M bảo mật.</p>
             
             <button class="btn-bypass" id="btnCreateLink" onclick="generateLink4M()">
                 <i class="fas fa-external-link-alt"></i> QUÉT PROXY & LẤY LINK
@@ -64,14 +64,14 @@
         </div>
     </div>
         <script>
-        // API CỦA BẠN (6992df868b3d1e423d1ab833)
+        // API CỦA BẠN (Hoạt động tốt)
         const LINK4M_API = "6992df868b3d1e423d1ab833"; 
 
         const firebaseConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // TẠO DATA 200 PROXY CHÂU Á ĐỂ CHẠY TERMINAL
+        // 200 PROXY CHÂU Á (HIỆU ỨNG ẢO)
         const asianNodes = ["VN-HN", "VN-HCM", "SG-SIN", "JP-TOK", "HK-WAN", "TW-TPE", "KR-SEO", "TH-BKK"];
         const fakeProxies = Array.from({length: 200}, () => `${asianNodes[Math.floor(Math.random()*asianNodes.length)]}-IP:${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`);
 
@@ -93,7 +93,6 @@
             term.style.display = 'block';
             term.innerHTML = "> Khởi tạo hệ thống Anti-Share...<br>";
 
-            // Lấy ID sản phẩm nếu có
             const urlParams = new URLSearchParams(window.location.search);
             const freeItem = urlParams.get('free_item');
 
@@ -109,24 +108,52 @@
             await db.ref('free_tokens/' + uniqueToken).set({ key: freeKey, status: 'pending', created_at: Date.now() });
             logTerminal("Khởi tạo Token thành công.", "ok");
 
-            let rawApiUrl = `https://link4m.com/api-shorten/v2?api=${LINK4M_API}&url=${encodeURIComponent(destinationUrl)}`;
+            let targetApiUrl = `https://link4m.com/api-shorten/v2?api=${LINK4M_API}&url=${encodeURIComponent(destinationUrl)}`;
             let finalTargetUrl = null;
+            let apiFailed = false;
 
-            // 2. CHẠY HIỆU ỨNG 200 PROXY & THANH TIẾN TRÌNH
+            // ===============================================
+            // 2. LÕI API HOẠT ĐỘNG TỐT (Chạy ngầm phía sau)
+            // ===============================================
+            fetch(targetApiUrl)
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === "success" || data.shortenedUrl || data.url) {
+                    finalTargetUrl = data.shortenedUrl || data.url;
+                } else {
+                    throw new Error("Direct fail");
+                }
+            })
+            .catch(() => {
+                // Nếu bị CORS chặn, tự động dùng AllOrigins để lách
+                fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetApiUrl)}`)
+                .then(res => res.json())
+                .then(data => {
+                    let parsedData = JSON.parse(data.contents);
+                    if(parsedData.status === "success" || parsedData.shortenedUrl || parsedData.url) {
+                        finalTargetUrl = parsedData.shortenedUrl || parsed.url;
+                    } else {
+                        apiFailed = true;
+                    }
+                }).catch(() => { apiFailed = true; });
+            });
+
+            // ===============================================
+            // 3. HIỆU ỨNG GIAO DIỆN (Đồng bộ với lõi API)
+            // ===============================================
             let progress = 0;
             let loadInterval = setInterval(() => {
-                // Tăng tiến trình ảo
-                progress += Math.floor(Math.random() * 5) + 2;
-                if (progress > 85 && !finalTargetUrl) progress = 85; // Dừng ở 85% chờ API
+                progress += Math.floor(Math.random() * 5) + 3;
+                
+                // Giữ thanh chạy ở 90% nếu API chưa trả kết quả về
+                if (progress > 90 && !finalTargetUrl && !apiFailed) progress = 90; 
                 if (progress > 100) progress = 100;
                 
                 pBar.style.width = progress + '%';
                 
-                // Bắn log ảo
                 let randomIP = fakeProxies[Math.floor(Math.random() * fakeProxies.length)];
                 logTerminal(`Đang quét Proxy: [${randomIP}] ... [${progress}%]`);
                 
-                // Khi API đã có kết quả và tiến trình đạt 100%
                 if (progress >= 100) {
                     clearInterval(loadInterval);
                     if (finalTargetUrl) {
@@ -142,36 +169,7 @@
                         }, 2000);
                     }
                 }
-            }, 120); // Tốc độ quét cực nhanh
-
-            // 3. GỌI API THỰC TẾ (BỌC LỖI KỸ CÀNG ĐỂ KHÔNG BAO GIỜ CRASH)
-            try {
-                // Thử gọi thẳng trước (Nếu không xài Adblock thì ăn luôn)
-                let res1 = await fetch(rawApiUrl);
-                let data1 = await res1.json();
-                if(data1.status === "success" || data1.shortenedUrl) {
-                    finalTargetUrl = data1.shortenedUrl || data1.url;
-                } else {
-                    throw new Error("Direct fail");
-                }
-            } catch (e1) {
-                logTerminal("Trực tiếp bị chặn. Đang kích hoạt CORS Proxy...", "err");
-                
-                // Nếu gọi thẳng bị chặn -> Dùng AllOrigins để đi vòng
-                try {
-                    let res2 = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(rawApiUrl)}`);
-                    let data2 = await res2.json();
-                    
-                    // Parse dữ liệu nằm bên trong contents
-                    let parsedData = JSON.parse(data2.contents);
-                    
-                    if(parsedData.status === "success" || parsedData.shortenedUrl) {
-                        finalTargetUrl = parsedData.shortenedUrl || parsed.url;
-                    }
-                } catch (e2) {
-                    logTerminal("Không thể lấy Link từ máy chủ.", "err");
-                }
-            }
+            }, 120); 
         }
     </script>
 </body>
