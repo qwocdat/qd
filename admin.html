@@ -6,12 +6,26 @@
     <title>ADMIN PANEL | QUOCDAT SEC</title>
     
     <script>
-        var currentUser = localStorage.getItem('vip_username');
-        // Chỉ cho phép tài khoản tên 'quocdat' hoặc 'admin' vào trang này
-        if(!currentUser || (currentUser.toLowerCase() !== 'quocdat' && currentUser.toLowerCase() !== 'admin')) { 
-            alert("CẢNH BÁO BẢO MẬT: Bạn không có quyền truy cập trang quản trị!");
-            window.location.replace("index.html"); 
+        // Kiểm tra xem trong phiên làm việc này Admin đã nhập pass chưa
+        var isAdminLoggedIn = sessionStorage.getItem('admin_auth_status');
+        
+        if (isAdminLoggedIn !== 'success') {
+            // Hiển thị hộp thoại nhập mật khẩu
+            var password = prompt("⛔ HỆ THỐNG BẢO MẬT CẤP CAO\n\nVui lòng nhập mật khẩu Quản Trị Viên:");
+            
+            if (password === "ngdaiquocdat") {
+                // Nhập đúng -> Lưu trạng thái để khi F5 không bị hỏi lại
+                sessionStorage.setItem('admin_auth_status', 'success');
+                alert("✅ Xác thực thành công! Chào mừng Admin.");
+            } else {
+                // Nhập sai -> Đá về trang chủ
+                alert("❌ Mật khẩu sai! Truy cập bị từ chối.");
+                window.location.replace("index.html");
+            }
         }
+
+        // Tạo sẵn biến giả lập để Firebase không bị lỗi khi Admin thao tác
+        var currentUser = localStorage.getItem('vip_username') || 'admin_system';
         var safeUserId = currentUser.replace(/[.#$\[\]]/g, '_');
     </script>
 
@@ -25,7 +39,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: #fff; display: flex; height: 100vh; overflow: hidden; }
         
-        /* SCROLLBAR GỌN GÀNG */
+        /* SCROLLBAR */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #000; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
@@ -42,15 +56,14 @@
         .nav-item:hover, .nav-item.active { background: rgba(255,71,87,0.1); color: var(--primary); }
         .nav-item i { width: 20px; text-align: center; font-size: 18px; }
 
-        /* MAIN CONTENT */
+        /* MAIN CONTENT & TOPBAR */
         .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         .topbar { height: 70px; background: rgba(10,10,15,0.9); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; backdrop-filter: blur(10px); }
         .page-title { font-family: 'Orbitron'; font-size: 18px; font-weight: bold; text-transform: uppercase; }
-        .topbar-right { display: flex; align-items: center; gap: 15px; }
-        .btn-view-site { background: #222; color: #fff; padding: 8px 15px; border-radius: 8px; font-size: 12px; font-weight: bold; text-decoration: none; border: 1px solid #333; }
+        .btn-view-site { background: #222; color: #fff; padding: 8px 15px; border-radius: 8px; font-size: 12px; font-weight: bold; text-decoration: none; border: 1px solid #333; transition: 0.3s; }
         .btn-view-site:hover { background: var(--accent); color: #000; }
         
-        /* CONTENT AREA */
+        /* CONTENT AREA & TABS */
         .content-area { padding: 20px; overflow-y: auto; flex: 1; }
         .tab-pane { display: none; animation: fadeIn 0.4s; }
         .tab-pane.active { display: block; }
@@ -66,7 +79,7 @@
         /* TABLES */
         .table-container { background: var(--card-bg); border-radius: 15px; border: 1px solid var(--border); overflow-x: auto; margin-bottom: 20px; }
         .table-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .btn-add { background: var(--primary); color: #fff; padding: 10px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .btn-add { background: var(--primary); color: #fff; padding: 10px 20px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
         
         table { width: 100%; border-collapse: collapse; min-width: 600px; }
         th { background: #1a1a24; padding: 15px; text-align: left; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
@@ -123,7 +136,7 @@
             <div class="nav-item" onclick="switchTab('products', this)"><i class="fas fa-box-open"></i> Quản Lý Sản Phẩm</div>
             <div class="nav-item" onclick="switchTab('users', this)"><i class="fas fa-users"></i> Quản Lý User</div>
             <div class="nav-item" onclick="switchTab('settings', this)"><i class="fas fa-cogs"></i> Cài Đặt Hệ Thống</div>
-            <div class="nav-item" style="color:#ff4757; margin-top:20px;" onclick="window.executeLogout()"><i class="fas fa-sign-out-alt"></i> Đăng Xuất</div>
+            <div class="nav-item" style="color:#ff4757; margin-top:20px;" onclick="logoutAdmin()"><i class="fas fa-sign-out-alt"></i> Thoát Khỏi Admin</div>
         </div>
     </div>
 
@@ -134,7 +147,7 @@
                 <div class="page-title" id="pageTitle">TỔNG QUAN HỆ THỐNG</div>
             </div>
             <div class="topbar-right">
-                <a href="index.html" class="btn-view-site" target="_blank"><i class="fas fa-external-link-alt"></i> Xem Website</a>
+                <a href="index.html" class="btn-view-site" target="_blank"><i class="fas fa-external-link-alt"></i> Trở về Trang Chủ</a>
             </div>
         </div>
 
@@ -144,7 +157,7 @@
                 <div class="stat-grid">
                     <div class="stat-card">
                         <div class="stat-icon" style="background:rgba(0,255,136,0.1); color:var(--accent);"><i class="fas fa-wallet"></i></div>
-                        <div class="stat-info"><div>Tổng Doanh Thu</div><span id="statRevenue">0 đ</span></div>
+                        <div class="stat-info"><div>Tổng Nạp User</div><span id="statRevenue">0 đ</span></div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon" style="background:rgba(30,144,255,0.1); color:#1e90ff;"><i class="fas fa-users"></i></div>
@@ -152,12 +165,12 @@
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon" style="background:rgba(255,71,87,0.1); color:var(--primary);"><i class="fas fa-box"></i></div>
-                        <div class="stat-info"><div>Tổng Sản Phẩm</div><span id="statProducts">0</span></div>
+                        <div class="stat-info"><div>Sản Phẩm Đang Bán</div><span id="statProducts">0</span></div>
                     </div>
                 </div>
                 <div class="table-container">
                     <div class="table-header"><h3 style="font-size:16px;">Hoạt Động Gần Đây</h3></div>
-                    <div style="padding:40px; text-align:center; color:#555; font-size:14px;">Chưa có dữ liệu giao dịch mới.</div>
+                    <div style="padding:40px; text-align:center; color:#555; font-size:14px;">Chưa có dữ liệu hệ thống mới.</div>
                 </div>
             </div>
 
@@ -165,7 +178,7 @@
                 <div class="table-container">
                     <div class="table-header">
                         <h3 style="font-size:16px;">Kho Sản Phẩm Của Bạn</h3>
-                        <button class="btn-add" onclick="openProductModal()"><i class="fas fa-plus"></i> Thêm Sản Phẩm</button>
+                        <button class="btn-add" onclick="openProductModal()"><i class="fas fa-plus"></i> Thêm Sản Phẩm Mới</button>
                     </div>
                     <table>
                         <thead>
@@ -178,7 +191,7 @@
                             </tr>
                         </thead>
                         <tbody id="productTableBody">
-                            <tr><td colspan="5" style="text-align:center; color:#555;">Đang tải dữ liệu từ Firebase...</td></tr>
+                            <tr><td colspan="5" style="text-align:center; color:#555;">Đang tải dữ liệu từ máy chủ Firebase...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -187,19 +200,19 @@
             <div id="tab-users" class="tab-pane">
                 <div class="table-container">
                     <div class="table-header">
-                        <h3 style="font-size:16px;">Danh Sách Thành Viên</h3>
+                        <h3 style="font-size:16px;">Danh Sách Thành Viên (Người Dùng)</h3>
                     </div>
                     <table>
                         <thead>
                             <tr>
-                                <th>Tài Khoản</th>
-                                <th>Số Dư Hiện Tại</th>
-                                <th>Ngày Tham Gia</th>
+                                <th>Tên Tài Khoản</th>
+                                <th>Số Dư Ví Hiện Tại</th>
+                                <th>Ngày Tạo</th>
                                 <th width="120">Nạp/Trừ Tiền</th>
                             </tr>
                         </thead>
                         <tbody id="userTableBody">
-                            <tr><td colspan="4" style="text-align:center; color:#555;">Đang tải dữ liệu User...</td></tr>
+                            <tr><td colspan="4" style="text-align:center; color:#555;">Đang tải danh sách người dùng...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -207,8 +220,8 @@
 
             <div id="tab-settings" class="tab-pane">
                 <div class="table-container" style="padding:30px;">
-                    <h3 style="color:var(--primary); margin-bottom:20px;"><i class="fas fa-cogs"></i> Cấu Hình Hệ Thống</h3>
-                    <p style="color:#888; font-size:14px;">Chức năng cài đặt API Ngân Hàng, API Link4M và đổi mật khẩu Admin đang được phát triển trong bản vá tiếp theo.</p>
+                    <h3 style="color:var(--primary); margin-bottom:20px;"><i class="fas fa-cogs"></i> Tùy Chỉnh Nâng Cao</h3>
+                    <p style="color:#888; font-size:14px; line-height: 1.6;">Chức năng Cài đặt Cổng gạch thẻ, Cấu hình API Link4M rút gọn và Thay đổi Pass Admin đang được DEV tiến hành vá ở phiên bản tiếp theo. Hiện tại vui lòng quản lý Sản phẩm và User.</p>
                 </div>
             </div>
 
@@ -225,7 +238,7 @@
                 <input type="hidden" id="pId">
                 <div class="form-group">
                     <label>Tên Sản Phẩm *</label>
-                    <input type="text" id="pName" placeholder="VD: Tool Auto Facebook V8" required>
+                    <input type="text" id="pName" placeholder="VD: Tool Facebook Pro V9" required>
                 </div>
                 <div class="form-group">
                     <label>Danh Mục</label>
@@ -237,20 +250,20 @@
                 </div>
                 <div class="form-group">
                     <label>Giá Bán (VNĐ) *</label>
-                    <input type="number" id="pPrice" placeholder="VD: 150000" required>
+                    <input type="number" id="pPrice" placeholder="VD: 250000" required>
                 </div>
                 <div class="form-group">
-                    <label>Mô Tả Ngắn</label>
-                    <textarea id="pDesc" rows="3" placeholder="Nhập mô tả giới thiệu..."></textarea>
+                    <label>Mô Tả Chức Năng</label>
+                    <textarea id="pDesc" rows="3" placeholder="Ghi chú các tính năng nổi bật..."></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Link Ảnh Icon (URL / Class FontAwesome)</label>
+                    <label>Mã Ảnh Icon (Dùng FontAwesome)</label>
                     <input type="text" id="pImg" placeholder="VD: fas fa-robot" value="fas fa-box">
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeModal('productModal')">Hủy Bỏ</button>
-                <button class="btn-save" onclick="saveProduct()">LƯU LẠI</button>
+                <button class="btn-cancel" onclick="closeModal('productModal')">Đóng</button>
+                <button class="btn-save" onclick="saveProduct()">LƯU SẢN PHẨM</button>
             </div>
         </div>
     </div>
@@ -258,64 +271,58 @@
     <div class="modal-overlay" id="moneyModal">
         <div class="modal-box">
             <div class="modal-head">
-                <div class="modal-title" style="color:var(--accent);">CẬP NHẬT SỐ DƯ TÀI KHOẢN</div>
+                <div class="modal-title" style="color:var(--accent);">ĐIỀU CHỈNH SỐ DƯ TÀI KHOẢN</div>
                 <button class="modal-close" onclick="closeModal('moneyModal')"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="uId">
                 <div style="margin-bottom:20px; padding:15px; background:rgba(0,184,255,0.1); border:1px dashed var(--accent); border-radius:10px;">
-                    <div style="font-size:12px; color:#888;">Tài khoản đang thao tác:</div>
+                    <div style="font-size:12px; color:#888;">Thao tác với tài khoản:</div>
                     <strong id="uNameDisplay" style="font-size:18px; color:#fff; font-family:'Orbitron';">...</strong>
                 </div>
                 <div class="form-group">
-                    <label>Nhập Số Tiền Mới (Cập nhật ghi đè) *</label>
-                    <input type="number" id="uNewBalance" placeholder="VD: 500000">
+                    <label>Nhập Số Dư Cần Ghi Đè (VNĐ) *</label>
+                    <input type="number" id="uNewBalance" placeholder="Nhập tổng số tiền hiện tại của khách...">
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeModal('moneyModal')">Hủy</button>
+                <button class="btn-cancel" onclick="closeModal('moneyModal')">Hủy Lệnh</button>
                 <button class="btn-save" style="background:var(--accent); color:#000;" onclick="saveUserBalance()">CẬP NHẬT TIỀN</button>
             </div>
         </div>
     </div>
 
     <div class="toast" id="toastMsg">Thành công!</div>
-        <script>
-        // CẤU HÌNH FIREBASE
-        const firebaseConfig = { 
-            apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", 
-            databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", 
-            projectId: "quocdat-b80c2" 
-        };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        // ------------------------------------
-        // CÁC HÀM UI CƠ BẢN
-        // ------------------------------------
+                            <script>
+        // Bật / Tắt Menu trên điện thoại
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
         }
 
+        // Chuyển Đổi Các Tab Chức Năng
         function switchTab(tabId, element) {
-            // Đổi màu menu
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             element.classList.add('active');
             
-            // Đổi nội dung tab
             document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tabId).classList.add('active');
             
-            // Đổi tiêu đề Topbar
             let titles = {
                 'dashboard': 'TỔNG QUAN HỆ THỐNG',
                 'products': 'QUẢN LÝ SẢN PHẨM SCRIPT',
-                'users': 'QUẢN LÝ THÀNH VIÊN',
+                'users': 'QUẢN LÝ THÀNH VIÊN VÀ TIỀN BẠC',
                 'settings': 'CÀI ĐẶT HỆ THỐNG'
             };
             document.getElementById('pageTitle').innerText = titles[tabId];
         }
 
+        // Hàm Tắt Admin (Hủy session pass)
+        function logoutAdmin() {
+            sessionStorage.removeItem('admin_auth_status');
+            window.location.replace('index.html');
+        }
+
+        // Cửa sổ thông báo góc dưới
         function showAdminToast(msg, isError = false) {
             let toast = document.getElementById('toastMsg');
             toast.style.borderLeftColor = isError ? '#ff4757' : '#00ff88';
@@ -328,9 +335,24 @@
             return Number(num).toLocaleString('vi-VN') + " đ";
         }
 
-        // ====================================
-        // QUẢN LÝ SẢN PHẨM (THÊM / SỬA GIÁ / XÓA)
-        // ====================================
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        // ===============================================
+        // KẾT NỐI FIREBASE BẰNG API KEY CỦA BẠN
+        // ===============================================
+        const firebaseConfig = { 
+            apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", 
+            databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", 
+            projectId: "quocdat-b80c2" 
+        };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // -----------------------------------------------
+        // PHẦN 1: QUẢN LÝ SẢN PHẨM (THÊM / SỬA / XÓA)
+        // -----------------------------------------------
         let currentProducts = {};
 
         function loadProducts() {
@@ -347,12 +369,12 @@
                         let tr = `
                             <tr>
                                 <td><strong style="color:var(--primary)">#${id.substring(0,4)}</strong></td>
-                                <td style="font-weight:bold;">${p.name}</td>
-                                <td><span style="background:#222; padding:3px 8px; border-radius:5px; font-size:11px;">${p.category}</span></td>
+                                <td style="font-weight:bold;"><i class="${p.img || 'fas fa-box'}" style="margin-right:8px; color:#888;"></i> ${p.name}</td>
+                                <td><span style="background:#222; padding:5px 10px; border-radius:5px; font-size:11px;">${p.category}</span></td>
                                 <td style="color:var(--accent); font-family:monospace; font-weight:bold; font-size:16px;">${formatMoney(p.price)}</td>
                                 <td>
-                                    <button class="action-btn edit" onclick="openProductModal('${id}')" title="Sửa Giá/Info"><i class="fas fa-edit"></i></button>
-                                    <button class="action-btn delete" onclick="deleteProduct('${id}')" title="Xóa"><i class="fas fa-trash-alt"></i></button>
+                                    <button class="action-btn edit" onclick="openProductModal('${id}')" title="Sửa Sản Phẩm"><i class="fas fa-edit"></i></button>
+                                    <button class="action-btn delete" onclick="deleteProduct('${id}')" title="Xóa Sản Phẩm"><i class="fas fa-trash-alt"></i></button>
                                 </td>
                             </tr>
                         `;
@@ -360,14 +382,14 @@
                     }
                     document.getElementById('statProducts').innerText = count;
                 } else {
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#555;">Chưa có sản phẩm nào trong kho. Hãy thêm mới!</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#555;">Kho hàng đang trống. Bấm Thêm Sản Phẩm Mới để bắt đầu!</td></tr>`;
                     document.getElementById('statProducts').innerText = '0';
                 }
             });
         }
 
         function openProductModal(id = null) {
-            // Reset form
+            // Xóa rỗng form trước khi mở
             document.getElementById('pId').value = '';
             document.getElementById('pName').value = '';
             document.getElementById('pPrice').value = '';
@@ -377,10 +399,10 @@
             
             document.getElementById('pModalTitle').innerText = 'THÊM SẢN PHẨM MỚI';
 
-            // Nếu truyền ID vào tức là lệnh Sửa
+            // Nếu là lệnh SỬA (Có ID truyền vào)
             if(id && currentProducts[id]) {
                 let p = currentProducts[id];
-                document.getElementById('pModalTitle').innerText = 'CHỈNH SỬA SẢN PHẨM (GIÁ/TÊN)';
+                document.getElementById('pModalTitle').innerText = 'CHỈNH SỬA SẢN PHẨM';
                 document.getElementById('pId').value = id;
                 document.getElementById('pName').value = p.name;
                 document.getElementById('pPrice').value = p.price;
@@ -401,38 +423,38 @@
             let img = document.getElementById('pImg').value;
 
             if(!name || !price) {
-                alert("Vui lòng điền đủ Tên và Giá bán!"); return;
+                alert("LỖI: Vui lòng điền tên và giá tiền của sản phẩm!"); return;
             }
 
             let productData = { name: name, price: price, category: category, desc: desc, img: img };
 
             if(id) {
-                // UPDATE
+                // UPDATE GHI ĐÈ LÊN SẢN PHẨM CŨ
                 db.ref('products/' + id).update(productData).then(() => {
-                    showAdminToast("Đã cập nhật giá và thông tin thành công!");
+                    showAdminToast("Đã cập nhật sản phẩm thành công!");
                     closeModal('productModal');
                 });
             } else {
-                // CREATE NEW
+                // TẠO MỚI SẢN PHẨM
                 let newRef = db.ref('products').push();
                 newRef.set(productData).then(() => {
-                    showAdminToast("Đã thêm sản phẩm mới vào kho!");
+                    showAdminToast("Đã thêm một sản phẩm mới vào Cửa Hàng!");
                     closeModal('productModal');
                 });
             }
         }
 
         function deleteProduct(id) {
-            if(confirm("Hành động này không thể hoàn tác! Bạn có chắc chắn muốn xóa sản phẩm này khỏi cửa hàng không?")) {
+            if(confirm("⚠ CẢNH BÁO: Bạn có chắc chắn muốn XÓA VĨNH VIỄN sản phẩm này không?")) {
                 db.ref('products/' + id).remove().then(() => {
-                    showAdminToast("Đã xóa sản phẩm vĩnh viễn!");
+                    showAdminToast("Đã xóa sản phẩm khỏi Database.");
                 });
             }
         }
 
-        // ====================================
-        // QUẢN LÝ USER VÀ SỐ DƯ (NẠP / TRỪ TIỀN)
-        // ====================================
+        // -----------------------------------------------
+        // PHẦN 2: QUẢN LÝ NGƯỜI DÙNG (CỘNG TRỪ TIỀN)
+        // -----------------------------------------------
         let currentUsers = {};
 
         function loadUsers() {
@@ -450,28 +472,29 @@
                         let bal = u.balance || 0;
                         totalMoney += bal;
                         
-                        // Lấy lại tên gốc bằng cách thay _ thành . (Mô phỏng)
+                        // Lấy lại tên gốc (Trường hợp có dấu chấm bị thay bằng _ )
                         let displayId = id.replace(/_/g, '.'); 
-                        let date = u.joined_at ? new Date(u.joined_at).toLocaleDateString('vi-VN') : 'N/A';
+                        let date = u.joined_at ? new Date(u.joined_at).toLocaleDateString('vi-VN') : 'Không rõ';
 
                         let tr = `
                             <tr>
-                                <td style="font-weight:bold; color:#fff;"><i class="fas fa-user-circle" style="color:#555; margin-right:8px;"></i> ${displayId}</td>
+                                <td style="font-weight:bold; color:#fff;"><i class="fas fa-user-astronaut" style="color:#555; margin-right:8px;"></i> ${displayId}</td>
                                 <td style="color:var(--primary); font-family:monospace; font-size:16px; font-weight:bold;">${formatMoney(bal)}</td>
                                 <td style="color:#888; font-size:12px;">${date}</td>
                                 <td>
-                                    <button class="action-btn money" onclick="openMoneyModal('${id}')" title="Sửa Số Dư"><i class="fas fa-coins"></i></button>
-                                    <button class="action-btn delete" onclick="deleteUser('${id}')" title="Xóa Tài Khoản"><i class="fas fa-user-slash"></i></button>
+                                    <button class="action-btn money" onclick="openMoneyModal('${id}')" title="Cộng / Trừ Tiền"><i class="fas fa-coins"></i></button>
+                                    <button class="action-btn delete" onclick="deleteUser('${id}')" title="Xóa Người Dùng"><i class="fas fa-user-slash"></i></button>
                                 </td>
                             </tr>
                         `;
                         tbody.innerHTML += tr;
                     }
                     document.getElementById('statUsers').innerText = count;
-                    document.getElementById('statRevenue').innerText = formatMoney(totalMoney); // Giả lập doanh thu = tổng tiền nạp
+                    document.getElementById('statRevenue').innerText = formatMoney(totalMoney);
                 } else {
-                    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#555;">Chưa có người dùng nào đăng ký.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#555;">Hệ thống chưa có người dùng nào đăng ký.</td></tr>`;
                     document.getElementById('statUsers').innerText = '0';
+                    document.getElementById('statRevenue').innerText = '0 đ';
                 }
             });
         }
@@ -489,21 +512,21 @@
             let newBal = Number(document.getElementById('uNewBalance').value);
             
             db.ref('users/' + id).update({ balance: newBal }).then(() => {
-                showAdminToast("Cập nhật số dư thành công!");
+                showAdminToast("Đã thay đổi số dư ví của khách hàng thành công!");
                 closeModal('moneyModal');
             });
         }
 
         function deleteUser(id) {
-            if(confirm("Xóa tài khoản này sẽ mất toàn bộ số dư và lịch sử của họ. CÓ CHẮC CHẮN XÓA KHÔNG?")) {
+            if(confirm("⛔ LƯU Ý: Xóa người dùng sẽ làm mất vĩnh viễn số dư và lịch sử giao dịch của họ. BẠN CÓ CHẮC CHẮN KHÔNG?")) {
                 db.ref('users/' + id).remove().then(() => {
-                    showAdminToast("Đã xóa vĩnh viễn tài khoản thành viên.");
+                    showAdminToast("Đã tiêu diệt tài khoản này khỏi hệ thống.");
                 });
             }
         }
 
         // ====================================
-        // KHỞI CHẠY HỆ THỐNG KHI VỪA VÀO ADMIN
+        // GỌI HÀM KHI VỪA VÀO TRANG ADMIN
         // ====================================
         window.onload = function() {
             loadProducts();
