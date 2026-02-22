@@ -3,28 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI CORE TỰ HỌC | QUOCDAT SEC</title>
+    <title>AI CORE V6.0 | QUOCDAT SEC</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
-    <script>
-        const fbConfig = { 
-            apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", 
-            databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", 
-            projectId: "quocdat-b80c2" 
-        };
-        if (!firebase.apps.length) firebase.initializeApp(fbConfig);
-        const db = firebase.database();
-
-        db.ref('raw_code/al_html').once('value', snap => {
-            let customCode = snap.val();
-            if (customCode && customCode.trim() !== "") {
-                document.open(); document.write(customCode); document.close();
-            }
-        });
-    </script>
-
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -85,25 +68,32 @@
 
     <div class="container">
         <div class="ai-status">
-            <h2>AI CORE V4.0</h2>
-            <p><i class="fas fa-microchip"></i> ĐÃ NÂNG CẤP BỘ NHỚ LỊCH SỬ (CONTEXT MEMORY)</p>
+            <h2>AI CORE V6.0</h2>
+            <p><i class="fas fa-satellite-dish"></i> TÍCH HỢP GOOGLE GEMINI (MIỄN PHÍ)</p>
         </div>
         
         <div class="tools-bar">
             <button class="btn-clear" onclick="clearMemory()"><i class="fas fa-trash-alt"></i> XÓA LỊCH SỬ CHAT</button>
         </div>
 
-        <div class="chat-box" id="chatBox">
-            </div>
+        <div class="chat-box" id="chatBox"></div>
 
         <div class="input-area">
-            <input type="text" id="userInput" placeholder="Hỏi nối tiếp câu trước thoải mái..." autocomplete="off">
+            <input type="text" id="userInput" placeholder="Hỏi AI bất cứ điều gì trên thế giới..." autocomplete="off">
             <button class="btn-send" id="btnSend"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
 
     <script>
-        // ĐỒNG BỘ CÀI ĐẶT
+        // ==========================================
+        // 🔑 API KEY GOOGLE GEMINI ĐÃ ĐƯỢC TÍCH HỢP
+        // ==========================================
+        const GEMINI_API_KEY = "AIzaSyCqt5-B4-brPMRHLOpP4OxgbnSc3XqBwWM"; 
+        
+        const fbConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
+        if (!firebase.apps.length) firebase.initializeApp(fbConfig);
+        const db = firebase.database();
+
         db.ref('settings').on('value', snap => {
             let s = snap.val() || {};
             if(s.theme_primary) document.documentElement.style.setProperty('--primary', s.theme_primary);
@@ -114,50 +104,35 @@
         const userInput = document.getElementById('userInput');
         const btnSend = document.getElementById('btnSend');
         
-        // CÁC BIẾN LƯU TRỮ LỊCH SỬ (MEMORY)
         let aiBrainData = []; 
-        let isLearning = false; 
-        let questionToLearn = ""; 
-        
-        // Tải lịch sử chat từ bộ nhớ tạm của trình duyệt
         let chatContext = JSON.parse(sessionStorage.getItem('ai_chat_history')) || [];
-        let lastSubject = sessionStorage.getItem('ai_last_subject') || "";
 
-        // TẢI NÃO BỘ TỪ FIREBASE
+        // NÃO BỘ NỘI BỘ TỪ FIREBASE
         db.ref('ai_brain_v2').on('value', snap => {
             aiBrainData = [];
             if(snap.exists()) {
                 let data = snap.val();
-                for(let key in data) {
-                    aiBrainData.push({ id: key, q: data[key].question.toLowerCase().trim(), a: data[key].answer });
-                }
+                for(let key in data) aiBrainData.push({ q: data[key].question.toLowerCase().trim(), a: data[key].answer });
             }
         });
 
-        // HÀM KHỞI ĐỘNG HOẶC PHỤC HỒI LỊCH SỬ
         function loadApp() {
             if (chatContext.length > 0) {
-                // Nếu đã có lịch sử chat trước đó -> Render lại ngay lập tức
                 chatContext.forEach(msg => {
                     let html = "";
-                    if (msg.role === 'user') {
-                        html = `<div class="msg msg-user"><span class="msg-name">GUEST <i class="fas fa-user"></i></span><div class="msg-bubble">${msg.text}</div></div>`;
-                    } else if (msg.role === 'ai') {
-                        html = `<div class="msg msg-ai"><span class="msg-name"><i class="fas fa-robot"></i> QUOCDAT.AI</span><div class="msg-bubble">${msg.text}</div></div>`;
-                    } else {
-                        html = `<div class="msg msg-system"><span class="msg-name"><i class="fas fa-cog"></i> SYSTEM</span><div class="msg-bubble">${msg.text}</div></div>`;
-                    }
+                    if (msg.role === 'user') html = `<div class="msg msg-user"><span class="msg-name">GUEST <i class="fas fa-user"></i></span><div class="msg-bubble">${msg.text}</div></div>`;
+                    else if (msg.role === 'ai') html = `<div class="msg msg-ai"><span class="msg-name"><i class="fas fa-robot"></i> QUOCDAT.AI</span><div class="msg-bubble">${msg.text}</div></div>`;
+                    else html = `<div class="msg msg-system"><span class="msg-name"><i class="fas fa-cog"></i> SYSTEM</span><div class="msg-bubble">${msg.text}</div></div>`;
                     chatBox.insertAdjacentHTML('beforeend', html);
                 });
                 scrollToBottom();
             } else {
-                // Nếu là lần đầu tiên vào web -> Chạy hiệu ứng khởi động
                 chatBox.innerHTML = `<div class="msg msg-ai"><span class="msg-name"><i class="fas fa-robot"></i> SYSTEM.AI</span><div class="msg-bubble" id="bootText"></div></div>`;
                 setTimeout(typeBootSequence, 500);
             }
         }
 
-        const bootSequence = ["Đã nạp Context Memory...","Sẵn sàng ghi nhớ ngữ cảnh! Bạn có thể hỏi nối tiếp câu trước thoải mái."];
+        const bootSequence = ["Khởi động Bộ nhớ Kép...", "Đã kết nối thành công với Google Gemini API!", "Tôi là trợ lý AI thông minh của bạn. Hãy hỏi tôi đi!"];
         let bootIndex = 0; let bootCharIndex = 0; let currentBootLine = "";
 
         function typeBootSequence() {
@@ -171,13 +146,12 @@
                 }
             } else {
                 document.getElementById('bootText').innerHTML = currentBootLine;
-                saveToHistory('ai', currentBootLine); // Lưu khởi động vào lịch sử
+                saveToHistory('ai', currentBootLine);
                 scrollToBottom();
             }
         }
         window.onload = loadApp;
 
-        // XỬ LÝ NHẬP LIỆU
         userInput.addEventListener('keypress', function (e) { if (e.key === 'Enter') processInput(); });
         btnSend.addEventListener('click', processInput);
 
@@ -187,7 +161,6 @@
 
             userInput.disabled = true; btnSend.disabled = true;
 
-            // In và lưu tin nhắn của User
             let safeText = escapeHtml(text);
             let userHtml = `<div class="msg msg-user"><span class="msg-name">GUEST <i class="fas fa-user"></i></span><div class="msg-bubble">${safeText}</div></div>`;
             chatBox.insertAdjacentHTML('beforeend', userHtml);
@@ -195,159 +168,99 @@
             
             userInput.value = ''; scrollToBottom();
 
-            setTimeout(() => {
-                if (isLearning) {
-                    learnNewKnowledge(questionToLearn, text);
-                } else {
-                    analyzeContextAndFindAnswer(text);
-                }
-            }, 500);
+            setTimeout(() => { analyzeContextAndFindAnswer(text); }, 500);
         }
 
-        // TẦNG LOGIC SIÊU VIỆT: PHÂN TÍCH NGỮ CẢNH (CONTEXT)
         function analyzeContextAndFindAnswer(question) {
             let qFormat = question.toLowerCase().trim();
 
-            // 1. Nếu khách test bộ nhớ (Hỏi về câu trước đó)
-            if (qFormat.includes("vừa nãy") || qFormat.includes("câu trước") || qFormat.includes("tôi vừa nói") || qFormat.includes("tôi vừa hỏi")) {
-                // Lục tìm trong mảng lịch sử câu gần nhất của User (trừ câu vừa gõ)
-                let reversedHistory = chatContext.slice().reverse();
-                let lastUserMsg = reversedHistory.find(m => m.role === 'user' && m.text.toLowerCase() !== qFormat);
-                
-                if (lastUserMsg) {
-                    renderAIMessage(`Bạn vừa hỏi/nói câu này: "${lastUserMsg.text}". Bạn muốn tôi giải thích thêm về nó à?`, 'msg-ai', 'QUOCDAT.AI');
-                } else {
-                    renderAIMessage(`Bộ nhớ của tôi cho thấy bạn chưa hỏi gì trước đó cả!`, 'msg-ai', 'QUOCDAT.AI');
-                }
-                resetInput();
-                return;
-            }
-
-            // 2. Nếu khách hỏi nối tiếp dạng trống không (sinh năm mấy, ở đâu, tại sao, thế còn, nó...)
-            let followUpKeywords = ["nó", "đó", "vậy", "thế", "còn", "tiếp", "tại sao", "vì sao", "ở đâu", "sinh năm", "là ai", "làm gì"];
-            let isFollowUp = followUpKeywords.some(word => qFormat.includes(word));
+            // 1. KIỂM TRA NÃO FIREBASE TRƯỚC
+            let found = aiBrainData.find(item => item.q === qFormat);
             
-            let searchTarget = qFormat;
-
-            // Nếu câu này là câu hỏi nối tiếp VÀ đã có chủ đề trước đó -> Gộp chung lại để tra mạng
-            if (isFollowUp && lastSubject !== "") {
-                // Ví dụ: lastSubject = "sơn tùng mtp", question = "sinh năm mấy" -> "sơn tùng mtp sinh năm mấy"
-                searchTarget = lastSubject + " " + qFormat;
-            } else {
-                // Nếu không phải nối tiếp, cập nhật Chủ đề mới
-                // Lọc bớt chữ thừa để lấy được Keyword chính làm Chủ đề
-                let cleanSubject = qFormat.replace(/là ai|là gì|như thế nào|tại sao/g, "").trim();
-                lastSubject = cleanSubject;
-                sessionStorage.setItem('ai_last_subject', lastSubject);
-            }
-
-            // KIỂM TRA TRONG BỘ NÃO
-            let found = aiBrainData.find(item => item.q === qFormat); // Tìm nguyên gốc
-            if (!found && isFollowUp) found = aiBrainData.find(item => item.q === searchTarget); // Tìm theo câu ghép
-
             if (found) {
                 renderAIMessage(found.a, 'msg-ai', 'QUOCDAT.AI');
                 resetInput();
             } else {
-                // Lọc chống ngu trước khi lên mạng
-                let personalKeywords = ["mày", "tao", "tôi", "bạn", "của ai", "web này", "admin", "đẹp", "yêu", "chào", "hi", "tên gì"];
-                let isPersonal = personalKeywords.some(word => qFormat.includes(word));
-
-                if (isPersonal) {
-                    isLearning = true; questionToLearn = question; 
-                    renderAIMessage("Câu này mang tính giao tiếp cá nhân. Bạn hãy gõ câu trả lời để dạy tôi đi!", 'msg-system', 'SYSTEM.LEARN');
-                    resetInput();
-                } else {
-                    // CẦM CÂU ĐÃ GÉP NGỮ CẢNH ĐI TRA WIKI
-                    searchInternet(searchTarget, question);
-                }
+                // 2. KHÔNG CÓ TRONG FIREBASE -> GỌI GOOGLE GEMINI
+                askGemini(question);
             }
         }
 
-        // TRA CỨU MẠNG
-        async function searchInternet(searchQuery, originalQuestion) {
+        // KẾT NỐI API GOOGLE GEMINI
+        async function askGemini(question) {
             let sysId = 'sys_msg_' + Date.now();
-            let sysHtml = `<div class="msg msg-system"><span class="msg-name"><i class="fas fa-wifi"></i> SYSTEM.SEARCH</span><div class="msg-bubble" id="${sysId}">Đang truy cập kho dữ liệu Internet...<span class="typing-indicator"></span></div></div>`;
+            let sysHtml = `<div class="msg msg-system"><span class="msg-name"><i class="fas fa-satellite-dish"></i> SYSTEM.API</span><div class="msg-bubble" id="${sysId}">Đang hỏi bộ não Google Gemini...<span class="typing-indicator"></span></div></div>`;
             chatBox.insertAdjacentHTML('beforeend', sysHtml); scrollToBottom();
 
             try {
-                let url = `https://vi.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(searchQuery)}&utf8=&format=json&origin=*`;
-                let res = await fetch(url); let data = await res.json();
+                // Đóng gói lịch sử thành format của Gemini
+                let geminiHistory = [];
+                chatContext.forEach(m => {
+                    if (m.role === 'user') geminiHistory.push({ role: "user", parts: [{ text: m.text }] });
+                    if (m.role === 'ai') geminiHistory.push({ role: "model", parts: [{ text: m.text.replace(/<br>/g, "\n") }] });
+                });
+
+                // Đẩy câu hỏi hiện tại vào
+                if (geminiHistory.length === 0 || geminiHistory[geminiHistory.length - 1].parts[0].text !== question) {
+                     geminiHistory.push({ role: "user", parts: [{ text: question }] });
+                }
+
+                // Cấu hình tính cách AI
+                let systemInstruction = {
+                    parts: [{ text: "Bạn là siêu AI trợ lý tên là QUOCDAT.AI, được phát triển bởi hệ thống QUOCDAT SEC. Hãy trả lời thân thiện, thông minh, dùng tiếng Việt Nam." }]
+                };
+
+                let apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+                
+                let response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        system_instruction: systemInstruction,
+                        contents: geminiHistory
+                    })
+                });
+
+                let data = await response.json();
                 document.getElementById(sysId).parentNode.remove();
 
-                if (data.query && data.query.search.length > 0) {
-                    let topResult = data.query.search[0];
-                    let snippet = topResult.snippet.replace(/(<([^>]+)>)/ig, "").replace(/&quot;/g, '"').replace(/&amp;/g, '&');
-                    let answer = `Theo tôi tìm hiểu về "${topResult.title}": ${snippet}...`;
-                    
+                if (data.candidates && data.candidates.length > 0) {
+                    let answer = data.candidates[0].content.parts[0].text;
+                    // Format lại câu trả lời cho đẹp
+                    answer = answer.replace(/\n/g, '<br>').replace(/\*\*/g, ''); 
                     renderAIMessage(answer, 'msg-ai', 'QUOCDAT.AI');
-                    resetInput();
+                } else if (data.error) {
+                    renderAIMessage(`Lỗi API Gemini: ${data.error.message}`, 'msg-system', 'ERROR');
                 } else {
-                    isLearning = true; questionToLearn = originalQuestion; 
-                    renderAIMessage("Mạng không có thông tin về vấn đề này. Bạn hãy gõ câu trả lời vào dưới đây để dạy tôi nhé!", 'msg-system', 'SYSTEM.LEARN');
-                    resetInput();
+                    renderAIMessage(`AI không thể trả lời câu này!`, 'msg-system', 'ERROR');
                 }
+                resetInput();
+
             } catch (e) {
                 document.getElementById(sysId).parentNode.remove();
-                isLearning = true; questionToLearn = originalQuestion; 
-                renderAIMessage("Mạng đang lag. Gõ câu trả lời vào dưới đây để dạy tôi trực tiếp nhé!", 'msg-system', 'SYSTEM.LEARN');
+                renderAIMessage("Lỗi kết nối API Google Gemini. Vui lòng thử lại sau.", 'msg-system', 'SYSTEM.ERROR');
                 resetInput();
             }
         }
 
-        function learnNewKnowledge(questionText, answerText) {
-            db.ref('ai_brain_v2').push().set({ question: questionText, answer: answerText, timestamp: Date.now() }).then(() => {
-                isLearning = false; questionToLearn = "";
-                renderAIMessage("Đã lưu vào bộ nhớ gốc! Hỏi lại tôi câu vừa nãy đi!", 'msg-system', 'SYSTEM.LEARN');
-                resetInput();
-            });
-        }
-
-        // HÀM HIỂN THỊ VÀ LƯU LỊCH SỬ
-        function renderAIMessage(text, cssClass, name, animate = true) {
+        function renderAIMessage(text, cssClass, name) {
             let aiId = 'ai_msg_' + Date.now();
             let aiHtml = `<div class="msg ${cssClass}"><span class="msg-name"><i class="fas fa-robot"></i> ${name}</span><div class="msg-bubble" id="${aiId}"></div></div>`;
             chatBox.insertAdjacentHTML('beforeend', aiHtml);
             
-            // Lưu vào Context Memory
             let roleSave = (cssClass === 'msg-system') ? 'system' : 'ai';
             saveToHistory(roleSave, text);
 
-            if (animate) {
-                typeMessage(aiId, text, 0);
-            } else {
-                document.getElementById(aiId).innerHTML = text;
-                scrollToBottom();
-            }
+            typeMessage(aiId, text, 0);
         }
 
         function typeMessage(elementId, text, index) {
             let el = document.getElementById(elementId);
             if(el) {
-                if (index < text.length) {
+                if (text.substring(index, index + 4) === "<br>") {
+                    el.innerHTML = text.substring(0, index + 4) + '<span class="typing-indicator"></span>';
+                    setTimeout(() => typeMessage(elementId, text, index + 4), 5); // Tốc độ gõ cực nhanh
+                } else {
                     el.innerHTML = text.substring(0, index + 1) + '<span class="typing-indicator"></span>';
-                    setTimeout(() => typeMessage(elementId, text, index + 1), 20);
-                    scrollToBottom();
-                } else { el.innerHTML = text; }
-            }
-        }
-
-        function saveToHistory(role, text) {
-            chatContext.push({ role: role, text: text });
-            sessionStorage.setItem('ai_chat_history', JSON.stringify(chatContext));
-        }
-
-        function clearMemory() {
-            if(confirm("Hành động này sẽ xóa sạch đoạn hội thoại hiện tại. Bạn có chắc không?")) {
-                sessionStorage.removeItem('ai_chat_history');
-                sessionStorage.removeItem('ai_last_subject');
-                window.location.reload();
-            }
-        }
-
-        function resetInput() { userInput.disabled = false; btnSend.disabled = false; userInput.focus(); }
-        function scrollToBottom() { chatBox.scrollTop = chatBox.scrollHeight; }
-        function escapeHtml(unsafe) { return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
-    </script>
-</body>
-</html>
+                    setTimeout(() =>
+                        
