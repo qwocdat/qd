@@ -19,6 +19,11 @@
         .header { background: rgba(0,0,0,0.8); padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
         .brand { font-family: 'Orbitron'; font-size: 20px; font-weight: 900; color: #fff; }
         .brand span { color: var(--primary); }
+        
+        /* NÚT TRANG CHỦ MỚI THÊM */
+        .btn-home { background: rgba(255,255,255,0.05); color: #fff; text-decoration: none; padding: 8px 15px; border-radius: 8px; font-size: 12px; font-weight: bold; font-family: 'Orbitron'; transition: 0.3s; display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); }
+        .btn-home:hover { background: var(--primary); color: #000; border-color: var(--primary); box-shadow: 0 0 10px rgba(0,255,136,0.3); }
+
         .user-info { display: flex; gap: 15px; align-items: center; font-size: 14px; font-weight: bold; }
         .balance-badge { background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 8px; color: var(--vip); border: 1px solid var(--vip); }
         
@@ -38,7 +43,6 @@
         .p-name { font-family: 'Orbitron'; font-size: 18px; margin-bottom: 10px; color: #fff; }
         .p-desc { font-size: 12px; color: #888; margin-bottom: 20px; min-height: 36px; }
         
-        /* CÁC LOẠI NÚT VÀ GIÁ */
         .p-price { font-size: 18px; font-weight: bold; font-family: monospace; margin-bottom: 15px; }
         .price-free { color: var(--primary); }
         .price-vip { color: var(--vip); }
@@ -57,12 +61,20 @@
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px);}
         .modal-box { width: 90%; max-width: 400px; background: #15151e; border-radius: 15px; border: 1px solid var(--primary); text-align: center; padding: 30px; }
         .key-display { font-family: 'Orbitron'; font-size: 24px; color: var(--vip); background: #000; padding: 15px; border-radius: 10px; border: 1px dashed var(--vip); margin: 20px 0; word-break: break-all; }
+        
+        @media (max-width: 600px) {
+            .header { flex-direction: column; gap: 15px; }
+            .header-left { width: 100%; display: flex; justify-content: space-between; align-items: center; }
+        }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="brand">QUOCDAT<span>.SHOP</span></div>
+        <div class="header-left" style="display: flex; align-items: center; gap: 20px;">
+            <div class="brand">QUOCDAT<span>.SHOP</span></div>
+            <a href="index.html" class="btn-home"><i class="fas fa-home"></i> TRANG CHỦ</a>
+        </div>
         <div class="user-info" id="userArea">
             <span id="uName">Chưa đăng nhập</span>
             <div class="balance-badge" id="uBal">0 đ</div>
@@ -96,7 +108,7 @@
             
             <div class="key-display" id="modalKeyResult">---</div>
             
-            <a href="download.html" class="btn-action btn-vip" style="display:inline-block; text-decoration:none; margin-bottom:10px;">TỚI CỔNG TRÍCH XUẤT NGAY</a>
+            <a href="download.html" class="btn-action btn-vip" style="display:inline-block; text-decoration:none; margin-bottom:10px;"><i class="fas fa-cloud-download-alt"></i> TỚI CỔNG TRÍCH XUẤT NGAY</a>
             <button class="btn-action btn-link" onclick="document.getElementById('keyModal').style.display='none'">ĐÓNG LẠI</button>
         </div>
     </div>
@@ -107,8 +119,8 @@
 
         let allProducts = {};
         
-        // 1. KIỂM TRA ĐĂNG NHẬP VÀ SỐ DƯ
-        const username = localStorage.getItem('vip_username'); // Giả định key lưu tên user của ông
+        // KIỂM TRA ĐĂNG NHẬP VÀ SỐ DƯ
+        const username = localStorage.getItem('vip_username');
         let safeUid = username ? username.replace(/[.#$\[\]]/g, '_') : null;
         let currentBalance = 0;
 
@@ -122,7 +134,14 @@
             document.getElementById('userArea').innerHTML = `<a href="index.html" style="color:var(--primary); text-decoration:none;">Đăng nhập / Đăng ký</a>`;
         }
 
-        // 2. TẢI DỮ LIỆU SẢN PHẨM VÀ RENDER
+        // ĐỒNG BỘ MÀU TỪ ADMIN
+        db.ref('settings').on('value', snap => {
+            let s = snap.val() || {};
+            if(s.theme_primary) document.documentElement.style.setProperty('--primary', s.theme_primary);
+            if(s.theme_bg) document.documentElement.style.setProperty('--bg', s.theme_bg);
+        });
+
+        // TẢI DỮ LIỆU SẢN PHẨM VÀ RENDER
         db.ref('products').on('value', snap => {
             allProducts = snap.val() || {};
             renderProducts();
@@ -137,18 +156,15 @@
             for(let id in allProducts) {
                 let p = allProducts[id];
                 
-                // Lọc theo tìm kiếm
                 if(search && !p.name.toLowerCase().includes(search)) continue;
 
                 let isFree = (p.price === 0 || !p.price);
                 let isInstant = p.is_instant === true;
 
-                // Lọc theo danh mục
                 if(filter === 'paid' && isFree) continue;
                 if(filter === 'free_link' && (!isFree || isInstant)) continue;
                 if(filter === 'free_fast' && (!isFree || !isInstant)) continue;
 
-                // Tạo giao diện từng thẻ
                 let badge = isInstant && isFree ? `<div class="badge-fast">FAST</div>` : '';
                 let icon = p.img || 'fas fa-box';
                 let priceHtml = '';
@@ -170,31 +186,29 @@
                         ${badge}
                         <i class="${icon} p-icon"></i>
                         <h3 class="p-name">${p.name}</h3>
-                        <p class="p-desc">${p.desc || 'Công cụ siêu cấp vip pro.'}</p>
+                        <p class="p-desc">${p.desc || 'Công cụ hỗ trợ chuyên nghiệp.'}</p>
                         ${priceHtml}
                         ${btnHtml}
                     </div>
                 `;
             }
 
-            if(html === '') html = `<div style="text-align:center; color:#888; grid-column: 1/-1;">Không tìm thấy sản phẩm nào phù hợp.</div>`;
+            if(html === '') html = `<div style="text-align:center; color:#888; grid-column: 1/-1;">Không tìm thấy sản phẩm nào phù hợp với bộ lọc.</div>`;
             grid.innerHTML = html;
         }
 
-        // 3. XỬ LÝ: MUA VIP (TRỪ TIỀN)
+        // XỬ LÝ: MUA VIP
         async function buyVIP(id) {
-            if(!safeUid) return alert("Bạn cần đăng nhập để mua hàng!");
+            if(!safeUid) return alert("Bạn cần đăng nhập để thực hiện chức năng này!");
             
             let p = allProducts[id];
             if(currentBalance < p.price) return alert(`Bạn không đủ tiền! Cần ${Number(p.price).toLocaleString('vi-VN')} đ. Vui lòng nạp thêm.`);
 
             if(confirm(`Xác nhận mua [${p.name}] với giá ${Number(p.price).toLocaleString('vi-VN')} đ?`)) {
-                // Trừ tiền
                 await db.ref('users/' + safeUid + '/balance').set(currentBalance - p.price);
                 
-                // Tạo Key VIP
                 let keyStr = "VIP-" + Math.random().toString(36).substring(2, 10).toUpperCase();
-                let exp = Date.now() + (30 * 24 * 60 * 60 * 1000); // Mặc định mua VIP cho hạn 30 ngày
+                let exp = Date.now() + (30 * 24 * 60 * 60 * 1000); 
                 
                 await db.ref('transactions').push().set({
                     user: username, type: 'vip_purchase', amount: p.price,
@@ -207,7 +221,7 @@
             }
         }
 
-        // 4. XỬ LÝ: NHẬN KEY NHANH (KHÔNG CẦN LINK)
+        // XỬ LÝ: NHẬN KEY NHANH
         async function getFastKey(id) {
             let p = allProducts[id];
             let keyStr = "FAST-" + Math.random().toString(36).substring(2, 8).toUpperCase();
