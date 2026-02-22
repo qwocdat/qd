@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI CORE V6.1 | QUOCDAT SEC</title>
+    <title>AI CORE V6.2 | QUOCDAT SEC</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -70,8 +70,8 @@
 
     <div class="container">
         <div class="ai-status">
-            <h2>AI CORE V6.1</h2>
-            <p><i class="fas fa-shield-alt"></i> HỆ THỐNG ĐÃ BỌC GIÁP CHỐNG SẬP</p>
+            <h2>AI CORE V6.2</h2>
+            <p><i class="fas fa-satellite-dish"></i> HỆ THỐNG ĐÃ FIX LỖI KẾT NỐI GEMINI</p>
         </div>
         
         <div class="tools-bar">
@@ -87,9 +87,6 @@
     </div>
 
     <script>
-        // ==========================================
-        // 🔑 API KEY GOOGLE GEMINI ĐÃ ĐƯỢC TÍCH HỢP
-        // ==========================================
         const GEMINI_API_KEY = "AIzaSyCqt5-B4-brPMRHLOpP4OxgbnSc3XqBwWM"; 
         
         const fbConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
@@ -109,7 +106,6 @@
         let aiBrainData = []; 
         let chatContext = JSON.parse(sessionStorage.getItem('ai_chat_history')) || [];
 
-        // LỌC DỮ LIỆU LỖI TỪ FIREBASE ĐỂ TRÁNH CRASH JS
         db.ref('ai_brain_v2').on('value', snap => {
             aiBrainData = [];
             if(snap.exists()) {
@@ -134,14 +130,14 @@
                     chatBox.insertAdjacentHTML('beforeend', html);
                 });
                 scrollToBottom();
-                resetInput(); // Đảm bảo input được mở khóa khi load lại
+                resetInput(); 
             } else {
                 chatBox.innerHTML = `<div class="msg msg-ai"><span class="msg-name"><i class="fas fa-robot"></i> SYSTEM.AI</span><div class="msg-bubble" id="bootText"></div></div>`;
                 setTimeout(typeBootSequence, 500);
             }
         }
 
-        const bootSequence = ["Khởi động Hệ thống Kép...", "Đã gắn chống ngắt kết nối!", "Tôi là trợ lý AI thông minh của bạn. Hãy hỏi tôi đi!"];
+        const bootSequence = ["Khởi động Hệ thống...", "Kết nối Gemini Flash Latest thành công!", "Tôi là trợ lý AI thông minh của bạn. Hãy hỏi tôi đi!"];
         let bootIndex = 0; let bootCharIndex = 0; let currentBootLine = "";
 
         function typeBootSequence() {
@@ -167,12 +163,11 @@
         btnSend.addEventListener('click', processInput);
 
         function processInput() {
-            if (btnSend.disabled || userInput.disabled) return; // Khóa chống spam click
+            if (btnSend.disabled || userInput.disabled) return; 
 
             let text = userInput.value.trim();
             if (!text) return;
 
-            // Khóa input trong lúc xử lý
             userInput.disabled = true; 
             btnSend.disabled = true;
 
@@ -199,13 +194,12 @@
                     askGemini(question);
                 }
             } catch (error) {
-                console.error("Lỗi phân tích nội bộ:", error);
-                renderAIMessage("Xin lỗi, dữ liệu não bộ bị nghẽn. Đã tự động khôi phục.", 'msg-system', 'SYSTEM.ERROR');
-                resetInput(); // Tự động mở khóa dù có lỗi
+                console.error(error);
+                renderAIMessage("Xin lỗi, dữ liệu bị nghẽn. Đã khôi phục.", 'msg-system', 'SYSTEM.ERROR');
+                resetInput(); 
             }
         }
 
-        // KẾT NỐI API GOOGLE GEMINI (Đã bọc chống sập)
         async function askGemini(question) {
             let sysId = 'sys_msg_' + Date.now();
             let sysHtml = `<div class="msg msg-system"><span class="msg-name"><i class="fas fa-satellite-dish"></i> SYSTEM.API</span><div class="msg-bubble" id="${sysId}">Đang hỏi bộ não Google Gemini...<span class="typing-indicator"></span></div></div>`;
@@ -227,7 +221,7 @@
                     parts: [{ text: "Bạn là siêu AI trợ lý tên là QUOCDAT.AI, được phát triển bởi hệ thống QUOCDAT SEC. Hãy trả lời thân thiện, thông minh, dùng tiếng Việt Nam." }]
                 };
 
-                let apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+                let apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
                 
                 let response = await fetch(apiUrl, {
                     method: 'POST',
@@ -240,27 +234,25 @@
 
                 let data = await response.json();
                 
-                // Xóa dòng "Đang hỏi bộ não..."
                 let loadingMsg = document.getElementById(sysId);
                 if(loadingMsg && loadingMsg.parentNode) loadingMsg.parentNode.remove();
 
                 if (data.candidates && data.candidates.length > 0) {
-                    let answer = data.candidates[0].content?.parts[0]?.text || "Không có phản hồi từ máy chủ.";
+                    let answer = data.candidates[0].content?.parts[0]?.text || "Không có phản hồi.";
                     answer = answer.replace(/\n/g, '<br>').replace(/\*\*/g, ''); 
                     renderAIMessage(answer, 'msg-ai', 'QUOCDAT.AI');
                 } else if (data.error) {
-                    renderAIMessage(`Lỗi API Gemini: ${data.error.message}`, 'msg-system', 'ERROR');
+                    renderAIMessage(`Lỗi API: ${data.error.message}`, 'msg-system', 'ERROR');
                 } else {
-                    renderAIMessage(`AI bị quá tải, vui lòng thử lại!`, 'msg-system', 'ERROR');
+                    renderAIMessage(`AI bị quá tải!`, 'msg-system', 'ERROR');
                 }
 
             } catch (e) {
-                console.error("Lỗi Fetch API:", e);
+                console.error(e);
                 let loadingMsg = document.getElementById(sysId);
                 if(loadingMsg && loadingMsg.parentNode) loadingMsg.parentNode.remove();
-                renderAIMessage("Lỗi mạng hoặc API Key Google Gemini bị từ chối.", 'msg-system', 'SYSTEM.ERROR');
+                renderAIMessage("Lỗi mạng.", 'msg-system', 'SYSTEM.ERROR');
             } finally {
-                // QUAN TRỌNG NHẤT: Luôn mở khóa nút gửi dù thành công hay sập mạng
                 resetInput();
             }
         }
@@ -292,7 +284,7 @@
 
         function saveToHistory(role, text) {
             chatContext.push({ role: role, text: text });
-            if(chatContext.length > 15) chatContext.shift(); // Nhớ 15 câu gần nhất
+            if(chatContext.length > 15) chatContext.shift(); 
             sessionStorage.setItem('ai_chat_history', JSON.stringify(chatContext));
         }
 
