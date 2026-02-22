@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI CORE V7.0 | QUOCDAT SEC</title>
+    <title>AI CORE V7.1 | QUOCDAT SEC</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
@@ -56,8 +56,8 @@
     </div>
     <div class="container">
         <div class="ai-status">
-            <h2>AI CORE V7.0</h2>
-            <p><i class="fas fa-bolt"></i> FREE AI KHÔNG CẦN KEY</p>
+            <h2>AI CORE V7.1</h2>
+            <p><i class="fas fa-check-circle"></i> ĐÃ FIX LỖI CỔNG KẾT NỐI API</p>
         </div>
         <div class="tools-bar">
             <button class="btn-clear" onclick="clearMemory()"><i class="fas fa-trash-alt"></i> XÓA LỊCH SỬ CHAT</button>
@@ -111,7 +111,7 @@
                 setTimeout(typeBootSequence, 500);
             }
         }
-        const bootSequence = ["Khởi động Hệ thống...", "Đã đổi sang Server AI siêu tốc 100% Free!", "Tôi là trợ lý AI. Hãy hỏi tôi đi!"];
+        const bootSequence = ["Khởi động Hệ thống...", "Đã cập nhật cổng OpenAI chuẩn!", "Tôi là trợ lý AI. Hãy hỏi tôi đi!"];
         let bootIndex = 0; let bootCharIndex = 0; let currentBootLine = "";
         function typeBootSequence() {
             if (bootIndex < bootSequence.length) {
@@ -177,27 +177,27 @@
                 if (apiMessages.length === 1 || apiMessages[apiMessages.length - 1].content !== question) {
                      apiMessages.push({ role: "user", content: question });
                 }
-                let response = await fetch('https://text.pollinations.ai/', {
+                let response = await fetch('https://text.pollinations.ai/openai', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         messages: apiMessages,
-                        model: 'gpt-4o'
+                        model: 'openai'
                     })
                 });
-                let textData = await response.text();
+                let data = await response.json();
                 let loadingMsg = document.getElementById(sysId);
                 if(loadingMsg && loadingMsg.parentNode) loadingMsg.parentNode.remove();
-                if (textData) {
-                    let answer = textData.replace(/\n/g, '<br>').replace(/\*\*/g, ''); 
+                if (data.choices && data.choices.length > 0) {
+                    let answer = data.choices[0].message.content.replace(/\n/g, '<br>').replace(/\*\*/g, ''); 
                     renderAIMessage(answer, 'msg-ai', 'QUOCDAT.AI');
                 } else {
-                    renderAIMessage(`AI bị lỗi!`, 'msg-system', 'ERROR');
+                    renderAIMessage(`AI bị lỗi phản hồi!`, 'msg-system', 'ERROR');
                 }
             } catch (e) {
                 let loadingMsg = document.getElementById(sysId);
                 if(loadingMsg && loadingMsg.parentNode) loadingMsg.parentNode.remove();
-                renderAIMessage("Lỗi mạng.", 'msg-system', 'SYSTEM.ERROR');
+                renderAIMessage("Lỗi mạng từ máy chủ AI.", 'msg-system', 'SYSTEM.ERROR');
             } finally {
                 resetInput();
             }
