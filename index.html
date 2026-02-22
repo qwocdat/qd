@@ -3,512 +3,277 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>QUOCDAT SEC </title>
+    <title id="pageTitle">TRANG CHỦ | QUOCDAT SEC</title>
     
-    <script>
-        var currentUser = localStorage.getItem('vip_username');
-        var safeUserId = "guest";
-        
-        // Nếu không có user, gán tạm chữ Khách để web không bị crash, sau đó tự chuyển trang
-        if(!currentUser || currentUser.trim() === "") { 
-            currentUser = "Khách Hàng";
-            window.location.replace("login.html"); 
-        } else {
-            safeUserId = currentUser.replace(/[.#$\[\]]/g, '_'); 
-        }
-
-        // HÀM GIAO DIỆN CƠ BẢN
-        window.openNav = function() { document.getElementById('mobileNav').style.right = '0px'; }
-        window.closeNav = function() { document.getElementById('mobileNav').style.right = '-100%'; }
-        window.openModal = function(id) { window.closeNav(); document.getElementById(id).style.display = 'flex'; }
-        window.closeModal = function(id) { document.getElementById(id).style.display = 'none'; }
-        window.closeOutside = function(event, id) { if(event.target.id === id) window.closeModal(id); }
-        window.goToPage = function(url) { window.location.href = url; }
-        window.confirmLogout = function() { window.openModal('logoutModal'); }
-        window.executeLogout = function() { localStorage.removeItem('vip_username'); window.location.href = "login.html"; }
-
-        // GIỎ HÀNG
-        let cartCount = 0;
-        window.showToast = function(msg) {
-            let toast = document.getElementById('toastMsg');
-            if(toast) {
-                toast.innerHTML = `<i class="fas fa-check-circle"></i> ${msg}`;
-                toast.classList.add('show');
-                setTimeout(() => { toast.classList.remove('show'); }, 3000);
-            }
-        }
-        window.addToCart = function(productName) {
-            cartCount++;
-            let badge = document.getElementById('cartBadge');
-            if(badge) {
-                badge.innerText = cartCount;
-                badge.style.display = 'flex';
-            }
-            window.showToast(`Đã thêm "${productName}" vào giỏ hàng!`);
-        }
-
-        window.toggleFAQ = function(el) {
-            el.classList.toggle('active');
-            let content = el.nextElementSibling;
-            if (content.style.maxHeight) { content.style.maxHeight = null; } 
-            else { content.style.maxHeight = content.scrollHeight + "px"; }
-        }
-    </script>
-
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        const fbConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
+        if (!firebase.apps.length) firebase.initializeApp(fbConfig);
+        firebase.database().ref('raw_code/index_html').once('value', snap => {
+            let customCode = snap.val();
+            if (customCode && customCode.trim() !== "") { document.open(); document.write(customCode); document.close(); }
+        });
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --accent: #00b8ff; }
+        :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --accent: #00b8ff; --vip: #f1c40f; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: #fff; min-height: 100vh; transition: background 0.3s; padding-bottom: 50px; }
         
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        /* HEADER */
+        .header { background: rgba(0,0,0,0.8); padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
+        .brand { font-family: 'Orbitron'; font-size: 20px; font-weight: 900; color: #fff; }
+        .brand span { color: var(--primary); }
         
-        body { 
-            background: var(--bg) url('https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat fixed; 
-            color: #fff; 
-            overflow-x: hidden; 
-            padding-top: 70px; 
-            padding-bottom: 50px;
-        }
-
-        .overlay-bg { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(10,10,15,0.92); z-index: -1; 
-        }
-
-        /* MÀN HÌNH CHỜ CSS TỰ TẮT */
-        #preloader { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: #050508; z-index: 9999999; 
-            display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            animation: hidePreloader 0.5s 2.5s forwards; 
-        }
-        @keyframes hidePreloader { to { opacity: 0; visibility: hidden; pointer-events: none; z-index: -1; } }
-
-        .loader-bar { width: 250px; height: 3px; background: #222; border-radius: 10px; overflow: hidden; margin: 20px 0; border: 1px solid #333; }
-        #lFill { width: 0%; height: 100%; background: var(--primary); box-shadow: 0 0 15px var(--primary); animation: fillBar 2.5s linear forwards; }
-        @keyframes fillBar { to { width: 100%; } }
-
-        /* ENTRY ANIMATION TỰ ĐỘNG CSS */
-        @keyframes fadeInUp { 0% { opacity: 0; transform: translateY(40px); } 100% { opacity: 1; transform: translateY(0); } }
-        .entry { animation: fadeInUp 1s ease forwards; animation-delay: 2.8s; opacity: 0; }
-        .d1 { animation-delay: 2.6s; } .d2 { animation-delay: 2.8s; } .d3 { animation-delay: 3.0s; }
-
-        /* HEADER & TOAST */
-        header { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(10,10,15,0.98); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); z-index: 1000; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
-        .logo { font-family: 'Orbitron'; font-size: 18px; font-weight: 900; color: #fff; text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-        .header-actions { display: flex; align-items: center; gap: 20px; }
-        .cart-icon { position: relative; font-size: 20px; color: #fff; cursor: pointer; }
-        .cart-badge { position: absolute; top: -8px; right: -10px; background: #ff4757; color: #fff; font-size: 10px; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; display: none; justify-content: center; align-items: center; border: 2px solid #0a0a0f; }
-        .hamburger { font-size: 24px; color: #fff; cursor: pointer; }
+        /* LAYOUT CHÍNH */
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
         
-        .toast { position: fixed; top: 90px; right: -300px; background: rgba(10,10,15,0.95); border-left: 4px solid var(--primary); border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); color: #fff; padding: 15px 20px; font-size: 13px; font-weight: bold; z-index: 99999; transition: 0.4s; display: flex; align-items: center; gap: 10px; }
-        .toast.show { right: 20px; }
-
-        /* HERO & BUTTONS */
-        .hero { min-height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 50px 20px; }
-        .hero h1 { font-size: clamp(28px, 6vw, 40px); font-family: 'Orbitron'; font-weight: 900; line-height: 1.2; text-transform: uppercase; margin-bottom: 20px; }
-        .hero h1 span { color: var(--primary); text-shadow: 0 0 20px rgba(0,255,136,0.3); }
-        .btn-group { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
-        .btn-lg { padding: 15px 30px; border-radius: 12px; font-weight: 900; font-family: 'Orbitron'; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s; cursor: pointer; border: none; text-transform: uppercase; }
-        .btn-main { background: var(--primary); color: #000; box-shadow: 0 5px 20px rgba(0,255,136,0.3); }
-        .btn-sub { background: transparent; color: #fff; border: 1px solid var(--border); }
-
-        .counter-wrap { display: flex; justify-content: center; gap: 30px; margin-top: 40px; flex-wrap: wrap; }
-        .counter-box { text-align: center; }
-        .count-num { font-size: 30px; font-family: 'Orbitron'; color: var(--accent); font-weight: bold; }
-
-        /* SECTIONS & GRIDS */
-        .section { padding: 50px 20px; max-width: 1200px; margin: 0 auto; }
-        .sec-title { text-align: center; font-family: 'Orbitron'; font-size: 24px; margin-bottom: 40px; text-transform: uppercase; }
-        .sec-title span { color: var(--primary); }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        /* KHUNG ĐĂNG NHẬP / THÔNG TIN TÀI KHOẢN */
+        .auth-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 30px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .input-group { position: relative; margin-bottom: 15px; }
+        .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #888; }
+        .input-group input { width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 15px 15px 15px 45px; border-radius: 10px; outline: none; transition: 0.3s; }
+        .input-group input:focus { border-color: var(--primary); }
         
-        .card { background: var(--card-bg); padding: 30px; border-radius: 16px; border: 1px solid var(--border); transition: 0.3s; }
-        .card:hover { border-color: var(--primary); transform: translateY(-5px); }
-        .card i.main-icon { color: var(--primary); font-size: 30px; margin-bottom: 15px; display: block; }
-        .card h3 { font-family: 'Orbitron'; font-size: 18px; margin-bottom: 10px; color: #fff; }
-
-        /* SẢN PHẨM BÁN CHẠY */
-        .filter-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; justify-content: space-between; }
-        .search-box { flex: 1; min-width: 250px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; display: flex; align-items: center; padding: 0 15px; }
-        .search-box input { background: transparent; border: none; color: #fff; padding: 12px; width: 100%; outline: none; }
-        .cat-pills { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; }
-        .cat-pill { padding: 10px 20px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 30px; font-size: 12px; font-weight: bold; white-space: nowrap; }
-        .cat-pill.active { background: var(--primary); color: #000; }
+        .btn { padding: 15px; border-radius: 10px; border: none; font-weight: bold; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; text-align: center; display: inline-block; width: 100%; text-decoration: none; }
+        .btn-primary { background: var(--primary); color: #000; }
+        .btn-primary:hover { filter: brightness(1.2); box-shadow: 0 0 15px rgba(0,255,136,0.3); }
+        .btn-outline { background: transparent; color: var(--primary); border: 1px solid var(--primary); }
+        .btn-outline:hover { background: rgba(0,255,136,0.1); }
         
-        .p-card { background: var(--card-bg); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; transition: 0.3s; }
-        .p-card:hover { border-color: var(--primary); }
-        .p-img { height: 130px; background: #111; display: flex; justify-content: center; align-items: center; font-size: 40px; position: relative; }
-        .p-badge { position: absolute; top: 10px; left: 10px; background: #ff4757; color: #fff; font-size: 10px; padding: 3px 8px; border-radius: 5px; font-weight: bold; }
-        .p-info { padding: 20px; flex: 1; display: flex; flex-direction: column; }
-        .p-title { font-family: 'Orbitron'; font-size: 15px; margin-bottom: 8px; font-weight: bold; }
-        .p-price-row { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 15px; border-top: 1px dashed var(--border); }
-        .btn-add-cart { background: rgba(0,184,255,0.1); border: 1px solid var(--accent); color: var(--accent); padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.3s; }
+        /* MENU TÍNH NĂNG CỐ ĐỊNH */
+        .fixed-menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 40px; }
+        .menu-item { background: var(--card-bg); border: 1px solid var(--border); padding: 20px; border-radius: 15px; text-align: center; cursor: pointer; transition: 0.3s; color: #fff; text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .menu-item:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 5px 15px rgba(0,184,255,0.2); }
+        .menu-item i { font-size: 30px; margin-bottom: 10px; color: var(--accent); }
+        .menu-item.highlight i { color: var(--vip); }
+        .menu-item.highlight:hover { border-color: var(--vip); box-shadow: 0 5px 15px rgba(241,196,15,0.2); }
 
-        /* QUY TRÌNH (STEPS) */
-        .step-grid { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
-        .step-item { flex: 1; min-width: 250px; background: rgba(255,255,255,0.03); padding: 25px; border-radius: 15px; position: relative; border: 1px solid #1a1a24; }
-        .step-num { position: absolute; top: -15px; left: 20px; background: var(--primary); color: #000; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 900; font-family: 'Orbitron'; }
-
-        /* ĐÁNH GIÁ (REVIEWS) */
-        .review-box { background: #111; padding: 25px; border-radius: 18px; border: 1px solid #222; }
-        .review-user { display: flex; align-items: center; gap: 12px; margin-top: 15px; border-top: 1px solid #222; padding-top: 15px; }
-        .user-ava { width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; color: #fff; }
-
-        /* FAQ & TIN TỨC */
-        .faq-box { margin-bottom: 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--card-bg); }
-        .faq-btn { width: 100%; padding: 15px 20px; text-align: left; background: transparent; border: none; color: #fff; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .faq-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-        .faq-content p { padding: 0 20px 15px; font-size: 13px; color: #888; line-height: 1.6; }
-        .blog-card { background: var(--card-bg); border-radius: 15px; border: 1px solid var(--border); padding: 20px; }
-        .blog-date { font-size: 11px; color: var(--primary); margin-bottom: 10px; font-family: monospace; }
-        .blog-title { font-size: 15px; font-weight: bold; margin-bottom: 10px; }
-
-        /* KỸ NĂNG */
-        .skills-container { background: var(--card-bg); border-radius: 20px; padding: 30px; border: 1px solid var(--border); }
-        .skill-item { margin-bottom: 20px; }
-        .skill-info { display: flex; justify-content: space-between; font-weight: bold; font-size: 12px; margin-bottom: 8px; color: #ddd; font-family: 'Orbitron'; }
-        .progress-bg { width: 100%; height: 8px; background: #000; border-radius: 5px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--primary)); width: 0; }
-        .entry .fill-77 { animation: fill77 2s ease forwards; animation-delay: 3s; }
-        .entry .fill-50 { animation: fill50 2s ease forwards; animation-delay: 3s; }
-        .entry .fill-40 { animation: fill40 2s ease forwards; animation-delay: 3s; }
-        .entry .fill-36 { animation: fill36 2s ease forwards; animation-delay: 3s; }
-        .entry .fill-20 { animation: fill20 2s ease forwards; animation-delay: 3s; }
-        @keyframes fill77 { to { width: 77%; } } @keyframes fill50 { to { width: 50%; } } @keyframes fill40 { to { width: 40%; } } @keyframes fill36 { to { width: 36%; } } @keyframes fill20 { to { width: 20%; } }
-
-        /* PHÁP LÝ & SIDEBAR & FOOTER */
-        .legal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
-        .legal-box { background: rgba(255,255,255,0.02); padding: 25px; border-radius: 15px; border: 1px solid #1a1a24; }
-        .legal-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 12px; border-bottom: 1px dashed #1a1a24; padding-bottom: 8px; }
-        .legal-row span:last-child { color: #ccc; text-align: right; }
-
-        .mobile-nav { position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; background: #0a0a0f; z-index: 3000; transition: 0.4s; border-left: 1px solid var(--border); overflow-y: auto; }
-        .nav-profile { padding: 40px 20px 20px; text-align: center; border-bottom: 1px solid var(--border); }
-        .avatar { width: 60px; height: 60px; background: var(--primary); color: #000; font-size: 26px; font-weight: bold; border-radius: 50%; margin: 0 auto 10px; display: flex; justify-content: center; align-items: center; border: 2px solid #fff; font-family: 'Orbitron'; }
-        .menu-link { display: flex; align-items: center; gap: 12px; color: #fff; text-decoration: none; padding: 14px; border-radius: 10px; font-weight: 600; margin-bottom: 5px; cursor: pointer; }
+        /* KHUNG CHỨA CÁC BOX ĐỘNG TỪ ADMIN */
+        .section-title { font-family: 'Orbitron'; font-size: 20px; color: #fff; border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; }
+        .dynamic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .box-card { background: rgba(0,0,0,0.5); border: 1px dashed var(--primary); border-radius: 15px; padding: 25px 20px; text-align: center; text-decoration: none; color: #fff; transition: 0.3s; display: block; }
+        .box-card:hover { transform: translateY(-5px); background: rgba(0,255,136,0.05); border-style: solid; }
+        .box-icon { font-size: 40px; color: var(--primary); margin-bottom: 15px; }
+        .box-title { font-family: 'Orbitron'; font-size: 16px; margin-bottom: 5px; }
         
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 99999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .ios-modal { width: 310px; background: #1c1c1e; border-radius: 20px; padding: 25px; text-align: center; border: 1px solid #333; }
+        /* MODALS (NẠP TIỀN & LỊCH SỬ) */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px);}
+        .modal-box { width: 90%; max-width: 600px; background: #15151e; border-radius: 15px; border: 1px solid var(--border); overflow: hidden; }
+        .modal-head { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; background: #111; font-family: 'Orbitron'; font-weight: bold; color: var(--accent); }
+        .modal-body { padding: 20px; max-height: 70vh; overflow-y: auto; }
         
-        footer { background: #050508; border-top: 1px solid var(--border); padding: 50px 20px; text-align: center; }
-        .footer-links { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
-        .footer-links a { color: #666; font-size: 13px; text-decoration: none; }
-        
-        .floating-menu { position: fixed; bottom: 20px; right: 20px; z-index: 500; display: flex; flex-direction: column; gap: 10px; }
-        .float-btn { width: 45px; height: 45px; border-radius: 50%; background: #111; border: 1px solid #333; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 18px; cursor: pointer; }
-        @media (min-width: 992px) { .pc-wallet { display: block; } .hamburger { display: none; } }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        th { background: #000; padding: 10px; text-align: left; font-size: 12px; color: #888; }
+        td { padding: 10px; border-bottom: 1px solid var(--border); font-size: 13px; }
     </style>
 </head>
 <body>
-        <div id="preloader">
-        <div class="loader-logo" style="font-family:'Orbitron'; font-size:26px; font-weight:900; color:#fff;">QUOCDAT<span style="color:var(--primary);">.SEC</span></div>
-        <div class="loader-bar"><div id="lFill"></div></div>
-        <div id="lTxt" style="font-family:'Orbitron'; color:var(--primary); font-weight:bold; margin-top: 10px;">LOADING...</div>
+
+    <div class="header">
+        <div class="brand" id="siteLogo">QUOCDAT<span>.SEC</span></div>
+        <div style="font-size: 12px; color: #888;">Hệ Thống Phân Phối Tiện Ích</div>
     </div>
-    
-    <script>
-        let p = 0; let t = setInterval(() => { p += 2; if(p>100) p = 100; let txt = document.getElementById('lTxt'); if(txt) txt.innerText = p+'%'; if(p>=100) clearInterval(t); }, 50);
-        setTimeout(() => { document.body.classList.add('loaded'); runCounters(); }, 3000);
-    </script>
 
-    <div class="overlay-bg"></div>
-    <div class="toast" id="toastMsg"></div>
-
-    <div id="banIOS_Overlay" style="position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); z-index: 999999999; display: none; align-items: center; justify-content: center; flex-direction: column;">
-        <div style="background: rgba(30,30,30,0.9); width: 300px; border-radius: 18px; text-align: center; border: 1px solid #444; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; box-shadow: 0 20px 40px rgba(0,0,0,0.8);">
-            <div style="padding: 25px 20px;">
-                <div style="color:#fff; font-weight:600; font-size:17px; margin-bottom:10px;">Tài Khoản Bị Khóa</div>
-                <div style="color:#aaa; font-size:13px; line-height:1.4;">Tài khoản của bạn đã bị vô hiệu hóa vì lý do:</div>
-                <div id="banIOS_Reason" style="color:#ff4757; font-weight:bold; font-size:14px; margin: 10px 0;">Vi phạm quy định</div>
-                <div style="color:#aaa; font-size:13px;">Sẽ được mở khóa vào:</div>
-                <div id="banIOS_Time" style="color:#fff; font-weight:bold; font-size:14px; margin-top:5px;">--/--/---- --:--</div>
+    <div class="container">
+        
+        <div class="auth-card" id="loginSection">
+            <h2 style="font-family:'Orbitron'; text-align:center; color:var(--primary); margin-bottom:20px;">ĐĂNG NHẬP HỆ THỐNG</h2>
+            <div class="input-group"><i class="fas fa-user"></i><input type="text" id="username" placeholder="Tên tài khoản (Không dấu, không khoảng trắng)"></div>
+            <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="password" placeholder="Mật khẩu"></div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-outline" onclick="register()">ĐĂNG KÝ MỚI</button>
+                <button class="btn btn-primary" onclick="login()">ĐĂNG NHẬP</button>
             </div>
-            <button style="border-top: 1px solid #444; color: #0a84ff; padding: 15px; font-weight: 600; cursor: pointer; width: 100%; background: transparent; border-left:none; border-right:none; border-bottom:none; font-size: 16px; outline:none;" onclick="window.executeLogout()">Đăng xuất</button>
+            <p id="authMsg" style="color:#ff4757; font-size:13px; text-align:center; margin-top:15px; display:none;"></p>
         </div>
-    </div>
 
-    <header>
-        <div class="logo" onclick="window.goToPage('index.html')"><i class="fas fa-shield-halved" style="color:var(--primary)"></i> QUOCDAT</div>
-        <div class="header-actions">
-            <div class="pc-wallet" id="pcBal" style="display:none; padding:8px 15px; border:1px solid var(--primary); border-radius:30px; color:var(--primary); font-family:Orbitron; font-size:12px; font-weight:bold; background:rgba(0,255,136,0.1);">0 đ</div> 
-            <div class="cart-icon" onclick="window.goToPage('cart.html')">
-                <i class="fas fa-shopping-cart"></i><div class="cart-badge" id="cartBadge">0</div>
-            </div>
-            <i class="fas fa-bars-staggered hamburger" onclick="window.openNav()"></i>
-        </div>
-    </header>
-
-    <div class="floating-menu">
-        <a onclick="window.goToPage('naptien.html')" class="float-btn" style="background:var(--accent); border:none;"><i class="fas fa-wallet"></i></a>
-        <a onclick="window.goToPage('getkey.html')" class="float-btn"><i class="fas fa-key"></i></a>
-        <a onclick="window.goToPage('shop.html')" class="float-btn"><i class="fas fa-store"></i></a>
-    </div>
-
-    <div class="mobile-nav" id="mobileNav">
-        <div style="padding:15px; text-align:right;"><i class="fas fa-xmark" style="font-size:28px; color:#555; cursor:pointer;" onclick="window.closeNav()"></i></div>
-        <div class="nav-profile">
-            <div class="avatar" id="nA">?</div>
-            <div id="nU" style="font-family:'Orbitron'; font-weight:bold; font-size:16px;">Đang Tải...</div>
-            <div id="nB" style="font-size:22px; color:var(--primary); font-weight:900; margin:10px 0; font-family:monospace;">0 đ</div>
-            <button style="background:#222; color:#fff; border:1px solid #444; padding:8px; border-radius:8px; width:100%; font-size:12px; cursor:pointer;" onclick="window.openModal('infoModal')">Hồ sơ cá nhân</button>
-        </div>
-        <div class="nav-links">
-            <a onclick="window.goToPage('index.html')" class="menu-link" style="background:rgba(0,255,136,0.1); color:var(--primary);"><i class="fas fa-house"></i> Trang Chủ</a>
-            <a onclick="window.goToPage('shop.html')" class="menu-link"><i class="fas fa-store"></i> Cửa Hàng | Kho Hàng</a>
-            <a onclick="window.goToPage('getkey.html')" class="menu-link"><i class="fas fa-key"></i> Lấy Key Miễn Phí!</a>
-            <a onclick="window.goToPage('naptien.html')" class="menu-link" style="color:var(--accent);"><i class="fas fa-credit-card"></i> Nạp Tiền Tự Động</a>
-            
-            <div class="menu-link" style="color:#ffb86c;" onclick="window.goToPage('lichsugiaodich.html')"><i class="fas fa-box-open"></i> Lịch Sử & Key</div>
-            
-            <a href="admin.html" class="menu-link" style="border-top:1px dashed #333; margin-top:15px; padding-top:20px; color:#aaa;"><i class="fas fa-user-shield"></i> ----------</a>
-            <div class="menu-link" style="color:#ff4757; margin-top:15px; background:rgba(255,71,87,0.1);" onclick="window.confirmLogout()"><i class="fas fa-power-off"></i> Đăng Xuất</div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="infoModal" onclick="window.closeOutside(event, 'infoModal')">
-        <div class="ios-modal">
-            <i class="fas fa-user-check" style="font-size:45px; color:var(--primary); margin-bottom:20px;"></i>
-            <div style="font-weight:bold; font-size:20px; margin-bottom:20px; font-family:'Orbitron';">HỒ SƠ HỆ THỐNG</div>
-            <div style="text-align:left; background:#000; padding:20px; border-radius:15px; margin-bottom:20px; font-size:14px; border:1px solid #222;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:15px;"><span style="color:#888;">Tài khoản:</span> <strong id="mU" style="color:#fff;">...</strong></div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:15px;"><span style="color:#888;">Số dư:</span> <strong id="mB" style="color:var(--primary);">0 đ</strong></div>
-                <div style="display:flex; justify-content:space-between;"><span style="color:#888;">Trạng thái:</span> <strong style="color:var(--accent);">Active</strong></div>
-            </div>
-            <button style="width:100%; padding:15px; background:var(--primary); color:#000; font-weight:bold; border:none; border-radius:12px; cursor:pointer;" onclick="window.closeModal('infoModal')">XÁC NHẬN</button>
-        </div>
-    </div>
-    
-    <div class="modal-overlay" id="historyModal" onclick="window.closeOutside(event, 'historyModal')">
-        <div class="ios-modal">
-            <div style="font-weight:bold; color:#ffb86c; font-size:20px; margin-bottom:20px; font-family:'Orbitron';">LỊCH SỬ GIAO DỊCH</div>
-            <div style="background:#000; padding:40px 15px; border-radius:15px; margin-bottom:20px; border:1px solid #222;">
-                <i class="fas fa-file-invoice-dollar" style="font-size:40px; color:#333; margin-bottom:20px;"></i><br>
-                <span style="color:#666; font-size:13px;">Bạn vui lòng ấn vào nút Lịch Sử & Kho Đồ trên Menu để xem!</span>
-            </div>
-            <button style="width:100%; padding:15px; background:#333; color:#fff; font-weight:bold; border:none; border-radius:12px; cursor:pointer;" onclick="window.closeModal('historyModal')">ĐÓNG</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="logoutModal" onclick="window.closeOutside(event, 'logoutModal')">
-        <div class="ios-modal">
-            <i class="fas fa-exclamation-triangle" style="font-size:45px; color:#ff4757; margin-bottom:20px;"></i>
-            <div style="font-weight:bold; font-size:20px; margin-bottom:15px; font-family:'Orbitron';">XÁC NHẬN ĐĂNG XUẤT</div>
-            <p style="font-size:14px; color:#888; margin-bottom:25px; line-height:1.6;">Bạn có chắc chắn muốn đăng xuất khỏi hệ thống QUOCDAT SEC không?</p>
-            <div style="display:flex; gap:15px;">
-                <button style="flex:1; padding:15px; background:#333; color:#fff; border:none; border-radius:12px; font-weight:bold; cursor:pointer;" onclick="window.closeModal('logoutModal')">HỦY BỎ</button>
-                <button style="flex:1; padding:15px; background:#ff4757; color:#fff; border:none; border-radius:12px; font-weight:bold; cursor:pointer;" onclick="window.executeLogout()">ĐĂNG XUẤT</button>
-            </div>
-        </div>
-    </div>
-        <main>
-        <section class="hero entry d1">
-            <div style="background:rgba(0,255,136,0.1); color:var(--primary); padding:8px 25px; border-radius:30px; font-size:11px; font-weight:900; margin-bottom:25px; border:1px solid var(--primary); letter-spacing:2px;">website phiên bản nâng cấp thứ 1</div>
-            <h1>TỔNG HỢP CÁC BẢN HACK XỊN NHẤT!<br><span>Client & SCRIPT VIP</span></h1>
-            <p style="color:#aaa; max-width:600px; margin-bottom:30px; line-height:1.7;">Nền tảng cung cấp script,client,hack,.....(free)</p>
-            
-            <div class="btn-group">
-                <button class="btn-lg btn-main" onclick="window.goToPage('shop.html')"><i class="fas fa-shopping-cart"></i> CỬA HÀNG SẢN PHẨM</button>
-                <button class="btn-lg btn-sub" onclick="window.goToPage('getkey.html')"><i class="fas fa-key"></i> LẤY KEY FREE</button>
-            </div>
-            
-            <div class="counter-wrap">
-                <div class="counter-box">
-                    <div class="count-num" data-target="150">0+</div>
-                    <div style="font-size:12px; color:#888; text-transform:uppercase; font-weight:bold;">Số key đã bán!</div>
+        <div class="auth-card" id="profileSection" style="display:none; border-color: var(--accent);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div>
+                    <div style="color:#888; font-size:13px;">Xin chào,</div>
+                    <h2 style="font-family:'Orbitron'; color:var(--accent); font-size: 24px;" id="dispName">User</h2>
                 </div>
-                <div class="counter-box">
-                    <div class="count-num" data-target="1000+">0+</div>
-                    <div style="font-size:12px; color:#888; text-transform:uppercase; font-weight:bold;">Người Dùng</div>
-                </div>
-                <div class="counter-box">
-                    <div class="count-num" data-target="35">0+</div>
-                    <div style="font-size:12px; color:#888; text-transform:uppercase; font-weight:bold;">Sản phẩm</div>
+                <div style="text-align: right;">
+                    <div style="color:#888; font-size:13px;">Số dư khả dụng</div>
+                    <div style="font-family:'Orbitron'; color:var(--vip); font-size: 24px; font-weight: bold;" id="dispBal">0 đ</div>
                 </div>
             </div>
-        </section>
+            <button class="btn" style="background: #ff4757; color:#fff; padding: 10px; margin-top: 20px; font-size: 12px;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> ĐĂNG XUẤT</button>
+        </div>
 
-        <section class="section entry d2">
-            <h2 class="sec-title">DỊCH VỤ <span>CHÍNH</span></h2>
-            <div class="grid">
-                <div class="card"><i class="fas fa-robot main-icon"></i><h3>Client Roblox</h3><p style="font-size:14px; color:#888; line-height:1.7;">Phần mềm chạy script.</p></div>
-                <div class="card"><i class="fas fa-code-branch main-icon"></i><h3>Script Roblox</h3><p style="font-size:14px; color:#888; line-height:1.7;">Chạy những bản hack tự động cày exp,farm tối ưu hoá thời gian chơi.</p></div>
-                <div class="card"><i class="fas fa-shield-virus main-icon"></i><h3>Zygame</h3><p style="font-size:14px; color:#888; line-height:1.7;">Hack free fire cân acc chính.</p></div>
+        <div class="section-title">CHỨC NĂNG HỆ THỐNG</div>
+        <div class="fixed-menu">
+            <a href="shop.html" class="menu-item highlight">
+                <i class="fas fa-shopping-cart"></i>
+                <div style="font-family:'Orbitron'; font-weight:bold;">CỬA HÀNG VIP</div>
+                <div style="font-size:11px; color:#888; margin-top:5px;">Mua Tool & Script</div>
+            </a>
+            <a href="getkey.html" class="menu-item">
+                <i class="fas fa-key" style="color:var(--primary);"></i>
+                <div style="font-family:'Orbitron'; font-weight:bold;">LẤY KEY FREE</div>
+                <div style="font-size:11px; color:#888; margin-top:5px;">Vượt link nhận Key</div>
+            </a>
+            <div class="menu-item" onclick="openModal('depositModal')">
+                <i class="fas fa-wallet" style="color:#1e90ff;"></i>
+                <div style="font-family:'Orbitron'; font-weight:bold;">NẠP TIỀN</div>
+                <div style="font-size:11px; color:#888; margin-top:5px;">Nạp số dư tài khoản</div>
             </div>
-        </section>
+            <div class="menu-item" onclick="openHistory()">
+                <i class="fas fa-history" style="color:#ff9f43;"></i>
+                <div style="font-family:'Orbitron'; font-weight:bold;">LỊCH SỬ KEY</div>
+                <div style="font-size:11px; color:#888; margin-top:5px;">Xem Key đã lấy/mua</div>
+            </div>
+        </div>
 
-        <section class="section entry d3">
-            <h2 class="sec-title">SẢN PHẨM <span>BÁN CHẠY</span></h2>
-            <div class="filter-bar"><div class="search-box"><i class="fas fa-search" style="color:#555;"></i><input type="text" placeholder="Tìm kiếm theo tên tool, script..."></div><div class="cat-pills"><div class="cat-pill active">Tất cả</div><div class="cat-pill">Script Game</div><div class="cat-pill">Web Source</div><div class="cat-pill">Tool Social</div></div></div>
-            
-            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-                <div class="p-card"><div class="p-img"><span class="p-badge">Best Seller</span><i class="fab fa-facebook" style="color:#1877f2;"></i></div><div class="p-info"><div class="p-title">Chưa cập nhập...</div><p style="font-size:13px; color:#888; margin-bottom:15px; flex:1;">Chưa cập nhập....</p><div class="p-price-row"><span style="color:var(--accent); font-family:monospace; font-size:18px; font-weight:bold;">150,000 đ</span><button class="btn-add-cart" onclick="window.addToCart('Tool Auto FB')">Thêm vào giỏ</button></div></div></div>
-                <div class="p-card"><div class="p-img"><span class="p-badge">Hot</span><i class="fas fa-laptop-code" style="color:var(--primary);"></i></div><div class="p-info"><div class="p-title">Chưa cập nhập...</div><p style="font-size:13px; color:#888; margin-bottom:15px; flex:1;">Chưa cập nhập....</p><div class="p-price-row"><span style="color:var(--accent); font-family:monospace; font-size:18px; font-weight:bold;">500,000 đ</span><button class="btn-add-cart" onclick="window.addToCart('Source Web Bán Acc')">Thêm vào giỏ</button></div></div></div>
-                <div class="p-card"><div class="p-img"><i class="fab fa-tiktok" style="color:#fff;"></i></div><div class="p-info"><div class="p-title">Tool TikTok Cày View & Heart</div><p style="font-size:13px; color:#888; margin-bottom:15px; flex:1;">Tự động buff view, tym đẩy video lên xu hướng không giới hạn số lượng.</p><div class="p-price-row"><span style="color:var(--accent); font-family:monospace; font-size:18px; font-weight:bold;">200,000 đ</span><button class="btn-add-cart" onclick="window.addToCart('Tool TikTok')">Thêm vào giỏ</button></div></div></div>
-                <div class="p-card"><div class="p-img"><i class="fas fa-gamepad" style="color:#f1c40f;"></i></div><div class="p-info"><div class="p-title">Script Blox Fruit</div><p style="font-size:13px; color:#888; margin-bottom:15px; flex:1;">Tự nhận nhiệm vụ, gom quái cực mượt. Hỗ trợ cho cả điện thoại và máy tính.</p><div class="p-price-row"><span style="color:var(--accent); font-family:monospace; font-size:18px; font-weight:bold;">50,000 đ</span><button class="btn-add-cart" onclick="window.addToCart('Script Blox Fruit')">Thêm vào giỏ</button></div></div></div>
-                <div class="p-card"><div class="p-img"><i class="fas fa-envelope-open-text" style="color:#e1306c;"></i></div><div class="p-info"><div class="p-title">Chưa cập nhập...</div><p style="font-size:13px; color:#888; margin-bottom:15px; flex:1;">Chưa cập nhập....</p><div class="p-price-row"><span style="color:var(--accent); font-family:monospace; font-size:18px; font-weight:bold;">300,000 đ</span><button class="btn-add-cart" onclick="window.addToCart('Auto Mailer')">Thêm vào giỏ</button></div></div></div>
-                <div class="p-card"><div class="p-img"><i class="fas fa-network-wired" style="color:#9c27b0;"></i></div><div class="p-info"><div class="p-title">Proxy Dân Cư</div><p style="font-size:13px; color:#888; margin-bottom:15px; flex:1;">Chưa cập nhập....</p><div class="p-price-row"><span style="color:var(--accent); font-family:monospace; font-size:18px; font-weight:bold;">90,000 đ <span style="font-size:10px; color:#555;">/Tháng</span></span><button class="btn-add-cart" onclick="window.addToCart('Proxy VIP')">Thêm vào giỏ</button></div></div></div>
-            </div>
-            
-            <div style="text-align:center; margin-top:40px;">
-                <button style="background:transparent; color:#888; border:1px solid #333; padding:15px 30px; border-radius:30px; font-size:14px; cursor:pointer; font-weight:bold; transition:0.3s;" onmouseover="this.style.color='#fff'; this.style.borderColor='#fff';" onmouseout="this.style.color='#888'; this.style.borderColor='#333';" onclick="window.goToPage('shop.html')">Xem tất cả 35+ sản phẩm <i class="fas fa-arrow-right"></i></button>
-            </div>
-        </section>
+        <div class="section-title">DANH MỤC MỞ RỘNG</div>
+        <div class="dynamic-grid" id="homeGrid">
+            <div style="color:#888; font-size:13px; grid-column: 1/-1;">Đang tải dữ liệu...</div>
+        </div>
+    </div>
 
-        <section class="section entry">
-            <h2 class="sec-title">QUY TRÌNH <span>MUA HÀNG</span></h2>
-            <div class="step-grid">
-                <div class="step-item"><div class="step-num">1</div><div style="font-weight:bold; margin-bottom:10px; color:var(--primary); font-size:16px;">Nạp Tiền Vào Ví</div><div style="font-size:14px; color:#777; line-height:1.6;">Chuyển khoản theo cú pháp hướng dẫn. Hệ thống sẽ tự động cộng số dư cho bạn trong 5s.</div></div>
-                <div class="step-item"><div class="step-num">2</div><div style="font-weight:bold; margin-bottom:10px; color:var(--primary); font-size:16px;">Chọn Mua Sản Phẩm</div><div style="font-size:14px; color:#777; line-height:1.6;">Lựa chọn sản phẩm cần thiết tại Cửa hàng, thêm vào giỏ và tiến hành thanh toán trừ tiền.</div></div>
-                <div class="step-item"><div class="step-num">3</div><div style="font-weight:bold; margin-bottom:10px; color:var(--primary); font-size:16px;">Nhận Hàng Tức Thì</div><div style="font-size:14px; color:#777; line-height:1.6;">Vào mục Lịch sử để lấy Link tải và tự động tạo Key kích hoạt sử dụng Tool.</div></div>
-            </div>
-        </section>
-
-        <section class="section entry">
-            <h2 class="sec-title">ĐÁNH GIÁ <span>TỪ KHÁCH HÀNG</span></h2>
-            <div class="grid">
-                <div class="review-box"><div style="color:#f1c40f; font-size:14px; margin-bottom:15px;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><p style="font-size:14px; color:#aaa; font-style:italic; line-height:1.6;">"Mình đã mua Script tại dây.dùng rất tốt.Xứng đáng 5 sao!"</p><div class="review-user"><div class="user-ava" style="background:var(--primary); color:#000;">T</div><div><div style="font-size:14px; font-weight:bold; color:#fff;">Trần Minh Quân</div><div style="font-size:12px; color:#555;">User</div></div></div></div>
-                <div class="review-box"><div style="color:#f1c40f; font-size:14px; margin-bottom:15px;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div><p style="font-size:14px; color:#aaa; font-style:italic; line-height:1.6;">"Rất tốt."</p><div class="review-user"><div class="user-ava" style="background:var(--accent); color:#000;">H</div><div><div style="font-size:14px; font-weight:bold; color:#fff;">Hoàng Anh Tú</div><div style="font-size:12px; color:#555;">User</div></div></div></div>
-                <div class="review-box"><div style="color:#f1c40f; font-size:14px; margin-bottom:15px;"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><p style="font-size:14px; color:#aaa; font-style:italic; line-height:1.6;">"Tôi đã nạp 100k vào đây web duyệt tiền rất nhanh chưa tới 5s."</p><div class="review-user"><div class="user-ava" style="background:#e1306c; color:#fff;">D</div><div><div style="font-size:14px; font-weight:bold; color:#fff;">Phạm Tuấn Dũng</div><div style="font-size:12px; color:#555;">User</div></div></div></div>
-            </div>
-        </section>
-
-        <section class="section entry">
-            <h2 class="sec-title">CÂU HỎI <span>THƯỜNG GẶP (FAQ)</span></h2>
-            <div style="max-width:900px; margin:0 auto;">
-                <div class="faq-box"><button class="faq-btn" onclick="window.toggleFAQ(this)">Tôi nạp tiền xong bao lâu thì có số dư? <i class="fas fa-chevron-down"></i></button><div class="faq-content"><p>Hệ thống xử lý hóa đơn ngân hàng và ví điện tử hoàn toàn bằng API tự động. Khi bạn chuyển khoản đúng nội dung và số tiền yêu cầu, số dư sẽ được cộng vào tài khoản trong vòng 5 - 10 giây.</p></div></div>
-                <div class="faq-box"><button class="faq-btn" onclick="window.toggleFAQ(this)">Có được hỗ trợ cài đặt mã nguồn web không? <i class="fas fa-chevron-down"></i></button><div class="faq-content"><p>Nếu bạn gặp vấn đề gì cần hỗ trợ vui lòng liên hệ Admin!.</p></div></div>
-                <div class="faq-box"><button class="faq-btn" onclick="window.toggleFAQ(this)">Chính sách cập nhật phiên bản mới như thế nào? <i class="fas fa-chevron-down"></i></button><div class="faq-content"><p>Các sản phẩm ở đây luôn được cập nhập phiên bản mới nhất!.</p></div></div>
-            </div>
-        </section>
-
-        <section class="section entry">
-            <h2 class="sec-title">BẢN TIN <span>HỆ THỐNG</span></h2>
-            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));">
-                <div class="blog-card"><div class="blog-date"><i class="far fa-calendar-alt"></i> Ngày 21 Tháng 02, 2026</div><div class="blog-title">Cập nhật Zygame OB52</div><p style="font-size:13px; color:#888; margin-bottom:15px; line-height:1.6;">Xem Thêm...</p><a href="#" style="color:var(--primary); font-size:13px; font-weight:bold; text-decoration:none;">Đọc chi tiết <i class="fas fa-arrow-right"></i></a></div>
-                <div class="blog-card"><div class="blog-date"><i class="far fa-calendar-alt"></i> Ngày 18 Tháng 02, 2026</div><div class="blog-title">Cập nhập Delta Client</div><p style="font-size:13px; color:#888; margin-bottom:15px; line-height:1.6;">Xem Thêm...</p><a href="#" style="color:var(--primary); font-size:13px; font-weight:bold; text-decoration:none;">Đọc chi tiết <i class="fas fa-arrow-right"></i></a></div>
-            </div>
-            
-            <div style="text-align:center; margin-top:70px;">
-                <div style="font-size:13px; color:#666; font-weight:bold; margin-bottom:20px; letter-spacing:3px;">Web được tạo bằng các ngôn ngữ sau:</div>
-                <div style="display:flex; justify-content:center; gap:30px; flex-wrap:wrap; opacity:0.4; font-family:'Orbitron'; font-weight:bold; font-size:22px;">
-                    <div>NONE</div> <div>NONE</div> <div>HTML</div> <div>JAVASCRIPT</div> <div>CSS</div>
+    <div class="modal-overlay" id="depositModal">
+        <div class="modal-box">
+            <div class="modal-head"><div><i class="fas fa-wallet"></i> NẠP SỐ DƯ</div><i class="fas fa-times" style="cursor:pointer;" onclick="closeModal('depositModal')"></i></div>
+            <div class="modal-body" style="text-align: center;">
+                <p style="color:#888; margin-bottom: 20px;">Vui lòng chuyển khoản với nội dung bên dưới. Tiền sẽ được cộng thủ công bởi Admin.</p>
+                <div style="background:#000; padding:20px; border-radius:10px; border: 1px dashed var(--accent); display: inline-block; text-align: left;">
+                    <div style="margin-bottom:10px; color:var(--accent); font-weight:bold;">NGÂN HÀNG: MB BANK</div>
+                    <div style="margin-bottom:10px;">STK: <strong style="color:#fff;">0123456789</strong></div>
+                    <div style="margin-bottom:10px;">Chủ TK: <strong style="color:#fff;">NGUYEN DAI QUOC DAT</strong></div>
+                    <hr style="border-color:#333; margin:15px 0;">
+                    <div style="color:#f1c40f;">Nội dung CK: <strong id="transferMemo" style="color:#fff; font-family:monospace;">---</strong></div>
                 </div>
             </div>
-        </section>
+        </div>
+    </div>
 
-        <section class="section entry">
-            <h2 class="sec-title">NĂNG LỰC <span>CÔNG NGHỆ</span></h2>
-            <div class="skills-container">
-                <div class="skill-item"><div class="skill-info"><span>HTML / CSS / GIAO DIỆN UI/UX</span><span>77%</span></div><div class="progress-bg"><div class="progress-fill fill-77" id="s1"></div></div></div>
-                <div class="skill-item"><div class="skill-info"><span>JAVASCRIPT / NODE.JS / REACT</span><span>50%</span></div><div class="progress-bg"><div class="progress-fill fill-50" id="s2"></div></div></div>
-                <div class="skill-item"><div class="skill-info"><span>PHP / LARAVEL / BACKEND API</span><span>40%</span></div><div class="progress-bg"><div class="progress-fill fill-40" id="s3"></div></div></div>
-                <div class="skill-item"><div class="skill-info"><span>PYTHON / TOOL AUTOMATION / BOT AI</span><span>36%</span></div><div class="progress-bg"><div class="progress-fill fill-36" id="s4"></div></div></div>
-                <div class="skill-item"><div class="skill-info"><span>LUA / KỊCH BẢN GAME SCRIPTING</span><span>20%</span></div><div class="progress-bg"><div class="progress-fill fill-20" id="s5"></div></div></div>
+    <div class="modal-overlay" id="historyModal">
+        <div class="modal-box" style="max-width: 800px;">
+            <div class="modal-head"><div><i class="fas fa-history"></i> LỊCH SỬ KEY CỦA TÔI</div><i class="fas fa-times" style="cursor:pointer;" onclick="closeModal('historyModal')"></i></div>
+            <div class="modal-body" style="overflow-x: auto;">
+                <table>
+                    <thead><tr><th>Thời gian</th><th>Sản phẩm</th><th>Mã KEY</th><th>Trạng thái</th></tr></thead>
+                    <tbody id="historyTable"><tr><td colspan="4" style="text-align:center;">Đang tải...</td></tr></tbody>
+                </table>
             </div>
-        </section>
-
-        <section class="section entry">
-            <h2 class="sec-title">XÁC THỰC <span>DOANH NGHIỆP</span></h2>
-            <div class="legal-grid">
-                <div class="legal-box"><div class="legal-title"><i class="fas fa-file-contract"></i> HỒ SƠ PHÁP LÝ CÔNG TY</div><div class="legal-row"><span>Tổ chức sở hữu:</span> <span>QUOCDA</span></div><div class="legal-row"><span>Người đại diện:</span> <span>QUỐC ĐẠT (Admin)</span></div><div class="legal-row"><span>Mã số thuế doanh nghiệp:</span> <span>0316829xxx</span></div><div class="legal-row"><span>Giấy phép hoạt động:</span> <span>41G802xxxx cấp bởi DEOBIET</span></div></div>
-                <div class="legal-box"><div class="legal-title"><i class="fas fa-headset"></i> LIÊN HỆ & TRỤ SỞ LÀM VIỆC</div><div class="legal-row"><span>Văn phòng làm việc:</span> <span>Nhà chứ ở đâu</span></div><div class="legal-row"><span>Đường dây nóng (Zalo):</span> <span>0989249990</span></div><div class="legal-row"><span>Chăm sóc khách hàng:</span> <span>t.me/quocdadv</span></div><div class="legal-row"><span>Hỗ trợ kỹ thuật:</span> <span>Telegram @quocdadv</span></div></div>
-            </div>
-        </section>
-
-        <footer class="entry">
-            <div style="text-align:center; font-family:'Orbitron'; font-size:26px; font-weight:900; margin-bottom:25px;">QUOCDAT<span style="color:var(--primary);">.SEC</span></div>
-            <div class="footer-links">
-                <a href="#">Trang Chủ</a><a href="#">Cửa Hàng</a><a href="#">Chính Sách Bảo Mật Dữ Liệu</a><a href="#">Điều Khoản Sử Dụng Dịch Vụ</a><a href="#">Chính Sách Thanh Toán & Hoàn Tiền</a>
-            </div>
-            <div style="display:flex; justify-content:center; gap:20px; font-size:22px; margin-bottom:30px;">
-                <i class="fab fa-facebook" style="color:#1877f2; cursor:pointer;"></i> <i class="fab fa-telegram" style="color:#0088cc; cursor:pointer;"></i> <i class="fab fa-youtube" style="color:#ff0000; cursor:pointer;"></i>
-            </div>
-            <div style="font-size:12px; color:#555; letter-spacing:1px; line-height:1.6;">
-                © 2026 QUOCDAT SEC SYSTEM. ALL RIGHTS RESERVED.<br>Mọi hành vi sao chép nội dung và giao diện đều vi phạm bản quyền.
-            </div>
-        </footer>
-    </main>
+        </div>
+    </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            try {
-                if(currentUser && currentUser.trim() !== "") {
-                    let cleanName = currentUser.trim();
-                    let firstLetter = cleanName.charAt(0).toUpperCase();
-                    let nU = document.getElementById('nU'); if(nU) nU.innerText = cleanName;
-                    let nA = document.getElementById('nA'); if(nA) nA.innerText = firstLetter;
-                    let mU = document.getElementById('mU'); if(mU) mU.innerText = cleanName;
-                }
-            } catch(e) { console.error("[SYS] Lỗi khi render thông tin User:", e); }
+        const db = firebase.database();
+        let currentUser = localStorage.getItem('vip_username');
+
+        // 1. ĐỒNG BỘ CÀI ĐẶT
+        db.ref('settings').on('value', snap => {
+            let s = snap.val() || {};
+            if(s.site_name) {
+                document.getElementById('siteLogo').innerHTML = s.site_name.replace(" ", "<span>.</span>");
+                document.getElementById('pageTitle').innerText = s.site_name;
+            }
+            if(s.theme_primary) document.documentElement.style.setProperty('--primary', s.theme_primary);
+            if(s.theme_bg) document.documentElement.style.setProperty('--bg', s.theme_bg);
         });
 
-        try {
-            const firebaseConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
-            if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-            
-            let databaseRef = firebase.database().ref('users/' + safeUserId);
-            
-            databaseRef.on('value', (snapshot) => {
-                if(!snapshot.exists() && safeUserId !== "guest") { 
-                    databaseRef.set({ balance: 0, joined_at: new Date().toISOString() }); 
-                }
-                
-                let uData = snapshot.val() || {};
-                let rawBalance = uData.balance || 0;
-                let moneyFormat = rawBalance.toLocaleString('vi-VN') + " đ";
-                
-                let pc = document.getElementById('pcBal'); if(pc) { pc.innerText = moneyFormat; pc.style.display = 'block'; }                let nb = document.getElementById('nB'); if(nb) { nb.innerText = moneyFormat; }
-                let mb = document.getElementById('mB'); if(mb) { mb.innerText = moneyFormat; }
-
-                // LOGIC CHẶN IOS NẾU TÀI KHOẢN BỊ ADMIN KHÓA
-                if(uData.banned && uData.ban_until) {
-                    let now = new Date().getTime();
-                    let banTime = new Date(uData.ban_until).getTime();
-                    if(banTime > now) {
-                        let reasonBox = document.getElementById('banIOS_Reason');
-                        if(reasonBox) reasonBox.innerText = uData.ban_reason || "Vi phạm chính sách.";
-                        let timeBox = document.getElementById('banIOS_Time');
-                        if(timeBox) timeBox.innerText = new Date(uData.ban_until).toLocaleString('vi-VN', { hour: '2-digit', minute:'2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
-                        
-                        let banUI = document.getElementById('banIOS_Overlay');
-                        if(banUI) { banUI.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
-                    } else {
-                        // Tự động mở khóa nếu quá hạn
-                        databaseRef.update({ banned: false, ban_reason: null, ban_until: null });
-                        let banUI = document.getElementById('banIOS_Overlay');
-                        if(banUI) { banUI.style.display = 'none'; document.body.style.overflow = 'auto'; }
-                    }
-                } else {
-                    let banUI = document.getElementById('banIOS_Overlay');
-                    if(banUI) { banUI.style.display = 'none'; document.body.style.overflow = 'auto'; }
-                }
-            });
-            
-        } catch(e) { console.error("Khởi tạo Firebase thất bại:", e); }
-
-        function runCounters() {
-            try {
-                const counterElements = document.querySelectorAll('.count-num');
-                counterElements.forEach(counter => {
-                    const finalValue = parseInt(counter.getAttribute('data-target'), 10);
-                    const stepValue = finalValue / 50; 
-                    let currentValue = 0;
-                    const updateValue = () => {
-                        currentValue += stepValue;
-                        if(currentValue < finalValue) {
-                            counter.innerText = Math.ceil(currentValue) + (finalValue > 50 ? '+' : '');
-                            setTimeout(updateValue, 30);
-                        } else {
-                            counter.innerText = finalValue + (finalValue > 50 ? '+' : '');
-                        }
-                    };
-                    updateValue();
+        // 2. TẢI CÁC DANH MỤC ĐỘNG
+        db.ref('home_sections').on('value', snap => {
+            let grid = document.getElementById('homeGrid'); grid.innerHTML = '';
+            if(snap.exists()) {
+                let data = snap.val(); let arr = [];
+                for(let id in data) arr.push(data[id]);
+                arr.sort((a,b) => a.order - b.order);
+                arr.forEach(item => {
+                    grid.innerHTML += `<a href="${item.link}" class="box-card"><i class="${item.icon} box-icon"></i><h3 class="box-title">${item.title}</h3><p style="font-size:12px; color:#888;">${item.desc || ''}</p></a>`;
                 });
-            } catch(e) { console.error("[SYS] Lỗi chạy số đếm:", e); }
+            } else { grid.innerHTML = `<div style="color:#555; font-style:italic;">Chưa có danh mục mở rộng nào.</div>`; }
+        });
+
+        // 3. XỬ LÝ TÀI KHOẢN
+        function checkLoginState() {
+            if(currentUser) {
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('profileSection').style.display = 'block';
+                document.getElementById('dispName').innerText = currentUser;
+                document.getElementById('transferMemo').innerText = "NAP " + currentUser;
+                
+                let safeUid = currentUser.replace(/[.#$\[\]]/g, '_');
+                db.ref('users/' + safeUid).on('value', snap => {
+                    let u = snap.val() || {};
+                    if(u.banned) { alert("Tài khoản của bạn đã bị khóa: " + u.banReason); logout(); return; }
+                    document.getElementById('dispBal').innerText = Number(u.balance || 0).toLocaleString('vi-VN') + " đ";
+                });
+            } else {
+                document.getElementById('loginSection').style.display = 'block';
+                document.getElementById('profileSection').style.display = 'none';
+            }
+        }
+        checkLoginState();
+
+        function showMsg(msg) {
+            let m = document.getElementById('authMsg'); m.innerText = msg; m.style.display = 'block';
+        }
+
+        async function register() {
+            let u = document.getElementById('username').value.trim();
+            let p = document.getElementById('password').value.trim();
+            if(!u || !p) return showMsg("Vui lòng nhập đủ tài khoản và mật khẩu!");
+            if(/[^a-zA-Z0-9]/.test(u)) return showMsg("Tên tài khoản không được chứa dấu hoặc ký tự đặc biệt!");
+            
+            let safeUid = u.replace(/[.#$\[\]]/g, '_');
+            let snap = await db.ref('users/' + safeUid).once('value');
+            if(snap.exists()) return showMsg("Tài khoản này đã tồn tại!");
+
+            await db.ref('users/' + safeUid).set({ password: p, balance: 0, banned: false });
+            localStorage.setItem('vip_username', u);
+            currentUser = u;
+            checkLoginState();
+        }
+
+        async function login() {
+            let u = document.getElementById('username').value.trim();
+            let p = document.getElementById('password').value.trim();
+            if(!u || !p) return showMsg("Vui lòng nhập đủ tài khoản và mật khẩu!");
+            
+            let safeUid = u.replace(/[.#$\[\]]/g, '_');
+            let snap = await db.ref('users/' + safeUid).once('value');
+            if(!snap.exists() || snap.val().password !== p) return showMsg("Sai tài khoản hoặc mật khẩu!");
+            if(snap.val().banned) return showMsg("Tài khoản đã bị khóa!");
+
+            localStorage.setItem('vip_username', u);
+            currentUser = u;
+            checkLoginState();
+        }
+
+        function logout() { localStorage.removeItem('vip_username'); currentUser = null; checkLoginState(); }
+
+        // 4. MODALS & LỊCH SỬ
+        function openModal(id) { 
+            if(id === 'depositModal' && !currentUser) return alert("Vui lòng đăng nhập trước!");
+            document.getElementById(id).style.display = 'flex'; 
+        }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        function openHistory() {
+            if(!currentUser) return alert("Vui lòng đăng nhập để xem lịch sử!");
+            document.getElementById('historyModal').style.display = 'flex';
+            
+            db.ref('transactions').orderByChild('user').equalTo(currentUser).once('value', snap => {
+                let tbody = document.getElementById('historyTable'); tbody.innerHTML = '';
+                if(snap.exists()) {
+                    let data = snap.val(); let keys = Object.keys(data).reverse();
+                    keys.forEach(id => {
+                        let t = data[id]; let time = new Date(t.time).toLocaleString('vi-VN');
+                        let status = t.used ? '<span style="color:#ff4757;">Đã dùng</span>' : '<span style="color:#00ff88;">Chưa dùng</span>';
+                        let kColor = t.color || 'var(--primary)';
+                        tbody.innerHTML += `<tr><td>${time}</td><td>${t.detail}</td><td><strong style="color:${kColor}; font-family:monospace;">${t.key_granted}</strong></td><td>${status}</td></tr>`;
+                    });
+                } else { tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Bạn chưa lấy/mua Key nào.</td></tr>`; }
+            });
         }
     </script>
 </body>
