@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI CORE V6.0 | QUOCDAT SEC</title>
+    <title>AI CORE V6.1 | QUOCDAT SEC</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -49,11 +49,13 @@
 
         .input-area { display: flex; gap: 10px; background: var(--card-bg); padding: 15px; border-radius: 15px; border: 1px solid var(--border); margin-bottom: 20px; }
         .input-area input { flex: 1; background: transparent; border: none; color: #fff; font-size: 15px; outline: none; font-family: 'Inter'; }
+        .input-area input:disabled { opacity: 0.5; }
         .btn-send { background: var(--primary); color: #000; border: none; width: 45px; height: 45px; border-radius: 10px; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; font-size: 18px; }
-        .btn-send:hover { filter: brightness(1.2); box-shadow: 0 0 15px rgba(0,255,136,0.3); transform: scale(1.05); }
+        .btn-send:disabled { background: #333; color: #777; cursor: not-allowed; }
+        .btn-send:hover:not(:disabled) { filter: brightness(1.2); box-shadow: 0 0 15px rgba(0,255,136,0.3); transform: scale(1.05); }
         
         .tools-bar { display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; }
-        .btn-clear { background: #333; color: #fff; border: none; padding: 5px 15px; border-radius: 5px; font-size: 11px; cursor: pointer; font-family: 'Orbitron'; }
+        .btn-clear { background: #333; color: #fff; border: none; padding: 5px 15px; border-radius: 5px; font-size: 11px; cursor: pointer; font-family: 'Orbitron'; transition: 0.3s; }
         .btn-clear:hover { background: #ff4757; }
     </style>
 </head>
@@ -68,8 +70,8 @@
 
     <div class="container">
         <div class="ai-status">
-            <h2>AI CORE V6.0</h2>
-            <p><i class="fas fa-satellite-dish"></i> TÍCH HỢP GOOGLE GEMINI (MIỄN PHÍ)</p>
+            <h2>AI CORE V6.1</h2>
+            <p><i class="fas fa-shield-alt"></i> HỆ THỐNG ĐÃ BỌC GIÁP CHỐNG SẬP</p>
         </div>
         
         <div class="tools-bar">
@@ -107,12 +109,18 @@
         let aiBrainData = []; 
         let chatContext = JSON.parse(sessionStorage.getItem('ai_chat_history')) || [];
 
-        // NÃO BỘ NỘI BỘ TỪ FIREBASE
+        // LỌC DỮ LIỆU LỖI TỪ FIREBASE ĐỂ TRÁNH CRASH JS
         db.ref('ai_brain_v2').on('value', snap => {
             aiBrainData = [];
             if(snap.exists()) {
                 let data = snap.val();
-                for(let key in data) aiBrainData.push({ q: data[key].question.toLowerCase().trim(), a: data[key].answer });
+                for(let key in data) {
+                    let q = data[key].question || "";
+                    let a = data[key].answer || "";
+                    if (q && a) {
+                        aiBrainData.push({ q: q.toString().toLowerCase().trim(), a: a.toString() });
+                    }
+                }
             }
         });
 
@@ -126,13 +134,14 @@
                     chatBox.insertAdjacentHTML('beforeend', html);
                 });
                 scrollToBottom();
+                resetInput(); // Đảm bảo input được mở khóa khi load lại
             } else {
                 chatBox.innerHTML = `<div class="msg msg-ai"><span class="msg-name"><i class="fas fa-robot"></i> SYSTEM.AI</span><div class="msg-bubble" id="bootText"></div></div>`;
                 setTimeout(typeBootSequence, 500);
             }
         }
 
-        const bootSequence = ["Khởi động Bộ nhớ Kép...", "Đã kết nối thành công với Google Gemini API!", "Tôi là trợ lý AI thông minh của bạn. Hãy hỏi tôi đi!"];
+        const bootSequence = ["Khởi động Hệ thống Kép...", "Đã gắn chống ngắt kết nối!", "Tôi là trợ lý AI thông minh của bạn. Hãy hỏi tôi đi!"];
         let bootIndex = 0; let bootCharIndex = 0; let currentBootLine = "";
 
         function typeBootSequence() {
@@ -148,64 +157,72 @@
                 document.getElementById('bootText').innerHTML = currentBootLine;
                 saveToHistory('ai', currentBootLine);
                 scrollToBottom();
+                resetInput();
             }
         }
+        
         window.onload = loadApp;
 
         userInput.addEventListener('keypress', function (e) { if (e.key === 'Enter') processInput(); });
         btnSend.addEventListener('click', processInput);
 
         function processInput() {
+            if (btnSend.disabled || userInput.disabled) return; // Khóa chống spam click
+
             let text = userInput.value.trim();
             if (!text) return;
 
-            userInput.disabled = true; btnSend.disabled = true;
+            // Khóa input trong lúc xử lý
+            userInput.disabled = true; 
+            btnSend.disabled = true;
 
             let safeText = escapeHtml(text);
             let userHtml = `<div class="msg msg-user"><span class="msg-name">GUEST <i class="fas fa-user"></i></span><div class="msg-bubble">${safeText}</div></div>`;
             chatBox.insertAdjacentHTML('beforeend', userHtml);
             saveToHistory('user', safeText);
             
-            userInput.value = ''; scrollToBottom();
+            userInput.value = ''; 
+            scrollToBottom();
 
             setTimeout(() => { analyzeContextAndFindAnswer(text); }, 500);
         }
 
         function analyzeContextAndFindAnswer(question) {
-            let qFormat = question.toLowerCase().trim();
-
-            // 1. KIỂM TRA NÃO FIREBASE TRƯỚC
-            let found = aiBrainData.find(item => item.q === qFormat);
-            
-            if (found) {
-                renderAIMessage(found.a, 'msg-ai', 'QUOCDAT.AI');
-                resetInput();
-            } else {
-                // 2. KHÔNG CÓ TRONG FIREBASE -> GỌI GOOGLE GEMINI
-                askGemini(question);
+            try {
+                let qFormat = question.toLowerCase().trim();
+                let found = aiBrainData.find(item => item.q === qFormat);
+                
+                if (found) {
+                    renderAIMessage(found.a, 'msg-ai', 'QUOCDAT.AI');
+                    resetInput();
+                } else {
+                    askGemini(question);
+                }
+            } catch (error) {
+                console.error("Lỗi phân tích nội bộ:", error);
+                renderAIMessage("Xin lỗi, dữ liệu não bộ bị nghẽn. Đã tự động khôi phục.", 'msg-system', 'SYSTEM.ERROR');
+                resetInput(); // Tự động mở khóa dù có lỗi
             }
         }
 
-        // KẾT NỐI API GOOGLE GEMINI
+        // KẾT NỐI API GOOGLE GEMINI (Đã bọc chống sập)
         async function askGemini(question) {
             let sysId = 'sys_msg_' + Date.now();
             let sysHtml = `<div class="msg msg-system"><span class="msg-name"><i class="fas fa-satellite-dish"></i> SYSTEM.API</span><div class="msg-bubble" id="${sysId}">Đang hỏi bộ não Google Gemini...<span class="typing-indicator"></span></div></div>`;
             chatBox.insertAdjacentHTML('beforeend', sysHtml); scrollToBottom();
 
             try {
-                // Đóng gói lịch sử thành format của Gemini
                 let geminiHistory = [];
                 chatContext.forEach(m => {
-                    if (m.role === 'user') geminiHistory.push({ role: "user", parts: [{ text: m.text }] });
-                    if (m.role === 'ai') geminiHistory.push({ role: "model", parts: [{ text: m.text.replace(/<br>/g, "\n") }] });
+                    let safePartText = m.text || "";
+                    if (m.role === 'user') geminiHistory.push({ role: "user", parts: [{ text: safePartText }] });
+                    if (m.role === 'ai') geminiHistory.push({ role: "model", parts: [{ text: safePartText.replace(/<br>/g, "\n") }] });
                 });
 
-                // Đẩy câu hỏi hiện tại vào
                 if (geminiHistory.length === 0 || geminiHistory[geminiHistory.length - 1].parts[0].text !== question) {
                      geminiHistory.push({ role: "user", parts: [{ text: question }] });
                 }
 
-                // Cấu hình tính cách AI
                 let systemInstruction = {
                     parts: [{ text: "Bạn là siêu AI trợ lý tên là QUOCDAT.AI, được phát triển bởi hệ thống QUOCDAT SEC. Hãy trả lời thân thiện, thông minh, dùng tiếng Việt Nam." }]
                 };
@@ -222,23 +239,28 @@
                 });
 
                 let data = await response.json();
-                document.getElementById(sysId).parentNode.remove();
+                
+                // Xóa dòng "Đang hỏi bộ não..."
+                let loadingMsg = document.getElementById(sysId);
+                if(loadingMsg && loadingMsg.parentNode) loadingMsg.parentNode.remove();
 
                 if (data.candidates && data.candidates.length > 0) {
-                    let answer = data.candidates[0].content.parts[0].text;
-                    // Format lại câu trả lời cho đẹp
+                    let answer = data.candidates[0].content?.parts[0]?.text || "Không có phản hồi từ máy chủ.";
                     answer = answer.replace(/\n/g, '<br>').replace(/\*\*/g, ''); 
                     renderAIMessage(answer, 'msg-ai', 'QUOCDAT.AI');
                 } else if (data.error) {
                     renderAIMessage(`Lỗi API Gemini: ${data.error.message}`, 'msg-system', 'ERROR');
                 } else {
-                    renderAIMessage(`AI không thể trả lời câu này!`, 'msg-system', 'ERROR');
+                    renderAIMessage(`AI bị quá tải, vui lòng thử lại!`, 'msg-system', 'ERROR');
                 }
-                resetInput();
 
             } catch (e) {
-                document.getElementById(sysId).parentNode.remove();
-                renderAIMessage("Lỗi kết nối API Google Gemini. Vui lòng thử lại sau.", 'msg-system', 'SYSTEM.ERROR');
+                console.error("Lỗi Fetch API:", e);
+                let loadingMsg = document.getElementById(sysId);
+                if(loadingMsg && loadingMsg.parentNode) loadingMsg.parentNode.remove();
+                renderAIMessage("Lỗi mạng hoặc API Key Google Gemini bị từ chối.", 'msg-system', 'SYSTEM.ERROR');
+            } finally {
+                // QUAN TRỌNG NHẤT: Luôn mở khóa nút gửi dù thành công hay sập mạng
                 resetInput();
             }
         }
@@ -259,8 +281,40 @@
             if(el) {
                 if (text.substring(index, index + 4) === "<br>") {
                     el.innerHTML = text.substring(0, index + 4) + '<span class="typing-indicator"></span>';
-                    setTimeout(() => typeMessage(elementId, text, index + 4), 5); // Tốc độ gõ cực nhanh
+                    setTimeout(() => typeMessage(elementId, text, index + 4), 5);
                 } else {
                     el.innerHTML = text.substring(0, index + 1) + '<span class="typing-indicator"></span>';
-                    setTimeout(() =>
-                        
+                    setTimeout(() => typeMessage(elementId, text, index + 1), 5);
+                }
+                scrollToBottom();
+            }
+        }
+
+        function saveToHistory(role, text) {
+            chatContext.push({ role: role, text: text });
+            if(chatContext.length > 15) chatContext.shift(); // Nhớ 15 câu gần nhất
+            sessionStorage.setItem('ai_chat_history', JSON.stringify(chatContext));
+        }
+
+        function clearMemory() {
+            if(confirm("Xóa sạch đoạn hội thoại hiện tại?")) {
+                sessionStorage.removeItem('ai_chat_history');
+                window.location.reload();
+            }
+        }
+
+        function resetInput() { 
+            userInput.disabled = false; 
+            btnSend.disabled = false; 
+            userInput.focus(); 
+        }
+        
+        function scrollToBottom() { chatBox.scrollTop = chatBox.scrollHeight; }
+        
+        function escapeHtml(unsafe) { 
+            if(!unsafe) return "";
+            return unsafe.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); 
+        }
+    </script>
+</body>
+</html>
