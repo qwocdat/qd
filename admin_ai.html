@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QUẢN LÝ NÃO AI | QUOCDAT SEC</title>
+    
+    <script>
+        var isAdminLoggedIn = sessionStorage.getItem('admin_auth_status');
+        if (isAdminLoggedIn !== 'success') {
+            var password = prompt("⛔ BẢO MẬT CẤP CAO\n\nNhập mật khẩu Admin để vào Trạm Điều Khiển AI:");
+            if (password === "ngdaiquocdat") {
+                sessionStorage.setItem('admin_auth_status', 'success'); alert("✅ Truy cập thành công!");
+            } else {
+                alert("❌ Mật khẩu sai!"); window.location.replace("index.html");
+            }
+        }
+    </script>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --accent: #00b8ff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: #fff; padding: 20px; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid var(--border); }
+        .title { font-family: 'Orbitron'; font-size: 24px; color: var(--primary); }
+        .btn-group { display: flex; gap: 10px; }
+        
+        .btn { background: var(--primary); color: #000; padding: 12px 20px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; text-decoration: none; font-family: 'Orbitron'; transition: 0.3s; }
+        .btn-blue { background: #1e90ff; color: #fff; }
+        .btn-red { background: #ff4757; color: #fff; }
+        .btn:hover { filter: brightness(1.2); }
+
+        .table-container { background: var(--card-bg); border-radius: 15px; border: 1px solid var(--border); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th { background: rgba(0,0,0,0.5); padding: 15px; text-align: left; font-size: 14px; color: var(--accent); font-family: 'Orbitron'; border-bottom: 1px solid var(--border); }
+        td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; line-height: 1.5; }
+        
+        .action-btn { background: #222; border: 1px solid #333; color: #fff; width: 35px; height: 35px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .action-btn:hover { background: #ff4757; border-color: #ff4757; }
+
+        /* MODAL THÊM CÂU HỎI */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px);}
+        .modal-box { width: 90%; max-width: 500px; background: #15151e; border-radius: 15px; border: 1px solid var(--primary); padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 8px; color: #888; font-weight: bold; font-size: 13px; }
+        .form-group input, .form-group textarea { width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 15px; border-radius: 10px; outline: none; font-family: 'Inter'; }
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="title"><i class="fas fa-brain"></i> QUẢN LÝ DỮ LIỆU AI</div>
+        <div class="btn-group">
+            <button class="btn btn-blue" onclick="document.getElementById('addModal').style.display='flex'"><i class="fas fa-plus"></i> DẠY KIẾN THỨC MỚI</button>
+            <a href="admin.html" class="btn"><i class="fas fa-arrow-left"></i> VỀ ADMIN TỔNG</a>
+            <a href="al.html" target="_blank" class="btn btn-red"><i class="fas fa-robot"></i> TEST AI</a>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th width="30%">CÂU HỎI NHẬN DIỆN</th>
+                    <th width="50%">CÂU TRẢ LỜI CỦA AI</th>
+                    <th width="10%">THỜI GIAN</th>
+                    <th width="10%">XÓA</th>
+                </tr>
+            </thead>
+            <tbody id="aiTableBody">
+                <tr><td colspan="4" style="text-align:center;">Đang tải dữ liệu...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="modal-overlay" id="addModal">
+        <div class="modal-box">
+            <h3 style="font-family:'Orbitron'; color:var(--primary); margin-bottom: 20px;"><i class="fas fa-plus-circle"></i> THÊM CÂU HỎI MỚI</h3>
+            <div class="form-group">
+                <label>Câu hỏi (Người dùng gõ)</label>
+                <input type="text" id="aiQuestion" placeholder="VD: Admin là ai?">
+            </div>
+            <div class="form-group">
+                <label>Câu trả lời (AI sẽ nói)</label>
+                <textarea id="aiAnswer" rows="4" placeholder="VD: Admin là sếp Nguyễn Đại Quốc Đạt chứ ai!"></textarea>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button class="btn" style="background:#333; color:#fff;" onclick="document.getElementById('addModal').style.display='none'">HỦY</button>
+                <button class="btn" onclick="saveAIData()">LƯU VÀO NÃO AI</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fbConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
+        if (!firebase.apps.length) firebase.initializeApp(fbConfig);
+        const db = firebase.database();
+
+        // TẢI DỮ LIỆU TỪ ai_brain_v2
+        db.ref('ai_brain_v2').on('value', snap => {
+            let tbody = document.getElementById('aiTableBody');
+            tbody.innerHTML = '';
+            
+            if(snap.exists()) {
+                let data = snap.val();
+                let keys = Object.keys(data).reverse(); // Hiện mới nhất lên đầu
+                
+                keys.forEach(id => {
+                    let item = data[id];
+                    let timeStr = new Date(item.timestamp || Date.now()).toLocaleDateString('vi-VN');
+                    
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><strong style="color:var(--accent);">${escapeHtml(item.question)}</strong></td>
+                            <td style="color:#ddd;">${escapeHtml(item.answer)}</td>
+                            <td style="color:#888; font-size: 12px;">${timeStr}</td>
+                            <td>
+                                <button class="action-btn" onclick="deleteData('${id}')"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">AI hiện đang trống rỗng. Hãy vào Chat để dạy nó!</td></tr>`;
+            }
+        });
+
+        function saveAIData() {
+            let q = document.getElementById('aiQuestion').value.trim();
+            let a = document.getElementById('aiAnswer').value.trim();
+            if(!q || !a) return alert("Vui lòng nhập đủ câu hỏi và câu trả lời!");
+
+            db.ref('ai_brain_v2').push().set({
+                question: q,
+                answer: a,
+                timestamp: Date.now()
+            }).then(() => {
+                alert("Đã thêm kiến thức cho AI thành công!");
+                document.getElementById('aiQuestion').value = '';
+                document.getElementById('aiAnswer').value = '';
+                document.getElementById('addModal').style.display = 'none';
+            });
+        }
+
+        function deleteData(id) {
+            if(confirm("Xóa đoạn hội thoại này khỏi não AI?")) {
+                db.ref('ai_brain_v2/' + id).remove();
+            }
+        }
+
+        function escapeHtml(unsafe) { return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+    </script>
+</body>
+</html>
+
