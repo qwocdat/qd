@@ -3,109 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI CORE V6.2 | QUOCDAT SEC</title>
-    
+    <title>AI CORE V7.0 | QUOCDAT SEC</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
         :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --accent: #00b8ff; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: #fff; min-height: 100vh; display: flex; flex-direction: column; transition: background 0.3s; }
-        
         .header { background: rgba(0,0,0,0.8); padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
         .header-left { display: flex; align-items: center; gap: 20px; }
         .brand { font-family: 'Orbitron'; font-size: 20px; font-weight: 900; color: #fff; }
         .brand span { color: var(--primary); }
         .btn-home { background: rgba(255,255,255,0.05); color: #fff; text-decoration: none; padding: 8px 15px; border-radius: 8px; font-size: 12px; font-weight: bold; font-family: 'Orbitron'; transition: 0.3s; border: 1px solid var(--border); cursor: pointer; }
         .btn-home:hover { background: var(--primary); color: #000; border-color: var(--primary); box-shadow: 0 0 10px rgba(0,255,136,0.3); }
-
         .container { max-width: 800px; margin: 20px auto; padding: 0 20px; flex: 1; display: flex; flex-direction: column; width: 100%; }
         .ai-status { text-align: center; margin-bottom: 10px; }
         .ai-status h2 { font-family: 'Orbitron'; color: var(--primary); font-size: 24px; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px rgba(0,255,136,0.5); }
         .ai-status p { color: #ff9f43; font-size: 13px; margin-top: 5px; font-family: monospace; }
-        
         .chat-box { background: #000; border: 1px solid var(--primary); border-radius: 15px; flex: 1; min-height: 400px; padding: 20px; overflow-y: auto; font-family: monospace; box-shadow: inset 0 0 20px rgba(0,255,136,0.05); display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; scroll-behavior: smooth; }
-        
         .msg { display: flex; flex-direction: column; max-width: 85%; }
         .msg-user { align-self: flex-end; align-items: flex-end; }
         .msg-ai { align-self: flex-start; align-items: flex-start; }
-        
         .msg-name { font-size: 11px; color: #888; margin-bottom: 5px; font-weight: bold; }
         .msg-ai .msg-name { color: var(--primary); }
         .msg-user .msg-name { color: var(--accent); }
         .msg-system .msg-name { color: #ff9f43; }
-        
         .msg-bubble { padding: 12px 18px; border-radius: 12px; font-size: 14px; line-height: 1.5; word-wrap: break-word; }
         .msg-user .msg-bubble { background: var(--accent); color: #000; border-bottom-right-radius: 2px; }
         .msg-ai .msg-bubble { background: rgba(0,255,136,0.1); color: var(--primary); border: 1px solid var(--primary); border-bottom-left-radius: 2px; text-shadow: 0 0 2px rgba(0,255,136,0.5); }
         .msg-system .msg-bubble { background: rgba(255,159,67,0.1); color: #ff9f43; border: 1px dashed #ff9f43; border-bottom-left-radius: 2px; }
-        
         .typing-indicator { display: inline-block; width: 10px; height: 15px; background-color: var(--primary); animation: blink 1s step-end infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-
         .input-area { display: flex; gap: 10px; background: var(--card-bg); padding: 15px; border-radius: 15px; border: 1px solid var(--border); margin-bottom: 20px; }
         .input-area input { flex: 1; background: transparent; border: none; color: #fff; font-size: 15px; outline: none; font-family: 'Inter'; }
         .input-area input:disabled { opacity: 0.5; }
         .btn-send { background: var(--primary); color: #000; border: none; width: 45px; height: 45px; border-radius: 10px; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; font-size: 18px; }
         .btn-send:disabled { background: #333; color: #777; cursor: not-allowed; }
         .btn-send:hover:not(:disabled) { filter: brightness(1.2); box-shadow: 0 0 15px rgba(0,255,136,0.3); transform: scale(1.05); }
-        
         .tools-bar { display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; }
         .btn-clear { background: #333; color: #fff; border: none; padding: 5px 15px; border-radius: 5px; font-size: 11px; cursor: pointer; font-family: 'Orbitron'; transition: 0.3s; }
         .btn-clear:hover { background: #ff4757; }
     </style>
 </head>
 <body>
-
     <div class="header">
         <div class="header-left">
             <div class="brand">QUOCDAT<span>.AI</span></div>
             <a href="index.html" class="btn-home"><i class="fas fa-home"></i> TRANG CHỦ</a>
         </div>
     </div>
-
     <div class="container">
         <div class="ai-status">
-            <h2>AI CORE V6.2</h2>
-            <p><i class="fas fa-satellite-dish"></i> HỆ THỐNG ĐÃ FIX LỖI KẾT NỐI GEMINI</p>
+            <h2>AI CORE V7.0</h2>
+            <p><i class="fas fa-bolt"></i> FREE AI KHÔNG CẦN KEY</p>
         </div>
-        
         <div class="tools-bar">
             <button class="btn-clear" onclick="clearMemory()"><i class="fas fa-trash-alt"></i> XÓA LỊCH SỬ CHAT</button>
         </div>
-
         <div class="chat-box" id="chatBox"></div>
-
         <div class="input-area">
             <input type="text" id="userInput" placeholder="Hỏi AI bất cứ điều gì trên thế giới..." autocomplete="off">
             <button class="btn-send" id="btnSend"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
-
     <script>
-        const GEMINI_API_KEY = "AIzaSyCqt5-B4-brPMRHLOpP4OxgbnSc3XqBwWM"; 
-        
         const fbConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
         if (!firebase.apps.length) firebase.initializeApp(fbConfig);
         const db = firebase.database();
-
         db.ref('settings').on('value', snap => {
             let s = snap.val() || {};
             if(s.theme_primary) document.documentElement.style.setProperty('--primary', s.theme_primary);
             if(s.theme_bg) document.documentElement.style.setProperty('--bg', s.theme_bg);
         });
-
         const chatBox = document.getElementById('chatBox');
         const userInput = document.getElementById('userInput');
         const btnSend = document.getElementById('btnSend');
-        
         let aiBrainData = []; 
         let chatContext = JSON.parse(sessionStorage.getItem('ai_chat_history')) || [];
-
         db.ref('ai_brain_v2').on('value', snap => {
             aiBrainData = [];
             if(snap.exists()) {
@@ -119,7 +95,6 @@
                 }
             }
         });
-
         function loadApp() {
             if (chatContext.length > 0) {
                 chatContext.forEach(msg => {
@@ -136,10 +111,8 @@
                 setTimeout(typeBootSequence, 500);
             }
         }
-
-        const bootSequence = ["Khởi động Hệ thống...", "Kết nối Gemini Flash Latest thành công!", "Tôi là trợ lý AI thông minh của bạn. Hãy hỏi tôi đi!"];
+        const bootSequence = ["Khởi động Hệ thống...", "Đã đổi sang Server AI siêu tốc 100% Free!", "Tôi là trợ lý AI. Hãy hỏi tôi đi!"];
         let bootIndex = 0; let bootCharIndex = 0; let currentBootLine = "";
-
         function typeBootSequence() {
             if (bootIndex < bootSequence.length) {
                 if (bootCharIndex < bootSequence[bootIndex].length) {
@@ -156,99 +129,72 @@
                 resetInput();
             }
         }
-        
         window.onload = loadApp;
-
         userInput.addEventListener('keypress', function (e) { if (e.key === 'Enter') processInput(); });
         btnSend.addEventListener('click', processInput);
-
         function processInput() {
             if (btnSend.disabled || userInput.disabled) return; 
-
             let text = userInput.value.trim();
             if (!text) return;
-
             userInput.disabled = true; 
             btnSend.disabled = true;
-
             let safeText = escapeHtml(text);
             let userHtml = `<div class="msg msg-user"><span class="msg-name">GUEST <i class="fas fa-user"></i></span><div class="msg-bubble">${safeText}</div></div>`;
             chatBox.insertAdjacentHTML('beforeend', userHtml);
             saveToHistory('user', safeText);
-            
             userInput.value = ''; 
             scrollToBottom();
-
             setTimeout(() => { analyzeContextAndFindAnswer(text); }, 500);
         }
-
         function analyzeContextAndFindAnswer(question) {
             try {
                 let qFormat = question.toLowerCase().trim();
                 let found = aiBrainData.find(item => item.q === qFormat);
-                
                 if (found) {
                     renderAIMessage(found.a, 'msg-ai', 'QUOCDAT.AI');
                     resetInput();
                 } else {
-                    askGemini(question);
+                    askFreeAI(question);
                 }
             } catch (error) {
-                console.error(error);
-                renderAIMessage("Xin lỗi, dữ liệu bị nghẽn. Đã khôi phục.", 'msg-system', 'SYSTEM.ERROR');
+                renderAIMessage("Dữ liệu bị nghẽn.", 'msg-system', 'SYSTEM.ERROR');
                 resetInput(); 
             }
         }
-
-        async function askGemini(question) {
+        async function askFreeAI(question) {
             let sysId = 'sys_msg_' + Date.now();
-            let sysHtml = `<div class="msg msg-system"><span class="msg-name"><i class="fas fa-satellite-dish"></i> SYSTEM.API</span><div class="msg-bubble" id="${sysId}">Đang hỏi bộ não Google Gemini...<span class="typing-indicator"></span></div></div>`;
+            let sysHtml = `<div class="msg msg-system"><span class="msg-name"><i class="fas fa-satellite-dish"></i> SYSTEM.API</span><div class="msg-bubble" id="${sysId}">Đang hỏi bộ não AI...<span class="typing-indicator"></span></div></div>`;
             chatBox.insertAdjacentHTML('beforeend', sysHtml); scrollToBottom();
-
             try {
-                let geminiHistory = [];
+                let apiMessages = [
+                    { role: "system", content: "Bạn là AI trợ lý tên là QUOCDAT.AI, được phát triển bởi QUOCDAT SEC. Luôn trả lời bằng tiếng Việt, thân thiện, ngắn gọn và thông minh." }
+                ];
                 chatContext.forEach(m => {
                     let safePartText = m.text || "";
-                    if (m.role === 'user') geminiHistory.push({ role: "user", parts: [{ text: safePartText }] });
-                    if (m.role === 'ai') geminiHistory.push({ role: "model", parts: [{ text: safePartText.replace(/<br>/g, "\n") }] });
+                    if (m.role === 'user') apiMessages.push({ role: "user", content: safePartText });
+                    if (m.role === 'ai') apiMessages.push({ role: "assistant", content: safePartText.replace(/<br>/g, "\n") });
                 });
-
-                if (geminiHistory.length === 0 || geminiHistory[geminiHistory.length - 1].parts[0].text !== question) {
-                     geminiHistory.push({ role: "user", parts: [{ text: question }] });
+                if (apiMessages.length === 1 || apiMessages[apiMessages.length - 1].content !== question) {
+                     apiMessages.push({ role: "user", content: question });
                 }
-
-                let systemInstruction = {
-                    parts: [{ text: "Bạn là siêu AI trợ lý tên là QUOCDAT.AI, được phát triển bởi hệ thống QUOCDAT SEC. Hãy trả lời thân thiện, thông minh, dùng tiếng Việt Nam." }]
-                };
-
-                let apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
-                
-                let response = await fetch(apiUrl, {
+                let response = await fetch('https://text.pollinations.ai/', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        system_instruction: systemInstruction,
-                        contents: geminiHistory
+                        messages: apiMessages,
+                        model: 'gpt-4o'
                     })
                 });
-
-                let data = await response.json();
-                
+                let textData = await response.text();
                 let loadingMsg = document.getElementById(sysId);
                 if(loadingMsg && loadingMsg.parentNode) loadingMsg.parentNode.remove();
-
-                if (data.candidates && data.candidates.length > 0) {
-                    let answer = data.candidates[0].content?.parts[0]?.text || "Không có phản hồi.";
-                    answer = answer.replace(/\n/g, '<br>').replace(/\*\*/g, ''); 
+                if (textData) {
+                    let answer = textData.replace(/\n/g, '<br>').replace(/\*\*/g, ''); 
                     renderAIMessage(answer, 'msg-ai', 'QUOCDAT.AI');
-                } else if (data.error) {
-                    renderAIMessage(`Lỗi API: ${data.error.message}`, 'msg-system', 'ERROR');
                 } else {
-                    renderAIMessage(`AI bị quá tải!`, 'msg-system', 'ERROR');
+                    renderAIMessage(`AI bị lỗi!`, 'msg-system', 'ERROR');
                 }
-
             } catch (e) {
-                console.error(e);
                 let loadingMsg = document.getElementById(sysId);
                 if(loadingMsg && loadingMsg.parentNode) loadingMsg.parentNode.remove();
                 renderAIMessage("Lỗi mạng.", 'msg-system', 'SYSTEM.ERROR');
@@ -256,18 +202,14 @@
                 resetInput();
             }
         }
-
         function renderAIMessage(text, cssClass, name) {
             let aiId = 'ai_msg_' + Date.now();
             let aiHtml = `<div class="msg ${cssClass}"><span class="msg-name"><i class="fas fa-robot"></i> ${name}</span><div class="msg-bubble" id="${aiId}"></div></div>`;
             chatBox.insertAdjacentHTML('beforeend', aiHtml);
-            
             let roleSave = (cssClass === 'msg-system') ? 'system' : 'ai';
             saveToHistory(roleSave, text);
-
             typeMessage(aiId, text, 0);
         }
-
         function typeMessage(elementId, text, index) {
             let el = document.getElementById(elementId);
             if(el) {
@@ -281,28 +223,23 @@
                 scrollToBottom();
             }
         }
-
         function saveToHistory(role, text) {
             chatContext.push({ role: role, text: text });
             if(chatContext.length > 15) chatContext.shift(); 
             sessionStorage.setItem('ai_chat_history', JSON.stringify(chatContext));
         }
-
         function clearMemory() {
             if(confirm("Xóa sạch đoạn hội thoại hiện tại?")) {
                 sessionStorage.removeItem('ai_chat_history');
                 window.location.reload();
             }
         }
-
         function resetInput() { 
             userInput.disabled = false; 
             btnSend.disabled = false; 
             userInput.focus(); 
         }
-        
         function scrollToBottom() { chatBox.scrollTop = chatBox.scrollHeight; }
-        
         function escapeHtml(unsafe) { 
             if(!unsafe) return "";
             return unsafe.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); 
