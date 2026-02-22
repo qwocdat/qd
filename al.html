@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI CORE V7.1 | QUOCDAT SEC</title>
+    <title>AI|QUOCDAT /title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
@@ -56,19 +56,21 @@
     </div>
     <div class="container">
         <div class="ai-status">
-            <h2>AI CORE V7.1</h2>
-            <p><i class="fas fa-check-circle"></i> ĐÃ FIX LỖI CỔNG KẾT NỐI API</p>
+            <h2>AI QUOCDAT</h2>
+            <p><i class="fas fa-bolt"></i> test</p>
         </div>
         <div class="tools-bar">
             <button class="btn-clear" onclick="clearMemory()"><i class="fas fa-trash-alt"></i> XÓA LỊCH SỬ CHAT</button>
         </div>
         <div class="chat-box" id="chatBox"></div>
         <div class="input-area">
-            <input type="text" id="userInput" placeholder="Hỏi AI bất cứ điều gì trên thế giới..." autocomplete="off">
+            <input type="text" id="userInput" placeholder="Hỏi câu gì khó khó tí xem..." autocomplete="off">
             <button class="btn-send" id="btnSend"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
     <script>
+        const GROQ_API_KEY = "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"; 
+        
         const fbConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
         if (!firebase.apps.length) firebase.initializeApp(fbConfig);
         const db = firebase.database();
@@ -108,19 +110,19 @@
                 resetInput(); 
             } else {
                 chatBox.innerHTML = `<div class="msg msg-ai"><span class="msg-name"><i class="fas fa-robot"></i> SYSTEM.AI</span><div class="msg-bubble" id="bootText"></div></div>`;
-                setTimeout(typeBootSequence, 500);
+                setTimeout(typeBootSequence, 300);
             }
         }
-        const bootSequence = ["Khởi động Hệ thống...", "Đã cập nhật cổng OpenAI chuẩn!", "Tôi là trợ lý AI. Hãy hỏi tôi đi!"];
+        const bootSequence = ["Kích hoạt lõi LPU siêu tốc...", "Gắn API chính chủ thành công!", "Tôi là siêu AI trợ lý. Xin chào!"];
         let bootIndex = 0; let bootCharIndex = 0; let currentBootLine = "";
         function typeBootSequence() {
             if (bootIndex < bootSequence.length) {
                 if (bootCharIndex < bootSequence[bootIndex].length) {
                     currentBootLine += bootSequence[bootIndex].charAt(bootCharIndex);
                     document.getElementById('bootText').innerHTML = currentBootLine + '<span class="typing-indicator"></span>';
-                    bootCharIndex++; setTimeout(typeBootSequence, 30);
+                    bootCharIndex++; setTimeout(typeBootSequence, 15);
                 } else {
-                    currentBootLine += "<br><br>"; bootIndex++; bootCharIndex = 0; setTimeout(typeBootSequence, 300);
+                    currentBootLine += "<br><br>"; bootIndex++; bootCharIndex = 0; setTimeout(typeBootSequence, 200);
                 }
             } else {
                 document.getElementById('bootText').innerHTML = currentBootLine;
@@ -144,7 +146,7 @@
             saveToHistory('user', safeText);
             userInput.value = ''; 
             scrollToBottom();
-            setTimeout(() => { analyzeContextAndFindAnswer(text); }, 500);
+            setTimeout(() => { analyzeContextAndFindAnswer(text); }, 100);
         }
         function analyzeContextAndFindAnswer(question) {
             try {
@@ -154,20 +156,20 @@
                     renderAIMessage(found.a, 'msg-ai', 'QUOCDAT.AI');
                     resetInput();
                 } else {
-                    askFreeAI(question);
+                    askGroqAI(question);
                 }
             } catch (error) {
-                renderAIMessage("Dữ liệu bị nghẽn.", 'msg-system', 'SYSTEM.ERROR');
+                renderAIMessage("Dữ liệu bị nghẽn nội bộ.", 'msg-system', 'SYSTEM.ERROR');
                 resetInput(); 
             }
         }
-        async function askFreeAI(question) {
+        async function askGroqAI(question) {
             let sysId = 'sys_msg_' + Date.now();
-            let sysHtml = `<div class="msg msg-system"><span class="msg-name"><i class="fas fa-satellite-dish"></i> SYSTEM.API</span><div class="msg-bubble" id="${sysId}">Đang hỏi bộ não AI...<span class="typing-indicator"></span></div></div>`;
+            let sysHtml = `<div class="msg msg-system"><span class="msg-name"><i class="fas fa-bolt"></i> SYSTEM.API</span><div class="msg-bubble" id="${sysId}">Đang phân tích siêu tốc...<span class="typing-indicator"></span></div></div>`;
             chatBox.insertAdjacentHTML('beforeend', sysHtml); scrollToBottom();
             try {
                 let apiMessages = [
-                    { role: "system", content: "Bạn là AI trợ lý tên là QUOCDAT.AI, được phát triển bởi QUOCDAT SEC. Luôn trả lời bằng tiếng Việt, thân thiện, ngắn gọn và thông minh." }
+                    { role: "system", content: "Bạn là siêu AI trợ lý tên là QUOCDAT.AI, phát triển bởi QUOCDAT SEC. Luôn trả lời bằng tiếng Việt, thông minh, súc tích và chính xác." }
                 ];
                 chatContext.forEach(m => {
                     let safePartText = m.text || "";
@@ -177,12 +179,16 @@
                 if (apiMessages.length === 1 || apiMessages[apiMessages.length - 1].content !== question) {
                      apiMessages.push({ role: "user", content: question });
                 }
-                let response = await fetch('https://text.pollinations.ai/openai', {
+                let response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${GROQ_API_KEY}`
+                    },
                     body: JSON.stringify({
                         messages: apiMessages,
-                        model: 'openai'
+                        model: 'llama3-8b-8192',
+                        temperature: 0.7
                     })
                 });
                 let data = await response.json();
@@ -191,13 +197,15 @@
                 if (data.choices && data.choices.length > 0) {
                     let answer = data.choices[0].message.content.replace(/\n/g, '<br>').replace(/\*\*/g, ''); 
                     renderAIMessage(answer, 'msg-ai', 'QUOCDAT.AI');
+                } else if(data.error) {
+                    renderAIMessage(`Lỗi cấu hình Key: ${data.error.message}`, 'msg-system', 'ERROR');
                 } else {
-                    renderAIMessage(`AI bị lỗi phản hồi!`, 'msg-system', 'ERROR');
+                    renderAIMessage(`Máy chủ không phản hồi!`, 'msg-system', 'ERROR');
                 }
             } catch (e) {
                 let loadingMsg = document.getElementById(sysId);
                 if(loadingMsg && loadingMsg.parentNode) loadingMsg.parentNode.remove();
-                renderAIMessage("Lỗi mạng từ máy chủ AI.", 'msg-system', 'SYSTEM.ERROR');
+                renderAIMessage("Lỗi mạng, không thể kết nối tới máy chủ.", 'msg-system', 'SYSTEM.ERROR');
             } finally {
                 resetInput();
             }
@@ -215,10 +223,10 @@
             if(el) {
                 if (text.substring(index, index + 4) === "<br>") {
                     el.innerHTML = text.substring(0, index + 4) + '<span class="typing-indicator"></span>';
-                    setTimeout(() => typeMessage(elementId, text, index + 4), 5);
+                    setTimeout(() => typeMessage(elementId, text, index + 4), 2);
                 } else {
                     el.innerHTML = text.substring(0, index + 1) + '<span class="typing-indicator"></span>';
-                    setTimeout(() => typeMessage(elementId, text, index + 1), 5);
+                    setTimeout(() => typeMessage(elementId, text, index + 1), 2);
                 }
                 scrollToBottom();
             }
@@ -229,7 +237,7 @@
             sessionStorage.setItem('ai_chat_history', JSON.stringify(chatContext));
         }
         function clearMemory() {
-            if(confirm("Xóa sạch đoạn hội thoại hiện tại?")) {
+            if(confirm("Xóa sạch lịch sử đoạn chat hiện tại?")) {
                 sessionStorage.removeItem('ai_chat_history');
                 window.location.reload();
             }
