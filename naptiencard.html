@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NẠP THẺ TỰ ĐỘNG | QUOCDAT SEC</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --accent: #00b8ff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+        
+        .card { background: var(--card-bg); border: 1px solid var(--border); width: 100%; max-width: 450px; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .title { font-family: 'Orbitron'; color: var(--primary); text-align: center; margin-bottom: 20px; font-size: 22px; }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 13px; color: #888; margin-bottom: 8px; font-weight: bold; }
+        .form-group input, .form-group select { width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 15px; border-radius: 10px; outline: none; font-size: 14px; transition: 0.3s; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--primary); }
+        
+        .btn { background: var(--primary); color: #000; padding: 18px; width: 100%; border-radius: 10px; border: none; font-weight: 900; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn:disabled { background: #333; color: #777; cursor: not-allowed; }
+        .btn:hover:not(:disabled) { filter: brightness(1.2); transform: translateY(-2px); }
+        
+        .btn-back { background: transparent; color: #fff; border: 1px solid #333; margin-top: 10px; }
+        .btn-back:hover { background: #333; color: #fff; }
+        
+        #msgBox { margin-top: 15px; padding: 15px; border-radius: 8px; font-size: 13px; text-align: center; display: none; font-weight: bold; line-height: 1.5; }
+        .msg-err { background: rgba(255,71,87,0.1); color: #ff4757; border: 1px solid #ff4757; }
+        .msg-succ { background: rgba(0,255,136,0.1); color: #00ff88; border: 1px solid #00ff88; }
+        .msg-pend { background: rgba(0,184,255,0.1); color: #00b8ff; border: 1px solid #00b8ff; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2 class="title"><i class="fas fa-bolt"></i> NẠP THẺ AUTO</h2>
+        <p style="text-align: center; color: #888; font-size: 12px; margin-bottom: 20px;">Tài khoản nhận tiền: <strong id="uNameDisplay" style="color:var(--accent);">Chưa đăng nhập</strong></p>
+        
+        <div id="inputArea">
+            <div class="form-group">
+                <label>Loại thẻ</label>
+                <select id="tTelco">
+                    <option value="VIETTEL">Viettel</option>
+                    <option value="VINAPHONE">Vinaphone</option>
+                    <option value="MOBIFONE">Mobifone</option>
+                    <option value="ZING">Zing</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Mệnh giá (Chọn sai mất thẻ)</label>
+                <select id="tAmount">
+                    <option value="10000">10.000 VNĐ</option>
+                    <option value="20000">20.000 VNĐ</option>
+                    <option value="30000">30.000 VNĐ</option>
+                    <option value="50000">50.000 VNĐ</option>
+                    <option value="100000">100.000 VNĐ</option>
+                    <option value="200000">200.000 VNĐ</option>
+                    <option value="500000">500.000 VNĐ</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Mã thẻ (PIN)</label><input type="text" id="tPin" placeholder="Nhập mã in dưới lớp tráng bạc"></div>
+            <div class="form-group"><label>Số Seri</label><input type="text" id="tSerial" placeholder="Nhập số seri in trên thẻ"></div>
+            
+            <button class="btn" id="btnSubmit" onclick="submitCard()">NẠP THẺ VÀ CHỜ CỘNG TIỀN</button>
+        </div>
+
+        <button class="btn btn-back" id="btnBack" onclick="window.location.href='index.html'">QUAY LẠI TRANG CHỦ</button>
+        
+        <div id="msgBox"></div>
+    </div>
+
+    <script>
+        const fbConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
+        if (!firebase.apps.length) firebase.initializeApp(fbConfig);
+        const db = firebase.database();
+
+        // ĐÃ NHẬP SẴN API THEO ẢNH CỦA ÔNG
+        const PARTNER_ID = "64211994080"; 
+        const PARTNER_KEY = "67daa13678b9f20d324d1ab825678957"; 
+
+        const username = localStorage.getItem('vip_username');
+        if(!username) {
+            alert("Bạn cần đăng nhập trước khi nạp tiền!");
+            window.location.replace("index.html");
+        } else {
+            document.getElementById('uNameDisplay').innerText = username;
+        }
+
+        db.ref('settings').once('value', snap => {
+            let s = snap.val() || {};
+            if(s.theme_primary) document.documentElement.style.setProperty('--primary', s.theme_primary);
+            if(s.theme_bg) document.documentElement.style.setProperty('--bg', s.theme_bg);
+        });
+
+        function showMsg(text, type) {
+            let b = document.getElementById('msgBox');
+            b.innerHTML = text; b.style.display = 'block';
+            if(type === 'err') b.className = 'msg-err';
+            else if(type === 'succ') b.className = 'msg-succ';
+            else b.className = 'msg-pend';
+        }
+
+        async function submitCard() {
+            let telco = document.getElementById('tTelco').value;
+            let amount = document.getElementById('tAmount').value;
+            let pin = document.getElementById('tPin').value.trim();
+            let serial = document.getElementById('tSerial').value.trim();
+            let btn = document.getElementById('btnSubmit');
+
+            if(!pin || !serial) return showMsg("Vui lòng nhập đủ Mã thẻ và Seri!", 'err');
+
+            btn.disabled = true;
+            document.getElementById('inputArea').style.display = 'none'; // Ẩn form để khách không bấm nhiều lần
+            document.getElementById('btnBack').style.display = 'none'; // Ẩn nút về trang chủ để ép khách đợi
+
+            let reqId = Math.floor(Math.random() * 1000000000).toString();
+            let signStr = PARTNER_KEY + pin + serial;
+            let sign = CryptoJS.MD5(signStr).toString(); 
+
+            try {
+                // 1. GỬI LÊN THESIEURE
+                showMsg("<i class='fas fa-spinner fa-spin'></i> Đang nộp thẻ lên hệ thống...", 'pend');
+                
+                let response = await fetch('https://thesieure.com/chargingws/v2', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        telco: telco, code: pin, serial: serial, amount: amount,
+                        request_id: reqId, partner_id: PARTNER_ID, sign: sign, command: 'charging'
+                    })
+                });
+
+                let result = await response.json();
+
+                if (result.status === 99 || result.status === 1) {
+                    showMsg("<i class='fas fa-sync fa-spin'></i> Thẻ đã gửi thành công!<br><br><span style='color:#ff4757;'>VUI LÒNG KHÔNG ĐÓNG TRANG NÀY.</span> Hệ thống đang kiểm tra tự động để cộng tiền (mất khoảng 10-30 giây).", 'pend');
+                    
+                    // 2. KHỞI ĐỘNG VÒNG LẶP KIỂM TRA MỖI 5 GIÂY
+                    let checkInterval = setInterval(async () => {
+                        try {
+                            let checkUrl = `https://thesieure.com/chargingws/v2?telco=${telco}&code=${pin}&serial=${serial}&amount=${amount}&request_id=${reqId}&partner_id=${PARTNER_ID}&sign=${sign}&command=check`;
+                            let res = await fetch(checkUrl, { method: 'GET' });
+                            let data = await res.json();
+                            
+                            if (data.status === 1) { 
+                                // THẺ ĐÚNG -> CỘNG TIỀN VÀO FIREBASE
+                                clearInterval(checkInterval);
+                                let safeUid = username.replace(/[.#$\[\]]/g, '_');
+                                let balSnap = await db.ref('users/' + safeUid + '/balance').once('value');
+                                let currentBal = balSnap.val() || 0;
+                                let addAmount = parseInt(data.value || amount); // Cộng theo mệnh giá thực
+                                
+                                await db.ref('users/' + safeUid + '/balance').set(currentBal + addAmount);
+                                
+                                showMsg(`<i class='fas fa-check-circle' style='font-size:30px; margin-bottom:10px;'></i><br>NẠP THÀNH CÔNG!<br>Tài khoản được cộng thêm ${addAmount.toLocaleString('vi-VN')} đ.`, 'succ');
+                                document.getElementById('btnBack').style.display = 'block'; // Hiện lại nút quay về
+                            } 
+                            else if (data.status === 2 || data.status === 3 || data.status === 4 || data.status === 100) { 
+                                // THẺ SAI HOẶC THẺ CŨ
+                                clearInterval(checkInterval);
+                                showMsg("<i class='fas fa-times-circle'></i> Thẻ lỗi, sai mệnh giá hoặc đã được sử dụng!<br>Chi tiết: " + data.message, 'err');
+                                document.getElementById('btnBack').style.display = 'block';
+                            }
+                            // Nếu data.status === 99 thì thẻ vẫn đang xử lý, vòng lặp tự động chạy tiếp
+                        } catch(e) {
+                            console.log("Đang dò lại trạng thái thẻ...");
+                        }
+                    }, 5000); // 5000 milliseconds = 5 giây check 1 lần
+                    
+                } else {
+                    showMsg("Lỗi từ hệ thống nạp thẻ: " + result.message, 'err');
+                    document.getElementById('btnBack').style.display = 'block';
+                }
+
+            } catch (error) {
+                showMsg("<i class='fas fa-exclamation-triangle'></i> Lỗi kết nối CORS trình duyệt! Thẻ đã được gửi đi nhưng web không thể tự cộng tiền. Vui lòng nhắn Admin cộng tay.", 'err');
+                document.getElementById('btnBack').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
