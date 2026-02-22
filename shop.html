@@ -13,14 +13,14 @@
     <style>
         :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --accent: #00b8ff; --vip: #f1c40f; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg); color: #fff; min-height: 100vh; padding-bottom: 50px; }
+        body { background: var(--bg); color: #fff; min-height: 100vh; padding-bottom: 50px; transition: background 0.3s;}
         
         /* HEADER & NAVBAR */
         .header { background: rgba(0,0,0,0.8); padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
+        .header-left { display: flex; align-items: center; gap: 20px; }
         .brand { font-family: 'Orbitron'; font-size: 20px; font-weight: 900; color: #fff; }
         .brand span { color: var(--primary); }
         
-        /* NÚT TRANG CHỦ MỚI THÊM */
         .btn-home { background: rgba(255,255,255,0.05); color: #fff; text-decoration: none; padding: 8px 15px; border-radius: 8px; font-size: 12px; font-weight: bold; font-family: 'Orbitron'; transition: 0.3s; display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); }
         .btn-home:hover { background: var(--primary); color: #000; border-color: var(--primary); box-shadow: 0 0 10px rgba(0,255,136,0.3); }
 
@@ -57,21 +57,21 @@
 
         .badge-fast { position: absolute; top: 10px; right: -30px; background: #f1c40f; color: #000; font-size: 10px; font-weight: bold; padding: 5px 30px; transform: rotate(45deg); font-family: 'Orbitron'; }
 
-        /* POPUP HIỂN THỊ KEY */
+        /* POPUP KẾT QUẢ */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px);}
         .modal-box { width: 90%; max-width: 400px; background: #15151e; border-radius: 15px; border: 1px solid var(--primary); text-align: center; padding: 30px; }
         .key-display { font-family: 'Orbitron'; font-size: 24px; color: var(--vip); background: #000; padding: 15px; border-radius: 10px; border: 1px dashed var(--vip); margin: 20px 0; word-break: break-all; }
         
         @media (max-width: 600px) {
             .header { flex-direction: column; gap: 15px; }
-            .header-left { width: 100%; display: flex; justify-content: space-between; align-items: center; }
+            .header-left { width: 100%; justify-content: space-between; }
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="header-left" style="display: flex; align-items: center; gap: 20px;">
+        <div class="header-left">
             <div class="brand">QUOCDAT<span>.SHOP</span></div>
             <a href="index.html" class="btn-home"><i class="fas fa-home"></i> TRANG CHỦ</a>
         </div>
@@ -105,21 +105,20 @@
             <i class="fas fa-check-circle" style="font-size: 50px; color: var(--primary); margin-bottom: 15px;"></i>
             <h2 style="font-family:'Orbitron'; color:#fff; margin-bottom:10px;">THÀNH CÔNG!</h2>
             <p style="color:#888; font-size:13px;">Mã Key của bạn đã được tạo thành công. Hãy copy và dán vào Cổng Trích Xuất.</p>
-            
             <div class="key-display" id="modalKeyResult">---</div>
-            
             <a href="download.html" class="btn-action btn-vip" style="display:inline-block; text-decoration:none; margin-bottom:10px;"><i class="fas fa-cloud-download-alt"></i> TỚI CỔNG TRÍCH XUẤT NGAY</a>
             <button class="btn-action btn-link" onclick="document.getElementById('keyModal').style.display='none'">ĐÓNG LẠI</button>
         </div>
     </div>
-        <script>
+
+    <script>
         const fbConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
         if (!firebase.apps.length) firebase.initializeApp(fbConfig);
         const db = firebase.database();
 
         let allProducts = {};
         
-        // KIỂM TRA ĐĂNG NHẬP VÀ SỐ DƯ
+        // KIỂM TRA ĐĂNG NHẬP
         const username = localStorage.getItem('vip_username');
         let safeUid = username ? username.replace(/[.#$\[\]]/g, '_') : null;
         let currentBalance = 0;
@@ -131,17 +130,15 @@
                 document.getElementById('uBal').innerText = Number(currentBalance).toLocaleString('vi-VN') + " đ";
             });
         } else {
-            document.getElementById('userArea').innerHTML = `<a href="index.html" style="color:var(--primary); text-decoration:none;">Đăng nhập / Đăng ký</a>`;
+            document.getElementById('userArea').innerHTML = `<a href="index.html" style="color:var(--primary); text-decoration:none;">Đăng ký / Đăng nhập</a>`;
         }
 
-        // ĐỒNG BỘ MÀU TỪ ADMIN
         db.ref('settings').on('value', snap => {
             let s = snap.val() || {};
             if(s.theme_primary) document.documentElement.style.setProperty('--primary', s.theme_primary);
             if(s.theme_bg) document.documentElement.style.setProperty('--bg', s.theme_bg);
         });
 
-        // TẢI DỮ LIỆU SẢN PHẨM VÀ RENDER
         db.ref('products').on('value', snap => {
             allProducts = snap.val() || {};
             renderProducts();
@@ -170,6 +167,7 @@
                 let priceHtml = '';
                 let btnHtml = '';
 
+                // Gắn các hàm có kiểm tra đăng nhập vào từng nút
                 if (!isFree) {
                     priceHtml = `<div class="p-price price-vip">${Number(p.price).toLocaleString('vi-VN')} đ</div>`;
                     btnHtml = `<button class="btn-action btn-vip" onclick="buyVIP('${id}')"><i class="fas fa-shopping-cart"></i> MUA BẰNG SỐ DƯ</button>`;
@@ -178,7 +176,7 @@
                     btnHtml = `<button class="btn-action btn-fast" onclick="getFastKey('${id}')"><i class="fas fa-bolt"></i> NHẬN KEY NHANH</button>`;
                 } else {
                     priceHtml = `<div class="p-price price-free">MIỄN PHÍ</div>`;
-                    btnHtml = `<button class="btn-action btn-link" onclick="window.location.href='getkey.html'"><i class="fas fa-link"></i> VƯỢT LINK LẤY KEY</button>`;
+                    btnHtml = `<button class="btn-action btn-link" onclick="goToGetKey()"><i class="fas fa-link"></i> VƯỢT LINK LẤY KEY</button>`;
                 }
 
                 html += `
@@ -193,20 +191,32 @@
                 `;
             }
 
-            if(html === '') html = `<div style="text-align:center; color:#888; grid-column: 1/-1;">Không tìm thấy sản phẩm nào phù hợp với bộ lọc.</div>`;
+            if(html === '') html = `<div style="text-align:center; color:#888; grid-column: 1/-1;">Không tìm thấy sản phẩm nào phù hợp.</div>`;
             grid.innerHTML = html;
         }
 
-        // XỬ LÝ: MUA VIP
+        // HÀM XỬ LÝ NÚT: VƯỢT LINK
+        function goToGetKey() {
+            if(!safeUid) {
+                alert("⚠️ Bạn cần Đăng ký / Đăng nhập tài khoản để lấy Key!");
+                window.location.href = 'index.html';
+                return;
+            }
+            window.location.href = 'getkey.html';
+        }
+
+        // HÀM XỬ LÝ NÚT: MUA VIP
         async function buyVIP(id) {
-            if(!safeUid) return alert("Bạn cần đăng nhập để thực hiện chức năng này!");
-            
+            if(!safeUid) {
+                alert("⚠️ Bạn cần Đăng ký / Đăng nhập tài khoản để mua hàng!");
+                window.location.href = 'index.html';
+                return;
+            }
             let p = allProducts[id];
             if(currentBalance < p.price) return alert(`Bạn không đủ tiền! Cần ${Number(p.price).toLocaleString('vi-VN')} đ. Vui lòng nạp thêm.`);
 
             if(confirm(`Xác nhận mua [${p.name}] với giá ${Number(p.price).toLocaleString('vi-VN')} đ?`)) {
                 await db.ref('users/' + safeUid + '/balance').set(currentBalance - p.price);
-                
                 let keyStr = "VIP-" + Math.random().toString(36).substring(2, 10).toUpperCase();
                 let exp = Date.now() + (30 * 24 * 60 * 60 * 1000); 
                 
@@ -216,24 +226,27 @@
                     download_link: p.download_link, expiry_at: exp, time: new Date().toISOString(),
                     used: false, color: '#00ff88'
                 });
-
                 showKeyModal(keyStr);
             }
         }
 
-        // XỬ LÝ: NHẬN KEY NHANH
+        // HÀM XỬ LÝ NÚT: NHẬN KEY NHANH
         async function getFastKey(id) {
+            if(!safeUid) {
+                alert("⚠️ Bạn cần Đăng ký / Đăng nhập tài khoản để nhận Key miễn phí!");
+                window.location.href = 'index.html';
+                return;
+            }
             let p = allProducts[id];
             let keyStr = "FAST-" + Math.random().toString(36).substring(2, 8).toUpperCase();
             let exp = Date.now() + 1200000; // Hạn 20 phút
 
             await db.ref('transactions').push().set({
-                user: username || 'Guest', type: 'free_fast', amount: 0,
+                user: username, type: 'free_fast', amount: 0,
                 detail: 'Nhận nhanh: ' + p.name, key_granted: keyStr,
                 download_link: p.download_link, expiry_at: exp, time: new Date().toISOString(),
                 used: false, color: '#f1c40f'
             });
-
             showKeyModal(keyStr);
         }
 
