@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI CORE BETA | QUOCDAT SEC</title>
+    <title>AI CORE TỰ HỌC | QUOCDAT SEC</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -37,7 +37,7 @@
         .header-left { display: flex; align-items: center; gap: 20px; }
         .brand { font-family: 'Orbitron'; font-size: 20px; font-weight: 900; color: #fff; }
         .brand span { color: var(--primary); }
-        .btn-home { background: rgba(255,255,255,0.05); color: #fff; text-decoration: none; padding: 8px 15px; border-radius: 8px; font-size: 12px; font-weight: bold; font-family: 'Orbitron'; transition: 0.3s; display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); }
+        .btn-home { background: rgba(255,255,255,0.05); color: #fff; text-decoration: none; padding: 8px 15px; border-radius: 8px; font-size: 12px; font-weight: bold; font-family: 'Orbitron'; transition: 0.3s; border: 1px solid var(--border); }
         .btn-home:hover { background: var(--primary); color: #000; border-color: var(--primary); box-shadow: 0 0 10px rgba(0,255,136,0.3); }
 
         .container { max-width: 800px; margin: 20px auto; padding: 0 20px; flex: 1; display: flex; flex-direction: column; width: 100%; }
@@ -81,51 +81,54 @@
 
     <div class="container">
         <div class="ai-status">
-            <h2>AI CORE TỰ HỌC</h2>
-            <p><i class="fas fa-brain"></i> MODEL IS LEARNING FROM USERS...</p>
+            <h2>AI CORE V3.0</h2>
+            <p><i class="fas fa-globe"></i> KẾT NỐI INTERNET: ONLINE</p>
         </div>
 
         <div class="chat-box" id="chatBox">
-            <div class="msg msg-ai" id="bootMsg">
+            <div class="msg msg-ai">
                 <span class="msg-name"><i class="fas fa-robot"></i> SYSTEM.AI</span>
                 <div class="msg-bubble" id="bootText"></div>
             </div>
         </div>
 
         <div class="input-area">
-            <input type="text" id="userInput" placeholder="Giao tiếp hoặc dạy AI tại đây..." autocomplete="off">
+            <input type="text" id="userInput" placeholder="Nhập câu hỏi để thử thách AI..." autocomplete="off">
             <button class="btn-send" id="btnSend"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
 
     <script>
-        // 1. ĐỒNG BỘ MÀU TỪ ADMIN
         db.ref('settings').on('value', snap => {
             let s = snap.val() || {};
             if(s.theme_primary) document.documentElement.style.setProperty('--primary', s.theme_primary);
             if(s.theme_bg) document.documentElement.style.setProperty('--bg', s.theme_bg);
-            if(s.site_name) document.title = "AI TỰ HỌC | " + s.site_name;
         });
 
         const chatBox = document.getElementById('chatBox');
         const userInput = document.getElementById('userInput');
         const btnSend = document.getElementById('btnSend');
         
-        let aiBrain = {}; // Bộ nhớ của AI
-        let isLearning = false; // Trạng thái đang học
-        let questionToLearn = ""; // Câu hỏi đang chờ được dạy
+        let aiBrainData = []; 
+        let isLearning = false; 
+        let questionToLearn = ""; 
 
-        // TẢI BỘ NÃO TỪ FIREBASE
-        db.ref('ai_brain').on('value', snap => {
-            aiBrain = snap.val() || {};
+        // 1. TẢI DỮ LIỆU TỪ FIREBASE (NÃO BỘ)
+        db.ref('ai_brain_v2').on('value', snap => {
+            aiBrainData = [];
+            if(snap.exists()) {
+                let data = snap.val();
+                for(let key in data) {
+                    aiBrainData.push({ id: key, q: data[key].question.toLowerCase().trim(), a: data[key].answer });
+                }
+            }
         });
 
-        // 2. HIỆU ỨNG AI KHỞI ĐỘNG
+        // 2. KHỞI ĐỘNG
         const bootSequence = [
-            "Initializing Self-Learning Matrix...",
-            "Loading Database...",
-            "Sẵn sàng! Hãy trò chuyện với tôi.",
-            "Nếu có câu hỏi nào tôi không biết, tôi sẽ nhờ bạn dạy tôi cách trả lời."
+            "Đã kết nối cơ sở dữ liệu Firebase...",
+            "Đã mở cổng tra cứu API Bách Khoa Toàn Thư...",
+            "Sẵn sàng! Hãy hỏi tôi bất cứ điều gì."
         ];
         let bootIndex = 0; let bootCharIndex = 0; let currentBootLine = "";
 
@@ -134,31 +137,28 @@
                 if (bootCharIndex < bootSequence[bootIndex].length) {
                     currentBootLine += bootSequence[bootIndex].charAt(bootCharIndex);
                     document.getElementById('bootText').innerHTML = currentBootLine + '<span class="typing-indicator"></span>';
-                    bootCharIndex++;
-                    setTimeout(typeBootSequence, 30);
+                    bootCharIndex++; setTimeout(typeBootSequence, 30);
                 } else {
-                    currentBootLine += "<br><br>";
-                    bootIndex++; bootCharIndex = 0;
-                    setTimeout(typeBootSequence, 300);
+                    currentBootLine += "<br><br>"; bootIndex++; bootCharIndex = 0; setTimeout(typeBootSequence, 300);
                 }
             } else {
-                document.getElementById('bootText').innerHTML = currentBootLine;
-                scrollToBottom();
+                document.getElementById('bootText').innerHTML = currentBootLine; scrollToBottom();
             }
         }
         window.onload = () => { setTimeout(typeBootSequence, 500); };
 
-        // 3. XỬ LÝ GIAO TIẾP VÀ DẠY HỌC
-        userInput.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') processInput();
-        });
+        // 3. XỬ LÝ NHẬP LIỆU
+        userInput.addEventListener('keypress', function (e) { if (e.key === 'Enter') processInput(); });
         btnSend.addEventListener('click', processInput);
 
         function processInput() {
             let text = userInput.value.trim();
             if (!text) return;
 
-            // In tin nhắn của User
+            // Chặn gửi tin nhắn liên tục khi AI đang học hoặc đang tìm
+            userInput.disabled = true;
+            btnSend.disabled = true;
+
             let userHtml = `<div class="msg msg-user"><span class="msg-name">GUEST <i class="fas fa-user"></i></span><div class="msg-bubble">${escapeHtml(text)}</div></div>`;
             chatBox.insertAdjacentHTML('beforeend', userHtml);
             userInput.value = '';
@@ -166,41 +166,99 @@
 
             setTimeout(() => {
                 if (isLearning) {
-                    // NẾU AI ĐANG HỎI ĐỂ HỌC -> LƯU CÂU TRẢ LỜI VÀO FIREBASE
                     learnNewKnowledge(questionToLearn, text);
                 } else {
-                    // NẾU ĐANG CHAT BÌNH THƯỜNG -> TÌM CÂU TRẢ LỜI
                     findAnswer(text);
                 }
             }, 500);
         }
 
+        // 4. KIỂM TRA NÃO BỘ -> NẾU KHÔNG CÓ THÌ LÊN MẠNG
         function findAnswer(question) {
-            // Chuyển câu hỏi về dạng in thường, bỏ khoảng trắng thừa để dễ tìm
-            let key = formatKey(question);
+            let qFormat = question.toLowerCase().trim();
+            let found = aiBrainData.find(item => item.q === qFormat);
 
-            // Tìm trong bộ não Firebase
-            if (aiBrain[key]) {
-                // Đã biết câu này
-                renderAIMessage(aiBrain[key], 'msg-ai', 'QUOCDAT.AI');
+            if (found) {
+                // Đã có trong não
+                renderAIMessage(found.a, 'msg-ai', 'QUOCDAT.AI');
+                resetInput();
             } else {
-                // Chưa biết câu này -> Bật chế độ học tập
-                isLearning = true;
-                questionToLearn = key; // Lưu lại câu hỏi chưa biết
-                renderAIMessage("Xin lỗi, dữ liệu của tôi chưa có câu trả lời cho vấn đề này. Bạn muốn tôi trả lời như thế nào khi gặp câu hỏi này?", 'msg-system', 'SYSTEM.LEARN');
+                // Không có trong não -> Gọi hàm tra mạng
+                searchInternet(question);
             }
         }
 
-        function learnNewKnowledge(questionKey, answerText) {
-            // Lưu kiến thức mới vào Firebase
-            db.ref('ai_brain/' + questionKey).set(answerText).then(() => {
-                isLearning = false; // Tắt chế độ học
+        // 5. TRA CỨU MẠNG (WIKIPEDIA API)
+        async function searchInternet(question) {
+            let sysId = 'sys_msg_' + Date.now();
+            let sysHtml = `
+                <div class="msg msg-system">
+                    <span class="msg-name"><i class="fas fa-wifi"></i> SYSTEM.SEARCH</span>
+                    <div class="msg-bubble" id="${sysId}">Đang truy cập kho dữ liệu Internet...<span class="typing-indicator"></span></div>
+                </div>`;
+            chatBox.insertAdjacentHTML('beforeend', sysHtml);
+            scrollToBottom();
+
+            try {
+                // Gọi API Wikipedia
+                let url = `https://vi.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(question)}&utf8=&format=json&origin=*`;
+                let res = await fetch(url);
+                let data = await res.json();
+
+                // Xóa dòng "Đang truy cập..."
+                document.getElementById(sysId).parentNode.remove();
+
+                if (data.query && data.query.search.length > 0) {
+                    // CÓ KẾT QUẢ TRÊN MẠNG
+                    let topResult = data.query.search[0];
+                    let title = topResult.title;
+                    // Xóa các thẻ HTML ra khỏi đoạn trích
+                    let snippet = topResult.snippet.replace(/(<([^>]+)>)/ig, "").replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+                    
+                    let answer = `Theo tôi tra cứu trên bách khoa toàn thư về "${title}": ${snippet}...`;
+
+                    renderAIMessage(answer, 'msg-ai', 'QUOCDAT.AI');
+
+                    // TỰ ĐỘNG GHI NHỚ VÀO FIREBASE ĐỂ LẦN SAU KHÔNG CẦN TÌM NỮA
+                    db.ref('ai_brain_v2').push().set({
+                        question: question,
+                        answer: answer,
+                        timestamp: Date.now()
+                    });
+                    
+                    resetInput();
+                } else {
+                    // MẠNG CŨNG KHÔNG CÓ
+                    isLearning = true;
+                    questionToLearn = question; 
+                    renderAIMessage("Dữ liệu mạng không có thông tin về câu này. Bạn hãy gõ câu trả lời vào dưới đây để tôi học lỏm nhé!", 'msg-system', 'SYSTEM.LEARN');
+                    resetInput();
+                }
+            } catch (e) {
+                // MẤT MẠNG HOẶC LỖI
+                document.getElementById(sysId).parentNode.remove();
+                isLearning = true;
+                questionToLearn = question; 
+                renderAIMessage("Hệ thống tra cứu đang bận. Bạn hãy gõ câu trả lời vào dưới đây để dạy tôi nhé!", 'msg-system', 'SYSTEM.LEARN');
+                resetInput();
+            }
+        }
+
+        // 6. LƯU KIẾN THỨC MỚI (TỪ NGƯỜI DÙNG DẠY)
+        function learnNewKnowledge(questionText, answerText) {
+            db.ref('ai_brain_v2').push().set({
+                question: questionText,
+                answer: answerText,
+                timestamp: Date.now()
+            }).then(() => {
+                isLearning = false;
                 questionToLearn = "";
-                renderAIMessage("Đã ghi nhớ! Cảm ơn bạn đã cập nhật kiến thức cho tôi.", 'msg-system', 'SYSTEM.LEARN');
+                renderAIMessage("Đã lưu vào bộ nhớ gốc! Hỏi lại tôi câu vừa nãy đi!", 'msg-system', 'SYSTEM.LEARN');
+                resetInput();
             });
         }
 
-        // 4. HÀM HIỂN THỊ TIN NHẮN CỦA AI CÓ HIỆU ỨNG GÕ
+        // CÁC HÀM HIỂN THỊ
         function renderAIMessage(text, cssClass, name) {
             let aiId = 'ai_msg_' + Date.now();
             let aiHtml = `
@@ -218,24 +276,21 @@
             let el = document.getElementById(elementId);
             if (index < text.length) {
                 el.innerHTML = text.substring(0, index + 1) + '<span class="typing-indicator"></span>';
-                setTimeout(() => typeMessage(elementId, text, index + 1), 20); // Tốc độ gõ
+                setTimeout(() => typeMessage(elementId, text, index + 1), 20);
                 scrollToBottom();
             } else {
-                el.innerHTML = text; // Xóa con trỏ
+                el.innerHTML = text;
             }
         }
 
-        function formatKey(text) {
-            // Biến câu hỏi thành dạng ID không dấu đặc biệt để lưu vào Firebase
-            return text.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim().replace(/\s+/g, '_');
+        function resetInput() {
+            userInput.disabled = false;
+            btnSend.disabled = false;
+            userInput.focus();
         }
 
         function scrollToBottom() { chatBox.scrollTop = chatBox.scrollHeight; }
-
-        function escapeHtml(unsafe) {
-            return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-        }
+        function escapeHtml(unsafe) { return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
     </script>
 </body>
 </html>
-
