@@ -60,6 +60,7 @@
         .action-btn { background: #222; border: 1px solid #333; color: #fff; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; margin-right: 5px; transition: 0.2s; }
         .action-btn.edit:hover { background: #1e90ff; border-color: #1e90ff; }
         .action-btn.money:hover { background: var(--accent); border-color: var(--accent); color: #000; }
+        .action-btn.ban:hover { background: #f1c40f; border-color: #f1c40f; color: #000; }
         .action-btn.delete:hover { background: #ff4757; border-color: #ff4757; }
         
         .form-group { margin-bottom: 15px; } 
@@ -100,10 +101,10 @@
         </div>
 
         <div class="content-area">
-            
             <div id="tab-dashboard" class="tab-pane active">
                 <div class="stat-grid">
                     <div class="card stat-card"><div class="stat-icon" style="background:rgba(0,255,136,0.1); color:var(--accent);"><i class="fas fa-wallet"></i></div><div><div style="font-size:11px; color:#888;">TỔNG NẠP</div><div id="statRevenue" style="font-size:20px; font-weight:bold; font-family:'Orbitron';">0 đ</div></div></div>
+                    <div class="card stat-card"><div class="stat-icon" style="background:rgba(30,144,255,0.1); color:#1e90ff;"><i class="fas fa-users"></i></div><div><div style="font-size:11px; color:#888;">USER ĐĂNG KÝ</div><div id="statUsers" style="font-size:20px; font-weight:bold; font-family:'Orbitron';">0</div></div></div>
                     <div class="card stat-card"><div class="stat-icon" style="background:rgba(255,71,87,0.1); color:var(--primary);"><i class="fas fa-box"></i></div><div><div style="font-size:11px; color:#888;">SẢN PHẨM</div><div id="statProducts" style="font-size:20px; font-weight:bold; font-family:'Orbitron';">0</div></div></div>
                 </div>
 
@@ -118,35 +119,29 @@
                         <div class="form-group"><label>Màu nền Web:</label><input type="color" id="themeBg"></div>
                         <div class="form-group"><label>Tên Thương Hiệu:</label><input type="text" id="siteName"></div>
                     </div>
-                    <div class="form-group"><label>Tiêu đề màn hình Get Key:</label><input type="text" id="getKeyTitle"></div>
                     <button class="btn" style="width: 100%; margin-top:10px;" onclick="saveSettings()"><i class="fas fa-save"></i> LƯU CẤU HÌNH</button>
                 </div>
-
+                
                 <div class="card" style="border-color: #1e90ff;">
-                    <h3 class="card-title" style="color: #1e90ff;"><i class="fas fa-laptop-code"></i> TRÌNH SOẠN THẢO MÃ NGUỒN (GHI ĐÈ)</h3>
+                    <h3 class="card-title" style="color: #1e90ff;"><i class="fas fa-laptop-code"></i> TRÌNH SOẠN THẢO MÃ NGUỒN</h3>
                     <div class="form-group">
                         <select id="pageSelect" onchange="loadRawCode()">
+                            <option value="naptiencard_html">Trang naptiencard.html (MỚI)</option>
                             <option value="getkey_html">Trang getkey.html</option>
                             <option value="key_html">Trang key.html</option>
                             <option value="download_html">Trang download.html</option>
                             <option value="shop_html">Trang shop.html</option>
                         </select>
                     </div>
-                    <textarea id="rawCodeArea" rows="6" placeholder="Mã HTML tùy chỉnh..." style="font-family: monospace; color:#00ff88;"></textarea>
+                    <textarea id="rawCodeArea" rows="6" placeholder="Mã HTML tùy chỉnh..."></textarea>
                     <button class="btn" style="background: #1e90ff; width: 100%; margin-top:10px;" onclick="saveRawCode()"><i class="fas fa-cloud-upload-alt"></i> CẬP NHẬT GIAO DIỆN</button>
                 </div>
             </div>
 
             <div id="tab-home_manage" class="tab-pane">
                 <div class="table-container" style="border-color: var(--accent);">
-                    <div class="table-header">
-                        <h3 style="color: var(--accent);">Các Danh Mục Hiển Thị Ở Trang Chủ</h3>
-                        <button class="btn-add" style="background: var(--accent); color: #000;" onclick="openHomeModal()"><i class="fas fa-plus"></i> Thêm Box Mới</button>
-                    </div>
-                    <table>
-                        <thead><tr><th width="60">TT</th><th>Tiêu đề Box</th><th>Đường dẫn (Link)</th><th width="100">Thao Tác</th></tr></thead>
-                        <tbody id="homeTableBody"></tbody>
-                    </table>
+                    <div class="table-header"><h3 style="color: var(--accent);">Box Trang Chủ</h3><button class="btn-add" style="background: var(--accent); color: #000;" onclick="openHomeModal()"><i class="fas fa-plus"></i> Thêm Box</button></div>
+                    <table><thead><tr><th width="60">TT</th><th>Tiêu đề Box</th><th>Link</th><th width="100">Thao Tác</th></tr></thead><tbody id="homeTableBody"></tbody></table>
                 </div>
             </div>
 
@@ -160,20 +155,20 @@
             <div id="tab-users" class="tab-pane">
                 <div class="table-container">
                     <div class="table-header"><h3>Danh Sách Người Dùng</h3></div>
-                    <table><thead><tr><th>Tài Khoản</th><th>Số Dư</th><th>Trạng Thái</th><th width="120">Thao Tác</th></tr></thead><tbody id="userTableBody"></tbody></table>
+                    <table><thead><tr><th>Tài Khoản</th><th>Số Dư</th><th>Trạng Thái</th><th width="140">Thao Tác</th></tr></thead><tbody id="userTableBody"></tbody></table>
                 </div>
             </div>
 
             <div id="tab-history" class="tab-pane">
                 <div class="card" style="border-color: #f1c40f;">
-                    <h3 class="card-title" style="color: #f1c40f;"><i class="fas fa-crown"></i> CÔNG CỤ TẠO KEY VIP THỦ CÔNG</h3>
+                    <h3 class="card-title" style="color: #f1c40f;"><i class="fas fa-crown"></i> CÔNG CỤ TẠO KEY VIP</h3>
                     <div class="grid-3">
                         <div class="form-group"><label>Mã Key:</label><input type="text" id="customKeyStr"></div>
                         <div class="form-group"><label>Hết hạn lúc:</label><input type="datetime-local" id="customKeyExp"></div>
-                        <div class="form-group"><label>Màu sắc Key:</label><input type="color" id="customKeyColor" value="#f1c40f"></div>
+                        <div class="form-group"><label>Màu sắc:</label><input type="color" id="customKeyColor" value="#f1c40f"></div>
                     </div>
-                    <div class="form-group"><label>Chọn công cụ cấp Key:</label><select id="customKeyProduct"></select></div>
-                    <button class="btn" style="background: #f1c40f; width: 100%; margin-top:10px;" onclick="createManualKey()"><i class="fas fa-magic"></i> TẠO KEY VIP</button>
+                    <div class="form-group"><label>Sản phẩm:</label><select id="customKeyProduct"></select></div>
+                    <button class="btn" style="background: #f1c40f; width: 100%;" onclick="createManualKey()"><i class="fas fa-magic"></i> TẠO KEY VIP</button>
                 </div>
                 <div class="table-container">
                     <div class="table-header"><h3>Lịch Sử Cấp Phát KEY</h3></div>
@@ -183,28 +178,15 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="homeModal">
-        <div class="modal-box">
-            <div class="modal-head"><div class="modal-title" style="color:var(--accent); font-weight:bold;">BOX TRANG CHỦ</div><button style="background:none; border:none; color:#fff;" onclick="closeModal('homeModal')"><i class="fas fa-times"></i></button></div>
-            <div class="modal-body">
-                <input type="hidden" id="hId">
-                <div class="form-group"><label>Thứ tự hiển thị (Số nhỏ xếp trên) *</label><input type="number" id="hOrder" value="1"></div>
-                <div class="form-group"><label>Tiêu Đề Box *</label><input type="text" id="hTitle" placeholder="VD: MUA HÀNG VIP"></div>
-                <div class="form-group"><label>Mô tả ngắn</label><input type="text" id="hDesc" placeholder="VD: Khám phá các tool siêu cấp..."></div>
-                <div class="form-group"><label>Icon (FontAwesome)</label><input type="text" id="hIcon" value="fas fa-shopping-cart"></div>
-                <div class="form-group"><label>Đường dẫn khi click vào (Link) *</label><input type="text" id="hLink" placeholder="VD: shop.html hoặc https://zalo.me/..."></div>
-            </div>
-            <div class="modal-footer"><button class="btn" style="background:#333; color:#fff;" onclick="closeModal('homeModal')">Hủy</button><button class="btn" style="background:var(--accent); color:#000;" onclick="saveHomeSection()">LƯU BOX NÀY</button></div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="productModal"><div class="modal-box"><div class="modal-head"><div class="modal-title" style="color:var(--primary); font-weight:bold;">SẢN PHẨM</div><button style="background:none; border:none; color:#fff;" onclick="closeModal('productModal')"><i class="fas fa-times"></i></button></div><div class="modal-body"><input type="hidden" id="pId"><div class="toggle-container" style="margin-bottom: 15px; border-color: #f1c40f;"><div style="text-align: left;"><label style="margin:0; color:#f1c40f; font-size:14px;">MỞ KHÓA NHẬN NHANH</label></div><input type="checkbox" id="pInstant" style="width: 20px; height: 20px;"></div><div class="form-group"><label>Tên Sản Phẩm *</label><input type="text" id="pName"></div><div class="form-group"><label>Giá (0 = Free) *</label><input type="number" id="pPrice"></div><div class="form-group"><label>Link Tải *</label><input type="text" id="pDownload"></div></div><div class="modal-footer"><button class="btn" style="background:#333; color:#fff;" onclick="closeModal('productModal')">Hủy</button><button class="btn" onclick="saveProduct()">LƯU LẠI</button></div></div></div>
+    <div class="modal-overlay" id="homeModal"><div class="modal-box"><div class="modal-head"><div class="modal-title" style="color:var(--accent); font-weight:bold;">BOX TRANG CHỦ</div><button style="background:none; border:none; color:#fff;" onclick="closeModal('homeModal')"><i class="fas fa-times"></i></button></div><div class="modal-body"><input type="hidden" id="hId"><div class="form-group"><label>Thứ tự *</label><input type="number" id="hOrder" value="1"></div><div class="form-group"><label>Tiêu Đề *</label><input type="text" id="hTitle"></div><div class="form-group"><label>Mô tả ngắn</label><input type="text" id="hDesc"></div><div class="form-group"><label>Icon</label><input type="text" id="hIcon" value="fas fa-star"></div><div class="form-group"><label>Link *</label><input type="text" id="hLink"></div></div><div class="modal-footer"><button class="btn" style="background:#333; color:#fff;" onclick="closeModal('homeModal')">Hủy</button><button class="btn" style="background:var(--accent); color:#000;" onclick="saveHomeSection()">LƯU LẠI</button></div></div></div>
+    
+    <div class="modal-overlay" id="productModal"><div class="modal-box"><div class="modal-head"><div class="modal-title" style="color:var(--primary); font-weight:bold;">SẢN PHẨM</div><button style="background:none; border:none; color:#fff;" onclick="closeModal('productModal')"><i class="fas fa-times"></i></button></div><div class="modal-body"><input type="hidden" id="pId"><div class="toggle-container" style="margin-bottom: 15px; border-color: #f1c40f;"><div style="text-align: left;"><label style="margin:0; color:#f1c40f; font-size:14px;">MỞ KHÓA NHẬN NHANH</label></div><input type="checkbox" id="pInstant" style="width: 20px; height: 20px;"></div><div class="form-group"><label>Tên Sản Phẩm *</label><input type="text" id="pName"></div><div class="form-group"><label>Mô tả (Mới khôi phục) *</label><textarea id="pDesc" rows="2" placeholder="Ví dụ: Script hack xịn xò nhất..."></textarea></div><div class="form-group"><label>Giá (0 = Free) *</label><input type="number" id="pPrice"></div><div class="form-group"><label>Link Tải *</label><input type="text" id="pDownload"></div></div><div class="modal-footer"><button class="btn" style="background:#333; color:#fff;" onclick="closeModal('productModal')">Hủy</button><button class="btn" onclick="saveProduct()">LƯU LẠI</button></div></div></div>
     
     <div class="modal-overlay" id="moneyModal"><div class="modal-box"><div class="modal-head"><div class="modal-title" style="color:var(--accent); font-weight:bold;">SỐ DƯ</div><button style="background:none; border:none; color:#fff;" onclick="closeModal('moneyModal')"><i class="fas fa-times"></i></button></div><div class="modal-body"><input type="hidden" id="uId"><div style="margin-bottom:15px; color:#fff;">Tài khoản: <strong id="uNameDisplay" style="color:var(--accent);"></strong></div><div class="form-group"><label>Số dư mới (VNĐ) *</label><input type="number" id="uNewBalance"></div></div><div class="modal-footer"><button class="btn" style="background:#333;" onclick="closeModal('moneyModal')">Hủy</button><button class="btn" style="background:var(--accent); color:#000;" onclick="saveUserBalance()">CẬP NHẬT</button></div></div></div>
     <div class="modal-overlay" id="banModal"><div class="modal-box" style="border-color:#ff9f43;"><div class="modal-head" style="background:#2d1b00;"><div class="modal-title" style="color:#ff9f43; font-weight:bold;"><i class="fas fa-lock"></i> KHÓA</div><button style="background:none; border:none; color:#fff;" onclick="closeModal('banModal')"><i class="fas fa-times"></i></button></div><div class="modal-body"><input type="hidden" id="banUid"><div class="form-group"><label>Lý do khóa *</label><input type="text" id="banReason"></div></div><div class="modal-footer"><button id="btnUnbanBtn" class="btn" style="background:#222; color:var(--accent); display:none;" onclick="unbanUser()">MỞ KHÓA</button><button class="btn" style="background:#ff9f43; color:#000;" onclick="executeBan()">KHÓA</button></div></div></div>
     
     <div class="toast" id="toastMsg">Thành công!</div>
-        <script>
+                                       <script>
         const fbConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
         if (!firebase.apps.length) firebase.initializeApp(fbConfig);
         const db = firebase.database();
@@ -217,21 +199,13 @@
             document.getElementById('pageTitle').innerText = titles[tabId];
         }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-        function showAdminToast(msg, isError = false) {
-            let t = document.getElementById('toastMsg'); t.style.borderLeftColor = isError ? '#ff4757' : '#00ff88';
-            t.innerHTML = `<i class="fas ${isError ? 'fa-times-circle' : 'fa-check-circle'}"></i> ${msg}`; t.classList.add('show'); setTimeout(() => { t.classList.remove('show'); }, 3000);
-        }
+        function showAdminToast(msg, isError = false) { let t = document.getElementById('toastMsg'); t.style.borderLeftColor = isError ? '#ff4757' : '#00ff88'; t.innerHTML = `<i class="fas ${isError ? 'fa-times-circle' : 'fa-check-circle'}"></i> ${msg}`; t.classList.add('show'); setTimeout(() => { t.classList.remove('show'); }, 3000); }
         function formatMoney(num) { return Number(num).toLocaleString('vi-VN') + " đ"; }
         function logoutAdmin() { sessionStorage.removeItem('admin_auth_status'); window.location.replace('index.html'); }
 
-        // --- 1. CÀI ĐẶT HỆ THỐNG ---
         db.ref('settings').on('value', snap => {
             let data = snap.val() || {};
             document.getElementById('siteName').value = data.site_name || '';
-            document.getElementById('getKeyTitle').value = data.getkey_title || '';
-            document.getElementById('time1').value = data.time_step_1 || 10;
-            document.getElementById('time2').value = data.time_step_2 || 15;
-            document.getElementById('time3').value = data.time_step_3 || 20;
             document.getElementById('maintenanceMode').checked = data.maintenance || false;
             let tPrimary = data.theme_primary || '#00ff88'; let tBg = data.theme_bg || '#0a0a0f';
             document.getElementById('themePrimary').value = tPrimary; document.getElementById('themeBg').value = tBg;
@@ -239,58 +213,26 @@
         });
 
         function saveSettings() {
-            db.ref('settings').update({
-                site_name: document.getElementById('siteName').value, getkey_title: document.getElementById('getKeyTitle').value,
-                time_step_1: parseInt(document.getElementById('time1').value), time_step_2: parseInt(document.getElementById('time2').value), time_step_3: parseInt(document.getElementById('time3').value),
-                maintenance: document.getElementById('maintenanceMode').checked, theme_primary: document.getElementById('themePrimary').value, theme_bg: document.getElementById('themeBg').value
-            }).then(() => showAdminToast("Lưu cấu hình thành công!"));
+            db.ref('settings').update({ site_name: document.getElementById('siteName').value, maintenance: document.getElementById('maintenanceMode').checked, theme_primary: document.getElementById('themePrimary').value, theme_bg: document.getElementById('themeBg').value }).then(() => showAdminToast("Lưu cấu hình thành công!"));
         }
 
-        // --- MỚI: QUẢN LÝ TRANG CHỦ (HOME SECTIONS) ---
         let currentHomeSections = {};
         db.ref('home_sections').on('value', snap => {
             let tbody = document.getElementById('homeTableBody'); tbody.innerHTML = '';
             if(snap.exists()) {
-                currentHomeSections = snap.val();
-                let arr = [];
+                currentHomeSections = snap.val(); let arr = [];
                 for(let id in currentHomeSections) { arr.push({id: id, ...currentHomeSections[id]}); }
-                arr.sort((a,b) => a.order - b.order); // Sắp xếp theo số thứ tự
-                
+                arr.sort((a,b) => a.order - b.order);
                 arr.forEach(item => {
-                    tbody.innerHTML += `<tr>
-                        <td><strong>${item.order}</strong></td>
-                        <td><i class="${item.icon}" style="color:var(--accent); margin-right:5px;"></i> ${item.title}</td>
-                        <td><a href="${item.link}" target="_blank" style="color:#1e90ff;">${item.link}</a></td>
-                        <td>
-                            <button class="action-btn edit" onclick="openHomeModal('${item.id}')"><i class="fas fa-edit"></i></button>
-                            <button class="action-btn delete" onclick="deleteHomeSection('${item.id}')"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>`;
+                    tbody.innerHTML += `<tr><td><strong>${item.order}</strong></td><td><i class="${item.icon}" style="color:var(--accent); margin-right:5px;"></i> ${item.title}</td><td><a href="${item.link}" target="_blank" style="color:#1e90ff;">${item.link}</a></td><td><button class="action-btn edit" onclick="openHomeModal('${item.id}')"><i class="fas fa-edit"></i></button><button class="action-btn delete" onclick="deleteHomeSection('${item.id}')"><i class="fas fa-trash"></i></button></td></tr>`;
                 });
-            } else { tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Chưa có danh mục nào. Hãy thêm mới!</td></tr>`; }
+            } else { tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Trống.</td></tr>`; }
         });
 
-        function openHomeModal(id = null) {
-            document.getElementById('hId').value = ''; document.getElementById('hOrder').value = '1'; document.getElementById('hTitle').value = ''; document.getElementById('hDesc').value = ''; document.getElementById('hIcon').value = 'fas fa-star'; document.getElementById('hLink').value = '';
-            if(id) {
-                let h = currentHomeSections[id]; document.getElementById('hId').value = id; document.getElementById('hOrder').value = h.order; document.getElementById('hTitle').value = h.title; document.getElementById('hDesc').value = h.desc || ''; document.getElementById('hIcon').value = h.icon; document.getElementById('hLink').value = h.link;
-            }
-            document.getElementById('homeModal').style.display = 'flex';
-        }
+        function openHomeModal(id = null) { document.getElementById('hId').value = ''; document.getElementById('hOrder').value = '1'; document.getElementById('hTitle').value = ''; document.getElementById('hDesc').value = ''; document.getElementById('hIcon').value = 'fas fa-star'; document.getElementById('hLink').value = ''; if(id) { let h = currentHomeSections[id]; document.getElementById('hId').value = id; document.getElementById('hOrder').value = h.order; document.getElementById('hTitle').value = h.title; document.getElementById('hDesc').value = h.desc || ''; document.getElementById('hIcon').value = h.icon; document.getElementById('hLink').value = h.link; } document.getElementById('homeModal').style.display = 'flex'; }
+        function saveHomeSection() { let id = document.getElementById('hId').value; let data = { order: Number(document.getElementById('hOrder').value), title: document.getElementById('hTitle').value, desc: document.getElementById('hDesc').value, icon: document.getElementById('hIcon').value, link: document.getElementById('hLink').value }; if(!data.title || !data.link) return alert("Điền đủ Tiêu đề và Link!"); if(id) db.ref('home_sections/' + id).update(data).then(() => { showAdminToast("Cập nhật Box thành công!"); closeModal('homeModal'); }); else db.ref('home_sections').push().set(data).then(() => { showAdminToast("Đã thêm Box!"); closeModal('homeModal'); }); }
+        function deleteHomeSection(id) { if(confirm("Xóa Box này?")) db.ref('home_sections/' + id).remove().then(() => showAdminToast("Đã xóa Box")); }
 
-        function saveHomeSection() {
-            let id = document.getElementById('hId').value;
-            let data = {
-                order: Number(document.getElementById('hOrder').value), title: document.getElementById('hTitle').value,
-                desc: document.getElementById('hDesc').value, icon: document.getElementById('hIcon').value, link: document.getElementById('hLink').value
-            };
-            if(!data.title || !data.link) return alert("Vui lòng điền đủ Tiêu đề và Link!");
-            if(id) db.ref('home_sections/' + id).update(data).then(() => { showAdminToast("Cập nhật Box thành công!"); closeModal('homeModal'); });
-            else db.ref('home_sections').push().set(data).then(() => { showAdminToast("Đã thêm Box ra trang chủ!"); closeModal('homeModal'); });
-        }
-        function deleteHomeSection(id) { if(confirm("Xóa Box này khỏi trang chủ?")) db.ref('home_sections/' + id).remove().then(() => showAdminToast("Đã xóa Box")); }
-
-        // --- CÁC CHỨC NĂNG CŨ (SẢN PHẨM, RAW CODE, TẠO KEY VIP, USER) ---
         function loadRawCode() { db.ref('raw_code/' + document.getElementById('pageSelect').value).once('value', snap => { document.getElementById('rawCodeArea').value = snap.val() || ""; }); }
         function saveRawCode() { if(confirm("CẢNH BÁO: Mã này sẽ ghi đè!")) db.ref('raw_code/' + document.getElementById('pageSelect').value).set(document.getElementById('rawCodeArea').value).then(() => showAdminToast("Cập nhật mã xong!")); }
         setTimeout(loadRawCode, 1000);
@@ -310,15 +252,41 @@
             document.getElementById('statProducts').innerText = pCount;
         });
 
-        function openProductModal(id = null) { document.getElementById('pId').value = ''; document.getElementById('pName').value = ''; document.getElementById('pPrice').value = ''; document.getElementById('pDownload').value = ''; document.getElementById('pInstant').checked = false; if(id) { let p = currentProducts[id]; document.getElementById('pId').value = id; document.getElementById('pName').value = p.name; document.getElementById('pPrice').value = p.price; document.getElementById('pDownload').value = p.download_link || ''; document.getElementById('pInstant').checked = p.is_instant || false; } document.getElementById('productModal').style.display = 'flex'; }
-        function saveProduct() { let id = document.getElementById('pId').value; let data = { name: document.getElementById('pName').value, price: Number(document.getElementById('pPrice').value), download_link: document.getElementById('pDownload').value, is_instant: document.getElementById('pInstant').checked }; if(!data.name || data.download_link === "") return alert("Điền đủ Tên và Link!"); if(id) db.ref('products/' + id).update(data).then(() => { showAdminToast("Cập nhật SP xong"); closeModal('productModal'); }); else db.ref('products').push().set(data).then(() => { showAdminToast("Đã thêm SP mới"); closeModal('productModal'); }); }
+        function openProductModal(id = null) { document.getElementById('pId').value = ''; document.getElementById('pName').value = ''; document.getElementById('pDesc').value = ''; document.getElementById('pPrice').value = ''; document.getElementById('pDownload').value = ''; document.getElementById('pInstant').checked = false; if(id) { let p = currentProducts[id]; document.getElementById('pId').value = id; document.getElementById('pName').value = p.name; document.getElementById('pDesc').value = p.desc || ''; document.getElementById('pPrice').value = p.price; document.getElementById('pDownload').value = p.download_link || ''; document.getElementById('pInstant').checked = p.is_instant || false; } document.getElementById('productModal').style.display = 'flex'; }
+        function saveProduct() { let id = document.getElementById('pId').value; let data = { name: document.getElementById('pName').value, desc: document.getElementById('pDesc').value, price: Number(document.getElementById('pPrice').value), download_link: document.getElementById('pDownload').value, is_instant: document.getElementById('pInstant').checked }; if(!data.name || data.download_link === "") return alert("Điền đủ Tên và Link!"); if(id) db.ref('products/' + id).update(data).then(() => { showAdminToast("Cập nhật SP xong"); closeModal('productModal'); }); else db.ref('products').push().set(data).then(() => { showAdminToast("Đã thêm SP mới"); closeModal('productModal'); }); }
         function deleteProduct(id) { if(confirm("Xóa sản phẩm này?")) db.ref('products/' + id).remove().then(() => showAdminToast("Đã xóa SP")); }
 
         async function createManualKey() { let keyStr = document.getElementById('customKeyStr').value.trim(); let expVal = document.getElementById('customKeyExp').value; let color = document.getElementById('customKeyColor').value; let pId = document.getElementById('customKeyProduct').value; if(!keyStr || !expVal || !pId) return alert("Nhập đủ thông tin!"); let expTimestamp = new Date(expVal).getTime(); if(expTimestamp <= Date.now()) return alert("Hạn dùng phải lớn hơn hiện tại!"); let pSnap = await db.ref('products/' + pId).once('value'); await db.ref('transactions').push().set({ user: 'ADMIN_VIP', type: 'vip_purchase', amount: 0, detail: 'Cấp KEY VIP: ' + pSnap.val().name, key_granted: keyStr, download_link: pSnap.val().download_link, expiry_at: expTimestamp, color: color, time: new Date().toISOString(), used: false }); showAdminToast("Tạo KEY VIP thành công!"); document.getElementById('customKeyStr').value = ''; }
         db.ref('transactions').on('value', (s) => { let tbody = document.getElementById('historyTableBody'); tbody.innerHTML = ''; let totalRev = 0; if(s.exists()) { let trans = s.val(); let keys = Object.keys(trans).reverse(); keys.forEach(id => { let t = trans[id]; totalRev += (t.amount || 0); let time = new Date(t.time).toLocaleString('vi-VN'); let keyColor = t.color ? t.color : 'var(--primary)'; let keyDisp = t.key_granted ? `<span style="color:${keyColor}; font-weight:bold; background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px;">${t.key_granted}</span>` : 'N/A'; let statusDisp = t.used ? '<span style="color:#ff4757; font-size:12px;">Đã Dùng</span>' : '<span style="color:#00ff88; font-size:12px;">Chưa Dùng</span>'; tbody.innerHTML += `<tr><td style="font-size:12px; color:#aaa;">${time}</td><td><strong style="color:#00b8ff;">${t.user.substring(0,10)}</strong></td><td>${t.detail}</td><td>${keyDisp}</td><td>${statusDisp}</td></tr>`; }); } else { tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Trống</td></tr>`; } document.getElementById('statRevenue').innerText = formatMoney(totalRev); });
 
-        db.ref('users').on('value', (s) => { let tbody = document.getElementById('userTableBody'); tbody.innerHTML = ''; let uCount = 0; if(s.exists()) { let users = s.val(); for(let id in users) { let u = users[id]; uCount++; let status = u.banned ? '<span style="color:#ff4757; font-weight:bold;"><i class="fas fa-lock"></i> KHÓA</span>' : '<span style="color:#00ff88;">Hoạt động</span>'; tbody.innerHTML += `<tr><td><strong style="color:#00b8ff;">${id}</strong></td><td style="font-weight:bold; font-family:monospace;">${formatMoney(u.balance || 0)}</td><td>${status}</td><td><button class="action-btn money" onclick="openMoneyModal('${id}', ${u.balance || 0})"><i class="fas fa-coins"></i></button><button class="action-btn ban" onclick="openBanModal('${id}', ${u.banned || false}, '${u.banReason || ''}')"><i class="fas fa-gavel"></i></button></td></tr>`; } } else { tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Trống</td></tr>`; } document.getElementById('statUsers').innerText = uCount; });
-        function openMoneyModal(id, bal) { document.getElementById('uId').value = id; document.getElementById('uNewBalance').value = bal; document.getElementById('moneyModal').style.display = 'flex'; } function saveUserBalance() { db.ref('users/' + document.getElementById('uId').value + '/balance').set(Number(document.getElementById('uNewBalance').value)).then(() => { showAdminToast("Cập nhật số dư thành công!"); closeModal('moneyModal'); }); } function openBanModal(id, isBan, reason) { document.getElementById('banUid').value = id; document.getElementById('banReason').value = isBan ? reason : ""; document.getElementById('btnUnbanBtn').style.display = isBan ? 'block' : 'none'; document.getElementById('banModal').style.display = 'flex'; } function executeBan() { db.ref('users/' + document.getElementById('banUid').value).update({ banned: true, banReason: document.getElementById('banReason').value }).then(() => { showAdminToast("Đã khóa!", true); closeModal('banModal'); }); } function unbanUser() { db.ref('users/' + document.getElementById('banUid').value).update({ banned: false, banReason: null }).then(() => { showAdminToast("Đã mở khóa!"); closeModal('banModal'); }); }
+        // --- CẬP NHẬT TÍNH NĂNG XÓA USER VÀ ĐẾM SỐ USER ---
+        db.ref('users').on('value', (s) => { 
+            let tbody = document.getElementById('userTableBody'); tbody.innerHTML = ''; let uCount = 0; 
+            if(s.exists()) { 
+                let users = s.val(); 
+                for(let id in users) { 
+                    let u = users[id]; uCount++; 
+                    let status = u.banned ? '<span style="color:#ff4757; font-weight:bold;"><i class="fas fa-lock"></i> KHÓA</span>' : '<span style="color:#00ff88;">Hoạt động</span>'; 
+                    tbody.innerHTML += `<tr><td><strong style="color:#00b8ff;">${id}</strong></td><td style="font-weight:bold; font-family:monospace;">${formatMoney(u.balance || 0)}</td><td>${status}</td><td><button class="action-btn money" onclick="openMoneyModal('${id}', ${u.balance || 0})"><i class="fas fa-coins"></i></button><button class="action-btn ban" onclick="openBanModal('${id}', ${u.banned || false}, '${u.banReason || ''}')"><i class="fas fa-gavel"></i></button><button class="action-btn delete" onclick="deleteUser('${id}')"><i class="fas fa-trash"></i></button></td></tr>`; 
+                } 
+            } else { tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Chưa có người dùng đăng ký.</td></tr>`; } 
+            
+            // Ép đếm lại số lượng User hiển thị lên đầu trang
+            document.getElementById('statUsers').innerText = uCount; 
+        });
+
+        function openMoneyModal(id, bal) { document.getElementById('uId').value = id; document.getElementById('uNewBalance').value = bal; document.getElementById('moneyModal').style.display = 'flex'; } 
+        function saveUserBalance() { db.ref('users/' + document.getElementById('uId').value + '/balance').set(Number(document.getElementById('uNewBalance').value)).then(() => { showAdminToast("Cập nhật số dư thành công!"); closeModal('moneyModal'); }); } 
+        function openBanModal(id, isBan, reason) { document.getElementById('banUid').value = id; document.getElementById('banReason').value = isBan ? reason : ""; document.getElementById('btnUnbanBtn').style.display = isBan ? 'block' : 'none'; document.getElementById('banModal').style.display = 'flex'; } 
+        function executeBan() { db.ref('users/' + document.getElementById('banUid').value).update({ banned: true, banReason: document.getElementById('banReason').value }).then(() => { showAdminToast("Đã khóa!", true); closeModal('banModal'); }); } 
+        function unbanUser() { db.ref('users/' + document.getElementById('banUid').value).update({ banned: false, banReason: null }).then(() => { showAdminToast("Đã mở khóa!"); closeModal('banModal'); }); }
+        
+        // HÀM XÓA TÀI KHOẢN MỚI
+        function deleteUser(id) {
+            if(confirm("CẢNH BÁO: Xóa tài khoản [" + id + "] sẽ mất hết số dư của họ. Bạn có chắc không?")) {
+                db.ref('users/' + id).remove().then(() => showAdminToast("Đã xóa tài khoản vĩnh viễn!"));
+            }
+        }
     </script>
 </body>
 </html>
