@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI CORE BETA | QUOCDAT SEC</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <script>
+        const fbConfig = { 
+            apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", 
+            databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", 
+            projectId: "quocdat-b80c2" 
+        };
+        if (!firebase.apps.length) firebase.initializeApp(fbConfig);
+        const db = firebase.database();
+
+        db.ref('raw_code/al_html').once('value', snap => {
+            let customCode = snap.val();
+            if (customCode && customCode.trim() !== "") {
+                document.open(); document.write(customCode); document.close();
+            }
+        });
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --accent: #00b8ff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: #fff; min-height: 100vh; display: flex; flex-direction: column; transition: background 0.3s; }
+        
+        .header { background: rgba(0,0,0,0.8); padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
+        .header-left { display: flex; align-items: center; gap: 20px; }
+        .brand { font-family: 'Orbitron'; font-size: 20px; font-weight: 900; color: #fff; }
+        .brand span { color: var(--primary); }
+        .btn-home { background: rgba(255,255,255,0.05); color: #fff; text-decoration: none; padding: 8px 15px; border-radius: 8px; font-size: 12px; font-weight: bold; font-family: 'Orbitron'; transition: 0.3s; display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); }
+        .btn-home:hover { background: var(--primary); color: #000; border-color: var(--primary); box-shadow: 0 0 10px rgba(0,255,136,0.3); }
+
+        .container { max-width: 800px; margin: 20px auto; padding: 0 20px; flex: 1; display: flex; flex-direction: column; width: 100%; }
+        .ai-status { text-align: center; margin-bottom: 20px; }
+        .ai-status h2 { font-family: 'Orbitron'; color: var(--primary); font-size: 24px; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px rgba(0,255,136,0.5); }
+        .ai-status p { color: #ff9f43; font-size: 13px; margin-top: 5px; font-family: monospace; }
+        
+        .chat-box { background: #000; border: 1px solid var(--primary); border-radius: 15px; flex: 1; min-height: 400px; padding: 20px; overflow-y: auto; font-family: monospace; box-shadow: inset 0 0 20px rgba(0,255,136,0.05); display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; scroll-behavior: smooth; }
+        
+        .msg { display: flex; flex-direction: column; max-width: 85%; }
+        .msg-user { align-self: flex-end; align-items: flex-end; }
+        .msg-ai { align-self: flex-start; align-items: flex-start; }
+        
+        .msg-name { font-size: 11px; color: #888; margin-bottom: 5px; font-weight: bold; }
+        .msg-ai .msg-name { color: var(--primary); }
+        .msg-user .msg-name { color: var(--accent); }
+        .msg-system .msg-name { color: #ff9f43; }
+        
+        .msg-bubble { padding: 12px 18px; border-radius: 12px; font-size: 14px; line-height: 1.5; word-wrap: break-word; }
+        .msg-user .msg-bubble { background: var(--accent); color: #000; border-bottom-right-radius: 2px; }
+        .msg-ai .msg-bubble { background: rgba(0,255,136,0.1); color: var(--primary); border: 1px solid var(--primary); border-bottom-left-radius: 2px; text-shadow: 0 0 2px rgba(0,255,136,0.5); }
+        .msg-system .msg-bubble { background: rgba(255,159,67,0.1); color: #ff9f43; border: 1px dashed #ff9f43; border-bottom-left-radius: 2px; }
+        
+        .typing-indicator { display: inline-block; width: 10px; height: 15px; background-color: var(--primary); animation: blink 1s step-end infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        .input-area { display: flex; gap: 10px; background: var(--card-bg); padding: 15px; border-radius: 15px; border: 1px solid var(--border); margin-bottom: 20px; }
+        .input-area input { flex: 1; background: transparent; border: none; color: #fff; font-size: 15px; outline: none; font-family: 'Inter'; }
+        .btn-send { background: var(--primary); color: #000; border: none; width: 45px; height: 45px; border-radius: 10px; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; font-size: 18px; }
+        .btn-send:hover { filter: brightness(1.2); box-shadow: 0 0 15px rgba(0,255,136,0.3); transform: scale(1.05); }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="header-left">
+            <div class="brand">QUOCDAT<span>.AI</span></div>
+            <a href="index.html" class="btn-home"><i class="fas fa-home"></i> TRANG CHỦ</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="ai-status">
+            <h2>AI CORE TỰ HỌC</h2>
+            <p><i class="fas fa-brain"></i> MODEL IS LEARNING FROM USERS...</p>
+        </div>
+
+        <div class="chat-box" id="chatBox">
+            <div class="msg msg-ai" id="bootMsg">
+                <span class="msg-name"><i class="fas fa-robot"></i> SYSTEM.AI</span>
+                <div class="msg-bubble" id="bootText"></div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="Giao tiếp hoặc dạy AI tại đây..." autocomplete="off">
+            <button class="btn-send" id="btnSend"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script>
+        // 1. ĐỒNG BỘ MÀU TỪ ADMIN
+        db.ref('settings').on('value', snap => {
+            let s = snap.val() || {};
+            if(s.theme_primary) document.documentElement.style.setProperty('--primary', s.theme_primary);
+            if(s.theme_bg) document.documentElement.style.setProperty('--bg', s.theme_bg);
+            if(s.site_name) document.title = "AI TỰ HỌC | " + s.site_name;
+        });
+
+        const chatBox = document.getElementById('chatBox');
+        const userInput = document.getElementById('userInput');
+        const btnSend = document.getElementById('btnSend');
+        
+        let aiBrain = {}; // Bộ nhớ của AI
+        let isLearning = false; // Trạng thái đang học
+        let questionToLearn = ""; // Câu hỏi đang chờ được dạy
+
+        // TẢI BỘ NÃO TỪ FIREBASE
+        db.ref('ai_brain').on('value', snap => {
+            aiBrain = snap.val() || {};
+        });
+
+        // 2. HIỆU ỨNG AI KHỞI ĐỘNG
+        const bootSequence = [
+            "Initializing Self-Learning Matrix...",
+            "Loading Database...",
+            "Sẵn sàng! Hãy trò chuyện với tôi.",
+            "Nếu có câu hỏi nào tôi không biết, tôi sẽ nhờ bạn dạy tôi cách trả lời."
+        ];
+        let bootIndex = 0; let bootCharIndex = 0; let currentBootLine = "";
+
+        function typeBootSequence() {
+            if (bootIndex < bootSequence.length) {
+                if (bootCharIndex < bootSequence[bootIndex].length) {
+                    currentBootLine += bootSequence[bootIndex].charAt(bootCharIndex);
+                    document.getElementById('bootText').innerHTML = currentBootLine + '<span class="typing-indicator"></span>';
+                    bootCharIndex++;
+                    setTimeout(typeBootSequence, 30);
+                } else {
+                    currentBootLine += "<br><br>";
+                    bootIndex++; bootCharIndex = 0;
+                    setTimeout(typeBootSequence, 300);
+                }
+            } else {
+                document.getElementById('bootText').innerHTML = currentBootLine;
+                scrollToBottom();
+            }
+        }
+        window.onload = () => { setTimeout(typeBootSequence, 500); };
+
+        // 3. XỬ LÝ GIAO TIẾP VÀ DẠY HỌC
+        userInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') processInput();
+        });
+        btnSend.addEventListener('click', processInput);
+
+        function processInput() {
+            let text = userInput.value.trim();
+            if (!text) return;
+
+            // In tin nhắn của User
+            let userHtml = `<div class="msg msg-user"><span class="msg-name">GUEST <i class="fas fa-user"></i></span><div class="msg-bubble">${escapeHtml(text)}</div></div>`;
+            chatBox.insertAdjacentHTML('beforeend', userHtml);
+            userInput.value = '';
+            scrollToBottom();
+
+            setTimeout(() => {
+                if (isLearning) {
+                    // NẾU AI ĐANG HỎI ĐỂ HỌC -> LƯU CÂU TRẢ LỜI VÀO FIREBASE
+                    learnNewKnowledge(questionToLearn, text);
+                } else {
+                    // NẾU ĐANG CHAT BÌNH THƯỜNG -> TÌM CÂU TRẢ LỜI
+                    findAnswer(text);
+                }
+            }, 500);
+        }
+
+        function findAnswer(question) {
+            // Chuyển câu hỏi về dạng in thường, bỏ khoảng trắng thừa để dễ tìm
+            let key = formatKey(question);
+
+            // Tìm trong bộ não Firebase
+            if (aiBrain[key]) {
+                // Đã biết câu này
+                renderAIMessage(aiBrain[key], 'msg-ai', 'QUOCDAT.AI');
+            } else {
+                // Chưa biết câu này -> Bật chế độ học tập
+                isLearning = true;
+                questionToLearn = key; // Lưu lại câu hỏi chưa biết
+                renderAIMessage("Xin lỗi, dữ liệu của tôi chưa có câu trả lời cho vấn đề này. Bạn muốn tôi trả lời như thế nào khi gặp câu hỏi này?", 'msg-system', 'SYSTEM.LEARN');
+            }
+        }
+
+        function learnNewKnowledge(questionKey, answerText) {
+            // Lưu kiến thức mới vào Firebase
+            db.ref('ai_brain/' + questionKey).set(answerText).then(() => {
+                isLearning = false; // Tắt chế độ học
+                questionToLearn = "";
+                renderAIMessage("Đã ghi nhớ! Cảm ơn bạn đã cập nhật kiến thức cho tôi.", 'msg-system', 'SYSTEM.LEARN');
+            });
+        }
+
+        // 4. HÀM HIỂN THỊ TIN NHẮN CỦA AI CÓ HIỆU ỨNG GÕ
+        function renderAIMessage(text, cssClass, name) {
+            let aiId = 'ai_msg_' + Date.now();
+            let aiHtml = `
+                <div class="msg ${cssClass}">
+                    <span class="msg-name"><i class="fas fa-robot"></i> ${name}</span>
+                    <div class="msg-bubble" id="${aiId}"><span class="typing-indicator"></span></div>
+                </div>
+            `;
+            chatBox.insertAdjacentHTML('beforeend', aiHtml);
+            scrollToBottom();
+            typeMessage(aiId, text, 0);
+        }
+
+        function typeMessage(elementId, text, index) {
+            let el = document.getElementById(elementId);
+            if (index < text.length) {
+                el.innerHTML = text.substring(0, index + 1) + '<span class="typing-indicator"></span>';
+                setTimeout(() => typeMessage(elementId, text, index + 1), 20); // Tốc độ gõ
+                scrollToBottom();
+            } else {
+                el.innerHTML = text; // Xóa con trỏ
+            }
+        }
+
+        function formatKey(text) {
+            // Biến câu hỏi thành dạng ID không dấu đặc biệt để lưu vào Firebase
+            return text.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim().replace(/\s+/g, '_');
+        }
+
+        function scrollToBottom() { chatBox.scrollTop = chatBox.scrollHeight; }
+
+        function escapeHtml(unsafe) {
+            return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
+
