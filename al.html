@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI  | QUOCDAT SEC</title>
+    <title>AI CORE V8.3 | QUOCDAT SEC</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
@@ -56,8 +56,8 @@
     </div>
     <div class="container">
         <div class="ai-status">
-            <h2>AI CORE V8.2</h2>
-            <p><i class="fas fa-bolt"></i> CHẠY BẰNG CHIP LPU GROQ - NHANH NHẤT THẾ GIỚI</p>
+            <h2>AI CORE V8.3</h2>
+            <p><i class="fas fa-bolt"></i> CHẠY LÕI LLAMA-3.3-70B MỚI NHẤT</p>
         </div>
         <div class="tools-bar">
             <button class="btn-clear" onclick="clearMemory()"><i class="fas fa-trash-alt"></i> XÓA LỊCH SỬ CHAT</button>
@@ -70,7 +70,6 @@
     </div>
     <script>
         const GROQ_API_KEY = "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"; 
-        
         const fbConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
         if (!firebase.apps.length) firebase.initializeApp(fbConfig);
         const db = firebase.database();
@@ -84,15 +83,12 @@
         const btnSend = document.getElementById('btnSend');
         let aiBrainData = []; 
         let chatContext = [];
-        
-        // Khối Try Catch chống sập do điện thoại chặn Session
         try {
             chatContext = JSON.parse(sessionStorage.getItem('ai_chat_history')) || [];
         } catch(e) {
             sessionStorage.removeItem('ai_chat_history');
             chatContext = [];
         }
-
         db.ref('ai_brain_v2').on('value', snap => {
             aiBrainData = [];
             if(snap.exists()) {
@@ -106,7 +102,6 @@
                 }
             }
         });
-
         function loadApp() {
             if (chatContext.length > 0) {
                 chatContext.forEach(msg => {
@@ -123,10 +118,8 @@
                 setTimeout(typeBootSequence, 300);
             }
         }
-
-        const bootSequence = ["Kích hoạt lõi LPU siêu tốc...", "Gắn API chính chủ thành công!", "Tôi là siêu AI trợ lý. Xin chào!"];
+        const bootSequence = ["Kích hoạt lõi Llama-3.3 mới nhất...", "Gắn API chính chủ thành công!", "Tôi là siêu AI trợ lý. Xin chào!"];
         let bootIndex = 0; let bootCharIndex = 0; let currentBootLine = "";
-
         function typeBootSequence() {
             if (bootIndex < bootSequence.length) {
                 if (bootCharIndex < bootSequence[bootIndex].length) {
@@ -146,7 +139,6 @@
         window.onload = loadApp;
         userInput.addEventListener('keypress', function (e) { if (e.key === 'Enter') processInput(); });
         btnSend.addEventListener('click', processInput);
-
         function processInput() {
             if (btnSend.disabled || userInput.disabled) return; 
             let text = userInput.value.trim();
@@ -161,7 +153,6 @@
             scrollToBottom();
             setTimeout(() => { analyzeContextAndFindAnswer(text); }, 100);
         }
-
         function analyzeContextAndFindAnswer(question) {
             try {
                 let qFormat = question.toLowerCase().trim();
@@ -177,7 +168,6 @@
                 resetInput(); 
             }
         }
-
         async function askGroqAI(question) {
             let sysId = 'sys_msg_' + Date.now();
             let sysHtml = `<div class="msg msg-system"><span class="msg-name"><i class="fas fa-bolt"></i> SYSTEM.API</span><div class="msg-bubble" id="${sysId}">Đang phân tích siêu tốc...<span class="typing-indicator"></span></div></div>`;
@@ -202,7 +192,7 @@
                     },
                     body: JSON.stringify({
                         messages: apiMessages,
-                        model: 'llama3-8b-8192',
+                        model: 'llama-3.3-70b-versatile',
                         temperature: 0.7
                     })
                 });
@@ -213,7 +203,7 @@
                     let answer = data.choices[0].message.content.replace(/\n/g, '<br>').replace(/\*\*/g, ''); 
                     renderAIMessage(answer, 'msg-ai', 'QUOCDAT.AI');
                 } else if(data.error) {
-                    renderAIMessage(`Lỗi cấu hình Key: ${data.error.message}`, 'msg-system', 'ERROR');
+                    renderAIMessage(`Lỗi API: ${data.error.message}`, 'msg-system', 'ERROR');
                 } else {
                     renderAIMessage(`Máy chủ không phản hồi!`, 'msg-system', 'ERROR');
                 }
@@ -225,7 +215,6 @@
                 resetInput();
             }
         }
-
         function renderAIMessage(text, cssClass, name) {
             let aiId = 'ai_msg_' + Date.now();
             let aiHtml = `<div class="msg ${cssClass}"><span class="msg-name"><i class="fas fa-robot"></i> ${name}</span><div class="msg-bubble" id="${aiId}"></div></div>`;
@@ -234,7 +223,6 @@
             saveToHistory(roleSave, text);
             typeMessage(aiId, text, 0);
         }
-
         function typeMessage(elementId, text, index) {
             let el = document.getElementById(elementId);
             if(el) {
@@ -248,30 +236,25 @@
                 scrollToBottom();
             }
         }
-
         function saveToHistory(role, text) {
             try {
                 chatContext.push({ role: role, text: text });
                 if(chatContext.length > 15) chatContext.shift(); 
                 sessionStorage.setItem('ai_chat_history', JSON.stringify(chatContext));
-            } catch(e) { console.log("Không thể lưu cache"); }
+            } catch(e) {}
         }
-
         function clearMemory() {
             if(confirm("Xóa sạch lịch sử đoạn chat hiện tại?")) {
                 try { sessionStorage.removeItem('ai_chat_history'); } catch(e){}
                 window.location.reload();
             }
         }
-
         function resetInput() { 
             userInput.disabled = false; 
             btnSend.disabled = false; 
             userInput.focus(); 
         }
-
         function scrollToBottom() { chatBox.scrollTop = chatBox.scrollHeight; }
-
         function escapeHtml(unsafe) { 
             if(!unsafe) return "";
             return unsafe.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); 
