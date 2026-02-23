@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TERMUX V3.0 | QUOCDAT SEC</title>
+    
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root { --primary: #00ff88; --bg: #000000; --accent: #ff4757; --text: #e0e0e0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { background: var(--bg); color: var(--text); font-family: 'Fira Code', monospace; min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* Thanh Header mang phong cách QUOCDAT SEC */
+        .header { background: #111; padding: 10px 15px; border-bottom: 1px solid var(--primary); display: flex; justify-content: space-between; align-items: center; }
+        .brand { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900; color: #fff; text-shadow: 0 0 5px var(--primary); }
+        .brand span { color: var(--primary); }
+        .sys-info { font-size: 11px; color: #888; }
+
+        /* Khung Terminal */
+        .terminal { flex: 1; display: flex; flex-direction: column; padding: 15px; overflow-y: auto; }
+        .welcome { color: #888; font-size: 13px; margin-bottom: 20px; line-height: 1.5; }
+        .welcome span { color: var(--primary); font-weight: bold; }
+
+        /* Khu vực Cài Thư Viện (PIP) */
+        .pip-section { display: flex; align-items: center; background: rgba(0, 255, 136, 0.05); border: 1px dashed var(--primary); padding: 10px; border-radius: 5px; margin-bottom: 15px; }
+        .prompt-line { color: var(--primary); font-weight: bold; font-size: 13px; white-space: nowrap; }
+        .pip-input { flex: 1; background: transparent; border: none; outline: none; color: #f1c40f; font-family: 'Fira Code', monospace; font-size: 13px; margin-left: 10px; }
+
+        /* Khu vực nhập Code */
+        .editor-section { display: flex; flex-direction: column; flex: 1; }
+        .editor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        
+        textarea { width: 100%; flex: 1; min-height: 250px; background: transparent; color: #fff; border: none; outline: none; font-family: 'Fira Code', monospace; font-size: 13px; line-height: 1.5; resize: none; tab-size: 4; border-left: 2px solid #333; padding-left: 10px; }
+        textarea:focus { border-left-color: var(--primary); }
+        
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: var(--primary); }
+
+        /* Nút bấm (Giao diện phím tắt) */
+        .keyboard-controls { display: flex; gap: 10px; padding: 15px 0; border-top: 1px dashed #333; margin-top: 10px; flex-wrap: wrap; }
+        .key-btn { background: transparent; color: var(--primary); border: 1px solid var(--primary); padding: 8px 15px; font-family: 'Fira Code', monospace; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
+        .key-btn:hover { background: var(--primary); color: #000; box-shadow: 0 0 10px var(--primary); }
+        .key-upload { border-color: #1e90ff; color: #1e90ff; }
+        .key-upload:hover { background: #1e90ff; color: #fff; box-shadow: 0 0 10px #1e90ff; }
+        .key-clear { border-color: var(--accent); color: var(--accent); }
+        .key-clear:hover { background: var(--accent); color: #000; box-shadow: 0 0 10px var(--accent); }
+
+        /* Màn hình Output */
+        .output-section { margin-top: 10px; padding-bottom: 30px;}
+        .output-box { background: transparent; font-size: 13px; white-space: pre-wrap; word-wrap: break-word; line-height: 1.5; }
+        .system-out { color: #888; }
+        .result-out { color: var(--primary); }
+        .error-out { color: var(--accent); }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="brand">QUOCDAT<span>.SEC</span></div>
+        <div class="sys-info"><i class="fas fa-terminal"></i> root@localhost:~</div>
+    </div>
+
+    <div class="terminal">
+        <div class="welcome">
+Welcome to QUOCDAT.SEC Termux Environment
+v3.0.0 (Python 3.11.3 - Pyodide WASM Engine)
+Module: <span>[micropip included]</span>
+        </div>
+
+        <div class="pip-section">
+            <span class="prompt-line">~/sandbox $ pip install</span>
+            <input type="text" id="pipPackages" class="pip-input" placeholder="requests, colorama, pytz..." spellcheck="false">
+        </div>
+
+        <div class="editor-section">
+            <div class="editor-header">
+                <span class="prompt-line" id="fileNameDisplay">~/sandbox $ nano main.py</span>
+            </div>
+            
+            <textarea id="pythonCode" spellcheck="false"># Gõ code hoặc tải file .py từ máy lên đây...
+import colorama
+from colorama import Fore, Style
+colorama.init()
+
+print(Fore.GREEN + "[+] Đã tải thành công thư viện Colorama!")
+print(Fore.CYAN + "[+] Hệ thống Termux Web của QUOCDAT SEC đã sẵn sàng.")
+print(Style.RESET_ALL + "Đang đợi lệnh từ sếp...")</textarea>
+        </div>
+
+        <div class="keyboard-controls">
+            <button class="key-btn" id="runBtn" py-click="run_code()">[▶] EXECUTE</button>
+            
+            <input type="file" id="fileInput" accept=".py,.txt" style="display: none;" onchange="docFilePython(event)">
+            <label for="fileInput" class="key-btn key-upload">[↑] UPLOAD FILE</label>
+            
+            <button class="key-btn key-clear" onclick="clearTerminal()">[✖] CLEAR</button>
+        </div>
+
+        <div class="output-section">
+            <div id="output" class="output-box"><span class="system-out">~/sandbox $ ./main.py</span></div>
+        </div>
+    </div>
+
+    <script>
+        function clearTerminal() {
+            document.getElementById('pythonCode').value = '';
+            document.getElementById('output').innerHTML = '<span class="system-out">~/sandbox $ </span>';
+        }
+
+        function docFilePython(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            document.getElementById('fileNameDisplay').innerHTML = `~/sandbox $ nano <span style="color:#f1c40f">${file.name}</span>`;
+            const reader = new FileReader();
+            reader.onload = function(e) { document.getElementById('pythonCode').value = e.target.result; };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+    </script>
+
+    <py-config>
+        packages = ["micropip", "colorama"]
+    </py-config>
+
+    <py-script>
+        import sys
+        import io
+        import micropip
+        import asyncio
+        import traceback
+        from js import document
+
+        async def execute_python():
+            code = document.getElementById('pythonCode').value
+            packages_str = document.getElementById('pipPackages').value
+            out_element = document.getElementById('output')
+            
+            # Cập nhật màn hình Console
+            out_element.innerHTML = "<span class='system-out'>~/sandbox $ ./main.py\n[+] Kích hoạt lõi Python...\n[+] Đang xử lý thư viện, vui lòng chờ...</span>"
+            
+            # 1. Cài đặt thư viện bằng Micropip nếu người dùng có nhập
+            try:
+                if packages_str.strip():
+                    # Tách các thư viện bằng dấu phẩy
+                    pkgs = [p.strip() for p in packages_str.split(',') if p.strip()]
+                    for pkg in pkgs:
+                        await micropip.install(pkg)
+            except Exception as e:
+                out_element.innerHTML = f"<span class='system-out'>~/sandbox $ ./main.py\n</span><span class='error-out'>[LỖI CÀI ĐẶT THƯ VIỆN PIP]:\n{str(e)}\n\nLưu ý: Một số thư viện bằng C++ (như lxml, selenium) không hỗ trợ chạy trên nền Web.</span>"
+                return
+
+            # 2. Chuẩn bị môi trường chạy Code
+            old_stdout = sys.stdout
+            sys.stdout = mystdout = io.StringIO()
+            
+            try:
+                # Chạy lệnh
+                exec(code, globals())
+                result = mystdout.getvalue()
+                
+                # In kết quả
+                if result.strip() != "":
+                    out_element.innerHTML = f"<span class='system-out'>~/sandbox $ ./main.py\n</span><span class='result-out'>{result}</span>"
+                else:
+                    out_element.innerHTML = "<span class='system-out'>~/sandbox $ ./main.py\n[Process completed with exit code 0]</span>"
+                    
+            except Exception as e:
+                # In lỗi màu đỏ y hệt Termux
+                error_msg = traceback.format_exc()
+                out_element.innerHTML = f"<span class='system-out'>~/sandbox $ ./main.py\n</span><span class='error-out'>{error_msg}</span>"
+            finally:
+                # Dọn dẹp bộ nhớ
+                sys.stdout = old_stdout
+
+        # Hàm cầu nối để kích hoạt Async từ nút bấm HTML
+        def run_code(*args, **kwargs):
+            asyncio.ensure_future(execute_python())
+    </py-script>
+
+</body>
+</html>
+
