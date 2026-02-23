@@ -15,16 +15,22 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: #fff; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .container { background: var(--card-bg); width: 100%; max-width: 800px; padding: 20px; border-radius: 15px; border: 1px solid var(--border); box-shadow: 0 0 20px rgba(0,255,136,0.1); }
-        h2 { font-family: 'Orbitron'; color: var(--primary); text-align: center; margin-bottom: 20px; letter-spacing: 1px; }
+        h2 { font-family: 'Orbitron'; color: var(--primary); text-align: center; margin-bottom: 5px; letter-spacing: 1px; }
         
+        .upload-section { display: flex; justify-content: space-between; align-items: center; background: #000; padding: 15px; border-radius: 10px; border: 1px dashed var(--accent); margin-bottom: 15px; margin-top: 20px; flex-wrap: wrap; gap: 10px; }
+        .btn-upload { background: #1e90ff; color: #fff; padding: 10px 15px; border-radius: 8px; font-family: 'Orbitron'; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.3s; display: inline-block; border: none; }
+        .btn-upload:hover { filter: brightness(1.2); box-shadow: 0 0 10px rgba(30,144,255,0.5); }
+        .btn-clear { background: #ff4757; color: #fff; padding: 10px 15px; border-radius: 8px; font-family: 'Orbitron'; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.3s; border: none; }
+        .btn-clear:hover { filter: brightness(1.2); box-shadow: 0 0 10px rgba(255,71,87,0.5); }
+
         .editor-header { display: flex; justify-content: space-between; color: #888; font-size: 12px; font-weight: bold; margin-bottom: 5px; }
-        textarea { width: 100%; height: 250px; background: #000; color: #f1c40f; border: 1px solid var(--border); padding: 15px; font-family: monospace; font-size: 15px; border-radius: 10px; outline: none; resize: vertical; tab-size: 4; }
+        textarea { width: 100%; height: 250px; background: #000; color: #f1c40f; border: 1px solid var(--border); padding: 15px; font-family: monospace; font-size: 13px; border-radius: 10px; outline: none; resize: vertical; tab-size: 4; }
         textarea:focus { border-color: var(--primary); }
         
-        .btn-run { background: var(--primary); color: #000; width: 100%; padding: 15px; border: none; border-radius: 10px; font-family: 'Orbitron'; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 15px; }
+        .btn-run { background: var(--primary); color: #000; width: 100%; padding: 15px; border: none; border-radius: 10px; font-family: 'Orbitron'; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 15px; text-transform: uppercase;}
         .btn-run:hover { filter: brightness(1.2); box-shadow: 0 0 15px rgba(0,255,136,0.3); transform: translateY(-2px); }
         
-        .output-box { background: #000; border: 1px dashed var(--accent); padding: 20px; border-radius: 10px; min-height: 150px; font-family: monospace; font-size: 15px; color: #fff; margin-top: 20px; white-space: pre-wrap; overflow-x: auto; }
+        .output-box { background: #000; border: 1px dashed var(--accent); padding: 20px; border-radius: 10px; min-height: 150px; font-family: monospace; font-size: 13px; color: #fff; margin-top: 20px; white-space: pre-wrap; overflow-x: auto; }
         .system-msg { color: #888; font-style: italic; }
         .error-msg { color: #ff4757; }
     </style>
@@ -33,34 +39,60 @@
 
     <div class="container">
         <h2><i class="fab fa-python"></i> PYTHON WEB SANDBOX</h2>
-        <p style="text-align: center; color: #888; font-size: 13px; margin-bottom: 20px;">
-            Môi trường kiểm thử code. Hỗ trợ các lệnh logic cơ bản.
-        </p>
+        <p style="text-align: center; color: #888; font-size: 13px;">Môi trường kiểm thử code. Hỗ trợ Load File từ thiết bị.</p>
+        
+        <div class="upload-section">
+            <div>
+                <input type="file" id="fileInput" accept=".py,.txt" style="display: none;" onchange="docFilePython(event)">
+                <label for="fileInput" class="btn-upload"><i class="fas fa-file-upload"></i> CHỌN FILE TỪ MÁY (.py)</label>
+            </div>
+            <button class="btn-clear" onclick="xoaTrang()"><i class="fas fa-trash-alt"></i> XÓA TRẮNG CODE</button>
+        </div>
         
         <div class="editor-header">
-            <span>INPUT: main.py</span>
+            <span id="fileNameDisplay">INPUT: main.py</span>
             <span>Ngôn ngữ: Python 3</span>
         </div>
         
-        <textarea id="pythonCode" spellcheck="false"># Gõ code Python của ông vào đây để test
-ten_sep = "QUOCDAT SEC"
-print(f"Xin chào sếp {ten_sep}!")
-
-tong = 0
-for i in range(1, 11):
-    tong += i
-    
-print(f"Tổng từ 1 đến 10 là: {tong}")</textarea>
+        <textarea id="pythonCode" spellcheck="false"># Gõ code hoặc tải file lên đây để test
+print("Hệ thống QUOCDAT SEC đã sẵn sàng!")</textarea>
 
         <button id="runBtn" py-onClick="execute_python()" class="btn-run">
-            <i class="fas fa-play"></i> CHẠY CODE NÀY
+            <i class="fas fa-play"></i> CHẠY MÃ LỆNH NÀY
         </button>
         
         <div class="editor-header" style="margin-top: 20px;">
             <span>OUTPUT: Màn hình Console</span>
         </div>
-        <div id="output" class="output-box"><span class="system-msg">Kết quả sẽ hiển thị ở đây... (Lần chạy đầu tiên có thể mất vài giây để nạp lõi Python)</span></div>
+        <div id="output" class="output-box"><span class="system-msg">Kết quả sẽ hiển thị ở đây... (Lần chạy đầu tiên có thể mất vài giây)</span></div>
     </div>
+
+    <script>
+        function docFilePython(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Đổi tên hiển thị
+            document.getElementById('fileNameDisplay').innerHTML = `INPUT: <span style="color:#00ff88">${file.name}</span>`;
+
+            // Đọc nội dung file
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('pythonCode').value = e.target.result;
+            };
+            reader.readAsText(file);
+            
+            // Reset input để có thể chọn lại đúng file đó nếu cần
+            event.target.value = '';
+        }
+
+        function xoaTrang() {
+            if(confirm("Bạn có chắc muốn xóa trắng toàn bộ code không?")) {
+                document.getElementById('pythonCode').value = '';
+                document.getElementById('fileNameDisplay').innerHTML = 'INPUT: main.py';
+            }
+        }
+    </script>
 
     <py-script>
         import sys
@@ -68,36 +100,28 @@ print(f"Tổng từ 1 đến 10 là: {tong}")</textarea>
         from js import document
 
         def execute_python(*args, **kwargs):
-            # Lấy code từ ô nhập liệu
             code = document.getElementById('pythonCode').value
             out_element = document.getElementById('output')
             
             out_element.innerHTML = "<span class='system-msg'>Đang xử lý...</span>"
             
-            # Chuyển hướng màn hình console (stdout) vào một biến ẩn
             old_stdout = sys.stdout
             sys.stdout = mystdout = io.StringIO()
             
             try:
-                # Ép trình duyệt chạy đoạn code vừa dán
                 exec(code)
-                # Thu thập toàn bộ các lệnh print() trong đoạn code đó
                 result = mystdout.getvalue()
                 
-                # In ra màn hình HTML
                 if result.strip() != "":
                     out_element.innerHTML = f"<span style='color:#00ff88'>{result}</span>"
                 else:
-                    out_element.innerHTML = "<span class='system-msg'>[Code chạy thành công nhưng không có lệnh in ra màn hình]</span>"
+                    out_element.innerHTML = "<span class='system-msg'>[Code chạy thành công nhưng không có lệnh in (print) ra màn hình]</span>"
                     
             except Exception as e:
-                # Nếu code gõ sai, in ra lỗi màu đỏ
-                out_element.innerHTML = f"<span class='error-msg'>Lỗi cú pháp:\n{str(e)}</span>"
+                out_element.innerHTML = f"<span class='error-msg'>Lỗi cú pháp / Lỗi thực thi:\n{str(e)}</span>"
             finally:
-                # Trả lại trạng thái mặc định cho trình duyệt
                 sys.stdout = old_stdout
     </py-script>
 
 </body>
 </html>
-
