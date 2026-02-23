@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUOCDAT SEC | SMS BOMBER</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary: #ff4757; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --accent: #ff6b81; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .container { background: var(--card-bg); width: 100%; max-width: 500px; padding: 30px; border-radius: 15px; border: 1px solid var(--border); box-shadow: 0 0 30px rgba(255, 71, 87, 0.15); }
+        h1 { font-family: 'Orbitron'; color: var(--primary); text-align: center; margin-bottom: 10px; font-size: 26px; text-transform: uppercase; letter-spacing: 2px; }
+        p.desc { text-align: center; color: #888; margin-bottom: 25px; font-size: 13px; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; color: #ccc; font-weight: bold; font-size: 13px; text-transform: uppercase; }
+        .form-group input { width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 15px; border-radius: 10px; outline: none; font-family: 'Inter'; font-size: 16px; transition: 0.3s; }
+        .form-group input:focus { border-color: var(--primary); box-shadow: inset 0 0 10px rgba(255, 71, 87, 0.2); }
+        
+        .btn-run { background: var(--primary); color: #fff; width: 100%; padding: 15px; border: none; border-radius: 10px; font-family: 'Orbitron'; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-run:hover { filter: brightness(1.2); box-shadow: 0 0 20px rgba(255, 71, 87, 0.5); transform: translateY(-2px); }
+        .btn-run:disabled { background: #333; color: #777; cursor: not-allowed; box-shadow: none; transform: none; }
+        
+        .result-box { background: #000; border: 1px dashed var(--accent); padding: 20px; border-radius: 10px; min-height: 100px; font-family: monospace; font-size: 14px; line-height: 1.6; word-wrap: break-word; color: #00ff88; display: none; }
+        .terminal-text { color: #00ff88; font-weight: bold; }
+        .terminal-err { color: #ff4757; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1><i class="fas fa-bomb"></i> SMS BOMBER</h1>
+        <p class="desc">Hệ thống Spam OTP đa luồng qua API Vercel</p>
+        
+        <div class="form-group">
+            <label><i class="fas fa-phone-alt"></i> Số điện thoại nạn nhân</label>
+            <input type="number" id="targetPhone" placeholder="VD: 0987654321" required>
+        </div>
+        
+        <div class="form-group">
+            <label><i class="fas fa-sync-alt"></i> Số vòng lặp (Khuyên dùng: 1-3)</label>
+            <input type="number" id="spamCount" value="1" min="1" max="5">
+        </div>
+
+        <button id="btnRunCode" class="btn-run" onclick="kichHoatSpam()"><i class="fas fa-fire"></i> KHAI HỎA</button>
+
+        <div id="resultArea" class="result-box"></div>
+    </div>
+
+    <script>
+        function kichHoatSpam() {
+            const btn = document.getElementById('btnRunCode');
+            const resultBox = document.getElementById('resultArea');
+            const phone = document.getElementById('targetPhone').value.trim();
+            const count = document.getElementById('spamCount').value.trim();
+
+            if(!phone) return alert("Vui lòng nhập số điện thoại!");
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ĐANG NÃ ĐẠN...';
+            resultBox.style.display = 'block';
+            resultBox.innerHTML = '<span style="color:#f1c40f;">[!] Đang khởi tạo luồng tấn công... Vui lòng chờ...</span>';
+
+            // Gọi Backend Python
+            fetch('/api/chay_code', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: phone, count: count })
+            })
+            .then(response => response.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-fire"></i> KHAI HỎA TIẾP';
+
+                if(data.status === "success") {
+                    resultBox.innerHTML = `<span class="terminal-text">${data.message}</span>`;
+                } else {
+                    resultBox.innerHTML = `<span class="terminal-err">[-] LỖI: ${data.message}</span>`;
+                }
+            })
+            .catch(error => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-fire"></i> THỬ LẠI';
+                resultBox.innerHTML = `<span class="terminal-err">[-] SERVER QUÁ TẢI (TIMEOUT 10s)!<br>Đạn có thể vẫn đang bay, vui lòng kiểm tra đt nạn nhân.</span>`;
+            });
+        }
+    </script>
+</body>
+</html>
+
