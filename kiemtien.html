@@ -6,382 +6,384 @@
     <title>Xưởng In Triệu Đô</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* Phong cách Dark Mode chuyên nghiệp */
+        /* Phong cách Dark Mode */
         body {
-            margin: 0;
-            padding: 10px;
-            background-color: #0c1219;
-            color: #d1d5db;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            box-sizing: border-box;
-            user-select: none; /* Tránh bôi đen chữ khi bấm nhanh */
+            margin: 0; padding: 10px; background-color: #0c1219; color: #d1d5db;
+            font-family: 'Segoe UI', Roboto, sans-serif; display: flex; flex-direction: column;
+            min-height: 100vh; box-sizing: border-box; user-select: none;
         }
 
         /* HEADER */
-        .header {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            box-sizing: border-box;
-        }
-        .user-avatar { font-size: 14px; display: flex; align-items: center; font-weight: bold; }
-        .right-header { display: flex; gap: 15px; align-items: center; font-size: 15px; font-weight: bold; background: #1a232f; padding: 5px 15px; border-radius: 20px;}
-        .trophy { color: #ffd700; font-size: 18px; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px; }
+        .user-info { display: flex; flex-direction: column; }
+        .user-name { font-size: 15px; font-weight: bold; color: #ffffff; }
+        .user-uid { font-size: 11px; color: #7a8a9a; }
+        .right-header { display: flex; gap: 10px; align-items: center; font-size: 15px; font-weight: bold; background: #1a232f; padding: 5px 12px; border-radius: 20px;}
+        .trophy { color: #ffd700; }
+        .green-neon { color: #4ade80; }
+
+        /* QUẢN LÝ CÁC TAB MÀN HÌNH */
+        .tab-content { display: none; width: 100%; flex-direction: column; align-items: center; animation: fadeIn 0.3s; }
+        .tab-content.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* BOX CHỨA THÔNG TIN KHAI THÁC */
         .mining-container {
-            background-color: #1a232f;
-            border-radius: 20px;
-            padding: 20px 15px;
-            width: 100%;
-            margin-top: 15px;
-            box-sizing: border-box;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            background-color: #1a232f; border-radius: 20px; padding: 20px 15px; width: 100%;
+            margin-top: 15px; box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-
-        /* DÒNG THỐNG KÊ NHỎ */
-        .stats-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: #7a8a9a;
-            margin-bottom: 25px;
-            font-weight: bold;
-        }
-        .green-neon { color: #4ade80; }
-
-        /* SẢN LƯỢNG LƯU TRỮ */
-        .display-label {
-            font-size: 13px;
-            color: #7a8a9a;
-            margin-bottom: 5px;
-            text-align: center;
-            letter-spacing: 1px;
-        }
+        .stats-row { display: flex; justify-content: space-between; font-size: 12px; color: #7a8a9a; margin-bottom: 25px; font-weight: bold; }
+        .display-label { font-size: 13px; color: #7a8a9a; margin-bottom: 5px; text-align: center; }
         .mining-display {
-            font-size: 46px;
-            font-weight: 800;
-            margin: 10px 0 20px 0;
-            text-align: center;
-            font-family: 'Courier New', monospace;
-            text-shadow: 0 0 15px rgba(74, 222, 128, 0.4);
-            color: #4ade80;
+            font-size: 46px; font-weight: 800; margin: 10px 0 20px 0; text-align: center;
+            font-family: 'Courier New', monospace; text-shadow: 0 0 15px rgba(74, 222, 128, 0.4); color: #4ade80;
         }
 
         /* BOX MÔ PHỎNG MÁY IN */
         .machine-view {
-            width: 100%;
-            height: 160px;
-            background-color: #111827;
-            border-radius: 15px;
-            margin: 20px 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-            border: 2px solid #2d3748;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+            width: 100%; height: 160px; background-color: #111827; border-radius: 15px;
+            margin: 20px 0; display: flex; justify-content: center; align-items: center;
+            position: relative; overflow: hidden; border: 2px solid #2d3748;
         }
-        .machine-status {
-            font-size: 12px;
-            color: #ef4444;
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
+        .machine-status { font-size: 12px; color: #ef4444; position: absolute; top: 15px; left: 15px; font-weight: bold; }
         .machine-status.mining { color: #4ade80; }
-
-        /* Hiệu ứng neon light chạy ngang máy in */
         .neon-light {
-            position: absolute;
-            width: 100%;
-            height: 5px;
-            background-color: #4ade80;
-            bottom: 40px;
-            border-radius: 2px;
-            box-shadow: 0 0 20px #4ade80;
-            transform: translateY(-150px);
-            opacity: 0;
-            transition: opacity 0.3s;
+            position: absolute; width: 100%; height: 5px; background-color: #4ade80; bottom: 40px;
+            box-shadow: 0 0 20px #4ade80; transform: translateY(-150px); opacity: 0; transition: opacity 0.3s;
         }
-        .mining .neon-light {
-            opacity: 1;
-            animation: scanLight 2s linear infinite;
-        }
-        @keyframes scanLight {
-            0% { transform: translateY(-80px); }
-            50% { transform: translateY(60px); }
-            100% { transform: translateY(-80px); }
-        }
+        .mining .neon-light { opacity: 1; animation: scanLight 2s linear infinite; }
+        @keyframes scanLight { 0% { transform: translateY(-80px); } 50% { transform: translateY(60px); } 100% { transform: translateY(-80px); } }
 
         /* NÚT ĐIỀU KHIỂN */
-        .controls {
-            display: flex;
-            gap: 15px;
-            width: 100%;
-            margin-top: 20px;
-        }
-        .btn-game {
-            flex: 1;
-            padding: 18px 10px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: bold;
-            border: none;
-            cursor: pointer;
-            transition: all 0.1s;
-            text-align: center;
-        }
-        .btn-start {
-            background-color: #166534;
-            color: #ffffff;
-            box-shadow: 0 6px 0 #052e16;
-        }
+        .controls { display: flex; gap: 15px; width: 100%; margin-top: 20px; }
+        .btn-game { flex: 1; padding: 15px 5px; border-radius: 12px; font-size: 14px; font-weight: bold; border: none; cursor: pointer; text-align: center; }
+        .btn-start { background-color: #166534; color: #ffffff; box-shadow: 0 6px 0 #052e16; }
         .btn-start:active { transform: translateY(4px); box-shadow: 0 2px 0 #052e16; }
-        
-        .btn-stop {
-            background-color: #1f2937;
-            color: #ef4444;
-            box-shadow: 0 6px 0 #111827;
-        }
-        .btn-stop:active { transform: translateY(4px); box-shadow: 0 2px 0 #111827; }
+        .btn-stop { background-color: #1f2937; color: #ef4444; box-shadow: 0 6px 0 #111827; }
+        .btn-upgrade { background-color: #1f2937; color: #d1d5db; border: 1px solid #374151; box-shadow: 0 6px 0 #111827; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;}
+        .btn-upgrade span.price { font-size: 10px; color: #fbbf24; }
 
-        .btn-upgrade {
-            background-color: #1f2937;
-            color: #d1d5db;
-            border: 1px solid #374151;
-            box-shadow: 0 6px 0 #111827;
-        }
-        .btn-upgrade:active { transform: translateY(4px); box-shadow: 0 2px 0 #111827; }
+        /* FORM NHẬP LIỆU GIAO DỊCH */
+        .form-box { background: #1a232f; width: 100%; border-radius: 15px; padding: 20px; box-sizing: border-box; margin-top: 20px; }
+        .form-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #ffffff; text-align: center; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 12px; color: #7a8a9a; margin-bottom: 5px; }
+        .input-group input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #374151; background: #111827; color: #fff; font-size: 16px; box-sizing: border-box; outline: none; }
+        .input-group input:focus { border-color: #4ade80; }
+        .btn-submit { width: 100%; background: #0ea5e9; color: white; padding: 15px; border-radius: 10px; font-weight: bold; border: none; font-size: 16px; margin-top: 10px; }
 
         /* THANH NAV DƯỚI CÙNG */
         .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: #111827;
-            display: flex;
-            justify-content: space-around;
-            padding: 12px 5px;
-            border-top: 1px solid #1f2937;
-            box-sizing: border-box;
-            z-index: 100;
+            position: fixed; bottom: 0; left: 0; width: 100%; background-color: #111827;
+            display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #1f2937; z-index: 100;
         }
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 11px;
-            color: #7a8a9a;
-            font-weight: bold;
-        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: #7a8a9a; font-weight: bold; cursor: pointer; width: 20%;}
         .nav-item.active { color: #ffffff; }
         .nav-icon { font-size: 22px; margin-bottom: 4px; }
-        
-        /* Chống bị lấp bởi bottom nav */
         .spacer { height: 80px; width: 100%; }
+        
+        .placeholder-text { text-align: center; margin-top: 50px; color: #7a8a9a; line-height: 1.6; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="user-avatar">
-            👤&nbsp;<span id="user-name">Người chơi</span>
+        <div class="user-info">
+            <div class="user-name">👤 <span id="user-name-display">Người chơi</span></div>
+            <div class="user-uid">UID: <span id="user-uid-display">Đang tải...</span></div>
         </div>
         <div class="right-header">
-            <span>🏆 <span class="trophy">7</span></span>
+            <span>🏆 <span class="trophy" id="level-display">1</span></span>
             <span>💰 <span id="gold-display" class="green-neon">0</span></span>
         </div>
     </div>
 
-    <div class="mining-container">
-        <div class="stats-row">
-            <div>⚡ TỐC ĐỘ: <span class="green-neon"><span id="mining-rate-display"></span> / giờ</span></div>
-            <div>🔄 CẤP MÁY: <span class="green-neon">LV 1</span></div>
+    <div id="tab-home" class="tab-content active">
+        <div class="mining-container">
+            <div class="stats-row">
+                <div>⚡ TỐC ĐỘ: <span class="green-neon"><span id="mining-rate-display"></span> / giờ</span></div>
+                <div>🔄 CẤP MÁY: <span class="green-neon">LV <span id="machine-lv">1</span></span></div>
+            </div>
+            <div class="display-label">SẢN LƯỢNG LƯU TRỮ</div>
+            <div class="mining-display" id="stored-output">0,0</div>
+            <div class="machine-view" id="machine-view">
+                <div class="machine-status" id="machine-status">NGỪNG HOẠT ĐỘNG</div>
+                <div style="font-size:60px; z-index: 10;">🖨️</div>
+                <div class="neon-light"></div>
+            </div>
         </div>
 
-        <div class="display-label">SẢN LƯỢNG LƯU TRỮ</div>
-        <div class="mining-display" id="stored-output">0,0</div>
-
-        <div class="machine-view" id="machine-view">
-            <div class="machine-status" id="machine-status">NGỪNG HOẠT ĐỘNG</div>
-            <div style="font-size:60px; z-index: 10;">🖨️</div>
-            <div class="neon-light"></div>
+        <div class="controls">
+            <button class="btn-game btn-start" id="start-btn" onclick="toggleMining()">► KHỞI ĐỘNG</button>
+            <button class="btn-game btn-upgrade" onclick="requestUpgrade()">
+                <div>⤴ NÂNG CẤP</div>
+                <span class="price" id="upgrade-price">50.000 Vàng</span>
+            </button>
         </div>
     </div>
 
-    <div class="controls">
-        <button class="btn-game btn-start" id="start-btn" onclick="toggleMining()">► KHỞI ĐỘNG</button>
-        <button class="btn-game btn-upgrade" onclick="requestUpgrade()">⤴ NÂNG CẤP</button>
+    <div id="tab-transfer" class="tab-content">
+        <div class="form-box">
+            <div class="form-title">💸 CHUYỂN VÀNG CHO NGƯỜI KHÁC</div>
+            <div class="input-group">
+                <label>UID Telegram người nhận:</label>
+                <input type="number" id="transfer-uid" placeholder="Ví dụ: 123456789">
+            </div>
+            <div class="input-group">
+                <label>Số Thỏi Vàng muốn chuyển:</label>
+                <input type="number" id="transfer-amount" placeholder="Tối thiểu 1,000">
+            </div>
+            <button class="btn-submit" onclick="submitTransfer()">Xác nhận Chuyển</button>
+        </div>
+    </div>
+
+    <div id="tab-tasks" class="tab-content">
+        <div class="placeholder-text">
+            <div style="font-size: 50px; margin-bottom: 10px;">📋</div>
+            <h3>Danh sách Nhiệm Vụ</h3>
+            <p>Hoàn thành nhiệm vụ để nhận thêm Vàng.<br>Tính năng đang được phát triển.</p>
+        </div>
+    </div>
+
+    <div id="tab-friends" class="tab-content">
+        <div class="placeholder-text">
+            <div style="font-size: 50px; margin-bottom: 10px;">👥</div>
+            <h3>Mời Đồng Bọn</h3>
+            <p>Mời bạn bè tham gia xưởng in để nhận % hoa hồng.<br>Tính năng đang được phát triển.</p>
+        </div>
+    </div>
+
+    <div id="tab-withdraw" class="tab-content">
+        <div class="form-box">
+            <div class="form-title">🏦 RÚT TIỀN MẶT</div>
+            <p style="text-align: center; color: #7a8a9a; font-size: 13px;">Tỷ giá: 50,000 Vàng = 20,000 VNĐ</p>
+            <div class="input-group">
+                <label>Ngân hàng / Momo của bạn:</label>
+                <input type="text" id="bank-info" placeholder="Ví dụ: Momo 0987654321">
+            </div>
+            <div class="input-group">
+                <label>Số Vàng muốn quy đổi:</label>
+                <input type="number" id="withdraw-amount" placeholder="Tối thiểu 50,000">
+            </div>
+            <button class="btn-submit" style="background: #10b981;" onclick="submitWithdraw()">Tạo Lệnh Rút Tiền</button>
+        </div>
     </div>
 
     <div class="spacer"></div>
 
     <div class="bottom-nav">
-        <div class="nav-item active">
+        <div class="nav-item active" onclick="switchTab('tab-home', this)">
             <div class="nav-icon">🏠</div> XƯỞNG IN
         </div>
-        <div class="nav-item" onclick="tg.showAlert('Tính năng Giao Dịch sắp ra mắt!')">
+        <div class="nav-item" onclick="switchTab('tab-transfer', this)">
             <div class="nav-icon">🔄</div> GIAO DỊCH
         </div>
-        <div class="nav-item" onclick="tg.showAlert('Tính năng Nhiệm Vụ sắp ra mắt!')">
+        <div class="nav-item" onclick="switchTab('tab-tasks', this)">
             <div class="nav-icon">✅</div> NHIỆM VỤ
         </div>
-        <div class="nav-item" onclick="tg.showAlert('Tính năng Đồng Bọn sắp ra mắt!')">
+        <div class="nav-item" onclick="switchTab('tab-friends', this)">
             <div class="nav-icon">👥</div> ĐỒNG BỌN
         </div>
-        <div class="nav-item" onclick="requestWithdraw()">
+        <div class="nav-item" onclick="switchTab('tab-withdraw', this)">
             <div class="nav-icon">🏦</div> ĐỔI THƯỞNG
         </div>
     </div>
 
     <script>
-        // Khởi tạo Telegram WebApp
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // --- CẤU HÌNH ---
-        const ratePerSecond = 0.5; // Tốc độ siêu chậm: 0.5 vàng/giây
-        const upgradeCost = 50000; // Giá nâng cấp
-        const withdrawThreshold = 50000; // Mốc đổi thưởng (50k vàng = 20k VNĐ)
+        // --- LẤY THÔNG TIN TELEGRAM ---
+        const user = tg.initDataUnsafe?.user;
+        let myUid = "Khách";
+        if (user) {
+            document.getElementById('user-name-display').innerText = user.first_name;
+            myUid = user.id; // Đây là UID Telegram chuẩn xác nhất
+            document.getElementById('user-uid-display').innerText = myUid;
+        }
 
-        // Các thành phần DOM
-        const miningRateDisplay = document.getElementById('mining-rate-display');
+        // --- HỆ THỐNG BIẾN LƯU TRỮ ---
+        let totalGold = parseFloat(localStorage.getItem('quocdat_gold') || 0);
+        let storedOutput = parseFloat(localStorage.getItem('quocdat_stored') || 0);
+        let machineLevel = parseInt(localStorage.getItem('quocdat_level') || 1);
+        
+        // HỆ THỐNG NÂNG CẤP: LV càng cao, tốc độ càng nhanh, giá càng đắt
+        let ratePerSecond = 0.5 * machineLevel; // Tốc độ cơ bản: LV1 = 0.5, LV2 = 1.0, LV3 = 1.5...
+        let upgradeCost = 50000 * machineLevel; // Giá nâng: Lên LV2 = 50k, Lên LV3 = 100k...
+
+        let isMining = false;
+        let miningInterval;
+
+        // Các thành phần DOM (Xưởng In)
         const goldDisplay = document.getElementById('gold-display');
         const storedOutputDisplay = document.getElementById('stored-output');
+        const miningRateDisplay = document.getElementById('mining-rate-display');
+        const machineLvDisplay = document.getElementById('machine-lv');
+        const levelDisplay = document.getElementById('level-display');
+        const upgradePriceDisplay = document.getElementById('upgrade-price');
         const startBtn = document.getElementById('start-btn');
         const machineStatus = document.getElementById('machine-status');
         const machineView = document.getElementById('machine-view');
 
-        // Lấy thông tin user
-        const user = tg.initDataUnsafe?.user;
-        if (user) {
-            document.getElementById('user-name').innerText = user.first_name;
-        }
-
-        // Biến toàn cục
-        let totalGold = parseFloat(localStorage.getItem('quocdat_gold') || 0);
-        let storedOutput = parseFloat(localStorage.getItem('quocdat_stored') || 0);
-        let isMining = false;
-        let miningInterval;
-
-        // Hiển thị tốc độ / giờ
-        miningRateDisplay.innerText = (ratePerSecond * 3600).toLocaleString('vi-VN');
-
-        // Hàm cập nhật giao diện
+        // --- HÀM CẬP NHẬT GIAO DIỆN ---
         function updateUI() {
             goldDisplay.innerText = Math.floor(totalGold).toLocaleString('vi-VN');
+            storedOutputDisplay.innerText = storedOutput.toFixed(1).replace('.', ',');
             
-            // Định dạng số đang nhảy: 1 chữ số thập phân, dùng dấu phẩy
-            let displayValue = storedOutput.toFixed(1).replace('.', ',');
-            storedOutputDisplay.innerText = displayValue;
+            // Cập nhật các chỉ số máy in
+            machineLvDisplay.innerText = machineLevel;
+            levelDisplay.innerText = machineLevel;
+            miningRateDisplay.innerText = (ratePerSecond * 3600).toLocaleString('vi-VN');
+            upgradePriceDisplay.innerText = upgradeCost.toLocaleString('vi-VN') + " Vàng";
         }
 
-        // Hàm Bật / Tắt máy in
+        // --- HÀM CHUYỂN TAB ---
+        function switchTab(tabId, element) {
+            // Tắt tất cả các tab
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            // Tắt hiệu ứng sáng ở menu dưới
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            
+            // Bật tab được chọn
+            document.getElementById(tabId).classList.add('active');
+            element.classList.add('active');
+            
+            // Nếu rời khỏi tab trang chủ, tự động thu hoạch tiền đang nhảy
+            if(tabId !== 'tab-home' && isMining) {
+                toggleMining(); 
+            }
+        }
+
+        // --- HÀM BẬT / TẮT MÁY IN ---
         function toggleMining() {
             if (!isMining) {
-                // ĐANG BẬT MÁY
                 isMining = true;
-                
                 startBtn.innerText = "⬜ NGỪNG HOẠT ĐỘNG";
-                startBtn.classList.remove('btn-start');
-                startBtn.classList.add('btn-stop');
-                
+                startBtn.classList.replace('btn-start', 'btn-stop');
                 machineStatus.innerText = "ĐANG SẢN XUẤT...";
                 machineStatus.classList.add('mining');
                 machineView.classList.add('mining');
 
-                // Nhảy số mượt: mỗi 100ms cộng 1/10 của ratePerSecond
                 miningInterval = setInterval(() => {
                     storedOutput += (ratePerSecond / 10);
                     updateUI();
                 }, 100);
-
             } else {
-                // ĐANG TẮT MÁY
                 isMining = false;
-                
                 startBtn.innerText = "► KHỞI ĐỘNG";
-                startBtn.classList.remove('btn-stop');
-                startBtn.classList.add('btn-start');
-                
+                startBtn.classList.replace('btn-stop', 'btn-start');
                 machineStatus.innerText = "NGỪNG HOẠT ĐỘNG";
                 machineStatus.classList.remove('mining');
                 machineView.classList.remove('mining');
-                
                 clearInterval(miningInterval);
 
-                // Cộng dồn vào ví tổng và reset
                 totalGold += storedOutput;
                 storedOutput = 0;
                 updateUI();
                 
-                // Lưu dữ liệu vào localStorage
                 localStorage.setItem('quocdat_gold', totalGold.toString());
                 localStorage.setItem('quocdat_stored', storedOutput.toString());
             }
         }
 
-        // Hàm xử lý Nâng Cấp
+        // --- HÀM NÂNG CẤP MÁY ---
         function requestUpgrade() {
             if (totalGold >= upgradeCost) {
-                // Thu hoạch trước khi nâng cấp
-                if(isMining) toggleMining(); 
+                if(isMining) toggleMining(); // Thu hoạch tiền đang chạy
                 
-                // Báo về cho Bot Python xử lý
-                const data = JSON.stringify({ action: "upgrade", cost: upgradeCost });
-                tg.sendData(data);
-                
-                tg.showAlert(`✅ Đã gửi yêu cầu nâng cấp máy với giá ${upgradeCost.toLocaleString('vi-VN')} Vàng!`);
-                
-                // Trừ tiền và lưu lại
+                // Trừ tiền và tăng cấp
                 totalGold -= upgradeCost;
-                updateUI();
+                machineLevel += 1;
+                
+                // Cập nhật lại sức mạnh và giá mới
+                ratePerSecond = 0.5 * machineLevel;
+                upgradeCost = 50000 * machineLevel;
+                
+                // Lưu vào máy
                 localStorage.setItem('quocdat_gold', totalGold.toString());
+                localStorage.setItem('quocdat_level', machineLevel.toString());
+                
+                updateUI();
+                
+                // Báo về Bot Telegram
+                tg.sendData(JSON.stringify({ action: "upgrade", new_level: machineLevel }));
+                tg.showAlert(`🎉 Chúc mừng! Máy in đã được nâng cấp lên LV ${machineLevel}. Tốc độ sản xuất đã tăng lên!`);
             } else {
-                tg.showAlert(`❌ Bạn cần tối thiểu ${upgradeCost.toLocaleString('vi-VN')} Vàng ở góc phải màn hình để nâng cấp!`);
+                tg.showAlert(`❌ Bạn chưa đủ Vàng! Cần ${upgradeCost.toLocaleString('vi-VN')} Vàng để lên LV ${machineLevel + 1}.`);
             }
         }
 
-        // Hàm xử lý Rút Tiền / Đổi Thưởng
-        function requestWithdraw() {
-            if (totalGold >= withdrawThreshold) {
-                // Thu hoạch trước
-                if(isMining) toggleMining();
-                
-                // Gửi dữ liệu rút tiền về Bot
-                const data = JSON.stringify({ 
-                    action: "rut_tien", 
-                    amount_gold: withdrawThreshold,
-                    vnd_value: 20000 
-                });
-                tg.sendData(data);
-                
-                tg.showAlert(`💰 Đã gửi lệnh đổi ${withdrawThreshold.toLocaleString('vi-VN')} Thỏi Vàng lấy 20.000 VNĐ. Hãy kiểm tra tin nhắn Bot!`);
-                
-                // Trừ tiền và đóng WebApp
-                totalGold -= withdrawThreshold;
-                updateUI();
-                localStorage.setItem('quocdat_gold', totalGold.toString());
-                tg.close();
-            } else {
-                tg.showAlert(`⚠️ Bạn chưa đủ điều kiện. Cần cày đủ ${withdrawThreshold.toLocaleString('vi-VN')} Thỏi Vàng mới có thể đổi lấy 20.000 VNĐ nhé!`);
+        // --- HÀM CHUYỂN TIỀN (GIAO DỊCH) ---
+        function submitTransfer() {
+            let targetUid = document.getElementById('transfer-uid').value;
+            let amount = parseInt(document.getElementById('transfer-amount').value);
+
+            if (!targetUid || isNaN(amount) || amount < 1000) {
+                tg.showAlert("⚠️ Vui lòng nhập đúng UID và số lượng (Tối thiểu 1,000 Vàng).");
+                return;
             }
+            if (targetUid == myUid) {
+                tg.showAlert("⚠️ Không thể tự chuyển tiền cho chính mình!");
+                return;
+            }
+            if (totalGold < amount) {
+                tg.showAlert("❌ Số dư Vàng của bạn không đủ để thực hiện giao dịch này.");
+                return;
+            }
+
+            // Trừ tiền
+            totalGold -= amount;
+            updateUI();
+            localStorage.setItem('quocdat_gold', totalGold.toString());
+
+            // Gửi dữ liệu về cho Bot xử lý chuyển tiền
+            tg.sendData(JSON.stringify({ 
+                action: "transfer", 
+                sender_uid: myUid,
+                target_uid: targetUid,
+                amount: amount
+            }));
+            
+            tg.showAlert(`💸 Đã chuyển thành công ${amount.toLocaleString('vi-VN')} Vàng tới UID ${targetUid}!`);
+            document.getElementById('transfer-uid').value = '';
+            document.getElementById('transfer-amount').value = '';
         }
 
-        // Khởi chạy giao diện lần đầu
+        // --- HÀM RÚT TIỀN (ĐỔI THƯỞNG) ---
+        function submitWithdraw() {
+            let bankInfo = document.getElementById('bank-info').value;
+            let amount = parseInt(document.getElementById('withdraw-amount').value);
+
+            if (!bankInfo || isNaN(amount) || amount < 50000) {
+                tg.showAlert("⚠️ Vui lòng nhập đầy đủ thông tin nhận tiền và số Vàng (Tối thiểu 50,000).");
+                return;
+            }
+            if (totalGold < amount) {
+                tg.showAlert("❌ Bạn không đủ Vàng để rút!");
+                return;
+            }
+
+            // Trừ tiền
+            totalGold -= amount;
+            updateUI();
+            localStorage.setItem('quocdat_gold', totalGold.toString());
+
+            let vnd_value = (amount / 50000) * 20000;
+
+            tg.sendData(JSON.stringify({ 
+                action: "rut_tien", 
+                uid: myUid,
+                bank_info: bankInfo,
+                amount_gold: amount,
+                vnd_value: vnd_value
+            }));
+            
+            tg.showAlert(`✅ Lệnh rút tiền đã được tạo! Hệ thống ghi nhận bạn đổi ${amount.toLocaleString('vi-VN')} Vàng lấy ${vnd_value.toLocaleString('vi-VN')} VNĐ. Hãy kiểm tra tin nhắn Bot!`);
+            document.getElementById('withdraw-amount').value = '';
+        }
+
+        // Khởi động
         updateUI();
     </script>
 </body>
 </html>
-
