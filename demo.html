@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Code Chống Nhìn Trộm</title>
+    
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    
+    <style>
+        /* Thiết lập giao diện cơ bản */
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: #f4f4f9;
+        }
+
+        /* Vùng chứa nội dung tài liệu quan trọng */
+        #content {
+            padding: 50px;
+            max-width: 800px;
+            margin: 0 auto;
+            transition: filter 0.3s ease; /* Tạo hiệu ứng làm mờ từ từ, mượt mà */
+        }
+
+        /* Lớp CSS này sẽ được JavaScript tự động thêm vào khi phát hiện nhìn trộm */
+        .peeping-detected {
+            filter: blur(15px); /* Làm mờ nội dung đi 15 pixel */
+            pointer-events: none; /* Không cho phép click chuột khi màn hình đang mờ */
+            user-select: none; /* Không cho phép bôi đen copy */
+        }
+
+        /* Giao diện khung camera (hiển thị ở góc phải màn hình) */
+        #video {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 150px;
+            border: 3px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        /* Hộp cảnh báo (Mặc định được ẩn đi bằng display: none) */
+        #warning-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff4757;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            display: none; 
+            z-index: 1001;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="warning-box">Phát hiện có người nhìn trộm! Đã khóa màn hình.</div>
+
+    <div id="content">
+        <h1>Báo cáo tài chính nội bộ</h1>
+        <p>Đây là những thông tin tuyệt mật. Hệ thống camera đang quét khuôn mặt của bạn.</p>
+        <p>Bạn hãy thử rủ thêm một người nữa vào chung khung hình camera (hoặc cầm một bức ảnh có khuôn mặt người khác giơ lên trước camera) để xem tính năng chống nhìn trộm hoạt động nhé!</p>
+    </div>
+
+    <video id="video" autoplay muted></video>
+
+    <script>
+        // Lấy các phần tử HTML để điều khiển bằng JavaScript
+        const video = document.getElementById('video');
+        const content = document.getElementById('content');
+        const warningBox = document.getElementById('warning-box');
+
+        // Bước 2: Tải mô hình trí tuệ nhân tạo (Model) dùng để quét khuôn mặt
+        // Chúng ta dùng mô hình "TinyFaceDetector" vì nó nhẹ và chạy nhanh trên trình duyệt
+        Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri('https://vladmandic.github.io/face-api/model/')
+        ]).then(startVideo);
+
+        // Bước 3: Hàm yêu cầu quyền bật Webcam của máy tính/điện thoại
+        function startVideo() {
+            navigator.mediaDevices.getUserMedia({ video: {} })
+                .then(stream => {
+                    video.srcObject = stream; // Truyền hình ảnh từ camera vào thẻ video
+                })
+                .catch(err => console.error("Không thể mở camera. Vui lòng cấp quyền!", err));
+        }
+
+        // Bước 4: Chạy vòng lặp kiểm tra liên tục khi camera đã bật
+        video.addEventListener('play', () => {
+            // Cứ mỗi 500 mili-giây (nửa giây), hàm này sẽ chạy một lần
+            setInterval(async () => {
+                // Quét camera để đếm tất cả khuôn mặt có trong khung hình
+                const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions());
+                
+                const numberOfFaces = detections.length;
+
+                // Nếu đếm được lớn hơn 1 người -> Bật chế độ chống nhìn trộm
+                if (numberOfFaces > 1) {
+                    content.classList.add('peeping-detected'); // Thêm hiệu ứng làm mờ
+                    warningBox.style.display = 'block';        // Hiển thị hộp cảnh báo đỏ
+                } 
+                // Nếu an toàn (có 1 người hoặc không có ai) -> Tắt chế độ nhìn trộm
+                else {
+                    content.classList.remove('peeping-detected'); // Bỏ hiệu ứng làm mờ
+                    warningBox.style.display = 'none';            // Ẩn hộp cảnh báo
+                }
+            }, 500); 
+        });
+    </script>
+
+</body>
+</html>
+
