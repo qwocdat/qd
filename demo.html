@@ -2,287 +2,277 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Samsung S26 Privacy Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Demo - Samsung S26 Style</title>
     
-    <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
 
     <style>
         :root {
             --ios-bg: #F2F2F7;
-            --ios-card: #FFFFFF;
-            --samsung-blue: #0355d0;
-            --active-green: #34C759;
+            --ios-blue: #007AFF;
+            --ios-green: #34C759;
+            --phone-border: #333;
         }
 
         body {
             font-family: -apple-system, sans-serif;
             background-color: var(--ios-bg);
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
-
-        /* Giao diện nội dung giả lập */
-        .app-container {
-            padding: 20px;
-            filter: blur(0px);
-            transition: filter 0.3s;
-        }
-
-        .header {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
-            padding: 40px 20px 20px;
+            padding: 20px;
+            margin: 0;
         }
 
-        .ios-card {
-            background: var(--ios-card);
+        h2 { font-size: 1.2rem; margin-bottom: 10px; }
+
+        /* KHUNG DEMO (Giống màn hình điện thoại) */
+        .demo-frame {
+            width: 320px;
+            height: 450px;
+            background: white;
+            border: 8px solid var(--phone-border);
+            border-radius: 30px;
+            position: relative;
+            overflow: hidden; /* Quan trọng để lớp che không tràn ra ngoài */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        /* Nội dung bên trong điện thoại */
+        .app-content {
+            padding: 20px;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        .chat-item {
+            background: #E9E9EB;
+            padding: 10px;
             border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 10px;
+            font-size: 14px;
         }
 
-        /* Màn hình chống nhìn trộm (Giống Samsung S26) */
+        /* LỚP CHỐNG NHÌN TRỘM (Chỉ nằm trong khung demo) */
         #privacy-shield {
-            position: fixed;
+            position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background-color: black; /* Tối đen 100% */
-            z-index: 10000;
+            background-color: black;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.2s ease-in-out;
+            transition: opacity 0.2s ease;
+            z-index: 99;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* Bảng điều khiển tùy chỉnh */
-        .settings-panel {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(20px);
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
-            padding: 20px;
-            box-sizing: border-box;
-            z-index: 1000;
+        /* BẢNG ĐIỀU KHIỂN (Nằm ngoài khung demo) */
+        .controls {
+            width: 320px;
+            margin-top: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
-        .setting-row {
+        .row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
-            border-bottom: 0.5px solid #DDD;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
         }
 
+        /* Switch kiểu iOS */
         .switch {
-            position: relative;
-            display: inline-block;
-            width: 46px; height: 26px;
+            position: relative; width: 44px; height: 24px;
         }
-
         .switch input { opacity: 0; width: 0; height: 0; }
-
         .slider {
-            position: absolute; cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #ccc;
-            transition: .4s; border-radius: 34px;
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc; transition: .3s; border-radius: 24px;
         }
-
         .slider:before {
-            position: absolute; content: "";
-            height: 22px; width: 22px;
-            left: 2px; bottom: 2px;
-            background-color: white;
-            transition: .4s; border-radius: 50%;
+            position: absolute; content: ""; height: 18px; width: 18px;
+            left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%;
         }
-
-        input:checked + .slider { background-color: var(--active-green); }
+        input:checked + .slider { background-color: var(--ios-green); }
         input:checked + .slider:before { transform: translateX(20px); }
 
-        .custom-range {
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        #status-dot {
-            width: 10px; height: 10px;
-            background: red; border-radius: 50%;
-            display: inline-block; margin-right: 5px;
-        }
+        #video { display: none; }
+        .status { font-size: 12px; text-align: center; color: #888; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <div id="privacy-shield"></div>
+    <h2>Privacy Demo (Samsung S26)</h2>
 
-    <div class="app-container">
-        <div class="header">
-            <h1 style="font-size: 28px; font-weight: 700;">Tin nhắn</h1>
-        </div>
-        
-        <div class="ios-card">
-            <b style="color: var(--samsung-blue);">Ngân hàng:</b>
-            <p>Số dư tài khoản của bạn là: 1,500,000,000 VND. Mã OTP là 667788.</p>
-        </div>
+    <div class="demo-frame">
+        <div id="privacy-shield"></div>
 
-        <div class="ios-card">
-            <b>Bạn thân:</b>
-            <p>Ê, tối nay đi quẩy không? Đừng cho ai nhìn thấy tin nhắn này nhé!</p>
-        </div>
-        
-        <div style="height: 300px;"></div> </div>
-
-    <div class="settings-panel">
-        <div style="text-align: center; margin-bottom: 10px;">
-            <div id="status-dot"></div> <span id="ai-log" style="font-size: 12px;">Đang tải AI...</span>
-        </div>
-
-        <div class="setting-row">
-            <span>Chống nhìn nghiêng (Góc hẹp)</span>
-            <label class="switch">
-                <input type="checkbox" id="btn-tilt">
-                <span class="slider"></span>
-            </label>
-        </div>
-
-        <div class="setting-row">
-            <span>Face ID (Mất dấu mặt = Khóa)</span>
-            <label class="switch">
-                <input type="checkbox" id="btn-face">
-                <span class="slider"></span>
-            </label>
-        </div>
-
-        <div class="setting-row">
-            <span>Phát hiện nhìn lén (2 người)</span>
-            <label class="switch">
-                <input type="checkbox" id="btn-spy">
-                <span class="slider"></span>
-            </label>
-        </div>
-
-        <div class="setting-row" style="flex-direction: column; align-items: flex-start;">
-            <span>Độ tối màn hình che: <span id="opacity-val">100%</span></span>
-            <input type="range" id="range-opacity" class="custom-range" min="0.5" max="1" step="0.1" value="1">
+        <div class="app-content">
+            <div style="font-weight: bold; margin-bottom: 15px;">Tin nhắn riêng tư</div>
+            <div class="chat-item"><b>Ngân hàng:</b> OTP của bạn là 888999. Đừng chia sẻ cho ai!</div>
+            <div class="chat-item"><b>Sếp:</b> File lương tháng này đã gửi vào mail nhé.</div>
+            <div class="chat-item"><b>Crush:</b> Tối nay 7h qua đón em đi chơi nhé ❤️</div>
+            <img src="https://api.dicebear.com/7.x/shapes/svg?seed=1" style="width: 100%; border-radius: 10px; margin-top: 10px;">
         </div>
     </div>
 
-    <video id="video" autoplay muted style="display:none;"></video>
+    <div class="controls">
+        <div class="row">
+            <span>Chống nhìn nghiêng</span>
+            <label class="switch">
+                <input type="checkbox" id="tilt-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="row">
+            <span>Mất mặt = Khóa (Face ID)</span>
+            <label class="switch">
+                <input type="checkbox" id="face-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="row">
+            <span>Cảnh báo người thứ 2</span>
+            <label class="switch">
+                <input type="checkbox" id="spy-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="row" style="border:none">
+            <span style="font-size: 13px;">Độ tối:</span>
+            <input type="range" id="dark-level" min="0.5" max="1" step="0.1" value="1" style="width: 150px;">
+        </div>
+        <div class="status" id="ai-status">Đang khởi tạo AI...</div>
+    </div>
+
+    <video id="video" autoplay muted playsinline></video>
 
     <script>
         const shield = document.getElementById('privacy-shield');
-        const aiLog = document.getElementById('ai-log');
-        const statusDot = document.getElementById('status-dot');
+        const aiStatus = document.getElementById('ai-status');
         const video = document.getElementById('video');
+        
+        const tiltToggle = document.getElementById('tilt-toggle');
+        const faceToggle = document.getElementById('face-toggle');
+        const spyToggle = document.getElementById('spy-toggle');
+        const darkLevel = document.getElementById('dark-level');
 
-        // Tùy chỉnh độ tối
-        let shieldOpacity = 1;
-        document.getElementById('range-opacity').addEventListener('input', (e) => {
-            shieldOpacity = e.target.value;
-            document.getElementById('opacity-val').innerText = (shieldOpacity * 100) + "%";
+        let isFaceMode = false;
+        let isSpyMode = false;
+        let isTiltMode = false;
+        let faceLock = false; // Trạng thái khóa do camera
+
+        // --- 1. XỬ LÝ GÓC NGHIÊNG (TILT) ---
+        window.addEventListener('deviceorientation', (e) => {
+            if (!isTiltMode) return;
+
+            // Beta: Độ gập máy. Cầm dọc bình thường là ~70-110 độ.
+            // Gamma: Nghiêng trái/phải. Cầm thẳng là ~0 độ.
+            const beta = e.beta; 
+            const gamma = Math.abs(e.gamma);
+
+            // NỚI RỘNG VÙNG AN TOÀN: 
+            // Nếu gamma > 25 (nghiêng trái/phải) HOẶC beta quá thấp/cao (nằm phẳng hoặc gập úp)
+            if (gamma > 25 || beta < 35 || beta > 140) {
+                activateShield("TILT");
+            } else {
+                deactivateShield("TILT");
+            }
         });
 
-        // --- CẢM BIẾN NGHIÊNG ---
-        let tiltEnabled = false;
-        document.getElementById('btn-tilt').addEventListener('change', async (e) => {
-            tiltEnabled = e.target.checked;
-            if (tiltEnabled && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        tiltToggle.onchange = async (e) => {
+            isTiltMode = e.target.checked;
+            if (isTiltMode && typeof DeviceOrientationEvent.requestPermission === 'function') {
                 await DeviceOrientationEvent.requestPermission();
             }
-        });
+            if (!isTiltMode) deactivateShield("TILT");
+        };
 
-        window.addEventListener('deviceorientation', (event) => {
-            if (!tiltEnabled) return;
-
-            // Xử lý góc nghiêng hợp lý cho tư thế cầm dọc
-            // Gamma: nghiêng trái/phải. Nếu quá 25 độ là che.
-            const sideTilt = Math.abs(event.gamma);
-            // Beta: độ dốc máy. Cầm dọc bình thường là 45-90. Nếu nằm phẳng (<20) hoặc quá đứng (>110) là che.
-            const frontTilt = event.beta;
-
-            if (sideTilt > 25 || frontTilt < 25 || frontTilt > 110) {
-                activateShield();
-            } else {
-                if (!faceLockActive) deactivateShield();
-            }
-        });
-
-        // --- FACE ID & NHÌN LÉN ---
-        let faceEnabled = false;
-        let spyEnabled = false;
-        let faceLockActive = false;
-
-        async function initAI() {
+        // --- 2. XỬ LÝ FACE ID (FACE-API.JS) ---
+        async function loadAI() {
             try {
-                // Sử dụng model siêu nhẹ từ CDN
                 const MODEL_URL = 'https://raw.githack.com/justadudewhohacks/face-api.js/master/weights';
                 await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-                statusDot.style.background = "#34C759";
-                aiLog.innerText = "Hệ thống bảo mật sẵn sàng";
-            } catch (e) {
-                aiLog.innerText = "Lỗi tải AI";
+                aiStatus.innerText = "✅ Hệ thống bảo mật đã sẵn sàng";
+            } catch (err) {
+                aiStatus.innerText = "❌ Lỗi tải AI. Hãy refresh lại.";
             }
         }
 
         async function startCamera() {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
-            video.srcObject = stream;
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
+                video.srcObject = stream;
+            } catch (err) {
+                alert("Bạn cần cấp quyền camera để dùng Face ID");
+            }
         }
 
-        document.getElementById('btn-face').addEventListener('change', (e) => {
-            faceEnabled = e.target.checked;
-            if (faceEnabled) startCamera();
-        });
+        faceToggle.onchange = (e) => {
+            isFaceMode = e.target.checked;
+            if (isFaceMode) startCamera();
+            if (!isFaceMode && !isSpyMode) deactivateShield("FACE");
+        };
 
-        document.getElementById('btn-spy').addEventListener('change', (e) => {
-            spyEnabled = e.target.checked;
-            if (spyEnabled) startCamera();
-        });
+        spyToggle.onchange = (e) => {
+            isSpyMode = e.target.checked;
+            if (isSpyMode) startCamera();
+            if (!isFaceMode && !isSpyMode) deactivateShield("FACE");
+        };
 
-        // Loop kiểm tra khuôn mặt
+        // Vòng lặp kiểm tra Camera
         video.addEventListener('play', () => {
             setInterval(async () => {
-                if (!faceEnabled && !spyEnabled) return;
+                if (!isFaceMode && !isSpyMode) return;
 
                 const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions());
-                
+                const numFaces = detections.length;
+
                 let shouldLock = false;
 
-                if (faceEnabled && detections.length === 0) {
-                    shouldLock = true; // Không thấy mặt chủ nhân
+                if (isFaceMode && numFaces === 0) {
+                    shouldLock = true; // Mất dấu mặt chủ
                 }
-                if (spyEnabled && detections.length > 1) {
+                if (isSpyMode && numFaces > 1) {
                     shouldLock = true; // Thấy người thứ 2
-                    if (navigator.vibrate) navigator.vibrate(100);
                 }
 
                 if (shouldLock) {
-                    faceLockActive = true;
-                    activateShield();
+                    faceLock = true;
+                    activateShield("FACE");
                 } else {
-                    faceLockActive = false;
-                    if (!tiltEnabled) deactivateShield();
+                    faceLock = false;
+                    deactivateShield("FACE");
                 }
             }, 400);
         });
 
-        function activateShield() {
-            shield.style.opacity = shieldOpacity;
+        // --- HÀM ĐIỀU KHIỂN SHIELD ---
+        let activeTriggers = new Set();
+
+        function activateShield(type) {
+            activeTriggers.add(type);
+            shield.style.opacity = darkLevel.value;
             shield.style.pointerEvents = "all";
         }
 
-        function deactivateShield() {
-            shield.style.opacity = "0";
-            shield.style.pointerEvents = "none";
+        function deactivateShield(type) {
+            activeTriggers.delete(type);
+            // Chỉ tắt shield nếu không còn lý do nào để khóa
+            if (activeTriggers.size === 0) {
+                shield.style.opacity = "0";
+                shield.style.pointerEvents = "none";
+            }
         }
 
-        initAI();
+        loadAI();
     </script>
 </body>
 </html>
