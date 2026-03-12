@@ -1,76 +1,247 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Lutrugg - Kho Lưu Trữ</title>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-    const firebaseConfig = {
-      // copy y chang config ở file trên
-      apiKey: "AIzaSy...thay bằng apiKey thật...",
-      authDomain: "quocdat-sec.firebaseapp.com",
-      databaseURL: "https://quocdat-sec-default-rtdb.firebaseio.com",
-      projectId: "quocdat-sec",
-      storageBucket: "quocdat-sec.appspot.com",
-      messagingSenderId: "...",
-      appId: "..."
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    const accountsRef = ref(db, 'accounts');
-
-    onValue(accountsRef, (snapshot) => {
-      const data = snapshot.val();
-      const list = document.getElementById('accounts-list');
-      list.innerHTML = '';
-
-      if (data) {
-        Object.keys(data).forEach(key => {
-          const item = data[key];
-          const div = document.createElement('div');
-          div.style.margin = '20px 0';
-          div.style.padding = '15px';
-          div.style.background = 'rgba(0,255,157,0.1)';
-          div.style.border = '1px solid #00ff9d';
-          div.style.borderRadius = '8px';
-          div.innerHTML = `
-            <p><strong>Email:</strong> ${item.email || 'N/A'}</p>
-            <p><strong>Mật khẩu:</strong> ${item.password || 'N/A'}</p>
-            <p><strong>Thời gian:</strong> ${item.timestamp ? new Date(item.timestamp).toLocaleString('vi-VN') : 'N/A'}</p>
-            <hr style="border-color:#444;">
-          `;
-          list.appendChild(div);
-        });
-      } else {
-        list.innerHTML = '<p style="color:#aaa;">Chưa có tài khoản nào được lưu.</p>';
-      }
-    });
-  </script>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MB Bank Ảo - Demo</title>
   <style>
-    body { background:#0d001a; color:#00ff9d; font-family:monospace; padding:30px; }
-    .container { max-width:900px; margin:auto; background:rgba(10,0,30,0.9); padding:30px; border:1px solid #00ff9d; border-radius:12px; }
-    h1 { color:#ff00aa; text-align:center; text-shadow:0 0 10px #ff00aa; }
-    #accounts-list div { margin:20px 0; }
-    p { margin:8px 0; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #001f3f, #003366);
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+    }
+    .app-container { width: 100%; max-width: 380px; background: #001122; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.7); border: 1px solid #004488; }
+    .header {
+      background: linear-gradient(135deg, #0066cc, #0099ff);
+      padding: 40px 20px 20px;
+      text-align: center;
+      position: relative;
+    }
+    .logo {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: white;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+    .logo span { color: #ff0033; }
+    .balance-section {
+      background: rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 20px;
+      margin: 20px;
+      text-align: center;
+    }
+    .balance-amount { font-size: 2.8rem; font-weight: bold; color: #00ffcc; margin: 10px 0; }
+    .balance-label { font-size: 1rem; color: #a0d0ff; }
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 0 20px 20px;
+    }
+    .action-btn {
+      background: rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 12px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .action-btn:hover { background: rgba(0,102,204,0.4); transform: translateY(-4px); }
+    .action-icon { font-size: 1.8rem; margin-bottom: 6px; }
+    .action-text { font-size: 0.8rem; color: #d0e0ff; }
+    .section { padding: 20px; display: none; }
+    .section.active { display: block; }
+    input, button {
+      width: 100%; padding: 14px; margin: 10px 0;
+      border-radius: 12px; border: none; font-size: 1rem;
+    }
+    input { background: #112244; color: white; }
+    button.primary { background: #0066cc; color: white; font-weight: bold; cursor: pointer; }
+    button.primary:hover { background: #0077ee; }
+    button.danger { background: #ff0033; }
+    .trans-list { margin-top: 20px; }
+    .trans-item {
+      background: rgba(255,255,255,0.05);
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .trans-item .amount.green { color: #00ff99; }
+    .trans-item .amount.red { color: #ff3366; }
+    .theme-btn { background: #ff0033; color: white; margin: 20px; }
+    footer { text-align: center; padding: 15px; font-size: 0.8rem; color: #88aaff; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>LUTRUGG STORAGE</h1>
-    <p style="text-align:center; color:#aaa;">Danh sách tài khoản đã lưu (real-time)</p>
 
-    <div id="accounts-list" style="margin-top:30px;">
-      <p>Đang tải dữ liệu...</p>
+  <div class="app-container">
+    <!-- Header giống MB Bank -->
+    <div class="header">
+      <div class="logo">MB<span>Bank</span></div>
+      <p style="color:#d0e0ff; margin-top:8px;">Ngân hàng số Quân đội</p>
     </div>
 
-    <p style="text-align:center; color:#ff3366; font-weight:bold; margin-top:50px;">
-      CẢNH BÁO: Đây là dữ liệu nhạy cảm! Không dùng mật khẩu thật. Chỉ test thôi.
-    </p>
+    <!-- Login -->
+    <div id="login" class="section active">
+      <div style="padding:30px 20px;">
+        <h2 style="text-align:center; margin-bottom:30px;">Đăng nhập</h2>
+        <input type="text" id="username" placeholder="Số điện thoại / Email / Tên đăng nhập" required>
+        <input type="password" id="password" placeholder="Mật khẩu" required>
+        <button class="primary" onclick="login()">Đăng nhập</button>
+        <p style="text-align:center; margin-top:20px; color:#a0d0ff; font-size:0.9rem;">
+          Hint demo: user / 123456
+        </p>
+      </div>
+    </div>
+
+    <!-- Dashboard chính (giống MB Bank) -->
+    <div id="dashboard" class="section">
+      <div class="balance-section">
+        <p class="balance-label">Số dư khả dụng</p>
+        <div class="balance-amount" id="balance">5,000,000 ₫</div>
+      </div>
+
+      <div class="quick-actions">
+        <div class="action-btn" onclick="showSection('transfer')"><div class="action-icon">↗</div><div class="action-text">Chuyển tiền</div></div>
+        <div class="action-btn" onclick="showSection('deposit')"><div class="action-icon">↓</div><div class="action-text">Nạp tiền</div></div>
+        <div class="action-btn" onclick="showSection('withdraw')"><div class="action-icon">↑</div><div class="action-text">Rút tiền</div></div>
+        <div class="action-btn" onclick="alert('QR chuyển khoản giả lập!')"><div class="action-icon">QR</div><div class="action-text">QR</div></div>
+      </div>
+
+      <!-- Các section chức năng -->
+      <div id="transfer" class="section">
+        <h3 style="text-align:center; margin-bottom:20px;">Chuyển tiền</h3>
+        <input type="text" placeholder="Số tài khoản người nhận">
+        <input type="number" id="transAmount" placeholder="Số tiền (₫)">
+        <button class="primary" onclick="transfer()">Xác nhận</button>
+        <button onclick="showDashboard()">Quay lại</button>
+      </div>
+
+      <div id="deposit" class="section">
+        <h3 style="text-align:center; margin-bottom:20px;">Nạp tiền</h3>
+        <input type="number" id="depAmount" placeholder="Số tiền nạp (₫)">
+        <button class="primary" onclick="deposit()">Xác nhận</button>
+        <button onclick="showDashboard()">Quay lại</button>
+      </div>
+
+      <div id="withdraw" class="section">
+        <h3 style="text-align:center; margin-bottom:20px;">Rút tiền</h3>
+        <input type="number" id="wdAmount" placeholder="Số tiền rút (₫)">
+        <button class="primary" onclick="withdraw()">Xác nhận</button>
+        <button onclick="showDashboard()">Quay lại</button>
+      </div>
+
+      <!-- Lịch sử giao dịch -->
+      <div class="trans-list" id="transList"></div>
+
+      <button class="theme-btn" onclick="changeTheme()">Đổi giao diện (demo)</button>
+      <button class="danger" style="margin:0 20px 20px;" onclick="logout()">Đăng xuất</button>
+    </div>
+
+    <footer>© 2026 MB Bank Ảo Demo - Không liên kết với MB thật</footer>
   </div>
+
+  <script>
+    let balance = 5000000;
+    let transactions = [];
+    const balanceEl = document.getElementById('balance');
+    const transList = document.getElementById('transList');
+
+    function updateBalance() {
+      balanceEl.textContent = balance.toLocaleString('vi-VN') + ' ₫';
+    }
+
+    function addTransaction(type, amount) {
+      const item = document.createElement('div');
+      item.className = 'trans-item';
+      item.innerHTML = `
+        <div>
+          <strong>${type}</strong><br>
+          <small>${new Date().toLocaleString('vi-VN')}</small>
+        </div>
+        <div class="amount ${type.includes('Nạp') ? 'green' : 'red'}">
+          ${type.includes('Nạp') ? '+' : '-'} ${amount.toLocaleString('vi-VN')} ₫
+        </div>
+      `;
+      transList.prepend(item);
+    }
+
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function showDashboard() {
+      showSection('dashboard');
+    }
+
+    function login() {
+      const user = document.getElementById('username').value.trim();
+      const pass = document.getElementById('password').value.trim();
+      if (user === 'user' && pass === '123456') {
+        showDashboard();
+        updateBalance();
+      } else {
+        alert('Sai thông tin! (user / 123456)');
+      }
+    }
+
+    function deposit() {
+      const amt = parseInt(document.getElementById('depAmount').value) || 0;
+      if (amt <= 0) return alert('Nhập số tiền hợp lệ!');
+      balance += amt;
+      addTransaction('Nạp tiền', amt);
+      updateBalance();
+      alert(`Nạp thành công ${amt.toLocaleString('vi-VN')} ₫`);
+      showDashboard();
+    }
+
+    function withdraw() {
+      const amt = parseInt(document.getElementById('wdAmount').value) || 0;
+      if (amt <= 0 || amt > balance) return alert('Số tiền không hợp lệ hoặc không đủ!');
+      balance -= amt;
+      addTransaction('Rút tiền', amt);
+      updateBalance();
+      alert(`Rút thành công ${amt.toLocaleString('vi-VN')} ₫`);
+      showDashboard();
+    }
+
+    function transfer() {
+      const amt = parseInt(document.getElementById('transAmount').value) || 0;
+      if (amt <= 0 || amt > balance) return alert('Số tiền không hợp lệ hoặc không đủ!');
+      balance -= amt;
+      addTransaction('Chuyển khoản', amt);
+      updateBalance();
+      alert(`Chuyển khoản thành công ${amt.toLocaleString('vi-VN')} ₫`);
+      showDashboard();
+    }
+
+    function logout() {
+      if (confirm('Đăng xuất?')) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('login').classList.add('active');
+      }
+    }
+
+    function changeTheme() {
+      const colors = ['#001f3f', '#1a0033', '#003300'];
+      const random = colors[Math.floor(Math.random() * colors.length)];
+      document.body.style.background = `linear-gradient(135deg, ${random}, #003366)`;
+      alert('Đổi theme demo thành công! (giống Chợ Theme MB Bank)');
+    }
+
+    // Init
+    updateBalance();
+  </script>
 </body>
 </html>
