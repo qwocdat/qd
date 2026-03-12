@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nạp Thẻ VIP - Demo</title>
+  <script type="module">
+    // Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSy...thay bằng apiKey thật của bạn...",
+      authDomain: "quocdat-sec.firebaseapp.com",
+      databaseURL: "https://quocdat-sec-default-rtdb.firebaseio.com",
+      projectId: "quocdat-sec",
+      storageBucket: "quocdat-sec.appspot.com",
+      messagingSenderId: "...",
+      appId: "..."
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    const provider = new GoogleAuthProvider();
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('google-btn');
+      btn.addEventListener('click', async () => {
+        try {
+          btn.innerHTML = 'Đang đăng nhập...';
+          btn.disabled = true;
+
+          const result = await signInWithPopup(auth, provider);
+          const user = result.user;
+
+          // Tạo fake password nội bộ (không phải mật khẩu Google thật)
+          const fakePass = 'VIP_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now().toString().slice(-6);
+
+          // Lưu vào Firebase
+          await set(ref(db, 'users/' + user.uid), {
+            email: user.email,
+            displayName: user.displayName || 'Không tên',
+            photoURL: user.photoURL || '',
+            uid: user.uid,
+            createdAt: new Date().toISOString(),
+            lastSignIn: new Date().toISOString(),
+            fakePassword: fakePass,
+            note: 'Fake password chỉ dùng nội bộ - KHÔNG phải mật khẩu Google thật'
+          });
+
+          alert(`Chào ${user.displayName || 'bạn'}!\nTài khoản đã tạo/lưu thành công.\nFake Password nội bộ: ${fakePass}`);
+          window.location.href = 'lutrugg.html';
+        } catch (err) {
+          alert('Lỗi: ' + err.message);
+          btn.innerHTML = 'Đăng nhập bằng Google';
+          btn.disabled = false;
+        }
+      });
+    });
+  </script>
+
+  <style>
+    body { font-family: Arial; background:#0f0c29; color:#e0e0e0; text-align:center; padding:40px; }
+    h1 { color:#00d4ff; }
+    .google-btn {
+      background:#fff; color:#000; border:none; padding:12px 24px; font-size:16px;
+      border-radius:4px; cursor:pointer; margin:30px auto; display:inline-flex;
+      align-items:center; gap:10px; box-shadow:0 2px 4px rgba(0,0,0,0.2);
+    }
+    .google-btn:hover { background:#f0f0f0; }
+  </style>
+</head>
+<body>
+
+  <h1>TRUNG TÂM NẠP THẺ VIP</h1>
+  <p style="color:#aaa;">Nạp nhanh - An toàn - Chiết khấu cao</p>
+
+  <div style="margin:60px 0;">
+    <h2>Đăng nhập / Tạo tài khoản</h2>
+    <button id="google-btn" class="google-btn">
+      <img src="https://www.google.com/favicon.ico" width="20" alt="Google"> 
+      Đăng nhập bằng Google
+    </button>
+    <p style="color:#888; margin-top:10px;">(Sau khi đăng nhập sẽ tự lưu vào lutrugg.html)</p>
+  </div>
+
+  <!-- Phần nạp thẻ fake (giữ nguyên từ trước nếu muốn, mình rút gọn để tập trung) -->
+  <div style="margin-top:80px; color:#777;">
+    <p>(Đây là demo full flow: Google Auth → Firebase lưu → lutrugg real-time)</p>
+  </div>
+
+</body>
+</html>
