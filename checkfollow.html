@@ -2,51 +2,50 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>QuocDat AI - Fix Cứng</title>
+    <title>QUOCDAT AI - Fix 100%</title>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
-        body { background: #000; color: #fff; text-align: center; padding: 20px; font-family: sans-serif; }
-        .card { background: #111; border: 1px solid #333; padding: 25px; border-radius: 20px; max-width: 400px; margin: auto; }
-        .btn { background: #007AFF; color: #fff; border: none; padding: 15px; width: 100%; border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 15px; }
-        #res { display: none; margin-top: 20px; padding: 10px; border: 1px dashed #007AFF; color: #00ff00; }
+        body { background: #000; color: #fff; text-align: center; font-family: sans-serif; padding: 20px; }
+        .card { background: #111; border: 1px solid #333; padding: 25px; border-radius: 20px; max-width: 380px; margin: auto; }
+        .btn { background: #007AFF; color: #fff; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+        #res { display: none; margin-top: 20px; padding: 15px; background: #222; border: 1px dashed #007AFF; color: #00ff00; }
     </style>
 </head>
 <body>
     <div class="card">
-        <h3>QUOCDAT AI - XÁC MINH</h3>
-        <input type="file" id="imgInp" accept="image/*">
-        <button class="btn" onclick="process()">XÁC MINH NGAY</button>
-        <div id="status" style="margin-top:15px; color: yellow;"></div>
-        <div id="res">Mã của mày: <strong id="k"></strong></div>
+        <h2>QUOCDAT AI - XÁC MINH</h2>
+        <input type="file" id="inp" accept="image/*">
+        <button class="btn" onclick="verify()">QUÉT TRẠNG THÁI</button>
+        <div id="st" style="margin-top:10px; color: #aaa;"></div>
+        <div id="res">Mã VIP của mày: <strong id="key"></strong></div>
     </div>
 
     <script>
-        async function process() {
-            const f = document.getElementById('imgInp').files[0];
-            const st = document.getElementById('status');
-            if(!f) return alert("Chọn ảnh đã Đạt!");
-            st.innerText = "⏳ AI đang lọc nhiễu vùng dưới...";
+        async function verify() {
+            const f = document.getElementById('inp').files[0];
+            const st = document.getElementById('st');
+            if(!f) return alert("Chọn ảnh đi Đạt!");
+            st.innerText = "⏳ Đang lọc nhiễu & soi ID...";
 
             try {
                 const res = await Tesseract.recognize(f, 'vie+eng');
                 const t = res.data.text.toLowerCase();
-                
-                // Logic cực chuẩn: Tìm ID của mày
-                if (t.includes("@quocdatdv")) {
-                    // Cắt lấy phần văn bản phía trên (trước chữ "đề xuất" hoặc "thích")
-                    const topPart = t.split("đề xuất")[0].split("thích")[0];
-                    
-                    if ((topPart.includes("nhắn tin") || topPart.includes("message")) && !topPart.includes("follow")) {
+
+                // Logic mới: Kiểm tra ID @quocdatdv và chữ Nhắn tin
+                // Chỉ lấy phần văn bản phía trên (bỏ qua phần Gợi ý)
+                const checkPart = t.split("đề xuất")[0]; 
+
+                if (checkPart.includes("@quocdatdv") && (checkPart.includes("nhắn tin") || checkPart.includes("message"))) {
+                    // Check xem có nút Follow đỏ của CHÍNH CHỦ không
+                    if (!checkPart.includes("follow") || checkPart.includes("đang follow")) {
                         const key = "qdv-" + Math.random().toString(36).substring(2, 10);
-                        document.getElementById('k').innerText = key;
+                        document.getElementById('key').innerText = key;
                         document.getElementById('res').style.display = "block";
-                        st.innerHTML = "<b style='color:#00ff00'>✅ OK! ĐÃ XÁC MINH.</b>";
-                    } else {
-                        st.innerHTML = "<b style='color:#ff4d4d'>❌ THẤT BẠI!</b><br>Vẫn thấy nút đỏ hoặc chưa nhấn Follow.";
+                        st.innerHTML = "<b style='color:#00ff00'>✅ XÁC MINH THÀNH CÔNG!</b>";
+                        return;
                     }
-                } else {
-                    st.innerText = "❌ Không tìm thấy ID @quocdatdv trong ảnh!";
                 }
+                st.innerHTML = "<b style='color:#ff4d4d'>❌ AI KHÔNG THẤY NÚT NHẮN TIN!</b><br>Hãy chụp rõ phần đầu trang cá nhân.";
             } catch(e) { st.innerText = "⚠️ Lỗi AI!"; }
         }
     </script>
