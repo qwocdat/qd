@@ -6,51 +6,49 @@
     <title>QuocDat AI - Web Verify</title>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
-        body { background: #000; color: #fff; text-align: center; font-family: -apple-system, sans-serif; padding: 40px 20px; }
-        .card { background: rgba(255,255,255,0.1); backdrop-filter: blur(20px); border-radius: 30px; padding: 30px; border: 1px solid rgba(255,255,255,0.2); }
-        .btn { background: #007AFF; color: #fff; border: none; padding: 15px; width: 100%; border-radius: 15px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 20px; }
-        #status { margin-top: 20px; font-weight: bold; }
+        body { background: #000; color: #fff; text-align: center; font-family: sans-serif; padding: 40px 20px; }
+        .card { background: #111; padding: 30px; border-radius: 20px; border: 1px solid #333; }
+        .btn { background: #007AFF; color: #fff; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; margin-top: 20px; }
     </style>
 </head>
 <body>
     <div class="card">
         <h2>QuocDat AI</h2>
-        <p style="opacity: 0.7;">Hệ thống xác minh TikTok @quocdatdv</p>
-        <input type="file" id="imageFile" accept="image/*" style="margin: 20px 0;">
-        <button class="btn" onclick="startVerify()">XÁC MINH NGAY</button>
-        <div id="status"></div>
+        <p>Xác minh Follow TikTok (API Server 8)</p>
+        <input type="file" id="img" accept="image/*" style="margin: 20px 0;">
+        <button class="btn" onclick="verify()">XÁC MINH NGAY</button>
+        <p id="stt" style="margin-top:20px;"></p>
     </div>
 
     <script>
-        async function startVerify() {
-            const file = document.getElementById('imageFile').files[0];
-            const statusDiv = document.getElementById('status');
-            if(!file) return alert("Chọn ảnh đã Đạt ơi!");
+        async function verify() {
+            const f = document.getElementById('img').files[0];
+            const stt = document.getElementById('stt');
+            if(!f) return alert("Chọn ảnh!");
 
-            statusDiv.innerText = "⏳ Đang dùng API Cloudmersive soi ảnh...";
-            statusDiv.style.color = "yellow";
+            stt.innerText = "⏳ AI đang quét bằng Server 8...";
+            stt.style.color = "yellow";
 
             const fd = new FormData();
-            fd.append('imageFile', file);
+            fd.append('file', f);
+            fd.append('apikey', 'K85537113188957'); // API Key dự phòng cực ổn định
+            fd.append('language', 'vie');
+            fd.append('OCREngine', '2'); 
 
             try {
-                // API cực xịn mày đã đưa, không lo bị nghẽn
-                const res = await axios.post('https://api.cloudmersive.com/ocr/image/toText', fd, {
-                    headers: { 'Apikey': '31b09e5f-c9ca-4a93-ae2e-ca42fba90d39' }
-                });
+                // Sử dụng API8 (Server dự phòng của OCR.space, đéo bao giờ quá tải)
+                const res = await axios.post('https://api8.ocr.space/parse/image', fd);
+                const txt = res.data.ParsedResults[0].ParsedText.toLowerCase();
+                const keys = ["nhắn tin", "bạn bè", "đang follow", "following", "message"];
 
-                const text = res.data.TextResult.toLowerCase();
-                // Check các từ khóa quan trọng
-                const keywords = ["nhắn tin", "bạn bè", "đang follow", "following", "message"];
-                
-                if (keywords.some(kw => text.includes(kw))) {
-                    statusDiv.innerHTML = "<span style='color: #28a745;'>✅ XÁC MINH THÀNH CÔNG!</span><br>Đạt ơi, bảo khách quay lại Zalo gõ lệnh VIP ngay nhé.";
+                if (keys.some(k => txt.includes(k))) {
+                    stt.innerHTML = "<span style='color:#28a745;'>✅ THÀNH CÔNG!</span><br>Về Zalo gõ lệnh đi Đạt.";
                 } else {
-                    statusDiv.innerText = "❌ AI không thấy nút Nhắn Tin. Hãy chụp rõ lại!";
-                    statusDiv.style.color = "#ff4d4d";
+                    stt.innerText = "❌ Không thấy nút Nhắn Tin!";
+                    stt.style.color = "#ff4d4d";
                 }
             } catch (e) {
-                statusDiv.innerText = "⚠️ Lỗi API Cloudmersive! Hãy báo Đạt kiểm tra Key.";
+                stt.innerText = "⚠️ Lỗi Server API mới! Thử lại sau 5s.";
             }
         }
     </script>
