@@ -1,56 +1,93 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuocDat AI - Web Verify</title>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <title>QuocDat AI - Local Scan</title>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
-        body { background: #000; color: #fff; text-align: center; font-family: sans-serif; padding: 40px 20px; }
-        .card { background: #111; padding: 30px; border-radius: 20px; border: 1px solid #333; }
-        .btn { background: #007AFF; color: #fff; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; margin-top: 20px; }
+        body { background: #0b0b0b; color: #fff; font-family: -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #1a1a1a; padding: 30px; border-radius: 24px; border: 1px solid #333; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h2 { color: #007AFF; margin-bottom: 10px; }
+        .upload-area { border: 2px dashed #444; padding: 20px; border-radius: 15px; margin: 20px 0; cursor: pointer; }
+        .btn { background: #007AFF; color: #fff; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; }
+        .btn:disabled { background: #333; cursor: not-allowed; }
+        #status { margin-top: 20px; font-size: 14px; line-height: 1.5; }
+        .loader { display: none; margin: 10px auto; border: 3px solid #333; border-top: 3px solid #007AFF; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2>QuocDat AI</h2>
-        <p>Xác minh Follow TikTok (API Server 8)</p>
-        <input type="file" id="img" accept="image/*" style="margin: 20px 0;">
-        <button class="btn" onclick="verify()">XÁC MINH NGAY</button>
-        <p id="stt" style="margin-top:20px;"></p>
+
+<div class="card">
+    <h2>QuocDat AI Web</h2>
+    <p style="opacity: 0.6;">Tự động quét ảnh bằng AI máy khách</p>
+    
+    <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+        <span id="fileName">Bấm để chọn ảnh TikTok</span>
+        <input type="file" id="fileInput" accept="image/*" hidden onchange="updateFileName(this)">
     </div>
 
-    <script>
-        async function verify() {
-            const f = document.getElementById('img').files[0];
-            const stt = document.getElementById('stt');
-            if(!f) return alert("Chọn ảnh!");
+    <button id="verifyBtn" class="btn" onclick="startAIScan()">XÁC MINH NGAY</button>
+    <div class="loader" id="loader"></div>
+    <div id="status"></div>
+</div>
 
-            stt.innerText = "⏳ AI đang quét bằng Server 8...";
-            stt.style.color = "yellow";
+<script>
+    function updateFileName(input) {
+        if (input.files[0]) document.getElementById('fileName').innerText = input.files[0].name;
+    }
 
-            const fd = new FormData();
-            fd.append('file', f);
-            fd.append('apikey', 'K85537113188957'); // API Key dự phòng cực ổn định
-            fd.append('language', 'vie');
-            fd.append('OCREngine', '2'); 
+    async function startAIScan() {
+        const fileInput = document.getElementById('fileInput');
+        const status = document.getElementById('status');
+        const btn = document.getElementById('verifyBtn');
+        const loader = document.getElementById('loader');
 
-            try {
-                // Sử dụng API8 (Server dự phòng của OCR.space, đéo bao giờ quá tải)
-                const res = await axios.post('https://api8.ocr.space/parse/image', fd);
-                const txt = res.data.ParsedResults[0].ParsedText.toLowerCase();
-                const keys = ["nhắn tin", "bạn bè", "đang follow", "following", "message"];
+        if (!fileInput.files[0]) return alert("Chưa chọn ảnh mà Đạt!");
 
-                if (keys.some(k => txt.includes(k))) {
-                    stt.innerHTML = "<span style='color:#28a745;'>✅ THÀNH CÔNG!</span><br>Về Zalo gõ lệnh đi Đạt.";
-                } else {
-                    stt.innerText = "❌ Không thấy nút Nhắn Tin!";
-                    stt.style.color = "#ff4d4d";
-                }
-            } catch (e) {
-                stt.innerText = "⚠️ Lỗi Server API mới! Thử lại sau 5s.";
+        // Chuẩn bị quét
+        btn.disabled = true;
+        loader.style.display = "block";
+        status.innerText = "⏳ AI đang khởi động bộ não...";
+        status.style.color = "yellow";
+
+        try {
+            // Chạy AI quét chữ trực tiếp trên trình duyệt
+            const result = await Tesseract.recognize(
+                fileInput.files[0],
+                'vie+eng', // Nhận diện tiếng Việt và Anh
+                { logger: m => {
+                    if(m.status === 'recognizing text') {
+                        status.innerText = `⏳ AI đang soi: ${Math.round(m.progress * 100)}%`;
+                    }
+                }}
+            );
+
+            const text = result.data.text.toLowerCase();
+            console.log("AI Scanned Text:", text);
+
+            // Các từ khóa xác nhận Follow
+            const keywords = ["nhắn tin", "bạn bè", "đang follow", "following", "message", "tin nhắn"];
+            const isFollowed = keywords.some(kw => text.includes(kw));
+
+            if (isFollowed) {
+                status.innerHTML = "<b style='color:#28a745;'>✅ XÁC MINH THÀNH CÔNG!</b><br>Quay lại Zalo gõ lệnh để nhận Link VIP.";
+                // Lưu vào bộ nhớ trình duyệt hoặc gửi thông báo (tùy Đạt)
+            } else {
+                status.innerHTML = "<b style='color:#ff4d4d;'>❌ AI KHÔNG THẤY NÚT FOLLOW!</b><br>Hãy chụp rõ trang cá nhân TikTok của Đạt.";
             }
+
+        } catch (error) {
+            console.error(error);
+            status.innerText = "⚠️ Lỗi AI: Không thể xử lý ảnh này!";
+            status.style.color = "#ff4d4d";
+        } finally {
+            btn.disabled = false;
+            loader.style.display = "none";
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>
