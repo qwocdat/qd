@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuocDat AI - Verification</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        :root {
+            --ios-blue: #007AFF;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #1e1e2f, #111111);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        /* Giao diện Liquid Glass */
+        .glass-container {
+            width: 85%;
+            max-width: 350px;
+            padding: 40px 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            color: white;
+        }
+
+        h2 { font-weight: 600; margin-bottom: 10px; font-size: 24px; }
+        p { opacity: 0.7; font-size: 14px; margin-bottom: 30px; }
+
+        /* Nút Up ảnh kiểu iOS */
+        .upload-btn {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            display: block;
+            margin-bottom: 20px;
+            transition: 0.3s;
+        }
+        .upload-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.2); }
+
+        .btn-verify {
+            background: var(--ios-blue);
+            color: white;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 10px 20px rgba(0, 122, 255, 0.3);
+            cursor: pointer;
+        }
+
+        /* Pop-up Liquid Glass Thông báo */
+        #popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 280px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(25px);
+            border-radius: 20px;
+            padding: 20px;
+            z-index: 100;
+            color: #000;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        #popup h3 { margin: 0 0 10px 0; font-size: 18px; }
+        #popup p { color: #333; margin-bottom: 15px; }
+        .popup-close {
+            color: var(--ios-blue);
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            padding-top: 10px;
+        }
+
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            z-index: 99;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="glass-container animate__animated animate__fadeInUp">
+        <h2>QuocDat AI</h2>
+        <p>Hệ thống xác minh TikTok @quocdatdv</p>
+
+        <label class="upload-btn" for="fileInput">
+            <span id="fileName">📁 Tải ảnh màn hình lên</span>
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+        </label>
+
+        <button class="btn-verify" id="startVerify">🚀 XÁC MINH NGAY</button>
+    </div>
+
+    <div id="overlay"></div>
+    <div id="popup" class="animate__animated">
+        <h3 id="popTitle">Thông báo</h3>
+        <p id="popMsg">Đang xử lý dữ liệu...</p>
+        <div class="popup-close" onclick="closePopup()">OK</div>
+    </div>
+
+    <script>
+        const API_KEY = 'K85537113188957';
+        const fileInput = document.getElementById('fileInput');
+        const fileNameText = document.getElementById('fileName');
+        const startVerify = document.getElementById('startVerify');
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const uid = urlParams.get('uid');
+
+        fileInput.onchange = () => {
+            if(fileInput.files[0]) {
+                fileNameText.innerText = "✅ Đã chọn: " + fileInput.files[0].name;
+                showPopup("Tải ảnh", "Ảnh đã được nạp vào bộ nhớ tạm!", "animate__bounceIn");
+            }
+        };
+
+        function showPopup(title, msg, anim) {
+            document.getElementById('popTitle').innerText = title;
+            document.getElementById('popMsg').innerText = msg;
+            document.getElementById('overlay').style.display = 'block';
+            const pop = document.getElementById('popup');
+            pop.style.display = 'block';
+            pop.className = 'animate__animated ' + anim;
+        }
+
+        function closePopup() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('popup').style.display = 'none';
+        }
+
+        startVerify.onclick = async () => {
+            if(!fileInput.files[0]) return showPopup("Lỗi", "Mày chưa chọn ảnh kìa Đạt!", "animate__shakeX");
+            
+            showPopup("AI Đang Soi", "Vui lòng đợi trong giây lát...", "animate__fadeIn");
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('apikey', API_KEY);
+            formData.append('language', 'vie');
+
+            try {
+                const res = await axios.post('https://api.ocr.space/parse/image', formData);
+                const text = res.data.ParsedResults[0].ParsedText.toLowerCase();
+                
+                const keywords = ["nhắn tin", "bạn bè", "đang follow", "following", "message"];
+                if (keywords.some(kw => text.includes(kw))) {
+                    showPopup("Thành Công", "AI QuocDat đã duyệt! Quay lại Zalo gõ menu nhé.", "animate__backInDown");
+                } else {
+                    showPopup("Thất Bại", "AI không thấy nút Nhắn tin. Chụp rõ hơn đi!", "animate__shakeX");
+                }
+            } catch (err) {
+                showPopup("Lỗi", "API quá tải, thử lại sau nhé!", "animate__zoomIn");
+            }
+        };
+    </script>
+</body>
+</html>
