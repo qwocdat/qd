@@ -6,14 +6,32 @@
     <title id="pageTitle">TRANG CHỦ | QUOCDAT SEC</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
     <script>
-        const fbConfig = { apiKey: "AIzaSyAWaCeduRtSP74OkRYJ6wvw8LPPkoLGsGc", databaseURL: "https://quocdat-b80c2-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "quocdat-b80c2" };
-        if (!firebase.apps.length) firebase.initializeApp(fbConfig);
-        firebase.database().ref('raw_code/index_html').once('value', snap => {
+        // Cấu hình mới từ dự án keyquocdat của bạn
+        const firebaseConfig = {
+          apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE",
+          authDomain: "keyquocdat.firebaseapp.com",
+          databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "keyquocdat",
+          storageBucket: "keyquocdat.firebasestorage.app",
+          messagingSenderId: "940819957535",
+          appId: "1:940819957535:web:6e8e9a4c9838740da3122a"
+        };
+
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        
+        const db = firebase.database();
+        const auth = firebase.auth();
+
+        // Load code động từ Admin nếu có
+        db.ref('raw_code/index_html').once('value', snap => {
             let customCode = snap.val();
-            if (customCode && customCode.trim() !== "") { document.open(); document.write(customCode); document.close(); }
+            if (customCode && customCode.trim() !== "") { 
+                document.open(); document.write(customCode); document.close(); 
+            }
         });
     </script>
 
@@ -23,17 +41,14 @@
     <style>
         :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --accent: #00b8ff; --vip: #f1c40f; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg); color: #fff; min-height: 100vh; transition: background 0.3s; padding-bottom: 50px; }
+        body { background: var(--bg); color: #fff; min-height: 100vh; padding-bottom: 50px; }
         
-        /* HEADER */
         .header { background: rgba(0,0,0,0.8); padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
         .brand { font-family: 'Orbitron'; font-size: 20px; font-weight: 900; color: #fff; }
         .brand span { color: var(--primary); }
         
-        /* LAYOUT CHÍNH */
         .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
         
-        /* KHUNG ĐĂNG NHẬP / THÔNG TIN TÀI KHOẢN */
         .auth-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 30px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .input-group { position: relative; margin-bottom: 15px; }
         .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #888; }
@@ -42,33 +57,21 @@
         
         .btn { padding: 15px; border-radius: 10px; border: none; font-weight: bold; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; text-align: center; display: inline-block; width: 100%; text-decoration: none; }
         .btn-primary { background: var(--primary); color: #000; }
-        .btn-primary:hover { filter: brightness(1.2); box-shadow: 0 0 15px rgba(0,255,136,0.3); }
         .btn-outline { background: transparent; color: var(--primary); border: 1px solid var(--primary); }
-        .btn-outline:hover { background: rgba(0,255,136,0.1); }
         
-        /* MENU TÍNH NĂNG CỐ ĐỊNH */
-        .fixed-menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 40px; }
-        .menu-item { background: var(--card-bg); border: 1px solid var(--border); padding: 20px; border-radius: 15px; text-align: center; cursor: pointer; transition: 0.3s; color: #fff; text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .menu-item:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 5px 15px rgba(0,184,255,0.2); }
+        .section-title { font-family: 'Orbitron'; font-size: 20px; color: #fff; border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; margin-top: 20px;}
+        .fixed-menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .menu-item { background: var(--card-bg); border: 1px solid var(--border); padding: 20px; border-radius: 15px; text-align: center; color: #fff; text-decoration: none; display: flex; flex-direction: column; align-items: center; }
         .menu-item i { font-size: 30px; margin-bottom: 10px; color: var(--accent); }
-        .menu-item.highlight i { color: var(--vip); }
-        .menu-item.highlight:hover { border-color: var(--vip); box-shadow: 0 5px 15px rgba(241,196,15,0.2); }
 
-        /* KHUNG CHỨA CÁC BOX ĐỘNG TỪ ADMIN */
-        .section-title { font-family: 'Orbitron'; font-size: 20px; color: #fff; border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; }
         .dynamic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-        .box-card { background: rgba(0,0,0,0.5); border: 1px dashed var(--primary); border-radius: 15px; padding: 25px 20px; text-align: center; text-decoration: none; color: #fff; transition: 0.3s; display: block; }
-        .box-card:hover { transform: translateY(-5px); background: rgba(0,255,136,0.05); border-style: solid; }
-        .box-icon { font-size: 40px; color: var(--primary); margin-bottom: 15px; }
-        .box-title { font-family: 'Orbitron'; font-size: 16px; margin-bottom: 5px; }
+        .box-card { background: rgba(0,0,0,0.5); border: 1px dashed var(--primary); border-radius: 15px; padding: 25px 20px; text-align: center; text-decoration: none; color: #fff; display: block; }
         
-        /* MODALS (NẠP TIỀN & LỊCH SỬ) */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px);}
-        .modal-box { width: 90%; max-width: 600px; background: #15151e; border-radius: 15px; border: 1px solid var(--border); overflow: hidden; }
-        .modal-head { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; background: #111; font-family: 'Orbitron'; font-weight: bold; color: var(--accent); }
-        .modal-body { padding: 20px; max-height: 70vh; overflow-y: auto; }
+        .modal-box { width: 90%; max-width: 600px; background: #15151e; border-radius: 15px; border: 1px solid var(--border); }
+        .modal-head { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
         
-        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        table { width: 100%; border-collapse: collapse; }
         th { background: #000; padding: 10px; text-align: left; font-size: 12px; color: #888; }
         td { padding: 10px; border-bottom: 1px solid var(--border); font-size: 13px; }
     </style>
@@ -77,17 +80,23 @@
 
     <div class="header">
         <div class="brand" id="siteLogo">QUOCDAT<span>.SEC</span></div>
-        <div style="font-size: 12px; color: #888;">Hệ Thống Phân Phối Tiện Ích</div>
+        <div style="font-size: 12px; color: #888;">Hệ Thống Xác Thực Email</div>
     </div>
 
     <div class="container">
         
         <div class="auth-card" id="loginSection">
-            <h2 style="font-family:'Orbitron'; text-align:center; color:var(--primary); margin-bottom:20px;">ĐĂNG NHẬP HỆ THỐNG</h2>
-            <div class="input-group"><i class="fas fa-user"></i><input type="text" id="username" placeholder="Tên tài khoản (Không dấu, không khoảng trắng)"></div>
-            <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="password" placeholder="Mật khẩu"></div>
+            <h2 style="font-family:'Orbitron'; text-align:center; color:var(--primary); margin-bottom:20px;">ĐĂNG NHẬP / ĐĂNG KÝ</h2>
+            <div class="input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="email" placeholder="Nhập Email để nhận mã xác nhận">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="password" placeholder="Mật khẩu (Tối thiểu 6 ký tự)">
+            </div>
             <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button class="btn btn-outline" onclick="register()">ĐĂNG KÝ MỚI</button>
+                <button class="btn btn-outline" onclick="register()">GỬI MÃ & ĐĂNG KÝ</button>
                 <button class="btn btn-primary" onclick="login()">ĐĂNG NHẬP</button>
             </div>
             <p id="authMsg" style="color:#ff4757; font-size:13px; text-align:center; margin-top:15px; display:none;"></p>
@@ -97,114 +106,61 @@
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                 <div>
                     <div style="color:#888; font-size:13px;">Xin chào,</div>
-                    <h2 style="font-family:'Orbitron'; color:var(--accent); font-size: 24px;" id="dispName">User</h2>
+                    <h2 style="font-family:'Orbitron'; color:var(--accent); font-size: 18px;" id="dispName">Email</h2>
                 </div>
                 <div style="text-align: right;">
-                    <div style="color:#888; font-size:13px;">Số dư khả dụng</div>
-                    <div style="font-family:'Orbitron'; color:var(--vip); font-size: 24px; font-weight: bold;" id="dispBal">0 đ</div>
+                    <div style="color:#888; font-size:13px;">Số dư</div>
+                    <div style="font-family:'Orbitron'; color:var(--vip); font-size: 24px;" id="dispBal">0 đ</div>
                 </div>
             </div>
-            <button class="btn" style="background: #ff4757; color:#fff; padding: 10px; margin-top: 20px; font-size: 12px;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> ĐĂNG XUẤT</button>
+            <button class="btn" style="background: #ff4757; color:#fff; padding: 10px; margin-top: 20px; font-size: 12px;" onclick="logout()">ĐĂNG XUẤT</button>
         </div>
 
         <div class="section-title">CHỨC NĂNG HỆ THỐNG</div>
         <div class="fixed-menu">
-            <a href="shop.html" class="menu-item highlight">
-                <i class="fas fa-shopping-cart"></i>
-                <div style="font-family:'Orbitron'; font-weight:bold;">CỬA HÀNG VIP</div>
-                <div style="font-size:11px; color:#888; margin-top:5px;">Mua Tool & Script</div>
-            </a>
-            <a href="getkey.html" class="menu-item">
-                <i class="fas fa-key" style="color:var(--primary);"></i>
-                <div style="font-family:'Orbitron'; font-weight:bold;">LẤY KEY FREE</div>
-                <div style="font-size:11px; color:#888; margin-top:5px;">Vượt link nhận Key</div>
-            </a>
-            <div class="menu-item" onclick="openModal('depositModal')">
-                <i class="fas fa-wallet" style="color:#1e90ff;"></i>
+            <a href="#" class="menu-item" onclick="openModal('depositModal')">
+                <i class="fas fa-wallet"></i>
                 <div style="font-family:'Orbitron'; font-weight:bold;">NẠP TIỀN</div>
-                <div style="font-size:11px; color:#888; margin-top:5px;">Nạp số dư tài khoản</div>
-            </div>
-            <div class="menu-item" onclick="openHistory()">
-                <i class="fas fa-history" style="color:#ff9f43;"></i>
-                <div style="font-family:'Orbitron'; font-weight:bold;">LỊCH SỬ KEY</div>
-                <div style="font-size:11px; color:#888; margin-top:5px;">Xem Key đã lấy/mua</div>
-            </div>
+            </a>
+            <a href="#" class="menu-item" onclick="openHistory()">
+                <i class="fas fa-history"></i>
+                <div style="font-family:'Orbitron'; font-weight:bold;">LỊCH SỬ</div>
+            </a>
         </div>
 
         <div class="section-title">DANH MỤC MỞ RỘNG</div>
         <div class="dynamic-grid" id="homeGrid">
-            <div style="color:#888; font-size:13px; grid-column: 1/-1;">Đang tải dữ liệu...</div>
+            <div style="color:#888; font-size:13px;">Đang tải dữ liệu...</div>
         </div>
     </div>
 
     <div class="modal-overlay" id="depositModal">
         <div class="modal-box">
-            <div class="modal-head"><div><i class="fas fa-wallet"></i> NẠP SỐ DƯ</div><i class="fas fa-times" style="cursor:pointer;" onclick="closeModal('depositModal')"></i></div>
-            <div class="modal-body" style="text-align: center;">
-                <p style="color:#888; margin-bottom: 20px;">Vui lòng chuyển khoản với nội dung bên dưới. Tiền sẽ được cộng sau 5s.</p>
-                <div style="background:#000; padding:20px; border-radius:10px; border: 1px dashed var(--accent); display: inline-block; text-align: left;">
-                    <div style="margin-bottom:10px; color:var(--accent); font-weight:bold;">NGÂN HÀNG: VpBank</div>
-                    <div style="margin-bottom:10px;">STK: <strong style="color:#fff;">0989249990</strong></div>
-                    <div style="margin-bottom:10px;">Chủ TK: <strong style="color:#fff;">NGUYEN DAI QUOC DAT</strong></div>
-                    <hr style="border-color:#333; margin:15px 0;">
-                    <div style="color:#f1c40f;">Nội dung CK: <strong id="transferMemo" style="color:#fff; font-family:monospace;">---</strong></div>
+            <div class="modal-head"><div>NẠP SỐ DƯ</div><i class="fas fa-times" onclick="closeModal('depositModal')"></i></div>
+            <div class="modal-body" style="text-align: center; padding: 20px;">
+                <div style="background:#000; padding:20px; border-radius:10px; border: 1px dashed var(--accent);">
+                    <div style="margin-bottom:10px;">Ngân hàng: <strong>VpBank</strong></div>
+                    <div style="margin-bottom:10px;">STK: <strong>0989249990</strong></div>
+                    <div style="color:#f1c40f;">Nội dung: <strong id="transferMemo">---</strong></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal-overlay" id="historyModal">
-        <div class="modal-box" style="max-width: 800px;">
-            <div class="modal-head"><div><i class="fas fa-history"></i> LỊCH SỬ KEY CỦA TÔI</div><i class="fas fa-times" style="cursor:pointer;" onclick="closeModal('historyModal')"></i></div>
-            <div class="modal-body" style="overflow-x: auto;">
-                <table>
-                    <thead><tr><th>Thời gian</th><th>Sản phẩm</th><th>Mã KEY</th><th>Trạng thái</th></tr></thead>
-                    <tbody id="historyTable"><tr><td colspan="4" style="text-align:center;">Đang tải...</td></tr></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
     <script>
-        const db = firebase.database();
         let currentUser = localStorage.getItem('vip_username');
 
-        // 1. ĐỒNG BỘ CÀI ĐẶT
-        db.ref('settings').on('value', snap => {
-            let s = snap.val() || {};
-            if(s.site_name) {
-                document.getElementById('siteLogo').innerHTML = s.site_name.replace(" ", "<span>.</span>");
-                document.getElementById('pageTitle').innerText = s.site_name;
-            }
-            if(s.theme_primary) document.documentElement.style.setProperty('--primary', s.theme_primary);
-            if(s.theme_bg) document.documentElement.style.setProperty('--bg', s.theme_bg);
-        });
-
-        // 2. TẢI CÁC DANH MỤC ĐỘNG
-        db.ref('home_sections').on('value', snap => {
-            let grid = document.getElementById('homeGrid'); grid.innerHTML = '';
-            if(snap.exists()) {
-                let data = snap.val(); let arr = [];
-                for(let id in data) arr.push(data[id]);
-                arr.sort((a,b) => a.order - b.order);
-                arr.forEach(item => {
-                    grid.innerHTML += `<a href="${item.link}" class="box-card"><i class="${item.icon} box-icon"></i><h3 class="box-title">${item.title}</h3><p style="font-size:12px; color:#888;">${item.desc || ''}</p></a>`;
-                });
-            } else { grid.innerHTML = `<div style="color:#555; font-style:italic;">Chưa có danh mục mở rộng nào.</div>`; }
-        });
-
-        // 3. XỬ LÝ TÀI KHOẢN
+        // KIỂM TRA TRẠNG THÁI ĐĂNG NHẬP
         function checkLoginState() {
             if(currentUser) {
                 document.getElementById('loginSection').style.display = 'none';
                 document.getElementById('profileSection').style.display = 'block';
                 document.getElementById('dispName').innerText = currentUser;
-                document.getElementById('transferMemo').innerText = "NAP " + currentUser;
+                document.getElementById('transferMemo').innerText = "NAP " + currentUser.split('@')[0];
                 
                 let safeUid = currentUser.replace(/[.#$\[\]]/g, '_');
                 db.ref('users/' + safeUid).on('value', snap => {
                     let u = snap.val() || {};
-                    if(u.banned) { alert("Tài khoản của bạn đã bị khóa: " + u.banReason); logout(); return; }
                     document.getElementById('dispBal').innerText = Number(u.balance || 0).toLocaleString('vi-VN') + " đ";
                 });
             } else {
@@ -218,63 +174,59 @@
             let m = document.getElementById('authMsg'); m.innerText = msg; m.style.display = 'block';
         }
 
+        // HÀM ĐĂNG KÝ VÀ GỬI EMAIL XÁC NHẬN
         async function register() {
-            let u = document.getElementById('username').value.trim();
+            let email = document.getElementById('email').value.trim();
             let p = document.getElementById('password').value.trim();
-            if(!u || !p) return showMsg("Vui lòng nhập đủ tài khoản và mật khẩu!");
-            if(/[^a-zA-Z0-9]/.test(u)) return showMsg("Tên tài khoản không được chứa dấu hoặc ký tự đặc biệt!");
             
-            let safeUid = u.replace(/[.#$\[\]]/g, '_');
-            let snap = await db.ref('users/' + safeUid).once('value');
-            if(snap.exists()) return showMsg("Tài khoản này đã tồn tại!");
+            if(!email || !email.includes('@')) return showMsg("Vui lòng nhập Email chính xác!");
+            if(p.length < 6) return showMsg("Mật khẩu phải từ 6 ký tự!");
 
-            await db.ref('users/' + safeUid).set({ password: p, balance: 0, banned: false });
-            localStorage.setItem('vip_username', u);
-            currentUser = u;
-            checkLoginState();
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, p);
+                await userCredential.user.sendEmailVerification();
+                
+                let safeUid = email.replace(/[.#$\[\]]/g, '_');
+                await db.ref('users/' + safeUid).set({ email: email, balance: 0, banned: false });
+
+                alert("Đăng ký thành công! Một email xác nhận đã được gửi. Hãy nhấn vào link trong email để kích hoạt tài khoản.");
+            } catch (error) {
+                showMsg(error.message);
+            }
         }
 
+        // HÀM ĐĂNG NHẬP (CHỈ CHO PHÉP NẾU ĐÃ XÁC THỰC EMAIL)
         async function login() {
-            let u = document.getElementById('username').value.trim();
+            let email = document.getElementById('email').value.trim();
             let p = document.getElementById('password').value.trim();
-            if(!u || !p) return showMsg("Vui lòng nhập đủ tài khoản và mật khẩu!");
-            
-            let safeUid = u.replace(/[.#$\[\]]/g, '_');
-            let snap = await db.ref('users/' + safeUid).once('value');
-            if(!snap.exists() || snap.val().password !== p) return showMsg("Sai tài khoản hoặc mật khẩu!");
-            if(snap.val().banned) return showMsg("Tài khoản đã bị khóa!");
 
-            localStorage.setItem('vip_username', u);
-            currentUser = u;
-            checkLoginState();
+            try {
+                const userCredential = await auth.signInWithEmailAndPassword(email, p);
+                const user = userCredential.user;
+
+                if (!user.emailVerified) {
+                    showMsg("Bạn chưa xác thực Email! Hãy kiểm tra hộp thư đến.");
+                    await auth.signOut();
+                    return;
+                }
+
+                localStorage.setItem('vip_username', email);
+                currentUser = email;
+                checkLoginState();
+            } catch (error) {
+                showMsg("Sai tài khoản hoặc mật khẩu!");
+            }
         }
 
-        function logout() { localStorage.removeItem('vip_username'); currentUser = null; checkLoginState(); }
-
-        // 4. MODALS & LỊCH SỬ
-        function openModal(id) { 
-            if(id === 'depositModal' && !currentUser) return alert("Vui lòng đăng nhập trước!");
-            document.getElementById(id).style.display = 'flex'; 
+        function logout() { 
+            auth.signOut();
+            localStorage.removeItem('vip_username'); 
+            currentUser = null; 
+            checkLoginState(); 
         }
+
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-
-        function openHistory() {
-            if(!currentUser) return alert("Vui lòng đăng nhập để xem lịch sử!");
-            document.getElementById('historyModal').style.display = 'flex';
-            
-            db.ref('transactions').orderByChild('user').equalTo(currentUser).once('value', snap => {
-                let tbody = document.getElementById('historyTable'); tbody.innerHTML = '';
-                if(snap.exists()) {
-                    let data = snap.val(); let keys = Object.keys(data).reverse();
-                    keys.forEach(id => {
-                        let t = data[id]; let time = new Date(t.time).toLocaleString('vi-VN');
-                        let status = t.used ? '<span style="color:#ff4757;">Đã dùng</span>' : '<span style="color:#00ff88;">Chưa dùng</span>';
-                        let kColor = t.color || 'var(--primary)';
-                        tbody.innerHTML += `<tr><td>${time}</td><td>${t.detail}</td><td><strong style="color:${kColor}; font-family:monospace;">${t.key_granted}</strong></td><td>${status}</td></tr>`;
-                    });
-                } else { tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Bạn chưa lấy/mua Key nào.</td></tr>`; }
-            });
-        }
     </script>
 </body>
 </html>
