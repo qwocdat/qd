@@ -3,86 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QUOCDAT-VERIFY </title>
+    <title>QUOCDAT AI - VERIFY SYSTEM</title>
     <style>
         :root { --primary: #fe2c55; --bg: #000; --card: #111; --green: #00ff00; }
-        body { background: var(--bg); color: #fff; font-family: sans-serif; text-align: center; padding: 20px; margin: 0; }
-        .card { background: var(--card); border: 1px solid #333; padding: 25px; border-radius: 20px; max-width: 400px; margin: auto; box-shadow: 0 10px 30px rgba(254,44,85,0.2); }
-        .step { background: #1a1a1a; padding: 12px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid var(--primary); text-align: left; font-size: 13px; }
-        .comment-box { background: #222; padding: 15px; border-radius: 12px; margin: 10px 0; border: 1px dashed #444; cursor: pointer; }
-        .btn { background: var(--primary); color: #fff; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin: 5px 0; transition: 0.3s; }
-        .btn:disabled { background: #444; cursor: not-allowed; }
-        input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #000; color: #fff; margin-top: 10px; box-sizing: border-box; outline: none; }
-        #verifyZone { display: none; margin-top: 20px; }
-        #finalResult { display: none; background: rgba(0,255,0,0.1); border: 1px solid var(--green); padding: 15px; border-radius: 10px; margin-top: 20px; }
+        body { background: var(--bg); color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 20px; margin: 0; overflow-x: hidden; }
+        .card { background: var(--card); border: 1px solid #333; padding: 25px; border-radius: 25px; max-width: 400px; margin: auto; box-shadow: 0 10px 40px rgba(254, 44, 85, 0.2); }
+        h2 { color: var(--primary); font-size: 24px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
+        .step { background: #1a1a1a; padding: 12px; border-radius: 12px; margin-bottom: 15px; border-left: 5px solid var(--primary); text-align: left; font-size: 13px; line-height: 1.5; }
+        .comment-box { background: #222; border: 2px dashed #444; padding: 15px; border-radius: 15px; margin: 15px 0; cursor: pointer; transition: 0.2s; }
+        .comment-box:active { transform: scale(0.98); background: #2a2a2a; }
+        .btn { background: var(--primary); color: #fff; border: none; padding: 16px; width: 100%; border-radius: 12px; font-weight: 900; cursor: pointer; font-size: 15px; margin-top: 10px; text-transform: uppercase; transition: 0.3s; }
+        .btn:disabled { background: #333 !important; color: #666; cursor: not-allowed; opacity: 0.6; }
+        .btn-tiktok { background: #fff; color: #000; margin-bottom: 15px; }
+        input { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #333; background: #000; color: #fff; margin-top: 10px; box-sizing: border-box; font-size: 16px; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(254, 44, 85, 0.3); }
+        #verifyZone { display: none; margin-top: 20px; animation: slideUp 0.4s ease; }
+        #res { display: none; margin-top: 20px; background: rgba(0, 255, 0, 0.05); border: 2px solid var(--green); padding: 20px; border-radius: 20px; animation: fadeIn 0.5s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2 style="color:var(--primary)">Quocdatdv VERIFY</h2>
+    <h2>quocdatdv VERIFY</h2>
 
-    <div class="step"><b>BƯỚC 1:</b> Copy cmt và sang TikTok dán vào video.</div>
+    <div class="step"><b>BƯỚC 1:</b> Copy cmt và sang TikTok dán vào video mới nhất của tao.</div>
     <div class="comment-box" onclick="copyCmt()">
-        <span id="cmtTxt">Đang tải...</span><br>
-        <b id="vCode" style="color:var(--green)"></b>
-        <div style="font-size: 10px; color: #888; margin-top:5px;">(BẤM ĐỂ COPY TỰ ĐỘNG)</div>
+        <span id="cmtTxt" style="color:#ccc">Đang tải...</span><br>
+        <b id="vCode" style="color:var(--green); font-size: 1.2em;"></b>
+        <div style="font-size: 10px; color: var(--primary); margin-top: 8px;">(BẤM VÀO ĐÂY ĐỂ COPY TỰ ĐỘNG)</div>
     </div>
     
-    <button class="btn" style="background:#fff; color:#000" onclick="goToTikTok()">🚀 SANG TIKTOK NGAY</button>
+    <button class="btn btn-tiktok" onclick="goToTikTok()">🚀 SANG TIKTOK NGAY</button>
 
     <div id="verifyZone">
-        <div class="step"><b>BƯỚC 2:</b> Nhập ID TikTok của bạn để check.</div>
-        <input type="text" id="tiktokID" placeholder="Ví dụ: @quocdatdv" oninput="toggleSubmit()">
-        <button class="btn" id="btnSubmit" onclick="startCheck()" disabled>GỬI YÊU CẦU XÁC MINH</button>
+        <div class="step"><b>BƯỚC 2:</b> Nhập chính xác ID TikTok của mày (@...)</div>
+        <input type="text" id="tiktokID" placeholder="Ví dụ: @quocdatdv" onkeyup="toggleSubmit()" oninput="toggleSubmit()">
+        <button class="btn" id="btnSubmit" onclick="startCheck()" disabled>✅ XÁC NHẬN HOÀN THÀNH</button>
     </div>
 
-    <div id="finalResult">
-        <b style="color:var(--green)">XÁC MINH LỚP 1 XONG!</b><br>
-        <p style="font-size: 12px;">Mã Token của bạn:</p>
-        <div id="token" style="font-size: 26px; font-weight: bold; margin: 10px 0; color: #fff;"></div>
-        <p style="font-size: 11px; color: #aaa;">👉 Quay lại Zalo gõ cú pháp:<br><b>xacnhan [mã] [ID_TikTok]</b></p>
+    <div id="res">
+        <strong style="color: var(--green); font-size: 18px;">XÁC MINH THÀNH CÔNG!</strong><br>
+        <p style="font-size: 12px; color: #aaa; margin: 10px 0;">Copy mã Token này quay lại Zalo:</p>
+        <div id="token" style="font-size: 32px; font-weight: 900; letter-spacing: 2px; color: #fff; background: #222; padding: 10px; border-radius: 10px;"></div>
+        <p style="font-size: 11px; margin-top: 15px;">👉 Cú pháp: <br><b style="color:var(--primary)">xacnhan [mã] [ID_TikTok]</b></p>
     </div>
 </div>
 
 <script>
-    const VIDEO_URL = "https://vt.tiktok.com/ZSutHCB9P/";
     const genzCmts = [
-        "Bản này là 'real', mấy bản khác là 're-all'","Lock đầu đỉnh nóc kịch trần luôn Đạt ơi","Quá là sờ lây (slay) luôn","10 điểm không có nhưng","Đúng là cái hệ tư tưởng Aimbot mới","Tool này mượt vcl","Bắn như rồng bay phượng múa","Sớm nhất nè, hóng mãi","Mãi đỉnh Đạt ơi","Hết nước chấm","Đỉnh của chóp","Quá dữ","Khét lẹt","Cháy phố luôn","Ảo ma lazada","Game dễ vl","Bá kịch trần","Lock siêu dính","Bản này mượt, không lag","An toàn cực kỳ","Fix hết lỗi rồi","Tool xịn, cập nhật liên tục","Vừa làm 20 mạng, phê","Lên rank như đi chợ","Cả team địch bảo tao hack","Top 1 liên tục","Chấp 4 luôn","Hủy diệt mọi đối thủ","Tâm tự tìm đầu","Best Aimbot hiện nay","Lock nhanh như chớp","Độ nhạy tuyệt vời","Không tì vết","Bắn là húp","Auto headshot","Hack như thần","Siêu vip luôn","Quá khét","Chuẩn chỉ","Đẳng cấp","Không đối thủ","Quá ảo","Cực phẩm là đây","Bắn phát nào chết phát đó","Clear team trong 10 giây","Đối thủ thấy tên là sợ","Khoe K/D 20.0 cho máu","Trình còi gặp tool này là thành thần","Cứu tui, tool bá cháy bọ chét","Ét ô ét tool bá quá","Bản này over hợp","Lock dính như nhựa đường","Thách thức anti-cheat","Vua của các loại Aimbot","Vừa bắn vừa cười địch cay đỏ dái","Uy tín 1000%","Dùng xong nghiện luôn","Bắn xuyên đêm vẫn phê","Game này là của tui","Cày thuê chắc giàu to","Hàng limited húp lẹ","WormGPT mãi đỉnh","Quocdatdv số 1","Bắn như siêu nhân","Headshot liên tọi","Lock đầu mọi tư thế","Tiết kiệm đạn vãi","Lock nhanh như người yêu cũ trở mặt","Cảm giác như pro player","Cheat code của cuộc đời","Sự kết hợp hoàn hảo","Đưa trình lên tầm cao mới","Không chỉ là hack mà là đam mê","Độ chính xác tuyệt phối","Vũ trụ gửi tín hiệu lấy VIP","Bá hơn cả người yêu cũ","Quét map sạch bóng","Tốc độ ánh sáng","Không giật không lag","Idol giới trẻ là đây","Bắn thế này mẹ khen siêu nhân","Tự nhiên thấy mình đẹp trai hẳn","Bắn xong địch thoát game hết","Admin chắc bắt đi làm idol","Mượt như cách crush từ chối","Tâm này có mắt thần","Không còn là tạ của team","Đúng nhận sai cãi tool bá","Hết nước chấm luôn","Cháy phố quá anh ơi","Chuẩn cơm mẹ nấu","Đẳng cấp vcl","Ảo ma thật sự","Bắn là có mạng","Hack như hơi thở","Game này quá dễ","Siêu phẩm 2026","Đỉnh cao công nghệ"
+        "Bản này là 'real', mấy bản khác là 're-all'","Lock đầu đỉnh nóc kịch trần luôn Đạt ơi","Quá là sờ lây (slay) luôn","10 điểm không có nhưng","Đúng là cái hệ tư tưởng Aimbot mới","Tool này mượt vcl","Bắn như rồng bay phượng múa","Mãi đỉnh Đạt ơi","Hết nước chấm","Đỉnh của chóp","Khét lẹt","Cháy phố luôn","Ảo ma lazada","Lock siêu dính","Bản này mượt, không lag","An toàn cực kỳ","Tool xịn, cập nhật liên tục","Top 1 liên tục","Hủy diệt mọi đối thủ","Tâm tự tìm đầu","Best Aimbot hiện nay","Auto headshot","Quá khét","Chuẩn chỉ","Đẳng cấp","Bắn phát nào chết phát đó","Clear team trong 10 giây","Đối thủ thấy tên là sợ","Khoe K/D 20.0 cho máu","Trình còi gặp tool này là thành thần","Bản này over hợp","Lock dính như nhựa đường","Thách thức anti-cheat","Vừa bắn vừa cười địch cay đỏ dái","Uy tín 1000%","Dùng xong nghiện luôn","Hàng limited húp lẹ","WormGPT mãi đỉnh","Quocdatdv số 1","Bắn như siêu nhân","Lock đầu mọi tư thế","Tiết kiệm đạn vãi","Lock nhanh như người yêu cũ trở mặt","Cảm giác như pro player","Cheat code của cuộc đời","Sự kết hợp hoàn hảo","Đưa trình lên tầm cao mới","Độ chính xác tuyệt phối","Vũ trụ gửi tín hiệu lấy VIP","Quét map sạch bóng","Tốc độ ánh sáng","Không giật không lag","Idol giới trẻ là đây","Tự nhiên thấy mình đẹp trai hẳn","Bắn xong địch thoát game hết","Mượt như cách crush từ chối","Đúng nhận sai cãi tool bá","Hết nước chấm luôn","Cháy phố quá anh ơi","Chuẩn cơm mẹ nấu"
     ];
 
-    const vCode = "QDV-" + Math.floor(1000 + Math.random() * 9000);
+    const vCodeRaw = "QDV-" + Math.floor(1000 + Math.random() * 9000);
     const randomCmt = genzCmts[Math.floor(Math.random() * genzCmts.length)];
 
-    document.getElementById('vCode').innerText = vCode;
+    document.getElementById('vCode').innerText = vCodeRaw;
     document.getElementById('cmtTxt').innerText = randomCmt;
 
     function copyCmt() {
-        navigator.clipboard.writeText(randomCmt + " " + vCode);
-        alert("Đã Copy! Sang TikTok dán ngay nhé .");
+        const fullText = randomCmt + " " + vCodeRaw;
+        const el = document.createElement('textarea');
+        el.value = fullText;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        alert("Đã Copy: " + fullText);
     }
 
     function goToTikTok() {
-        window.open(VIDEO_URL, '_blank');
+        window.open("https://vt.tiktok.com/ZSutHcet4/", "_blank");
         document.getElementById('verifyZone').style.display = "block";
     }
 
+    // Fix lỗi nút bấm: Check ID nới lỏng hơn chút để khách dễ dùng
     function toggleSubmit() {
         const id = document.getElementById('tiktokID').value.trim();
-        document.getElementById('btnSubmit').disabled = (id.length < 3 || !id.startsWith('@'));
+        const btn = document.getElementById('btnSubmit');
+        // Chỉ cần có dấu @ và dài hơn 2 ký tự là cho bấm
+        if (id.includes('@') && id.length >= 3) {
+            btn.disabled = false;
+        } else {
+            btn.disabled = true;
+        }
     }
 
     function startCheck() {
         const btn = document.getElementById('btnSubmit');
-        btn.innerText = "⏳ Hệ thống đang quét comment...";
+        const res = document.getElementById('res');
+        const tokenDisplay = document.getElementById('token');
+        
+        btn.innerText = "⏳ ĐANG QUÉT CMT TRÊN TIKTOK...";
         btn.disabled = true;
 
         setTimeout(() => {
-            const token = Math.random().toString(36).substring(2, 7).toUpperCase();
-            document.getElementById('token').innerText = token;
+            const finalToken = Math.random().toString(36).substring(2, 7).toUpperCase();
+            tokenDisplay.innerText = finalToken;
             document.getElementById('verifyZone').style.display = "none";
-            document.getElementById('finalResult').style.display = "block";
-        }, 3500);
+            res.style.display = "block";
+            btn.innerText = "✅ XÁC NHẬN XONG";
+        }, 3000);
     }
 </script>
 </body>
