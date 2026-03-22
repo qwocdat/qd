@@ -1,54 +1,58 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuocDat AI - Verify</title>
+    <title>QuocDat AI Verify</title>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; text-align: center; padding: 20px; }
-        .glass { background: rgba(255,255,255,0.1); backdrop-filter: blur(15px); border-radius: 25px; padding: 30px; border: 1px solid rgba(255,255,255,0.2); }
-        .btn { background: #007AFF; color: #fff; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; margin-top: 20px; }
+        body { background: #000; color: #fff; text-align: center; font-family: sans-serif; padding: 50px 20px; }
+        .container { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 30px; border-radius: 25px; border: 1px solid #333; }
+        input { margin: 20px 0; }
+        button { background: #007AFF; color: #fff; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        #result { margin-top: 20px; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="glass">
-        <h2>Xác Minh TikTok</h2>
-        <p>Tải ảnh màn hình đã Follow @quocdatdv</p>
-        <input type="file" id="fileInput" accept="image/*" style="margin: 20px 0;">
-        <button class="btn" onclick="startVerify()">XÁC MINH NGAY</button>
-        <p id="status" style="margin-top: 20px; font-weight: bold;"></p>
+    <div class="container">
+        <h2>QuocDat AI</h2>
+        <p>Tải ảnh chụp màn hình đã Follow TikTok</p>
+        <input type="file" id="imageInput" accept="image/*">
+        <button onclick="handleVerify()">XÁC MINH NGAY</button>
+        <p id="result"></p>
     </div>
 
     <script>
-        async function startVerify() {
-            const file = document.getElementById('fileInput').files[0];
-            const status = document.getElementById('status');
-            if(!file) return alert("Chọn ảnh đã Đạt!");
+        async function handleVerify() {
+            const file = document.getElementById('imageInput').files[0];
+            const resDiv = document.getElementById('result');
+            if(!file) return alert("Chọn ảnh đi Đạt!");
 
-            status.innerText = "⏳ Đang soi ảnh bằng OCR Space...";
-            status.style.color = "yellow";
+            resDiv.innerText = "⏳ AI đang soi ảnh (API Cloudmersive)...";
+            resDiv.style.color = "yellow";
 
             const fd = new FormData();
-            fd.append('file', file);
-            fd.append('apikey', 'K85537113188957'); // Key dự phòng ổn định cho Web
-            fd.append('language', 'vie');
-            fd.append('OCREngine', '2');
+            fd.append('imageFile', file);
 
             try {
-                const res = await axios.post('https://api.ocr.space/parse/image', fd);
-                const text = res.data.ParsedResults[0].ParsedText.toLowerCase();
+                // Dùng API Cloudmersive xịn, không bị giới hạn như OCR Space
+                const response = await axios.post('https://api.cloudmersive.com/ocr/image/toText', fd, {
+                    headers: { 'Apikey': '31b09e5f-c9ca-4a93-ae2e-ca42fba90d39' }
+                });
+
+                const text = response.data.TextResult.toLowerCase();
                 const keywords = ["nhắn tin", "bạn bè", "đang follow", "following", "message"];
-                
-                if (keywords.some(kw => text.includes(kw))) {
-                    status.innerText = "✅ THÀNH CÔNG! Quay lại Zalo gõ lệnh đi.";
-                    status.style.color = "#28a745";
+
+                if (keywords.some(k => text.includes(k))) {
+                    resDiv.innerHTML = "✅ XÁC MINH THÀNH CÔNG!<br>Quay lại Zalo gõ lệnh VIP để nhận link.";
+                    resDiv.style.color = "#28a745";
                 } else {
-                    status.innerText = "❌ AI KHÔNG THẤY NÚT FOLLOW!";
-                    status.style.color = "#ff4d4d";
+                    resDiv.innerText = "❌ Không tìm thấy bằng chứng Follow (Nút Nhắn tin)!";
+                    resDiv.style.color = "#ff4d4d";
                 }
-            } catch (e) {
-                status.innerText = "⚠️ Lỗi API Web, hãy gửi ảnh trực tiếp cho Bot!";
+            } catch (err) {
+                resDiv.innerText = "⚠️ Lỗi API: Key hết hạn hoặc ảnh lỗi!";
+                resDiv.style.color = "#ff4d4d";
             }
         }
     </script>
