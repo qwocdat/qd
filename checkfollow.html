@@ -3,61 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuocDat AI - Super Scan</title>
+    <title>QuocDat AI - Key Generator</title>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         body { background: #000; color: #fff; font-family: sans-serif; text-align: center; padding: 20px; }
-        .card { background: #111; border: 1px solid #333; padding: 30px; border-radius: 25px; max-width: 400px; margin: auto; box-shadow: 0 0 20px rgba(0,122,255,0.2); }
+        .card { background: #111; border: 1px solid #333; padding: 30px; border-radius: 25px; max-width: 400px; margin: auto; }
         .btn { background: #007AFF; color: #fff; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 20px; }
-        #status { margin-top: 20px; font-size: 14px; line-height: 1.6; }
-        .loading { color: #ffcc00; }
+        #keyDisplay { background: #222; padding: 15px; border-radius: 10px; margin-top: 20px; display: none; border: 1px dashed #007AFF; color: #00ff00; font-family: monospace; }
+        #status { margin-top: 20px; font-size: 14px; }
     </style>
 </head>
 <body>
     <div class="card">
-        <h2 style="color: #007AFF;">QuocDat AI Scan v3</h2>
-        <p style="opacity: 0.7;">Quét mọi ngôn ngữ & định dạng</p>
+        <h2 style="color: #007AFF;">QuocDat AI v5</h2>
+        <p style="opacity: 0.7;">Quét ảnh để nhận Key VIP</p>
         <input type="file" id="file" accept="image/*" style="margin: 20px 0;">
-        <button class="btn" id="btn" onclick="superScan()">XÁC MINH NGAY</button>
+        <button class="btn" id="btn" onclick="startVerify()">XÁC MINH & TẠO KEY</button>
+        
         <div id="status"></div>
+        <div id="keyDisplay">
+            <p style="color: #fff; font-size: 12px;">Copy Key này về Bot Zalo:</p>
+            <strong id="generatedKey"></strong>
+        </div>
     </div>
 
     <script>
-        async function superScan() {
+        function generateRandomKey() {
+            const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+            let result = 'quocdatdv-';
+            for (let i = 0; i < 9; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        async function startVerify() {
             const f = document.getElementById('file').files[0];
             const st = document.getElementById('status');
-            const btn = document.getElementById('btn');
+            const keyBox = document.getElementById('keyDisplay');
+            const keyTxt = document.getElementById('generatedKey');
+            
             if(!f) return alert("Chọn ảnh đi Đạt!");
             
-            btn.disabled = true;
-            st.innerHTML = "<span class='loading'>⏳ AI đang soi từng pixel...</span>";
-            
+            document.getElementById('btn').disabled = true;
+            st.innerHTML = "<span style='color: #ffcc00;'>⏳ AI đang kiểm tra nút Follow...</span>";
+            keyBox.style.display = "none";
+
             try {
-                // Chạy AI nhận diện đa ngôn ngữ
                 const res = await Tesseract.recognize(f, 'vie+eng');
-                // Chuyển hết về chữ thường để so sánh cho dễ
                 const text = res.data.text.toLowerCase();
                 
-                // BỘ TỪ KHÓA TỔNG HỢP MỌI TRƯỜNG HỢP (VIỆT - ANH - HOA - THƯỜNG)
-                const keywords = [
-                    "nhắn tin", "nhan tin", "tin nhan", "tin nhắn",
-                    "message", "msg", "mess",
-                    "đang follow", "dang follow", "following", "followed",
-                    "bạn bè", "ban be", "friends", "friend",
-                    "đã follow", "da follow"
-                ];
-                
-                const isMatch = keywords.some(k => text.includes(k));
-                
-                if (isMatch) {
-                    st.innerHTML = "<b style='color:#28a745; font-size:18px;'>✅ XÁC MINH THÀNH CÔNG!</b><br>Chụp ảnh này gửi cho Đạt hoặc quay lại Zalo gõ lệnh VIP.";
+                // Logic: Có "Nhắn tin" và KHÔNG có nút "Follow/Theo dõi" đỏ
+                const hasMessage = /nhắn tin|tin nhắn|message|bạn bè|friends/.test(text);
+                const stillHasFollow = /(?<!đang\s)(follow|theo dõi|theo doi)/.test(text);
+
+                if (hasMessage && !stillHasFollow) {
+                    const newKey = generateRandomKey();
+                    st.innerHTML = "<b style='color:#28a745;'>✅ XÁC MINH THÀNH CÔNG!</b>";
+                    keyTxt.innerText = newKey;
+                    keyBox.style.display = "block";
+                    
+                    // Gửi key này lên server/database của mày nếu có, 
+                    // hoặc đơn giản là khách chụp ảnh lại gửi cho mày check.
                 } else {
-                    st.innerHTML = "<b style='color:#ff4d4d;'>❌ AI KHÔNG TÌM THẤY!</b><br>Hãy chụp rõ vùng có nút Nhắn tin hoặc Đang Follow.";
+                    st.innerHTML = "<b style='color:#ff4d4d;'>❌ THẤT BẠI!</b><br>AI vẫn thấy nút đỏ hoặc chưa thấy nút Nhắn tin.";
                 }
-            } catch (e) { 
-                st.innerText = "⚠️ Lỗi AI! Thử lại ảnh khác."; 
-            }
-            btn.disabled = false;
+            } catch (e) { st.innerText = "⚠️ Lỗi AI quét ảnh!"; }
+            document.getElementById('btn').disabled = false;
         }
     </script>
 </body>
