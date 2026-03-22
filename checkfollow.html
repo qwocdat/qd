@@ -2,48 +2,53 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>QuocDat AI - Super Logic</title>
+    <title>QuocDat AI - HWID System</title>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         body { background: #000; color: #fff; text-align: center; font-family: sans-serif; padding: 20px; }
         .card { background: #111; border: 1px solid #333; padding: 30px; border-radius: 20px; max-width: 400px; margin: auto; }
         .btn { background: #007AFF; color: #fff; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; }
-        #keyBox { background: #222; padding: 15px; border-radius: 10px; margin-top: 20px; display: none; border: 1px dashed #007AFF; color: #00ff00; }
+        #resultBox { display: none; margin-top: 20px; padding: 15px; background: #222; border: 1px dashed #007AFF; }
     </style>
 </head>
 <body>
     <div class="card">
-        <h2>QUOCDAT AI v6</h2>
+        <h2>QUOCDAT AI HWID</h2>
         <input type="file" id="file" accept="image/*">
-        <button class="btn" id="btn" onclick="scan()">XÁC MINH & LẤY KEY</button>
-        <div id="st"></div>
-        <div id="keyBox">Key của mày: <b id="key"></b></div>
+        <button class="btn" onclick="verifyAndGen()">XÁC MINH & LẤY KEY</button>
+        <div id="status"></div>
+        
+        <div id="resultBox">
+            <p style="font-size: 12px;">Copy cả dòng này gửi vào Bot:</p>
+            <code id="finalData" style="color: #00ff00; word-break: break-all;"></code>
+        </div>
     </div>
 
     <script>
-        async function scan() {
+        // Hàm lấy HWID đơn giản từ trình duyệt
+        function getSimpleHWID() {
+            const info = navigator.userAgent + screen.width + screen.height;
+            return btoa(info).substring(0, 16); // Mã hóa base64 lấy 16 ký tự
+        }
+
+        async function verifyAndGen() {
             const f = document.getElementById('file').files[0];
-            const st = document.getElementById('st');
+            const st = document.getElementById('status');
             if(!f) return alert("Chọn ảnh!");
-            
-            st.innerText = "⏳ AI đang soi nút bấm...";
+
+            st.innerText = "⏳ AI đang kiểm tra...";
             try {
-                const res = await Tesseract.recognize(f, 'vie+eng', { 
-                    tessedit_char_whitelist: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚÝàáâãèéêìíòóôõùúýĂăĐđĨĩŨũƠơƯưẠạẢảẤấẦầẨẩẪẫẬậẮắẰằẲẳẴẵẶặẸẹẺẻẼẽẾếỀềỂểỄễỆệỈỉỊịỌọỎỏỐốỒồỔổỖỗỘộỚớỜờỞởỠỡỢợỤụỦủỨứỪừỬửỮữỰựỲỳỴỵỶỷỸỹ' 
-                });
+                const res = await Tesseract.recognize(f, 'vie+eng');
                 const txt = res.data.text.toLowerCase();
                 
-                // Logic chuẩn: Có Nhắn tin/Bạn bè và KHÔNG có nút Follow đỏ
-                const confirmed = /nhắn tin|tin nhắn|message|bạn bè|friends|following/.test(txt);
-                const stillRed = /(?<!đang\s)(follow|theo dõi|theo doi)/.test(txt);
-
-                if (confirmed && !stillRed) {
-                    const key = "quocdatdv-" + Math.random().toString(36).substring(2, 11);
-                    document.getElementById('key').innerText = key;
-                    document.getElementById('keyBox').style.display = "block";
+                if (/nhắn tin|message|bạn bè/.test(txt) && !/(?<!đang\s)follow/.test(txt)) {
+                    const key = "qdv-" + Math.random().toString(36).substring(2, 10);
+                    const hwid = getSimpleHWID();
+                    document.getElementById('finalData').innerText = `xacnhan ${key}|${hwid}`;
+                    document.getElementById('resultBox').style.display = "block";
                     st.innerText = "✅ THÀNH CÔNG!";
                 } else {
-                    st.innerText = "❌ Không thấy nút Nhắn tin hoặc vẫn còn nút Follow đỏ!";
+                    st.innerText = "❌ Ảnh chưa hợp lệ!";
                 }
             } catch (e) { st.innerText = "⚠️ Lỗi AI!"; }
         }
