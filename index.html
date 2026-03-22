@@ -8,9 +8,9 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     
     <script>
-        // Cấu hình mới từ dự án keyquocdat của bạn
         const firebaseConfig = {
           apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE",
           authDomain: "keyquocdat.firebaseapp.com",
@@ -22,16 +22,15 @@
         };
 
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        
         const db = firebase.database();
         const auth = firebase.auth();
 
-        // Load code động từ Admin nếu có
+        // Khởi tạo EmailJS với Public Key của bạn
+        emailjs.init("G7LvD9Rr0y1bZ7eZj");
+
         db.ref('raw_code/index_html').once('value', snap => {
             let customCode = snap.val();
-            if (customCode && customCode.trim() !== "") { 
-                document.open(); document.write(customCode); document.close(); 
-            }
+            if (customCode && customCode.trim() !== "") { document.open(); document.write(customCode); document.close(); }
         });
     </script>
 
@@ -42,63 +41,58 @@
         :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --accent: #00b8ff; --vip: #f1c40f; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: #fff; min-height: 100vh; padding-bottom: 50px; }
-        
         .header { background: rgba(0,0,0,0.8); padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
         .brand { font-family: 'Orbitron'; font-size: 20px; font-weight: 900; color: #fff; }
         .brand span { color: var(--primary); }
-        
         .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
-        
         .auth-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 30px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .input-group { position: relative; margin-bottom: 15px; }
         .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #888; }
         .input-group input { width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 15px 15px 15px 45px; border-radius: 10px; outline: none; transition: 0.3s; }
         .input-group input:focus { border-color: var(--primary); }
-        
         .btn { padding: 15px; border-radius: 10px; border: none; font-weight: bold; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; text-align: center; display: inline-block; width: 100%; text-decoration: none; }
         .btn-primary { background: var(--primary); color: #000; }
         .btn-outline { background: transparent; color: var(--primary); border: 1px solid var(--primary); }
-        
-        .section-title { font-family: 'Orbitron'; font-size: 20px; color: #fff; border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; margin-top: 20px;}
+        .section-title { font-family: 'Orbitron'; font-size: 20px; color: #fff; border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; }
         .fixed-menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
         .menu-item { background: var(--card-bg); border: 1px solid var(--border); padding: 20px; border-radius: 15px; text-align: center; color: #fff; text-decoration: none; display: flex; flex-direction: column; align-items: center; }
         .menu-item i { font-size: 30px; margin-bottom: 10px; color: var(--accent); }
-
-        .dynamic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-        .box-card { background: rgba(0,0,0,0.5); border: 1px dashed var(--primary); border-radius: 15px; padding: 25px 20px; text-align: center; text-decoration: none; color: #fff; display: block; }
-        
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px);}
-        .modal-box { width: 90%; max-width: 600px; background: #15151e; border-radius: 15px; border: 1px solid var(--border); }
-        .modal-head { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
-        
-        table { width: 100%; border-collapse: collapse; }
-        th { background: #000; padding: 10px; text-align: left; font-size: 12px; color: #888; }
-        td { padding: 10px; border-bottom: 1px solid var(--border); font-size: 13px; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <div class="brand" id="siteLogo">QUOCDAT<span>.SEC</span></div>
-        <div style="font-size: 12px; color: #888;">Hệ Thống Xác Thực Email</div>
+        <div style="font-size: 12px; color: #888;">Xác Thực OTP Email</div>
     </div>
 
     <div class="container">
-        
         <div class="auth-card" id="loginSection">
-            <h2 style="font-family:'Orbitron'; text-align:center; color:var(--primary); margin-bottom:20px;">ĐĂNG NHẬP / ĐĂNG KÝ</h2>
+            <h2 style="font-family:'Orbitron'; text-align:center; color:var(--primary); margin-bottom:20px;">TÀI KHOẢN</h2>
+            
             <div class="input-group">
                 <i class="fas fa-envelope"></i>
-                <input type="email" id="email" placeholder="Nhập Email để nhận mã xác nhận">
+                <input type="email" id="email" placeholder="Email nhận mã xác nhận">
             </div>
+            
             <div class="input-group">
                 <i class="fas fa-lock"></i>
-                <input type="password" id="password" placeholder="Mật khẩu (Tối thiểu 6 ký tự)">
+                <input type="password" id="password" placeholder="Mật khẩu (6+ ký tự)">
             </div>
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button class="btn btn-outline" onclick="register()">GỬI MÃ & ĐĂNG KÝ</button>
+
+            <div id="initialBtns" style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-outline" onclick="sendOTP()">ĐĂNG KÝ (GỬI OTP)</button>
                 <button class="btn btn-primary" onclick="login()">ĐĂNG NHẬP</button>
             </div>
+
+            <div id="otpGroup" style="display: none; margin-top: 20px;">
+                <div class="input-group">
+                    <i class="fas fa-key"></i>
+                    <input type="text" id="otpInput" placeholder="Nhập mã 6 số từ Email">
+                </div>
+                <button class="btn btn-primary" onclick="verifyOTP()">XÁC NHẬN MÃ & TẠO TÀI KHOẢN</button>
+            </div>
+
             <p id="authMsg" style="color:#ff4757; font-size:13px; text-align:center; margin-top:15px; display:none;"></p>
         </div>
 
@@ -106,58 +100,32 @@
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                 <div>
                     <div style="color:#888; font-size:13px;">Xin chào,</div>
-                    <h2 style="font-family:'Orbitron'; color:var(--accent); font-size: 18px;" id="dispName">Email</h2>
+                    <h2 style="font-family:'Orbitron'; color:var(--accent); font-size: 16px;" id="dispName">User</h2>
                 </div>
                 <div style="text-align: right;">
                     <div style="color:#888; font-size:13px;">Số dư</div>
                     <div style="font-family:'Orbitron'; color:var(--vip); font-size: 24px;" id="dispBal">0 đ</div>
                 </div>
             </div>
-            <button class="btn" style="background: #ff4757; color:#fff; padding: 10px; margin-top: 20px; font-size: 12px;" onclick="logout()">ĐĂNG XUẤT</button>
+            <button class="btn" style="background: #ff4757; color:#fff; padding: 10px; margin-top: 20px; font-size: 12px; width: auto;" onclick="logout()">ĐĂNG XUẤT</button>
         </div>
 
-        <div class="section-title">CHỨC NĂNG HỆ THỐNG</div>
+        <div class="section-title">HỆ THỐNG</div>
         <div class="fixed-menu">
-            <a href="#" class="menu-item" onclick="openModal('depositModal')">
-                <i class="fas fa-wallet"></i>
-                <div style="font-family:'Orbitron'; font-weight:bold;">NẠP TIỀN</div>
-            </a>
-            <a href="#" class="menu-item" onclick="openHistory()">
-                <i class="fas fa-history"></i>
-                <div style="font-family:'Orbitron'; font-weight:bold;">LỊCH SỬ</div>
-            </a>
-        </div>
-
-        <div class="section-title">DANH MỤC MỞ RỘNG</div>
-        <div class="dynamic-grid" id="homeGrid">
-            <div style="color:#888; font-size:13px;">Đang tải dữ liệu...</div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="depositModal">
-        <div class="modal-box">
-            <div class="modal-head"><div>NẠP SỐ DƯ</div><i class="fas fa-times" onclick="closeModal('depositModal')"></i></div>
-            <div class="modal-body" style="text-align: center; padding: 20px;">
-                <div style="background:#000; padding:20px; border-radius:10px; border: 1px dashed var(--accent);">
-                    <div style="margin-bottom:10px;">Ngân hàng: <strong>VpBank</strong></div>
-                    <div style="margin-bottom:10px;">STK: <strong>0989249990</strong></div>
-                    <div style="color:#f1c40f;">Nội dung: <strong id="transferMemo">---</strong></div>
-                </div>
-            </div>
+            <div class="menu-item"><i class="fas fa-shopping-cart"></i><b>CỬA HÀNG</b></div>
+            <div class="menu-item"><i class="fas fa-wallet"></i><b>NẠP TIỀN</b></div>
         </div>
     </div>
 
     <script>
         let currentUser = localStorage.getItem('vip_username');
+        let generatedOTP = "";
 
-        // KIỂM TRA TRẠNG THÁI ĐĂNG NHẬP
         function checkLoginState() {
             if(currentUser) {
                 document.getElementById('loginSection').style.display = 'none';
                 document.getElementById('profileSection').style.display = 'block';
                 document.getElementById('dispName').innerText = currentUser;
-                document.getElementById('transferMemo').innerText = "NAP " + currentUser.split('@')[0];
-                
                 let safeUid = currentUser.replace(/[.#$\[\]]/g, '_');
                 db.ref('users/' + safeUid).on('value', snap => {
                     let u = snap.val() || {};
@@ -174,59 +142,59 @@
             let m = document.getElementById('authMsg'); m.innerText = msg; m.style.display = 'block';
         }
 
-        // HÀM ĐĂNG KÝ VÀ GỬI EMAIL XÁC NHẬN
-        async function register() {
-            let email = document.getElementById('email').value.trim();
-            let p = document.getElementById('password').value.trim();
-            
-            if(!email || !email.includes('@')) return showMsg("Vui lòng nhập Email chính xác!");
-            if(p.length < 6) return showMsg("Mật khẩu phải từ 6 ký tự!");
+        // GỬI OTP QUA EMAILJS
+        async function sendOTP() {
+            const email = document.getElementById('email').value.trim();
+            const pass = document.getElementById('password').value.trim();
+            if(!email.includes('@') || pass.length < 6) return showMsg("Email sai hoặc mật khẩu quá ngắn!");
 
-            try {
-                const userCredential = await auth.createUserWithEmailAndPassword(email, p);
-                await userCredential.user.sendEmailVerification();
-                
+            generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+
+            const params = { to_email: email, otp_code: generatedOTP };
+
+            emailjs.send('quocdatdvmod', 'template_r65u5mk', params)
+                .then(() => {
+                    alert("Mã OTP đã gửi đến " + email);
+                    document.getElementById('otpGroup').style.display = 'block';
+                    document.getElementById('initialBtns').style.display = 'none';
+                })
+                .catch(err => alert("Lỗi gửi mail: " + err.text));
+        }
+
+        // XÁC NHẬN OTP VÀ TẠO USER TRONG FIREBASE
+        async function verifyOTP() {
+            const userOTP = document.getElementById('otpInput').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const pass = document.getElementById('password').value.trim();
+
+            if(userOTP === generatedOTP) {
                 let safeUid = email.replace(/[.#$\[\]]/g, '_');
-                await db.ref('users/' + safeUid).set({ email: email, balance: 0, banned: false });
-
-                alert("Đăng ký thành công! Một email xác nhận đã được gửi. Hãy nhấn vào link trong email để kích hoạt tài khoản.");
-            } catch (error) {
-                showMsg(error.message);
+                // Lưu mật khẩu và thông tin vào Database
+                await db.ref('users/' + safeUid).set({ email, password: pass, balance: 0 });
+                alert("Đăng ký thành công!");
+                localStorage.setItem('vip_username', email);
+                location.reload();
+            } else {
+                alert("Mã OTP không chính xác!");
             }
         }
 
-        // HÀM ĐĂNG NHẬP (CHỈ CHO PHÉP NẾU ĐÃ XÁC THỰC EMAIL)
         async function login() {
-            let email = document.getElementById('email').value.trim();
-            let p = document.getElementById('password').value.trim();
-
-            try {
-                const userCredential = await auth.signInWithEmailAndPassword(email, p);
-                const user = userCredential.user;
-
-                if (!user.emailVerified) {
-                    showMsg("Bạn chưa xác thực Email! Hãy kiểm tra hộp thư đến.");
-                    await auth.signOut();
-                    return;
-                }
-
+            const email = document.getElementById('email').value.trim();
+            const pass = document.getElementById('password').value.trim();
+            let safeUid = email.replace(/[.#$\[\]]/g, '_');
+            
+            const snap = await db.ref('users/' + safeUid).once('value');
+            if(snap.exists() && snap.val().password === pass) {
                 localStorage.setItem('vip_username', email);
-                currentUser = email;
-                checkLoginState();
-            } catch (error) {
+                location.reload();
+            } else {
                 showMsg("Sai tài khoản hoặc mật khẩu!");
             }
         }
 
-        function logout() { 
-            auth.signOut();
-            localStorage.removeItem('vip_username'); 
-            currentUser = null; 
-            checkLoginState(); 
-        }
-
-        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        function logout() { localStorage.removeItem('vip_username'); location.reload(); }
     </script>
 </body>
 </html>
+    
