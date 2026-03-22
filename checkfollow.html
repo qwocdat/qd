@@ -2,55 +2,52 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>QuocDat AI - HWID System</title>
+    <title>QuocDat AI v7 - Fix Logic</title>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         body { background: #000; color: #fff; text-align: center; font-family: sans-serif; padding: 20px; }
-        .card { background: #111; border: 1px solid #333; padding: 30px; border-radius: 20px; max-width: 400px; margin: auto; }
-        .btn { background: #007AFF; color: #fff; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 20px; }
-        #resultBox { display: none; margin-top: 20px; padding: 15px; background: #222; border: 1px dashed #007AFF; }
+        .card { background: #111; border: 1px solid #333; padding: 25px; border-radius: 20px; max-width: 400px; margin: auto; }
+        #resBox { display: none; margin-top: 20px; padding: 15px; border: 1px dashed #007AFF; color: #00ff00; }
+        .btn { background: #007AFF; color: #fff; border: none; padding: 15px; width: 100%; border-radius: 10px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="card">
-        <h2>QUOCDAT AI HWID</h2>
-        <input type="file" id="file" accept="image/*">
-        <button class="btn" onclick="verifyAndGen()">XÁC MINH & LẤY KEY</button>
-        <div id="status"></div>
-        
-        <div id="resultBox">
-            <p style="font-size: 12px;">Copy cả dòng này gửi vào Bot:</p>
-            <code id="finalData" style="color: #00ff00; word-break: break-all;"></code>
-        </div>
+        <h2>QUOCDAT AI - XÁC MINH</h2>
+        <input type="file" id="inp" accept="image/*">
+        <button class="btn" onclick="verify()">QUÉT ẢNH NGAY</button>
+        <div id="st" style="margin-top:15px"></div>
+        <div id="resBox">Mã xác nhận: <strong id="val"></strong></div>
     </div>
 
     <script>
-        // Hàm lấy HWID đơn giản từ trình duyệt
-        function getSimpleHWID() {
-            const info = navigator.userAgent + screen.width + screen.height;
-            return btoa(info).substring(0, 16); // Mã hóa base64 lấy 16 ký tự
-        }
+        async function verify() {
+            const f = document.getElementById('inp').files[0];
+            const st = document.getElementById('st');
+            if(!f) return alert("Chọn ảnh đi Đạt!");
 
-        async function verifyAndGen() {
-            const f = document.getElementById('file').files[0];
-            const st = document.getElementById('status');
-            if(!f) return alert("Chọn ảnh!");
-
-            st.innerText = "⏳ AI đang kiểm tra...";
+            st.innerText = "⏳ AI đang soi trạng thái Follow...";
             try {
                 const res = await Tesseract.recognize(f, 'vie+eng');
-                const txt = res.data.text.toLowerCase();
+                const t = res.data.text.toLowerCase();
+
+                // Logic mới: Tìm chữ "@quocdatdv" đi kèm với "Nhắn tin" 
+                // và KHÔNG được có nút Follow đỏ ở khu vực thông tin cá nhân.
+                const isCorrectUser = t.includes("@quocdatdv");
+                const hasMessageBtn = t.includes("nhắn tin") || t.includes("message");
                 
-                if (/nhắn tin|message|bạn bè/.test(txt) && !/(?<!đang\s)follow/.test(txt)) {
+                // Loại trừ trường hợp vẫn còn nút Follow đỏ của trang cá nhân
+                const hasRedBtn = t.split("thích")[0].includes("follow"); 
+
+                if (isCorrectUser && hasMessageBtn && !hasRedBtn) {
                     const key = "qdv-" + Math.random().toString(36).substring(2, 10);
-                    const hwid = getSimpleHWID();
-                    document.getElementById('finalData').innerText = `xacnhan ${key}|${hwid}`;
-                    document.getElementById('resultBox').style.display = "block";
-                    st.innerText = "✅ THÀNH CÔNG!";
+                    document.getElementById('val').innerText = key;
+                    document.getElementById('resBox').style.display = "block";
+                    st.innerHTML = "<b style='color:#00ff00'>✅ ĐÃ FOLLOW! Copy mã bên dưới:</b>";
                 } else {
-                    st.innerText = "❌ Ảnh chưa hợp lệ!";
+                    st.innerHTML = "<b style='color:#ff4d4d'>❌ THẤT BẠI!</b><br>AI vẫn thấy nút Follow đỏ hoặc không rõ ID @quocdatdv.";
                 }
-            } catch (e) { st.innerText = "⚠️ Lỗi AI!"; }
+            } catch(e) { st.innerText = "⚠️ Lỗi AI quét ảnh!"; }
         }
     </script>
 </body>
