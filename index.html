@@ -2,36 +2,49 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QUOCDATDV | PREMIUM SYSTEM</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --primary: #00ff88; --bg: #0a0a0f; --card-bg: #15151e; --border: #2a2a35; --accent: #00b8ff; --vip: #f1c40f; }
+        :root { --primary: #00ff88; --bg: #0a0a0f; --card: #15151e; --border: #2a2a35; --accent: #00b8ff; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: #fff; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .brand { font-family: 'Orbitron'; font-size: 28px; font-weight: 900; margin-bottom: 30px; text-shadow: 0 0 15px var(--primary); }
+
+        /* Giao diện Brand */
+        .brand { font-family: 'Orbitron'; font-size: 32px; margin-bottom: 30px; text-shadow: 0 0 20px var(--primary); }
         .brand span { color: var(--primary); }
-        .auth-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 24px; padding: 30px; width: 100%; max-width: 450px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        .input-group { position: relative; margin-bottom: 15px; }
+
+        /* Form Card */
+        .auth-card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 30px; width: 100%; max-width: 450px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .input-group { position: relative; margin-bottom: 20px; }
         .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #666; }
         .input-group input { width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 15px 15px 15px 45px; border-radius: 12px; outline: none; }
-        .btn { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        .btn-primary { background: var(--primary); color: #000; }
-        .btn-outline { background: transparent; color: var(--primary); border: 1px solid var(--primary); }
-        .store-container { margin-top: 30px; width: 100%; max-width: 800px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 24px; padding: 25px; position: relative; }
-        .store-header { font-family: 'Orbitron'; color: var(--primary); margin-bottom: 20px; font-size: 18px; display: flex; align-items: center; gap: 10px; }
+        .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(0,255,136,0.2); }
+
+        /* Buttons */
+        .btn { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; }
+        .btn-primary { background: var(--primary); color: #000; margin-top: 10px; }
+        .btn-primary:hover { transform: scale(1.02); box-shadow: 0 0 20px var(--primary); }
+
+        /* Kho Hàng */
+        .store-container { margin-top: 40px; width: 100%; max-width: 800px; background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 25px; position: relative; overflow: hidden; }
+        .store-title { font-family: 'Orbitron'; color: var(--primary); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
         .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
         .product-item { background: #000; border: 1px solid var(--border); padding: 20px; border-radius: 18px; text-align: center; }
-        .locked { filter: blur(12px); pointer-events: none; }
-        .lock-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); border-radius: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5; text-align: center; }
-        .user-info { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 15px; }
+        .product-item i { font-size: 30px; color: var(--accent); margin-bottom: 10px; }
+        
+        /* Hiệu ứng Khóa */
+        .locked { filter: blur(15px); pointer-events: none; }
+        .lock-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; }
+
+        /* User Header */
+        .user-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border); }
     </style>
 </head>
 <body>
@@ -40,138 +53,113 @@
 
     <div class="auth-card">
         <div id="authForms">
-            <div id="inputSection">
+            <div id="loginInputs">
                 <div class="input-group">
                     <i class="fas fa-envelope"></i>
-                    <input type="email" id="email" placeholder="Nhập Email">
+                    <input type="email" id="email" placeholder="Email đăng ký/đăng nhập">
                 </div>
                 <div class="input-group">
                     <i class="fas fa-lock"></i>
-                    <input type="password" id="password" placeholder="Nhập Mật khẩu">
+                    <input type="password" id="password" placeholder="Mật khẩu của bạn">
                 </div>
-                <button class="btn btn-primary" onclick="startAuth()">TIẾP TỤC (NHẬN OTP) 📩</button>
+                <button class="btn btn-primary" onclick="sendAuthOTP()">NHẬN MÃ OTP 📨</button>
             </div>
 
-            <div id="otpSection" style="display: none;">
-                <p style="text-align: center; font-size: 13px; color: #888; margin-bottom: 15px;">Mã OTP đã gửi vào Email của bạn!</p>
+            <div id="otpInputArea" style="display: none;">
+                <p style="text-align: center; font-size: 13px; color: var(--primary); margin-bottom: 15px;">Đã gửi mã vào Gmail của bạn!</p>
                 <div class="input-group">
                     <i class="fas fa-key"></i>
-                    <input type="text" id="otpInput" placeholder="Nhập mã 6 số">
+                    <input type="text" id="otpCode" placeholder="Nhập 6 số từ Email">
                 </div>
-                <button class="btn btn-primary" onclick="finishAuth()">XÁC NHẬN TRUY CẬP ✅</button>
+                <button class="btn btn-primary" onclick="verifyOTP()">XÁC NHẬN VÀ VÀO KHO ✅</button>
             </div>
         </div>
 
-        <div id="profileSection" style="display: none;">
-            <div class="user-info">
-                <div>
-                    <small style="color:#888">Tài khoản:</small>
-                    <div id="uName" style="font-weight: bold; color:var(--accent)">-</div>
-                </div>
-                <div style="text-align: right;">
-                    <small style="color:#888">Số dư:</small>
-                    <div id="uBal" style="font-weight: bold; color:var(--vip)">0 đ</div>
-                </div>
+        <div id="userInfo" style="display: none;">
+            <div class="user-header">
+                <div id="uMail" style="font-weight: 600; color: var(--accent);">user@gmail.com</div>
+                <div style="color: #f1c40f;">0 đ</div>
             </div>
-            <button class="btn" style="background:#ff4757; color:#fff" onclick="logout()">ĐĂNG XUẤT</button>
+            <button class="btn" style="background: #ff4757; color: #fff;" onclick="logout()">ĐĂNG XUẤT 🚪</button>
         </div>
     </div>
 
     <div class="store-container">
-        <div class="store-header"><i class="fas fa-shopping-bag"></i> KHO HÀNG CÔNG TY 📦</div>
-        <div id="lockOverlay" class="lock-overlay">
+        <div class="store-title"><i class="fas fa-shopping-cart"></i> KHO HÀNG CÔNG TY</div>
+        
+        <div id="storeLock" class="lock-overlay">
             <i class="fas fa-lock" style="font-size: 40px; color: var(--primary); margin-bottom: 10px;"></i>
-            <p style="font-family: 'Orbitron'; font-size: 13px;">ĐĂNG NHẬP ĐỂ MỞ KHO 🔐</p>
+            <p style="font-family: 'Orbitron';">VUI LÒNG ĐĂNG NHẬP 🔐</p>
         </div>
-        <div id="productGrid" class="product-grid locked">
-            <div class="product-item"><i class="fas fa-bolt"></i><p>VIP 1 NGÀY</p><span class="price">10.000đ</span></div>
-            <div class="product-item"><i class="fas fa-crown"></i><p>KING 30 NGÀY</p><span class="price">150.000đ</span></div>
+
+        <div id="storeGrid" class="product-grid locked">
+            <div class="product-item"><i class="fas fa-bolt"></i><p>GÓI VIP 1</p><p style="color:#f1c40f">10k</p></div>
+            <div class="product-item"><i class="fas fa-fire"></i><p>GÓI VIP 2</p><p style="color:#f1c40f">50k</p></div>
+            <div class="product-item"><i class="fas fa-crown"></i><p>GÓI VIP 3</p><p style="color:#f1c40f">100k</p></div>
         </div>
     </div>
 
     <script>
         firebase.initializeApp({
-          apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE",
-          authDomain: "keyquocdat.firebaseapp.com",
-          databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app",
-          projectId: "keyquocdat",
-          storageBucket: "keyquocdat.firebasestorage.app",
-          messagingSenderId: "940819957535",
-          appId: "1:940819957535:web:6e8e9a4c9838740da3122a"
+            apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE",
+            databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "keyquocdat"
         });
         const db = firebase.database();
         emailjs.init("G7LvD9Rr0y1bZ7eZj");
 
-        let generatedOTP = "";
-        let authMode = "";
+        let currentOTP = "";
 
-        function checkState() {
-            const user = localStorage.getItem('vip_username');
+        function checkStatus() {
+            const user = localStorage.getItem('logged_in');
             if(user) {
                 document.getElementById('authForms').style.display = 'none';
-                document.getElementById('profileSection').style.display = 'block';
-                document.getElementById('lockOverlay').style.display = 'none';
-                document.getElementById('productGrid').classList.remove('locked');
-                document.getElementById('uName').innerText = user;
-                let safeUid = user.replace(/[.#$\[\]]/g, '_');
-                db.ref('users/' + safeUid).on('value', snap => {
-                    let data = snap.val() || {balance: 0};
-                    document.getElementById('uBal').innerText = (data.balance || 0).toLocaleString() + " đ";
-                });
+                document.getElementById('userInfo').style.display = 'block';
+                document.getElementById('uMail').innerText = user;
+                document.getElementById('storeLock').style.display = 'none';
+                document.getElementById('storeGrid').classList.remove('locked');
             }
         }
-        checkState();
+        checkStatus();
 
-        async function startAuth() {
-            const email = document.getElementById('email').value.trim();
-            const pass = document.getElementById('password').value.trim();
-            if(!email.includes('@') || pass.length < 6) return alert("Email hoặc mật khẩu không đúng!");
+        async function sendAuthOTP() {
+            const email = document.getElementById('email').value;
+            if(!email.includes('@')) return alert("Email không đúng định dạng!");
 
-            let safeUid = email.replace(/[.#$\[\]]/g, '_');
-            const snap = await db.ref('users/' + safeUid).once('value');
-            
-            if(snap.exists()) {
-                if(snap.val().password !== pass) return alert("Sai mật khẩu!");
-                authMode = "login";
-            } else {
-                authMode = "register";
-            }
+            currentOTP = Math.floor(100000 + Math.random() * 900000).toString();
 
-            generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
-            
-            // --- SỬA LẠI BIẾN KHỚP VỚI TEMPLATE r65u5mk ---
+            // CHỖ NÀY LÀ QUAN TRỌNG NHẤT: TRUYỀN otp_code LÀ MÃ SỐ
             const params = {
                 to_email: email,
-                passcode: generatedOTP, // <--- TRUYỀN MÃ SỐ VÀO BIẾN passcode (Con số to nhất)
-                otp_code: "10 Phút"      // <--- TRUYỀN THỜI GIAN VÀO BIẾN otp_code (Dòng nhỏ)
+                otp_code: currentOTP, // <--- Mã số hiện ở {{otp_code}} (ô to)
+                passcode: "15 Phút"    // <--- Thời gian hiện ở {{passcode}} (dòng nhỏ)
             };
 
             emailjs.send('quocdatdvmod', 'template_r65u5mk', params)
                 .then(() => {
-                    alert("OTP đã gửi! Kiểm tra Gmail ngay 🚀");
-                    document.getElementById('inputSection').style.display = 'none';
-                    document.getElementById('otpSection').style.display = 'block';
-                })
-                .catch(err => alert("Lỗi gửi mail: " + err.text));
+                    alert("Gửi mã thành công!");
+                    document.getElementById('loginInputs').style.display = 'none';
+                    document.getElementById('otpInputArea').style.display = 'block';
+                }).catch(e => alert("Lỗi: " + e.text));
         }
 
-        async function finishAuth() {
-            const input = document.getElementById('otpInput').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const pass = document.getElementById('password').value.trim();
+        async function verifyOTP() {
+            const code = document.getElementById('otpCode').value;
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
 
-            if(input !== generatedOTP) return alert("Mã OTP không chính xác!");
-
-            if(authMode === "register") {
-                let safeUid = email.replace(/[.#$\[\]]/g, '_');
-                await db.ref('users/' + safeUid).set({ email, password: pass, balance: 0 });
+            if(code === currentOTP) {
+                let safeId = email.replace(/[.#$\[\]]/g, '_');
+                await db.ref('users/' + safeId).set({ email, password: pass });
+                localStorage.setItem('logged_in', email);
+                location.reload();
+            } else {
+                alert("Mã sai rồi!");
             }
-
-            localStorage.setItem('vip_username', email);
-            location.reload();
         }
 
-        function logout() { localStorage.removeItem('vip_username'); location.reload(); }
+        function logout() { localStorage.clear(); location.reload(); }
     </script>
 </body>
-</html>
+    </html>
+    
