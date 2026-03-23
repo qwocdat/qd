@@ -15,13 +15,18 @@
         :root { --primary: #00ff88; --bg: #0a0a0f; --card: #15151e; --border: #2a2a35; --accent: #00b8ff; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: #fff; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+
         .brand { font-family: 'Orbitron'; font-size: 28px; margin-bottom: 25px; text-shadow: 0 0 15px var(--primary); }
         .brand span { color: var(--primary); }
+
+        /* Auth Card */
         .auth-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; width: 100%; max-width: 400px; margin-bottom: 30px; }
         .input-group { margin-bottom: 12px; }
         .input-group input { width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 12px; border-radius: 10px; outline: none; }
         .btn { width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: bold; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; }
         .btn-primary { background: var(--primary); color: #000; }
+
+        /* Store Section */
         .store-container { width: 100%; max-width: 800px; }
         .store-title { font-family: 'Orbitron'; color: var(--primary); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
         .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
@@ -30,13 +35,22 @@
         .product-card i { font-size: 30px; color: var(--accent); margin-bottom: 10px; }
         .product-card h3 { font-size: 16px; margin-bottom: 5px; }
         .product-card .price { color: #f1c40f; font-weight: bold; margin-bottom: 15px; display: block; }
-        .btn-buy { background: rgba(0, 255, 136, 0.1); color: var(--primary); border: 1px solid var(--primary); font-size: 12px; padding: 8px; }
+        .btn-buy { background: rgba(0, 255, 136, 0.1); color: var(--primary); border: 1px solid var(--primary); font-size: 12px; padding: 8px; width: 100%; border-radius: 8px; cursor: pointer; }
         .btn-buy:hover { background: var(--primary); color: #000; }
+
         .locked { filter: blur(10px); pointer-events: none; opacity: 0.5; }
-        #ios-alert { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
-        .ios-box { background: rgba(30, 30, 35, 0.95); width: 280px; border-radius: 14px; text-align: center; border: 0.5px solid #444; overflow: hidden; }
+
+        /* POPUP iOS CHUNG */
+        .ios-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(5px); }
+        .ios-box { background: rgba(30, 30, 35, 0.95); width: 280px; border-radius: 14px; text-align: center; border: 0.5px solid #444; overflow: hidden; animation: iosPop 0.2s ease-out; }
+        @keyframes iosPop { from { transform: scale(1.1); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .ios-content { padding: 20px; }
-        .ios-btn { width: 100%; padding: 12px; background: transparent; border: none; border-top: 0.5px solid #444; color: #007aff; font-size: 17px; font-weight: bold; cursor: pointer; }
+        .ios-content b { font-size: 17px; color: #fff; }
+        .ios-content p { font-size: 13px; color: #ccc; margin-top: 5px; }
+        .ios-footer { display: flex; border-top: 0.5px solid #444; }
+        .ios-btn { flex: 1; padding: 12px; background: transparent; border: none; font-size: 17px; cursor: pointer; color: #007aff; }
+        .ios-btn.cancel { color: #ff3b30; border-right: 0.5px solid #444; }
+        .ios-btn.confirm { font-weight: bold; }
     </style>
 </head>
 <body>
@@ -67,13 +81,28 @@
         <div id="product-list" class="product-grid locked"></div>
     </div>
 
-    <div id="ios-alert">
+    <div id="ios-alert" class="ios-overlay">
         <div class="ios-box">
             <div class="ios-content">
-                <b style="font-size:17px">Thông báo</b><br>
-                <p id="ios-msg" style="font-size:13px; color:#ccc; margin-top:5px">Mã OTP đã được gửi!</p>
+                <b>Thông báo</b>
+                <p id="ios-msg"></p>
             </div>
-            <button class="ios-btn" onclick="document.getElementById('ios-alert').style.display='none'">Đồng ý</button>
+            <div class="ios-footer">
+                <button class="ios-btn" onclick="closeAlert()">Đồng ý</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="ios-buy-confirm" class="ios-overlay">
+        <div class="ios-box">
+            <div class="ios-content">
+                <b>Xác nhận mua</b>
+                <p id="buy-msg"></p>
+            </div>
+            <div class="ios-footer">
+                <button class="ios-btn cancel" onclick="closeBuyPopup()">Hủy</button>
+                <button class="ios-btn confirm" id="confirm-buy-btn">Mua ngay</button>
+            </div>
         </div>
     </div>
 
@@ -92,6 +121,8 @@
 
         function init() {
             const user = localStorage.getItem('logged_user');
+            
+            // Load sản phẩm từ Admin
             db.ref('products').on('value', snap => {
                 const list = document.getElementById('product-list');
                 list.innerHTML = '';
@@ -102,7 +133,7 @@
                             <i class="fas fa-gem"></i>
                             <h3>${p.name}</h3>
                             <span class="price">${p.price.toLocaleString()} VNĐ</span>
-                            <button class="btn btn-buy" onclick="buyProduct('${doc.key}', ${p.price})">MUA NGAY</button>
+                            <button class="btn-buy" onclick="buyProduct('${doc.key}', ${p.price}, '${p.name}')">MUA NGAY</button>
                         </div>
                     `;
                 });
@@ -123,13 +154,18 @@
         }
         init();
 
+        // OTP Logic
         function sendOTP() {
             const email = document.getElementById('email').value.trim();
-            if(!email.includes('@')) return alert("Email sai!");
+            if(!email.includes('@')) return showAlert("Email không hợp lệ!");
             currentOTP = Math.floor(100000 + Math.random() * 900000).toString();
-            emailjs.send('quocdatdvmod', 'template_r65u5mk', { to_email: email, otp_code: currentOTP, passcode: "10 Phút" })
-            .then(() => {
-                document.getElementById('ios-alert').style.display = 'flex';
+            
+            emailjs.send('quocdatdvmod', 'template_r65u5mk', {
+                to_email: email,
+                otp_code: currentOTP,
+                passcode: "10 Phút"
+            }).then(() => {
+                showAlert("Mã OTP đã được gửi tới Email của bạn!");
                 document.getElementById('login-step').style.display = 'none';
                 document.getElementById('otp-step').style.display = 'block';
             });
@@ -145,39 +181,44 @@
                 if(!check.exists()) await db.ref('users/' + id).set({ email, password: pass, balance: 0 });
                 localStorage.setItem('logged_user', email);
                 location.reload();
-            } else { alert("Mã sai!"); }
+            } else { showAlert("Mã xác nhận không chính xác!"); }
         }
 
-        // --- ĐÂY LÀ PHẦN FIX MUA HÀNG ---
-        async function buyProduct(pId, price) {
-            const email = localStorage.getItem('logged_user');
-            if (!email) return alert("Vui lòng đăng nhập!");
-
+        // MUA HÀNG LOGIC (iOS STYLE)
+        function buyProduct(pId, price, name) {
             if (userBalance < price) {
-                return alert("❌ Bạn không đủ tiền!\nSố dư: " + userBalance.toLocaleString() + "đ\nGiá: " + price.toLocaleString() + "đ");
+                return showAlert(`Bạn không đủ tiền!<br>Cần nạp thêm: ${(price - userBalance).toLocaleString()}đ`);
             }
 
-            if (confirm("Xác nhận mua sản phẩm này?")) {
-                let id = email.replace(/[.#$\[\]]/g, '_');
-                const newBalance = userBalance - price;
+            document.getElementById('buy-msg').innerHTML = `Mua <b>${name}</b> với giá <span style="color:#f1c40f">${price.toLocaleString()}đ</span>?`;
+            document.getElementById('ios-buy-confirm').style.display = 'flex';
 
-                try {
-                    // Trừ tiền trên Firebase
-                    await db.ref('users/' + id).update({ balance: newBalance });
-                    
-                    // Lấy link từ sản phẩm
-                    const pSnap = await db.ref('products/' + pId).once('value');
-                    const link = pSnap.val().download_link;
-
-                    alert("✅ Mua thành công! Đang mở sản phẩm...");
-                    if (link) window.open(link, '_blank');
-                    else alert("Sản phẩm chưa có link, hãy báo Admin!");
-                } catch (e) {
-                    alert("Lỗi: " + e.message);
-                }
-            }
+            document.getElementById('confirm-buy-btn').onclick = () => executePurchase(pId, price);
         }
 
+        async function executePurchase(pId, price) {
+            closeBuyPopup();
+            const email = localStorage.getItem('logged_user');
+            let id = email.replace(/[.#$\[\]]/g, '_');
+            const newBalance = userBalance - price;
+
+            try {
+                await db.ref('users/' + id).update({ balance: newBalance });
+                const pSnap = await db.ref('products/' + pId).once('value');
+                const link = pSnap.val().download_link;
+
+                showAlert("✅ Mua thành công! Đang lấy link...");
+                if (link) setTimeout(() => window.open(link, '_blank'), 1500);
+            } catch (e) { showAlert("Lỗi: " + e.message); }
+        }
+
+        // Helper functions
+        function showAlert(msg) {
+            document.getElementById('ios-msg').innerHTML = msg;
+            document.getElementById('ios-alert').style.display = 'flex';
+        }
+        function closeAlert() { document.getElementById('ios-alert').style.display = 'none'; }
+        function closeBuyPopup() { document.getElementById('ios-buy-confirm').style.display = 'none'; }
         function logout() { localStorage.clear(); location.reload(); }
     </script>
 </body>
