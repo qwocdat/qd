@@ -2,13 +2,15 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>fake</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>White Screen</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             background-color: white; overflow: hidden;
+            cursor: default;
         }
-        /* Video ẩn siêu nhỏ */
+        /* Ẩn video hoàn toàn */
         #trollVideo {
             position: absolute; width: 1px; height: 1px; opacity: 0;
         }
@@ -17,29 +19,26 @@
 <body>
 
     <video id="trollVideo" loop playsinline>
-        <source src="fakesound.mp4" type="video/mp4">
+        <source src="https://raw.githubusercontent.com/qwocdat/qd/main/fakesound.mp4" type="video/mp4">
     </video>
 
     <script>
         const video = document.getElementById('trollVideo');
 
-        // Cố gắng phát tự động (thường sẽ thất bại ở lần đầu)
-        video.play().catch(() => {
-            console.log("Trình duyệt chặn. Chờ người dùng chạm vào màn hình...");
-        });
-
-        // Bắt bất kỳ hành động nào của người dùng để kích hoạt âm thanh
-        const enableSound = () => {
-            video.play();
-            // Gỡ bỏ các sự kiện sau khi đã phát thành công
-            ["click", "touchstart", "keydown", "scroll"].forEach(event => {
-                document.removeEventListener(event, enableSound);
-            });
+        // Hàm kích hoạt nhạc
+        const startSound = () => {
+            video.play().then(() => {
+                console.log("Đang phát...");
+                // Gỡ sự kiện sau khi đã phát thành công để tránh tốn tài nguyên
+                ["click", "touchstart", "scroll", "keydown"].forEach(e => {
+                    document.removeEventListener(e, startSound);
+                });
+            }).catch(err => console.log("Đang đợi tương tác..."));
         };
 
-        // Lắng nghe mọi hành động: Click, Chạm, Nhấn phím, Cuộn chuột
-        ["click", "touchstart", "keydown", "scroll"].forEach(event => {
-            document.addEventListener(event, enableSound);
+        // Lắng nghe mọi hành động nhỏ nhất của người dùng
+        ["click", "touchstart", "scroll", "keydown"].forEach(e => {
+            document.addEventListener(e, startSound);
         });
     </script>
 </body>
