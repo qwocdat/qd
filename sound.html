@@ -2,51 +2,45 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trang web trắng</title>
     <style>
-        /* Đảm bảo toàn bộ màn hình trắng tinh */
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #ffffff;
-            overflow: hidden; /* Không cho cuộn trang */
-            cursor: default;
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: white; overflow: hidden;
         }
-        /* Ẩn hoàn toàn video khỏi tầm mắt */
-        #tiktokVideo {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            opacity: 0;
+        /* Video ẩn siêu nhỏ */
+        #trollVideo {
+            position: absolute; width: 1px; height: 1px; opacity: 0;
         }
     </style>
 </head>
 <body>
 
-    <video id="tiktokVideo" loop playsinline>
+    <video id="trollVideo" loop playsinline>
         <source src="fakesound.mp4" type="video/mp4">
     </video>
 
     <script>
-        // Hàm bắt đầu phát nhạc khi người dùng tương tác
-        function startTroll() {
-            const video = document.getElementById('tiktokVideo');
-            video.play().catch(error => {
-                console.log("Trình duyệt chặn phát tự động, cần click mạnh hơn!");
+        const video = document.getElementById('trollVideo');
+
+        // Cố gắng phát tự động (thường sẽ thất bại ở lần đầu)
+        video.play().catch(() => {
+            console.log("Trình duyệt chặn. Chờ người dùng chạm vào màn hình...");
+        });
+
+        // Bắt bất kỳ hành động nào của người dùng để kích hoạt âm thanh
+        const enableSound = () => {
+            video.play();
+            // Gỡ bỏ các sự kiện sau khi đã phát thành công
+            ["click", "touchstart", "keydown", "scroll"].forEach(event => {
+                document.removeEventListener(event, enableSound);
             });
-            
-            // Sau khi bấm xong thì gỡ sự kiện để tránh bấm lại nhiều lần
-            document.removeEventListener('click', startTroll);
-            document.removeEventListener('touchstart', startTroll);
-        }
+        };
 
-        // Lắng nghe cả cú click chuột và chạm màn hình (điện thoại)
-        document.addEventListener('click', startTroll);
-        document.addEventListener('touchstart', startTroll);
+        // Lắng nghe mọi hành động: Click, Chạm, Nhấn phím, Cuộn chuột
+        ["click", "touchstart", "keydown", "scroll"].forEach(event => {
+            document.addEventListener(event, enableSound);
+        });
     </script>
-
 </body>
 </html>
