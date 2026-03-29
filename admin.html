@@ -6,7 +6,6 @@
     <title>ADMIN PANEL | QUOCDAT SEC</title>
     
     <script>
-        // Bảo mật Admin
         var isAdmin = sessionStorage.getItem('admin_logged');
         if (isAdmin !== 'true') {
             var pass = prompt("HỆ THỐNG QUẢN TRỊ\nNhập mật khẩu Admin:");
@@ -26,26 +25,30 @@
     <style>
         :root { --primary: #00ff88; --bg: #0a0a0f; --card: #15151e; --border: #2a2a35; --accent: #00b8ff; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg); color: #fff; display: flex; min-height: 100vh; }
-        .sidebar { width: 260px; background: #000; border-right: 1px solid var(--border); padding: 20px; }
-        .nav-item { padding: 15px; color: #888; cursor: pointer; border-radius: 10px; margin-bottom: 5px; transition: 0.3s; display: flex; align-items: center; gap: 10px; }
+        body { background: var(--bg); color: #fff; display: flex; min-height: 100vh; overflow-x: hidden; }
+        
+        .sidebar { width: 240px; background: #000; border-right: 1px solid var(--border); padding: 20px; flex-shrink: 0; }
+        .nav-item { padding: 12px; color: #888; cursor: pointer; border-radius: 8px; margin-bottom: 5px; transition: 0.3s; display: flex; align-items: center; gap: 10px; font-size: 14px; }
         .nav-item:hover, .nav-item.active { background: var(--card); color: var(--primary); }
-        .main { flex: 1; padding: 30px; overflow-y: auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .stat-box { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid var(--border); text-align: center; }
-        .stat-box h2 { font-family: 'Orbitron'; color: var(--primary); font-size: 24px; }
-        .card { background: var(--card); border-radius: 15px; border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th { text-align: left; padding: 12px; color: #555; font-size: 11px; text-transform: uppercase; }
-        td { padding: 12px; border-top: 1px solid var(--border); font-size: 13px; }
-        .btn { padding: 8px 15px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 12px; }
+        
+        .main { flex: 1; padding: 25px; overflow-y: auto; }
+        .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-box { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid var(--border); text-align: center; }
+        .stat-box h2 { font-family: 'Orbitron'; color: var(--primary); font-size: 20px; margin-top: 5px; }
+        
+        .card { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 10px; color: #555; font-size: 11px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 13px; }
+        
+        .btn { padding: 7px 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; font-size: 11px; }
         .btn-edit { background: var(--accent); color: #000; }
         .btn-delete { background: #ff4757; color: #fff; margin-left: 5px; }
-        .btn-add { background: var(--primary); color: #000; margin-bottom: 15px; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-size: 12px; color: #888; }
-        .form-group input { width: 100%; padding: 10px; background: #000; border: 1px solid var(--border); color: #fff; border-radius: 8px; outline: none; }
+        .btn-add { background: var(--primary); color: #000; width: 100%; margin-top: 10px; font-family: 'Orbitron'; }
+        
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; margin-bottom: 4px; font-size: 11px; color: #888; }
+        .form-group input { width: 100%; padding: 10px; background: #000; border: 1px solid var(--border); color: #fff; border-radius: 6px; outline: none; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
     </style>
@@ -53,31 +56,24 @@
 <body>
 
     <div class="sidebar">
-        <h2 style="font-family:'Orbitron'; color:var(--primary); margin-bottom:30px;">QD.ADMIN</h2>
-        <div class="nav-item active" onclick="showTab('users', this)"><i class="fas fa-users"></i> Người Dùng</div>
-        <div class="nav-item" onclick="showTab('products', this)"><i class="fas fa-box"></i> Sản Phẩm</div>
-        <div class="nav-item" onclick="showTab('add-prod', this)"><i class="fas fa-plus-circle"></i> Thêm Sản Phẩm</div>
-        <div class="nav-item" style="margin-top:50px; color:#ff4757" onclick="location.href='index.html'"><i class="fas fa-sign-out-alt"></i> Thoát</div>
+        <h2 style="font-family:'Orbitron'; color:var(--primary); margin-bottom:30px; font-size: 18px;">QD.ADMIN</h2>
+        <div class="nav-item active" onclick="showTab('users', this)"><i class="fas fa-users"></i> NGƯỜI DÙNG</div>
+        <div class="nav-item" onclick="showTab('products', this)"><i class="fas fa-box"></i> SẢN PHẨM</div>
+        <div class="nav-item" onclick="showTab('add-tab', this)"><i class="fas fa-plus-square"></i> THÊM MỚI</div>
+        <div class="nav-item" style="margin-top:50px; color:#ff4757" onclick="location.href='index.html'"><i class="fas fa-sign-out-alt"></i> THOÁT</div>
     </div>
 
     <div class="main">
-        <div class="header">
-            <h1 id="tab-title">Quản Lý Người Dùng</h1>
-            <div style="color:var(--accent)">System Secured</div>
-        </div>
-
         <div class="grid-stats">
-            <div class="stat-box"><div>TỔNG USER</div><h2 id="count-users">0</h2></div>
-            <div class="stat-box"><div>SẢN PHẨM</div><h2 id="count-products">0</h2></div>
-            <div class="stat-box"><div>SỐ DƯ HỆ THỐNG</div><h2 id="total-revenue">0đ</h2></div>
+            <div class="stat-box"><div>USERS</div><h2 id="count-users">0</h2></div>
+            <div class="stat-box"><div>PRODUCTS</div><h2 id="count-products">0</h2></div>
+            <div class="stat-box"><div>SYSTEM CASH</div><h2 id="total-revenue">0đ</h2></div>
         </div>
 
         <div id="users" class="tab-content active">
             <div class="card">
                 <table>
-                    <thead>
-                        <tr><th>Tài Khoản</th><th>Số Dư</th><th>Thao Tác</th></tr>
-                    </thead>
+                    <thead><tr><th>EMAIL</th><th>SỐ DƯ</th><th>THAO TÁC</th></tr></thead>
                     <tbody id="user-list"></tbody>
                 </table>
             </div>
@@ -86,108 +82,82 @@
         <div id="products" class="tab-content">
             <div class="card">
                 <table>
-                    <thead>
-                        <tr><th>Tên SP</th><th>Giá</th><th>Link</th><th>Thao Tác</th></tr>
-                    </thead>
+                    <thead><tr><th>TÊN</th><th>GIÁ</th><th>LINK</th><th>THAO TÁC</th></tr></thead>
                     <tbody id="product-list"></tbody>
                 </table>
             </div>
         </div>
 
-        <div id="add-prod" class="tab-content">
-            <div class="card" style="max-width: 500px;">
-                <h3 style="margin-bottom:15px; color:var(--primary)">THÊM SẢN PHẨM MỚI</h3>
-                <div class="form-group">
-                    <label>Tên Sản Phẩm</label>
-                    <input type="text" id="p-name" placeholder="Ví dụ: Tool Hack VIP">
-                </div>
-                <div class="form-group">
-                    <label>Giá Tiền (VNĐ)</label>
-                    <input type="number" id="p-price" placeholder="Ví dụ: 50000">
-                </div>
-                <div class="form-group">
-                    <label>Link Tự Mở Khi Mua (Bắt buộc)</label>
-                    <input type="text" id="p-link" placeholder="https://drive.google.com/...">
-                </div>
-                <button class="btn btn-add" style="width:100%" onclick="saveProduct()">LƯU SẢN PHẨM</button>
+        <div id="add-tab" class="tab-content">
+            <div class="card" style="max-width: 450px; margin: auto;">
+                <h3 style="color:var(--primary); margin-bottom:15px; font-size:14px;">[ THÊM SẢN PHẨM MỚI ]</h3>
+                <div class="form-group"><label>Tên Sản Phẩm</label><input type="text" id="p-name" placeholder="Ví dụ: Tool VIP"></div>
+                <div class="form-group"><label>Giá Tiền (Nhập 0 nếu Free)</label><input type="number" id="p-price" placeholder="Ví dụ: 0"></div>
+                <div class="form-group"><label>Link Tool/Key</label><input type="text" id="p-link" placeholder="https://..."></div>
+                <button class="btn btn-add" onclick="saveProduct()">LƯU HỆ THỐNG</button>
             </div>
         </div>
     </div>
 
     <script>
-        // FIREBASE CONFIG CHUẨN ĐÉT
-        const firebaseConfig = {
-            databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app"
-        };
+        const firebaseConfig = { databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        function showTab(tabId, el) {
+        function showTab(tId, el) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
+            document.getElementById(tId).classList.add('active');
             el.classList.add('active');
-            document.getElementById('tab-title').innerText = el.innerText;
         }
 
-        // 1. Quản lý Người dùng & Tổng số dư
-        db.ref('users').on('value', snap => {
-            const list = document.getElementById('user-list');
-            list.innerHTML = '';
-            let count = 0; let totalBal = 0;
-            snap.forEach(user => {
-                count++;
-                const data = user.val();
-                totalBal += (data.balance || 0);
-                list.innerHTML += `
-                    <tr>
-                        <td style="color:var(--accent)">${data.email}</td>
-                        <td style="color:var(--primary)">${(data.balance || 0).toLocaleString()}đ</td>
-                        <td>
-                            <button class="btn btn-edit" onclick="editBalance('${user.key}', ${data.balance || 0})">Sửa Tiền</button>
-                            <button class="btn btn-delete" onclick="deleteUser('${user.key}')">Xóa</button>
-                        </td>
-                    </tr>
-                `;
+        // Realtime Users
+        db.ref('users').on('value', s => {
+            const list = document.getElementById('user-list'); list.innerHTML = '';
+            let count = 0; let total = 0;
+            s.forEach(u => {
+                count++; const d = u.val(); total += (d.balance || 0);
+                list.innerHTML += `<tr>
+                    <td style="color:var(--accent)">${d.email}</td>
+                    <td style="color:var(--primary)">${(d.balance || 0).toLocaleString()}đ</td>
+                    <td><button class="btn btn-edit" onclick="editBal('${u.key}', ${d.balance || 0})">Sửa</button>
+                    <button class="btn btn-delete" onclick="delUser('${u.key}')">Xóa</button></td>
+                </tr>`;
             });
             document.getElementById('count-users').innerText = count;
-            document.getElementById('total-revenue').innerText = totalBal.toLocaleString() + "đ";
+            document.getElementById('total-revenue').innerText = total.toLocaleString() + "đ";
         });
 
-        // 2. Danh sách Sản phẩm (Dùng biến 'link' để khớp index.html)
-        db.ref('products').on('value', snap => {
-            const list = document.getElementById('product-list');
-            list.innerHTML = '';
+        // Realtime Products
+        db.ref('products').on('value', s => {
+            const list = document.getElementById('product-list'); list.innerHTML = '';
             let count = 0;
-            snap.forEach(prod => {
-                count++;
-                const data = prod.val();
-                list.innerHTML += `
-                    <tr>
-                        <td><b>${data.name}</b></td>
-                        <td>${(data.price || 0).toLocaleString()}đ</td>
-                        <td style="font-size:10px; opacity:0.5">${data.link || 'Chưa gắn'}</td>
-                        <td><button class="btn btn-delete" onclick="deleteProduct('${prod.key}')">Xóa</button></td>
-                    </tr>
-                `;
+            s.forEach(p => {
+                count++; const d = p.val();
+                list.innerHTML += `<tr>
+                    <td><b>${d.name}</b></td>
+                    <td style="color:#f1c40f">${(d.price || 0).toLocaleString()}đ</td>
+                    <td style="font-size:10px; opacity:0.4">${d.link || 'Error'}</td>
+                    <td><button class="btn btn-delete" onclick="delProd('${p.key}')">Xóa</button></td>
+                </tr>`;
             });
             document.getElementById('count-products').innerText = count;
         });
 
-        // 3. Hàm lưu sản phẩm chuẩn (Fix lỗi Địt cụ mày bảo chưa gắn)
+        // FIX LỖI GIÁ 0Đ
         function saveProduct() {
             const n = document.getElementById('p-name').value.trim();
-            const p = parseInt(document.getElementById('p-price').value);
+            const pText = document.getElementById('p-price').value.trim(); // Lấy text để check trống
             const l = document.getElementById('p-link').value.trim();
             
-            if(!n || !p || !l) return alert("Phải nhập đủ Tên, Giá và Link mở tool!");
+            if(!n || pText === "" || !l) return alert("Điền đủ Tên, Giá và Link!");
 
             db.ref('products').push({
                 name: n,
-                price: p,
-                link: l // Tên biến 'link' này là cái index.html đang tìm
+                price: parseInt(pText), // Ép kiểu sang số (0 vẫn là 0)
+                link: l
             }).then(() => {
-                alert("Đã lưu sản phẩm chuẩn bài!");
+                alert("Đã thêm sản phẩm!");
                 document.getElementById('p-name').value = '';
                 document.getElementById('p-price').value = '';
                 document.getElementById('p-link').value = '';
@@ -195,14 +165,12 @@
             });
         }
 
-        function editBalance(id, oldBal) {
-            const newBal = prompt("Nhập số tiền mới cho tài khoản này:", oldBal);
-            if (newBal !== null) db.ref('users/' + id).update({ balance: Number(newBal) });
+        function editBal(id, old) {
+            const n = prompt("Số dư mới:", old);
+            if (n !== null) db.ref('users/'+id).update({ balance: Number(n) });
         }
-
-        function deleteUser(id) { if(confirm("Xóa user này?")) db.ref('users/' + id).remove(); }
-        function deleteProduct(id) { if(confirm("Xóa sản phẩm này?")) db.ref('products/' + id).remove(); }
+        function delUser(id) { if(confirm("Xóa khách này?")) db.ref('users/'+id).remove(); }
+        function delProd(id) { if(confirm("Xóa sản phẩm này?")) db.ref('products/'+id).remove(); }
     </script>
 </body>
-    </html>
-    
+</html>
