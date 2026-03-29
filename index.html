@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QUOCDATDV</title>
+    <title>QUOCDATDV - VIP SYSTEM</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
@@ -50,26 +50,32 @@
 
             <div id="s-nap" class="card">
                 <select id="telco"><option value="VIETTEL">Viettel</option><option value="VINAPHONE">Vinaphone</option><option value="MOBIFONE">Mobifone</option></select>
-                <select id="amount"><option value="10000">10,000đ</option><option value="50000">50,000đ</option><option value="100000">100,000đ</option></select>
+                <select id="amount"><option value="10000">10,000đ</option><option value="20000">20,000đ</option><option value="50000">50,000đ</option><option value="100000">100,000đ</option></select>
                 <input type="text" id="serial" placeholder="Số Seri">
                 <input type="text" id="pin" placeholder="Mã thẻ">
                 <button class="btn btn-green" id="btn-nap" onclick="napThe()">XÁC NHẬN NẠP</button>
             </div>
 
             <div id="s-key" class="card hidden">
-                <div id="product-list">Đang tải sản phẩm...</div>
+                <div id="product-list">Đang tải sản phẩm từ Admin...</div>
             </div>
         </div>
     </div>
 
     <script>
-        const config = { databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app" };
-        firebase.initializeApp(config);
+        // Cấu hình đồng bộ từ Firebase và Script của bạn
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwTht1cB6KQzGp6kyyYDGW_m1uJavES4xPlEafzRyosoChy5DreGaY6Z3IaJU0xOx1b/exec";
+        const fbConfig = { databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app" };
+        firebase.initializeApp(fbConfig);
         const db = firebase.database();
-        const P_ID = "3160359786"; const P_KEY = "6de754692207c9262c5317b28d39cf05";
+        
+        // Thông tin nạp thẻ từ ảnh bạn gửi
+        const P_ID = "3160359786"; 
+        const P_KEY = "6de754692207c9262c5317b28d39cf05";
 
         async function handleAuth() {
-            const e = document.getElementById('email').value; const p = document.getElementById('password').value;
+            const e = document.getElementById('email').value.trim();
+            const p = document.getElementById('password').value.trim();
             if(!e || !p) return alert("Nhập đủ thông tin!");
             let id = e.replace(/[.#$\[\]]/g, '_');
             const s = await db.ref('users/'+id).once('value');
@@ -94,6 +100,7 @@
         function loadProducts() {
             db.ref('products').on('value', s => {
                 const div = document.getElementById('product-list'); div.innerHTML = '';
+                if(!s.exists()) { div.innerHTML = "Chưa có sản phẩm nào. Hãy dùng admin.html để thêm!"; return; }
                 s.forEach(child => {
                     const p = child.val();
                     div.innerHTML += `<div class="product"><h3>${p.name}</h3><p class="price">${p.price.toLocaleString()}đ</p><button class="btn btn-green" onclick="buy('${child.key}', ${p.price})">MUA</button></div>`;
@@ -102,24 +109,41 @@
         }
 
         async function napThe() {
-            const telco = document.getElementById('telco').value; const pin = document.getElementById('pin').value;
-            const seri = document.getElementById('serial').value; const amt = document.getElementById('amount').value;
-            if(!seri || !pin) return alert("Nhập mã thẻ!");
+            const telco = document.getElementById('telco').value;
+            const pin = document.getElementById('pin').value.trim();
+            const seri = document.getElementById('serial').value.trim();
+            const amt = document.getElementById('amount').value;
+            const btn = document.getElementById('btn-nap');
+            
+            if(!seri || !pin) return alert("Nhập đủ Seri và Mã thẻ!");
+            
+            btn.innerText = "ĐANG XỬ LÝ...";
+            btn.disabled = true;
+
             const rid = user.replace(/[.#$\[\]]/g, '_') + "_" + Date.now();
             const sign = CryptoJS.MD5(P_KEY + pin + seri).toString();
+            
+            // Gửi qua Proxy Script để tránh lỗi CORS Server
+            const proxyUrl = `${SCRIPT_URL}?action=sendCard&sign=${sign}&telco=${telco}&code=${pin}&serial=${seri}&amount=${amt}&request_id=${rid}&partner_id=${P_ID}`;
+            
             try {
-                const res = await fetch(`https://gachthefast.com/chargingws/v2?sign=${sign}&telco=${telco}&code=${pin}&serial=${seri}&amount=${amt}&request_id=${rid}&partner_id=${P_ID}&command=charging`);
+                const res = await fetch(proxyUrl);
                 const data = await res.json();
-                alert(data.message);
-            } catch(e) { alert("Lỗi kết nối Server!"); }
+                alert(data.message || "Đã gửi thẻ thành công!");
+            } catch(e) { 
+                alert("Lỗi: Không thể kết nối hệ thống trung gian!"); 
+            } finally {
+                btn.innerText = "XÁC NHẬN NẠP";
+                btn.disabled = false;
+            }
         }
 
         function buy(k, pr) {
-            if(window.currentBalance < pr) return alert("Không đủ tiền!");
-            if(confirm("Xác nhận mua?")) {
+            if(window.currentBalance < pr) return alert("Bạn không đủ tiền!");
+            if(confirm("Xác nhận thanh toán?")) {
                 let id = user.replace(/[.#$\[\]]/g, '_');
                 db.ref('users/'+id).update({balance: window.currentBalance - pr});
-                alert("Mua thành công!");
+                alert("Giao dịch thành công!");
             }
         }
 
@@ -132,5 +156,4 @@
         function logout() { localStorage.clear(); location.reload(); }
     </script>
 </body>
-                </html>
-                
+</html>
