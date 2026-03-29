@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>QUOCDATDV</title>
+    <title>QUOCDATDV </title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -16,29 +16,42 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); color: #fff; padding: 20px; display: flex; flex-direction: column; align-items: center; }
 
-        .brand { font-family: 'Orbitron'; font-size: 28px; margin-bottom: 25px; text-shadow: 0 0 15px var(--primary); }
+        /* Navbar & Brand */
+        .brand { font-family: 'Orbitron'; font-size: 32px; margin-bottom: 10px; text-shadow: 0 0 15px rgba(0, 255, 136, 0.5); text-align: center; }
         .brand span { color: var(--primary); }
 
-        /* Auth Card */
-        .auth-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; width: 100%; max-width: 400px; margin-bottom: 30px; }
-        .input-group { margin-bottom: 12px; }
-        .input-group input { width: 100%; background: #000; color: #fff; border: 1px solid var(--border); padding: 12px; border-radius: 10px; outline: none; }
-        .btn { width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: bold; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; }
-        .btn-primary { background: var(--primary); color: #000; }
+        /* Intro Section */
+        .intro-section { max-width: 800px; width: 100%; text-align: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(180deg, rgba(21, 21, 30, 0) 0%, rgba(21, 21, 30, 0.8) 100%); border-radius: 20px; border-bottom: 1px solid var(--border); }
+        .intro-section h1 { font-size: 20px; margin-bottom: 10px; font-family: 'Orbitron'; }
+        .intro-section p { color: #aaa; font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
+        .features-grid { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+        .feature-box { background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 12px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; flex: 1; min-width: 140px; justify-content: center; color: #ddd; }
+        .feature-box i { color: var(--primary); font-size: 18px; }
 
-        /* Store Section */
+        /* Auth Card */
+        .auth-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 25px; width: 100%; max-width: 400px; margin-bottom: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .auth-title { font-family: 'Orbitron'; text-align: center; margin-bottom: 20px; color: var(--accent); }
+        .input-group { margin-bottom: 15px; }
+        .input-group input { width: 100%; background: #0b0b0f; color: #fff; border: 1px solid var(--border); padding: 14px; border-radius: 10px; outline: none; transition: 0.3s; }
+        .input-group input:focus { border-color: var(--primary); }
+        .btn { width: 100%; padding: 14px; border-radius: 10px; border: none; font-weight: bold; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; font-size: 15px; }
+        .btn-primary { background: var(--primary); color: #000; }
+        .btn-primary:hover { background: #00cc6a; transform: translateY(-2px); }
+
+        /* Store Section (Danh mục Mua Key) */
         .store-container { width: 100%; max-width: 800px; }
-        .store-title { font-family: 'Orbitron'; color: var(--primary); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
-        .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .store-title { font-family: 'Orbitron'; color: var(--primary); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-size: 22px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
         .product-card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 18px; text-align: center; transition: 0.3s; position: relative; overflow: hidden; }
-        .product-card:hover { border-color: var(--primary); transform: translateY(-5px); }
-        .product-card i { font-size: 30px; color: var(--accent); margin-bottom: 10px; }
-        .product-card h3 { font-size: 16px; margin-bottom: 5px; }
-        .product-card .price { color: #f1c40f; font-weight: bold; margin-bottom: 15px; display: block; }
-        .btn-buy { background: rgba(0, 255, 136, 0.1); color: var(--primary); border: 1px solid var(--primary); font-size: 12px; padding: 8px; width: 100%; border-radius: 8px; cursor: pointer; }
+        .product-card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 5px 20px rgba(0,255,136,0.1); }
+        .product-card i { font-size: 35px; color: var(--accent); margin-bottom: 15px; }
+        .product-card h3 { font-size: 18px; margin-bottom: 8px; }
+        .product-card .price { color: #f1c40f; font-weight: bold; margin-bottom: 15px; display: block; font-size: 16px; }
+        .btn-buy { background: rgba(0, 255, 136, 0.1); color: var(--primary); border: 1px solid var(--primary); font-size: 14px; font-weight: bold; padding: 10px; width: 100%; border-radius: 8px; cursor: pointer; transition: 0.3s; }
         .btn-buy:hover { background: var(--primary); color: #000; }
 
-        .locked { filter: blur(10px); pointer-events: none; opacity: 0.5; }
+        .locked { filter: blur(8px); pointer-events: none; opacity: 0.6; }
+        .locked-msg { text-align: center; color: #ff4757; margin-bottom: 20px; font-weight: bold; font-family: 'Inter'; }
 
         /* POPUP iOS CHUNG */
         .ios-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(5px); }
@@ -46,9 +59,10 @@
         @keyframes iosPop { from { transform: scale(1.1); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .ios-content { padding: 20px; }
         .ios-content b { font-size: 17px; color: #fff; }
-        .ios-content p { font-size: 13px; color: #ccc; margin-top: 5px; }
+        .ios-content p { font-size: 14px; color: #ccc; margin-top: 8px; line-height: 1.4; }
         .ios-footer { display: flex; border-top: 0.5px solid #444; }
-        .ios-btn { flex: 1; padding: 12px; background: transparent; border: none; font-size: 17px; cursor: pointer; color: #007aff; }
+        .ios-btn { flex: 1; padding: 14px; background: transparent; border: none; font-size: 16px; cursor: pointer; color: #007aff; transition: 0.2s; }
+        .ios-btn:active { background: rgba(255,255,255,0.1); }
         .ios-btn.cancel { color: #ff3b30; border-right: 0.5px solid #444; }
         .ios-btn.confirm { font-weight: bold; }
     </style>
@@ -57,28 +71,38 @@
 
     <div class="brand">QUOCDAT<span>DV</span></div>
 
-    <div class="auth-card">
-        <div id="auth-box">
-            <div id="login-step">
-                <div class="input-group"><input type="email" id="email" placeholder="Email nhận mã"></div>
-                <div class="input-group"><input type="password" id="password" placeholder="Mật khẩu"></div>
-                <button class="btn btn-primary" onclick="sendOTP()">NHẬN MÃ OTP 📩</button>
-            </div>
-            <div id="otp-step" style="display:none;">
-                <div class="input-group"><input type="text" id="otp_input" placeholder="Nhập 6 số từ Email"></div>
-                <button class="btn btn-primary" onclick="verifyOTP()">XÁC NHẬN ✅</button>
-            </div>
+    <div class="intro-section">
+        <h1>HỆ THỐNG CUNG CẤP KEY VIP</h1>
+        <p>Chào mừng bạn đến với hệ thống bán Key tự động. Chúng tôi cung cấp các loại bản quyền phần mềm, tool VIP với giá cả cạnh tranh nhất thị trường. Nhanh chóng, an toàn và bảo mật.</p>
+        <div class="features-grid">
+            <div class="feature-box"><i class="fas fa-bolt"></i> Giao dịch Auto 3s</div>
+            <div class="feature-box"><i class="fas fa-shield-alt"></i> Bảo mật 100%</div>
+            <div class="feature-box"><i class="fas fa-headset"></i> Hỗ trợ 24/7</div>
         </div>
+    </div>
+
+    <div class="auth-card" id="auth-container">
+        <div id="auth-box">
+            <h3 class="auth-title">ĐĂNG NHẬP / ĐĂNG KÝ</h3>
+            <div class="input-group"><input type="email" id="email" placeholder="Nhập Email của bạn"></div>
+            <div class="input-group"><input type="password" id="password" placeholder="Nhập mật khẩu"></div>
+            <button class="btn btn-primary" onclick="login()">VÀO HỆ THỐNG 🚀</button>
+            <p style="text-align: center; font-size: 12px; color: #888; margin-top: 15px;">*Nếu tài khoản chưa tồn tại, hệ thống sẽ tự động đăng ký.</p>
+        </div>
+        
         <div id="user-box" style="display:none; text-align:center;">
-            <p id="user-display" style="color:var(--accent); margin-bottom:10px; font-weight:bold;"></p>
-            <p id="balance-display" style="color:#f1c40f; margin-bottom:15px; font-size: 18px;">Số dư: 0đ</p>
+            <i class="fas fa-user-circle" style="font-size: 50px; color: var(--primary); margin-bottom: 10px;"></i>
+            <p id="user-display" style="color:#fff; margin-bottom:5px; font-weight:bold; font-size: 16px;"></p>
+            <p id="balance-display" style="color:#f1c40f; margin-bottom:20px; font-size: 20px; font-family: 'Orbitron';">Số dư: 0đ</p>
             <button class="btn" style="background:#ff4757; color:#fff" onclick="logout()">ĐĂNG XUẤT</button>
         </div>
     </div>
 
     <div class="store-container">
-        <div class="store-title"><i class="fas fa-shopping-cart"></i> KHO SẢN PHẨM VIP</div>
-        <div id="product-list" class="product-grid locked"></div>
+        <div class="store-title"><i class="fas fa-key"></i> DANH MỤC MUA KEY</div>
+        <p id="locked-warning" class="locked-msg">⚠️ Vui lòng đăng nhập để xem và mua Key!</p>
+        <div id="product-list" class="product-grid locked">
+            </div>
     </div>
 
     <div id="ios-alert" class="ios-overlay">
@@ -88,7 +112,7 @@
                 <p id="ios-msg"></p>
             </div>
             <div class="ios-footer">
-                <button class="ios-btn" onclick="closeAlert()">Đồng ý</button>
+                <button class="ios-btn confirm" onclick="closeAlert()">Đồng ý</button>
             </div>
         </div>
     </div>
@@ -96,7 +120,7 @@
     <div id="ios-buy-confirm" class="ios-overlay">
         <div class="ios-box">
             <div class="ios-content">
-                <b>Xác nhận mua</b>
+                <b>Xác nhận mua Key</b>
                 <p id="buy-msg"></p>
             </div>
             <div class="ios-footer">
@@ -107,6 +131,7 @@
     </div>
 
     <script>
+        // Cấu hình Firebase
         const conf = {
             apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE",
             databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -114,9 +139,7 @@
         };
         firebase.initializeApp(conf);
         const db = firebase.database();
-        emailjs.init("G7LvD9Rr0y1bZ7eZj");
 
-        let currentOTP = "";
         let userBalance = 0;
 
         function init() {
@@ -126,11 +149,17 @@
             db.ref('products').on('value', snap => {
                 const list = document.getElementById('product-list');
                 list.innerHTML = '';
+                
+                if(!snap.exists()) {
+                    list.innerHTML = '<p style="text-align:center; color:#888; grid-column: 1/-1;">Chưa có Key nào trong hệ thống.</p>';
+                    return;
+                }
+
                 snap.forEach(doc => {
                     const p = doc.val();
                     list.innerHTML += `
                         <div class="product-card">
-                            <i class="fas fa-gem"></i>
+                            <i class="fas fa-fingerprint"></i>
                             <h3>${p.name}</h3>
                             <span class="price">${p.price.toLocaleString()} VNĐ</span>
                             <button class="btn-buy" onclick="buyProduct('${doc.key}', ${p.price}, '${p.name}')">MUA NGAY</button>
@@ -139,58 +168,67 @@
                 });
             });
 
+            // Nếu đã đăng nhập
             if(user) {
                 document.getElementById('auth-box').style.display = 'none';
                 document.getElementById('user-box').style.display = 'block';
-                document.getElementById('user-display').innerText = "User: " + user;
-                document.getElementById('product-list').classList.remove('locked');
+                document.getElementById('user-display').innerText = user;
                 
+                // Mở khóa cửa hàng
+                document.getElementById('product-list').classList.remove('locked');
+                document.getElementById('locked-warning').style.display = 'none';
+                
+                // Lấy số dư real-time
                 let id = user.replace(/[.#$\[\]]/g, '_');
                 db.ref('users/' + id + '/balance').on('value', s => {
                     userBalance = s.val() || 0;
-                    document.getElementById('balance-display').innerText = "Số dư: " + userBalance.toLocaleString() + "đ";
+                    document.getElementById('balance-display').innerText = userBalance.toLocaleString() + " VNĐ";
                 });
             }
         }
         init();
 
-        // OTP Logic
-        function sendOTP() {
-            const email = document.getElementById('email').value.trim();
-            if(!email.includes('@')) return showAlert("Email không hợp lệ!");
-            currentOTP = Math.floor(100000 + Math.random() * 900000).toString();
-            
-            emailjs.send('quocdatdvmod', 'template_r65u5mk', {
-                to_email: email,
-                otp_code: currentOTP,
-                passcode: "10 Phút"
-            }).then(() => {
-                showAlert("Mã OTP đã được gửi tới Email của bạn!");
-                document.getElementById('login-step').style.display = 'none';
-                document.getElementById('otp-step').style.display = 'block';
-            });
-        }
-
-        async function verifyOTP() {
-            const code = document.getElementById('otp_input').value.trim();
+        // ĐĂNG NHẬP / ĐĂNG KÝ (Không dùng OTP)
+        async function login() {
             const email = document.getElementById('email').value.trim();
             const pass = document.getElementById('password').value.trim();
-            if(code === currentOTP) {
-                let id = email.replace(/[.#$\[\]]/g, '_');
+            
+            if(!email || !pass) return showAlert("Vui lòng nhập đầy đủ Email và Mật khẩu!");
+            if(!email.includes('@')) return showAlert("Định dạng Email không hợp lệ!");
+
+            let id = email.replace(/[.#$\[\]]/g, '_');
+            
+            try {
                 const check = await db.ref('users/' + id).once('value');
-                if(!check.exists()) await db.ref('users/' + id).set({ email, password: pass, balance: 0 });
+                if(!check.exists()) {
+                    // Tạo tài khoản mới nếu chưa có
+                    await db.ref('users/' + id).set({ email: email, password: pass, balance: 0 });
+                    showAlert("Đăng ký thành công! Đang vào hệ thống...");
+                } else {
+                    // Kiểm tra mật khẩu nếu đã có tài khoản
+                    if(check.val().password !== pass) {
+                        return showAlert("Sai mật khẩu! Vui lòng thử lại.");
+                    }
+                }
+                
+                // Lưu phiên và reload
                 localStorage.setItem('logged_user', email);
-                location.reload();
-            } else { showAlert("Mã xác nhận không chính xác!"); }
+                setTimeout(() => location.reload(), 1500);
+            } catch (e) {
+                showAlert("Lỗi kết nối máy chủ: " + e.message);
+            }
         }
 
-        // MUA HÀNG LOGIC (iOS STYLE)
+        // MUA HÀNG LOGIC
         function buyProduct(pId, price, name) {
+            const user = localStorage.getItem('logged_user');
+            if(!user) return showAlert("Vui lòng đăng nhập để mua Key!");
+
             if (userBalance < price) {
-                return showAlert(`Bạn không đủ tiền!<br>Cần nạp thêm: ${(price - userBalance).toLocaleString()}đ`);
+                return showAlert(`Tài khoản không đủ số dư!<br>Bạn cần nạp thêm: <b style="color:#ff3b30">${(price - userBalance).toLocaleString()} VNĐ</b>`);
             }
 
-            document.getElementById('buy-msg').innerHTML = `Mua <b>${name}</b> với giá <span style="color:#f1c40f">${price.toLocaleString()}đ</span>?`;
+            document.getElementById('buy-msg').innerHTML = `Xác nhận mua <b>${name}</b> với giá <span style="color:#f1c40f">${price.toLocaleString()} VNĐ</span>?`;
             document.getElementById('ios-buy-confirm').style.display = 'flex';
 
             document.getElementById('confirm-buy-btn').onclick = () => executePurchase(pId, price);
@@ -203,23 +241,32 @@
             const newBalance = userBalance - price;
 
             try {
+                // Trừ tiền
                 await db.ref('users/' + id).update({ balance: newBalance });
+                
+                // Lấy link/key tải xuống từ Firebase
                 const pSnap = await db.ref('products/' + pId).once('value');
                 const link = pSnap.val().download_link;
 
-                showAlert("✅ Mua thành công! Đang lấy link...");
-                if (link) setTimeout(() => window.open(link, '_blank'), 1500);
-            } catch (e) { showAlert("Lỗi: " + e.message); }
+                showAlert("✅ Mua thành công! Đang chuyển hướng lấy Key...");
+                if (link) {
+                    setTimeout(() => window.open(link, '_blank'), 1500);
+                } else {
+                    setTimeout(() => showAlert("Sản phẩm chưa có dữ liệu Key. Vui lòng liên hệ Admin!"), 1500);
+                }
+            } catch (e) { 
+                showAlert("Lỗi giao dịch: " + e.message); 
+            }
         }
 
-        // Helper functions
+        // Các hàm hỗ trợ giao diện
         function showAlert(msg) {
             document.getElementById('ios-msg').innerHTML = msg;
             document.getElementById('ios-alert').style.display = 'flex';
         }
         function closeAlert() { document.getElementById('ios-alert').style.display = 'none'; }
         function closeBuyPopup() { document.getElementById('ios-buy-confirm').style.display = 'none'; }
-        function logout() { localStorage.clear(); location.reload(); }
+        function logout() { localStorage.removeItem('logged_user'); location.reload(); }
     </script>
 </body>
 </html>
