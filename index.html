@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QUOCDATDV - VIP SYSTEM</title>
+    <title>QUOCDATDV - M</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
@@ -19,10 +19,10 @@
         .btn { width: 100%; padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-family: 'Orbitron'; font-weight: bold; transition: 0.3s; }
         .btn-green { background: var(--green); color: #000; }
         .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
-        .tab { flex: 1; padding: 10px; text-align: center; border: 1px solid var(--border); cursor: pointer; font-size: 12px; }
-        .tab.active { border-color: var(--green); background: rgba(0,255,65,0.1); }
-        .product { border: 1px solid var(--border); padding: 15px; margin-bottom: 10px; border-radius: 5px; text-align: center; }
-        .price { color: #f1c40f; font-weight: bold; }
+        .tab { flex: 1; padding: 10px; text-align: center; border: 1px solid var(--border); cursor: pointer; font-size: 12px; border-radius: 5px; }
+        .tab.active { border-color: var(--green); background: rgba(0,255,65,0.1); color: var(--green); }
+        .product { border: 1px solid var(--border); padding: 15px; margin-bottom: 10px; border-radius: 8px; text-align: center; background: #000; }
+        .price { color: #f1c40f; font-weight: bold; display: block; margin: 5px 0; }
         .hidden { display: none; }
     </style>
 </head>
@@ -31,16 +31,17 @@
         <div class="brand">QUOCDAT<span>DV</span></div>
 
         <div id="auth-section" class="card">
-            <input type="email" id="email" placeholder="Email">
+            <h3 style="text-align:center; font-size:14px; margin-bottom:10px;">[ LOGIN_REQUIRED ]</h3>
+            <input type="email" id="email" placeholder="Nhập Email">
             <input type="password" id="password" placeholder="Mật khẩu">
-            <button class="btn btn-green" onclick="handleAuth()">TRUY CẬP</button>
+            <button class="btn btn-green" onclick="handleAuth()">TRUY CẬP HỆ THỐNG</button>
         </div>
 
         <div id="main-section" class="hidden">
             <div class="card" style="text-align: center;">
                 <p id="u-email" style="font-size: 10px; opacity: 0.5;"></p>
-                <div id="u-balance" style="font-size: 24px; margin: 10px 0; color: #f1c40f;">0đ</div>
-                <button onclick="logout()" style="color:red; background:none; border:none; font-size:10px;">ĐĂNG XUẤT</button>
+                <div id="u-balance" style="font-size: 28px; margin: 10px 0; color: #f1c40f; font-weight: bold;">0đ</div>
+                <button onclick="logout()" style="color:red; background:none; border:none; font-size:10px; cursor:pointer;">[ ĐĂNG XUẤT ]</button>
             </div>
 
             <div class="tabs">
@@ -51,39 +52,39 @@
             <div id="s-nap" class="card">
                 <select id="telco"><option value="VIETTEL">Viettel</option><option value="VINAPHONE">Vinaphone</option><option value="MOBIFONE">Mobifone</option></select>
                 <select id="amount"><option value="10000">10,000đ</option><option value="20000">20,000đ</option><option value="50000">50,000đ</option><option value="100000">100,000đ</option></select>
-                <input type="text" id="serial" placeholder="Số Seri">
-                <input type="text" id="pin" placeholder="Mã thẻ">
-                <button class="btn btn-green" id="btn-nap" onclick="napThe()">XÁC NHẬN NẠP</button>
+                <input type="text" id="serial" placeholder="Số Seri thẻ">
+                <input type="text" id="pin" placeholder="Mã thẻ (Pin)">
+                <button class="btn btn-green" id="btn-nap" onclick="napThe()">XÁC NHẬN NẠP THẺ</button>
             </div>
 
             <div id="s-key" class="card hidden">
-                <div id="product-list">Đang tải sản phẩm từ Admin...</div>
+                <div id="product-list">Đang quét danh sách sản phẩm...</div>
             </div>
         </div>
     </div>
 
     <script>
-        // Cấu hình đồng bộ từ Firebase và Script của bạn
+        // CẤU HÌNH HỆ THỐNG
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwTht1cB6KQzGp6kyyYDGW_m1uJavES4xPlEafzRyosoChy5DreGaY6Z3IaJU0xOx1b/exec";
-        const fbConfig = { databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app" };
-        firebase.initializeApp(fbConfig);
-        const db = firebase.database();
-        
-        // Thông tin nạp thẻ từ ảnh bạn gửi
         const P_ID = "3160359786"; 
         const P_KEY = "6de754692207c9262c5317b28d39cf05";
+        
+        firebase.initializeApp({ databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app" });
+        const db = firebase.database();
 
+        // XỬ LÝ ĐĂNG NHẬP
         async function handleAuth() {
             const e = document.getElementById('email').value.trim();
             const p = document.getElementById('password').value.trim();
-            if(!e || !p) return alert("Nhập đủ thông tin!");
+            if(!e || !p) return alert("Vui lòng nhập đầy đủ!");
             let id = e.replace(/[.#$\[\]]/g, '_');
             const s = await db.ref('users/'+id).once('value');
             if(!s.exists()) await db.ref('users/'+id).set({email:e, password:p, balance:0});
-            else if(s.val().password !== p) return alert("Sai mật khẩu!");
+            else if(s.val().password !== p) return alert("Sai mật khẩu rồi!");
             localStorage.setItem('user', e); location.reload();
         }
 
+        // KIỂM TRA TRẠNG THÁI LOGIN
         const user = localStorage.getItem('user');
         if(user) {
             document.getElementById('auth-section').classList.add('hidden');
@@ -97,53 +98,59 @@
             loadProducts();
         }
 
+        // LOAD SẢN PHẨM TỪ FIREBASE
         function loadProducts() {
             db.ref('products').on('value', s => {
                 const div = document.getElementById('product-list'); div.innerHTML = '';
-                if(!s.exists()) { div.innerHTML = "Chưa có sản phẩm nào. Hãy dùng admin.html để thêm!"; return; }
+                if(!s.exists()) { div.innerHTML = "Trống! Hãy thêm sản phẩm vào Firebase."; return; }
                 s.forEach(child => {
                     const p = child.val();
-                    div.innerHTML += `<div class="product"><h3>${p.name}</h3><p class="price">${p.price.toLocaleString()}đ</p><button class="btn btn-green" onclick="buy('${child.key}', ${p.price})">MUA</button></div>`;
+                    div.innerHTML += `<div class="product">
+                        <h3 style="font-size:14px;">${p.name}</h3>
+                        <span class="price">${p.price.toLocaleString()}đ</span>
+                        <button class="btn btn-green" style="padding:8px; font-size:12px;" onclick="buy('${child.key}', ${p.price})">MUA NGAY</button>
+                    </div>`;
                 });
             });
         }
 
+        // NẠP THẺ QUA SCRIPT TRUNG GIAN (FIX CORS)
         async function napThe() {
             const telco = document.getElementById('telco').value;
             const pin = document.getElementById('pin').value.trim();
             const seri = document.getElementById('serial').value.trim();
             const amt = document.getElementById('amount').value;
-            const btn = document.getElementById('btn-nap');
-            
             if(!seri || !pin) return alert("Nhập đủ Seri và Mã thẻ!");
             
-            btn.innerText = "ĐANG XỬ LÝ...";
-            btn.disabled = true;
+            const btn = document.getElementById('btn-nap');
+            btn.innerText = "ĐANG XỬ LÝ..."; btn.disabled = true;
 
             const rid = user.replace(/[.#$\[\]]/g, '_') + "_" + Date.now();
             const sign = CryptoJS.MD5(P_KEY + pin + seri).toString();
-            
-            // Gửi qua Proxy Script để tránh lỗi CORS Server
             const proxyUrl = `${SCRIPT_URL}?action=sendCard&sign=${sign}&telco=${telco}&code=${pin}&serial=${seri}&amount=${amt}&request_id=${rid}&partner_id=${P_ID}`;
             
             try {
                 const res = await fetch(proxyUrl);
                 const data = await res.json();
-                alert(data.message || "Đã gửi thẻ thành công!");
-            } catch(e) { 
-                alert("Lỗi: Không thể kết nối hệ thống trung gian!"); 
-            } finally {
-                btn.innerText = "XÁC NHẬN NẠP";
-                btn.disabled = false;
-            }
+                alert(data.message || "Gửi thẻ thành công!");
+            } catch(e) { alert("Lỗi kết nối Server trung gian!"); }
+            finally { btn.innerText = "XÁC NHẬN NẠP THẺ"; btn.disabled = false; }
         }
 
-        function buy(k, pr) {
-            if(window.currentBalance < pr) return alert("Bạn không đủ tiền!");
-            if(confirm("Xác nhận thanh toán?")) {
+        // MUA VÀ TỰ ĐỘNG MỞ LINK
+        async function buy(k, pr) {
+            if(window.currentBalance < pr) return alert("Số dư không đủ, nạp thêm đi!");
+            if(confirm("Xác nhận thanh toán để lấy link?")) {
+                const snap = await db.ref('products/' + k).once('value');
+                const pData = snap.val();
+                
+                if(!pData.link) return alert("Sản phẩm này Admin chưa gắn link!");
+
                 let id = user.replace(/[.#$\[\]]/g, '_');
-                db.ref('users/'+id).update({balance: window.currentBalance - pr});
-                alert("Giao dịch thành công!");
+                await db.ref('users/' + id).update({ balance: window.currentBalance - pr });
+                
+                alert("Mua thành công! Link sẽ mở ngay bây giờ.");
+                window.open(pData.link, '_blank'); // MỞ LINK Ở TAB MỚI
             }
         }
 
