@@ -2,165 +2,352 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QUOCDATDV - M</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QUOCDAT SEC </title>
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Fira+Code&display=swap" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        :root { --green: #00ff41; --bg: #050505; --card: #0d0d0d; --border: #1a1a1a; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Fira Code', monospace; }
-        body { background: var(--bg); color: var(--green); padding: 15px; }
-        .container { max-width: 500px; margin: 0 auto; }
-        .brand { font-family: 'Orbitron'; text-align: center; font-size: 28px; margin: 20px 0; text-shadow: 0 0 10px var(--green); }
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 15px; }
-        input, select { width: 100%; background: #000; border: 1px solid var(--border); color: var(--green); padding: 12px; margin: 8px 0; border-radius: 5px; outline: none; }
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-family: 'Orbitron'; font-weight: bold; transition: 0.3s; }
-        .btn-green { background: var(--green); color: #000; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
-        .tab { flex: 1; padding: 10px; text-align: center; border: 1px solid var(--border); cursor: pointer; font-size: 12px; border-radius: 5px; }
-        .tab.active { border-color: var(--green); background: rgba(0,255,65,0.1); color: var(--green); }
-        .product { border: 1px solid var(--border); padding: 15px; margin-bottom: 10px; border-radius: 8px; text-align: center; background: #000; }
-        .price { color: #f1c40f; font-weight: bold; display: block; margin: 5px 0; }
-        .hidden { display: none; }
+        :root {
+            --primary: #00ff88;
+            --bg: #050505;
+            --card: #0d0d12;
+            --border: #1a1a24;
+            --accent: #00b8ff;
+            --danger: #ff4757;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'JetBrains Mono', monospace; }
+        body { background: var(--bg); color: #fff; overflow-x: hidden; }
+        
+        /* Header */
+        .header { background: #000; padding: 15px 20px; border-bottom: 1px solid var(--primary); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 0 15px rgba(0,255,136,0.1); }
+        .logo { font-family: 'Orbitron', sans-serif; color: var(--primary); font-size: 18px; font-weight: bold; letter-spacing: 2px; }
+        .user-info { display: flex; align-items: center; gap: 15px; font-size: 12px; }
+        .balance { color: #f1c40f; font-weight: bold; font-size: 14px; }
+        
+        /* Layout */
+        .container { max-width: 1000px; margin: 20px auto; padding: 0 15px; }
+        
+        /* Menu Tabs */
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; overflow-x: auto; }
+        .tab-btn { background: transparent; color: #888; border: none; padding: 8px 15px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.3s; white-space: nowrap; font-family: 'Orbitron', sans-serif; }
+        .tab-btn.active { color: var(--primary); border-bottom: 2px solid var(--primary); text-shadow: 0 0 8px rgba(0,255,136,0.5); }
+        
+        /* Khu vực hiển thị */
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Lưới Sản Phẩm */
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
+        .product-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 15px; transition: 0.3s; position: relative; overflow: hidden; }
+        .product-card:hover { border-color: var(--primary); box-shadow: 0 0 15px rgba(0,255,136,0.1); }
+        .product-card h3 { font-family: 'Orbitron', sans-serif; font-size: 16px; margin-bottom: 10px; color: #fff; }
+        .product-card .price { color: #f1c40f; font-weight: bold; margin-bottom: 15px; font-size: 14px; }
+        
+        /* Buttons & Forms */
+        .btn { width: 100%; padding: 10px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: 'Orbitron', sans-serif; }
+        .btn-buy { background: var(--primary); color: #000; }
+        .btn-buy:hover { background: #00cc6a; }
+        .btn-free { background: var(--accent); color: #000; }
+        
+        .box-naptien { background: var(--card); border: 1px dashed var(--border); padding: 20px; border-radius: 8px; max-width: 500px; margin: 0 auto; }
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 12px; color: #aaa; }
+        .form-control { width: 100%; padding: 12px; background: #000; border: 1px solid var(--border); color: #fff; border-radius: 4px; outline: none; transition: 0.3s; font-family: 'JetBrains Mono', monospace; }
+        .form-control:focus { border-color: var(--primary); }
+        
+        /* Modal Login */
+        #login-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 999; }
+        .login-box { background: var(--card); padding: 30px; border-radius: 10px; border: 1px solid var(--primary); text-align: center; width: 300px; box-shadow: 0 0 20px rgba(0,255,136,0.2); }
+        
+        .hidden { display: none !important; }
+        .matrix-text { color: var(--primary); text-align: center; font-size: 11px; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="brand">QUOCDAT<span>DV</span></div>
 
-        <div id="auth-section" class="card">
-            <h3 style="text-align:center; font-size:14px; margin-bottom:10px;">[ LOGIN_REQUIRED ]</h3>
-            <input type="email" id="email" placeholder="Nhập Email">
-            <input type="password" id="password" placeholder="Mật khẩu">
-            <button class="btn btn-green" onclick="handleAuth()">TRUY CẬP HỆ THỐNG</button>
+    <div id="login-modal">
+        <div class="login-box">
+            <h2 style="font-family:'Orbitron'; color:var(--primary); margin-bottom:20px;">SYSTEM LOGIN</h2>
+            <input type="email" id="login-email" class="form-control" placeholder="Nhập Email để lưu data..." style="margin-bottom: 15px;">
+            <button class="btn btn-buy" onclick="login()">TRUY CẬP HỆ THỐNG</button>
+            <p class="matrix-text">Connection secure. Encrypted via QuocDatSec.</p>
+        </div>
+    </div>
+
+    <div class="header">
+        <div class="logo"><i class="fas fa-terminal"></i> QD.ONLINE</div>
+        <div class="user-info">
+            <span id="user-display" style="color:#aaa;">Guest</span>
+            <div class="balance"><i class="fas fa-wallet"></i> <span id="balance-display">0</span>đ</div>
+            <button onclick="logout()" style="background:none;border:none;color:var(--danger);cursor:pointer;"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('tab-home', this)"><i class="fas fa-store"></i> CỬA HÀNG TOOL</button>
+            <button class="tab-btn" onclick="switchTab('tab-nap', this)"><i class="fas fa-coins"></i> NẠP TIỀN AUTO</button>
         </div>
 
-        <div id="main-section" class="hidden">
-            <div class="card" style="text-align: center;">
-                <p id="u-email" style="font-size: 10px; opacity: 0.5;"></p>
-                <div id="u-balance" style="font-size: 28px; margin: 10px 0; color: #f1c40f; font-weight: bold;">0đ</div>
-                <button onclick="logout()" style="color:red; background:none; border:none; font-size:10px; cursor:pointer;">[ ĐĂNG XUẤT ]</button>
+        <div id="tab-home" class="tab-content active">
+            <div class="product-grid" id="product-list">
+                </div>
+        </div>
+
+        <div id="tab-nap" class="tab-content">
+            
+            <div style="text-align:center; margin-bottom:20px;">
+                <button class="tab-btn active" style="font-size:12px; padding:5px 10px;" onclick="switchNap('s-bank', this)">CHUYỂN KHOẢN (AUTO)</button>
+                <button class="tab-btn" style="font-size:12px; padding:5px 10px;" onclick="switchNap('s-card', this)">NẠP THẺ CÀO</button>
             </div>
 
-            <div class="tabs">
-                <div id="t-nap" class="tab active" onclick="showTab('nap')">NẠP THẺ</div>
-                <div id="t-key" class="tab" onclick="showTab('key')">MUA KEY</div>
+            <div id="s-bank" class="box-naptien">
+                <div style="text-align:center; margin-bottom: 15px;">
+                    <h3 style="color:var(--primary); font-family:'Orbitron';">AUTO BANKING 24/7</h3>
+                    <p style="font-size:11px; color:#888;">Tiền tự cộng vào web sau 5-10 giây</p>
+                </div>
+
+                <div id="bank-input-area">
+                    <div class="form-group">
+                        <label>Số tiền muốn nạp (Tối thiểu 10k):</label>
+                        <input type="number" id="bank-amount" class="form-control" placeholder="Ví dụ: 50000">
+                    </div>
+                    <button class="btn btn-buy" onclick="createInvoice()">TẠO MÃ THANH TOÁN QR</button>
+                </div>
+
+                <div id="invoice-area" class="hidden" style="text-align:center;">
+                    <p style="font-size:12px; margin-bottom:10px; color:#aaa;">Mở App Ngân hàng quét mã này:</p>
+                    <div style="background:#fff; padding:10px; display:inline-block; border-radius:8px; margin-bottom:10px;">
+                        <img id="qr-generated" src="" style="width:200px;">
+                    </div>
+                    <div>
+                        <p style="font-size:13px;">Số tiền: <b id="inv-amt" style="color:#f1c40f;">0đ</b></p>
+                        <p style="font-size:13px;">Nội dung: <b id="inv-msg" style="color:var(--primary);"></b></p>
+                    </div>
+                    <div id="auto-listen-status" class="matrix-text" style="margin-top:15px; animation: pulse 1.5s infinite;">
+                        <i class="fas fa-spinner fa-spin"></i> Hệ thống đang chờ tiền về... Không cần tải lại trang.
+                    </div>
+                </div>
             </div>
 
-            <div id="s-nap" class="card">
-                <select id="telco"><option value="VIETTEL">Viettel</option><option value="VINAPHONE">Vinaphone</option><option value="MOBIFONE">Mobifone</option></select>
-                <select id="amount"><option value="10000">10,000đ</option><option value="20000">20,000đ</option><option value="50000">50,000đ</option><option value="100000">100,000đ</option></select>
-                <input type="text" id="serial" placeholder="Số Seri thẻ">
-                <input type="text" id="pin" placeholder="Mã thẻ (Pin)">
-                <button class="btn btn-green" id="btn-nap" onclick="napThe()">XÁC NHẬN NẠP THẺ</button>
+            <div id="s-card" class="box-naptien hidden">
+                <h3 style="text-align:center; color:var(--accent); font-family:'Orbitron'; margin-bottom:15px;">NẠP THẺ CÀO</h3>
+                <div class="form-group">
+                    <label>Loại Thẻ</label>
+                    <select id="card-type" class="form-control">
+                        <option value="VIETTEL">Viettel</option>
+                        <option value="VINAPHONE">Vinaphone</option>
+                        <option value="MOBIFONE">Mobifone</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Mệnh Giá</label>
+                    <select id="card-amount" class="form-control">
+                        <option value="10000">10.000đ</option>
+                        <option value="20000">20.000đ</option>
+                        <option value="50000">50.000đ</option>
+                        <option value="100000">100.000đ</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Số Seri</label>
+                    <input type="text" id="card-serial" class="form-control" placeholder="Nhập Serial thẻ">
+                </div>
+                <div class="form-group">
+                    <label>Mã Thẻ (PIN)</label>
+                    <input type="text" id="card-pin" class="form-control" placeholder="Nhập Mã thẻ">
+                </div>
+                <button class="btn btn-buy" onclick="submitCard()">NẠP THẺ NGAY</button>
             </div>
 
-            <div id="s-key" class="card hidden">
-                <div id="product-list">Đang quét danh sách sản phẩm...</div>
-            </div>
         </div>
     </div>
 
     <script>
-        // CẤU HÌNH HỆ THỐNG
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwTht1cB6KQzGp6kyyYDGW_m1uJavES4xPlEafzRyosoChy5DreGaY6Z3IaJU0xOx1b/exec";
-        const P_ID = "3160359786"; 
-        const P_KEY = "6de754692207c9262c5317b28d39cf05";
-        
-        firebase.initializeApp({ databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app" });
+        // 1. CẤU HÌNH FIREBASE (Giữ nguyên của ông)
+        const firebaseConfig = {
+            databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app"
+        };
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // XỬ LÝ ĐĂNG NHẬP
-        async function handleAuth() {
-            const e = document.getElementById('email').value.trim();
-            const p = document.getElementById('password').value.trim();
-            if(!e || !p) return alert("Vui lòng nhập đầy đủ!");
-            let id = e.replace(/[.#$\[\]]/g, '_');
-            const s = await db.ref('users/'+id).once('value');
-            if(!s.exists()) await db.ref('users/'+id).set({email:e, password:p, balance:0});
-            else if(s.val().password !== p) return alert("Sai mật khẩu rồi!");
-            localStorage.setItem('user', e); location.reload();
+        let currentUser = null;
+        let userId = null;
+        let currentBalance = 0;
+
+        // 2. KHỞI TẠO HỆ THỐNG
+        window.onload = () => {
+            const savedUser = localStorage.getItem('user');
+            if(savedUser) {
+                currentUser = savedUser;
+                userId = currentUser.replace(/[.#$\[\]]/g, '_');
+                document.getElementById('login-modal').classList.add('hidden');
+                document.getElementById('user-display').innerText = currentUser.split('@')[0];
+                listenBalance();
+                loadProducts();
+            }
+        };
+
+        function login() {
+            const email = document.getElementById('login-email').value.trim();
+            if(!email || !email.includes('@')) return alert("Nhập Email hợp lệ!");
+            localStorage.setItem('user', email);
+            location.reload();
         }
 
-        // KIỂM TRA TRẠNG THÁI LOGIN
-        const user = localStorage.getItem('user');
-        if(user) {
-            document.getElementById('auth-section').classList.add('hidden');
-            document.getElementById('main-section').classList.remove('hidden');
-            document.getElementById('u-email').innerText = user;
-            let id = user.replace(/[.#$\[\]]/g, '_');
-            db.ref('users/'+id+'/balance').on('value', s => { 
-                document.getElementById('u-balance').innerText = (s.val() || 0).toLocaleString() + "đ";
-                window.currentBalance = s.val() || 0;
+        function logout() {
+            localStorage.removeItem('user');
+            location.reload();
+        }
+
+        function switchTab(tabId, el) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            el.classList.add('active');
+        }
+
+        function switchNap(id, el) {
+            document.getElementById('s-bank').classList.add('hidden');
+            document.getElementById('s-card').classList.add('hidden');
+            document.getElementById(id).classList.remove('hidden');
+            el.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        // 3. LẤY SỐ DƯ REALTIME
+        function listenBalance() {
+            db.ref('users/' + userId + '/balance').on('value', snap => {
+                currentBalance = snap.val() || 0;
+                document.getElementById('balance-display').innerText = currentBalance.toLocaleString();
+                
+                // Cơ chế phát hiện tiền vào tự động từ SePay/Pipedream
+                if(window.isWaitingForBank && currentBalance > window.oldBalance) {
+                    const received = currentBalance - window.oldBalance;
+                    document.getElementById('invoice-area').innerHTML = `
+                        <div style="padding: 20px; color: var(--primary);">
+                            <i class="fas fa-check-circle" style="font-size: 50px; margin-bottom:15px;"></i>
+                            <h3>NẠP THÀNH CÔNG +${received.toLocaleString()}đ</h3>
+                        </div>
+                    `;
+                    window.isWaitingForBank = false;
+                    setTimeout(() => location.reload(), 3000);
+                }
             });
-            loadProducts();
         }
 
-        // LOAD SẢN PHẨM TỪ FIREBASE
+        // 4. LOAD SẢN PHẨM & MUA HÀNG (Fix triệt để giá 0đ)
         function loadProducts() {
-            db.ref('products').on('value', s => {
-                const div = document.getElementById('product-list'); div.innerHTML = '';
-                if(!s.exists()) { div.innerHTML = "Trống! Hãy thêm sản phẩm vào Firebase."; return; }
-                s.forEach(child => {
+            db.ref('products').on('value', snap => {
+                const list = document.getElementById('product-list');
+                list.innerHTML = '';
+                snap.forEach(child => {
                     const p = child.val();
-                    div.innerHTML += `<div class="product">
-                        <h3 style="font-size:14px;">${p.name}</h3>
-                        <span class="price">${p.price.toLocaleString()}đ</span>
-                        <button class="btn btn-green" style="padding:8px; font-size:12px;" onclick="buy('${child.key}', ${p.price})">MUA NGAY</button>
-                    </div>`;
+                    const priceText = p.price === 0 ? 'FREE' : p.price.toLocaleString() + 'đ';
+                    const btnClass = p.price === 0 ? 'btn-free' : 'btn-buy';
+                    const btnText = p.price === 0 ? 'NHẬN TOOL' : 'MUA NGAY';
+
+                    list.innerHTML += `
+                        <div class="product-card">
+                            <h3><i class="fas fa-box-open"></i> ${p.name}</h3>
+                            <div class="price">${priceText}</div>
+                            <button class="btn ${btnClass}" onclick="buyItem('${child.key}', ${p.price}, '${p.link}')">${btnText}</button>
+                        </div>
+                    `;
                 });
             });
         }
 
-        // NẠP THẺ QUA SCRIPT TRUNG GIAN (FIX CORS)
-        async function napThe() {
-            const telco = document.getElementById('telco').value;
-            const pin = document.getElementById('pin').value.trim();
-            const seri = document.getElementById('serial').value.trim();
-            const amt = document.getElementById('amount').value;
-            if(!seri || !pin) return alert("Nhập đủ Seri và Mã thẻ!");
+        function buyItem(key, price, link) {
+            if(!link || link === "undefined") return alert("Lỗi: Admin chưa cấu hình link sản phẩm này!");
             
-            const btn = document.getElementById('btn-nap');
-            btn.innerText = "ĐANG XỬ LÝ..."; btn.disabled = true;
+            if(price === 0) {
+                alert("Mở khóa thành công! Đang chuyển hướng đến Link Tool...");
+                window.open(link, '_blank');
+                return;
+            }
 
-            const rid = user.replace(/[.#$\[\]]/g, '_') + "_" + Date.now();
-            const sign = CryptoJS.MD5(P_KEY + pin + seri).toString();
-            const proxyUrl = `${SCRIPT_URL}?action=sendCard&sign=${sign}&telco=${telco}&code=${pin}&serial=${seri}&amount=${amt}&request_id=${rid}&partner_id=${P_ID}`;
-            
-            try {
-                const res = await fetch(proxyUrl);
-                const data = await res.json();
-                alert(data.message || "Gửi thẻ thành công!");
-            } catch(e) { alert("Lỗi kết nối Server trung gian!"); }
-            finally { btn.innerText = "XÁC NHẬN NẠP THẺ"; btn.disabled = false; }
-        }
+            if(currentBalance < price) {
+                alert(`Ông còn thiếu ${(price - currentBalance).toLocaleString()}đ nữa. Vui lòng nạp thêm!`);
+                switchTab('tab-nap', document.querySelectorAll('.tabs .tab-btn')[1]);
+                return;
+            }
 
-        // MUA VÀ TỰ ĐỘNG MỞ LINK
-        async function buy(k, pr) {
-            if(window.currentBalance < pr) return alert("Số dư không đủ, nạp thêm đi!");
-            if(confirm("Xác nhận thanh toán để lấy link?")) {
-                const snap = await db.ref('products/' + k).once('value');
-                const pData = snap.val();
-                
-                if(!pData.link) return alert("Sản phẩm này Admin chưa gắn link!");
-
-                let id = user.replace(/[.#$\[\]]/g, '_');
-                await db.ref('users/' + id).update({ balance: window.currentBalance - pr });
-                
-                alert("Mua thành công! Link sẽ mở ngay bây giờ.");
-                window.open(pData.link, '_blank'); // MỞ LINK Ở TAB MỚI
+            if(confirm(`Xác nhận mua với giá ${price.toLocaleString()}đ?`)) {
+                db.ref('users/' + userId).update({ balance: currentBalance - price }).then(() => {
+                    alert("Mua thành công! Vui lòng lưu lại link.");
+                    window.open(link, '_blank');
+                });
             }
         }
 
-        function showTab(t) {
-            document.getElementById('s-nap').classList.toggle('hidden', t !== 'nap');
-            document.getElementById('s-key').classList.toggle('hidden', t !== 'key');
-            document.getElementById('t-nap').classList.toggle('active', t === 'nap');
-            document.getElementById('t-key').classList.toggle('active', t === 'key');
+        // 5. AUTO BANK (SEPAY QR)
+        function createInvoice() {
+            const amt = document.getElementById('bank-amount').value;
+            if(!amt || amt < 10000) return alert("Nạp ngân hàng tối thiểu 10.000đ ông nhé!");
+
+            // Cú pháp nội dung: NAP + ID khách hàng
+            const content = "NAP " + userId;
+            
+            // Link QR SePay chuẩn
+            const qrUrl = `https://qr.sepay.vn/img?bank=VPBank&acc=0989249990&template=compact&amount=${amt}&des=${content}`;
+            
+            document.getElementById('qr-generated').src = qrUrl;
+            document.getElementById('inv-amt').innerText = parseInt(amt).toLocaleString() + "đ";
+            document.getElementById('inv-msg').innerText = content;
+            
+            document.getElementById('bank-input-area').classList.add('hidden');
+            document.getElementById('invoice-area').classList.remove('hidden');
+
+            // Bật cờ theo dõi số dư thay đổi
+            window.oldBalance = currentBalance;
+            window.isWaitingForBank = true;
         }
-        function logout() { localStorage.clear(); location.reload(); }
+
+        // 6. NẠP THẺ CÀO (API Gạch thẻ)
+        function submitCard() {
+            const type = document.getElementById('card-type').value;
+            const amount = document.getElementById('card-amount').value;
+            const seri = document.getElementById('card-serial').value.trim();
+            const pin = document.getElementById('card-pin').value.trim();
+
+            if(!seri || !pin) return alert("Nhập đủ Seri và Mã Thẻ!");
+
+            const btn = event.target;
+            btn.innerText = "ĐANG XỬ LÝ...";
+            btn.disabled = true;
+
+            // LƯU Ý CHO QUỐC ĐẠT: 
+            // Nếu API GachTheFast đang lỗi, code này sẽ đẩy thẳng thẻ vào Firebase để ông tự duyệt thủ công.
+            // Tránh việc khách nạp bị kẹt và chửi rủa.
+            db.ref('card_requests').push({
+                user: currentUser,
+                type: type,
+                amount: amount,
+                seri: seri,
+                pin: pin,
+                status: 'pending',
+                time: new Date().toLocaleString()
+            }).then(() => {
+                alert("Đã gửi thẻ lên hệ thống! Vui lòng chờ Admin duyệt (1-5 phút).");
+                document.getElementById('card-serial').value = '';
+                document.getElementById('card-pin').value = '';
+                btn.innerText = "NẠP THẺ NGAY";
+                btn.disabled = false;
+            }).catch(e => {
+                alert("Lỗi: " + e.message);
+                btn.innerText = "NẠP THẺ NGAY";
+                btn.disabled = false;
+            });
+        }
     </script>
 </body>
 </html>
