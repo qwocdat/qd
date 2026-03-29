@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>QUOCDATDV </title>
+    <title>QUOCDATDV</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -14,124 +15,128 @@
     <style>
         :root { --primary: #00ff88; --bg: #0a0a0f; --card: #15151e; --border: #2a2a35; --accent: #00b8ff; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg); color: #fff; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        body { background: var(--bg); color: #fff; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
 
-        /* Navbar & Brand */
         .brand { font-family: 'Orbitron'; font-size: 32px; margin-bottom: 10px; text-shadow: 0 0 15px rgba(0, 255, 136, 0.5); text-align: center; }
         .brand span { color: var(--primary); }
 
-        /* Intro Section */
-        .intro-section { max-width: 800px; width: 100%; text-align: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(180deg, rgba(21, 21, 30, 0) 0%, rgba(21, 21, 30, 0.8) 100%); border-radius: 20px; border-bottom: 1px solid var(--border); }
-        .intro-section h1 { font-size: 20px; margin-bottom: 10px; font-family: 'Orbitron'; }
-        .intro-section p { color: #aaa; font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
-        .features-grid { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
-        .feature-box { background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 12px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; flex: 1; min-width: 140px; justify-content: center; color: #ddd; }
-        .feature-box i { color: var(--primary); font-size: 18px; }
+        /* Tabs */
+        .tabs { display: flex; gap: 10px; margin-bottom: 25px; width: 100%; max-width: 800px; }
+        .tab-btn { flex: 1; padding: 12px; background: var(--card); border: 1px solid var(--border); color: #888; border-radius: 10px; cursor: pointer; font-family: 'Orbitron'; font-size: 13px; transition: 0.3s; }
+        .tab-btn.active { border-color: var(--primary); color: var(--primary); background: rgba(0, 255, 136, 0.05); }
+
+        /* Container Sections */
+        .content-section { width: 100%; max-width: 800px; display: none; }
+        .content-section.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Auth Card */
-        .auth-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 25px; width: 100%; max-width: 400px; margin-bottom: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .auth-title { font-family: 'Orbitron'; text-align: center; margin-bottom: 20px; color: var(--accent); }
+        .auth-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 25px; width: 100%; max-width: 400px; margin-bottom: 30px; }
+        .auth-title { font-family: 'Orbitron'; text-align: center; margin-bottom: 20px; color: var(--accent); font-size: 16px; }
         .input-group { margin-bottom: 15px; }
-        .input-group input { width: 100%; background: #0b0b0f; color: #fff; border: 1px solid var(--border); padding: 14px; border-radius: 10px; outline: none; transition: 0.3s; }
+        .input-group label { display: block; font-size: 11px; color: #666; margin-bottom: 5px; font-family: 'Orbitron'; }
+        .input-group input, .input-group select { width: 100%; background: #0b0b0f; color: #fff; border: 1px solid var(--border); padding: 14px; border-radius: 10px; outline: none; }
         .input-group input:focus { border-color: var(--primary); }
-        .btn { width: 100%; padding: 14px; border-radius: 10px; border: none; font-weight: bold; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; font-size: 15px; }
+        .btn { width: 100%; padding: 14px; border-radius: 10px; border: none; font-weight: bold; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; font-size: 14px; }
         .btn-primary { background: var(--primary); color: #000; }
-        .btn-primary:hover { background: #00cc6a; transform: translateY(-2px); }
 
-        /* Store Section (Danh mục Mua Key) */
-        .store-container { width: 100%; max-width: 800px; }
-        .store-title { font-family: 'Orbitron'; color: var(--primary); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-size: 22px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+        /* Store & Product */
+        .store-title { font-family: 'Orbitron'; color: var(--primary); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-size: 20px; }
         .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
-        .product-card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 18px; text-align: center; transition: 0.3s; position: relative; overflow: hidden; }
-        .product-card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 5px 20px rgba(0,255,136,0.1); }
-        .product-card i { font-size: 35px; color: var(--accent); margin-bottom: 15px; }
-        .product-card h3 { font-size: 18px; margin-bottom: 8px; }
-        .product-card .price { color: #f1c40f; font-weight: bold; margin-bottom: 15px; display: block; font-size: 16px; }
-        .btn-buy { background: rgba(0, 255, 136, 0.1); color: var(--primary); border: 1px solid var(--primary); font-size: 14px; font-weight: bold; padding: 10px; width: 100%; border-radius: 8px; cursor: pointer; transition: 0.3s; }
-        .btn-buy:hover { background: var(--primary); color: #000; }
+        .product-card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 18px; text-align: center; transition: 0.3s; }
+        .product-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+        .product-card i { font-size: 30px; color: var(--accent); margin-bottom: 10px; }
+        .price { color: #f1c40f; font-weight: bold; display: block; margin-bottom: 15px; }
 
-        .locked { filter: blur(8px); pointer-events: none; opacity: 0.6; }
-        .locked-msg { text-align: center; color: #ff4757; margin-bottom: 20px; font-weight: bold; font-family: 'Inter'; }
-
-        /* POPUP iOS CHUNG */
-        .ios-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 2000; backdrop-filter: blur(5px); }
-        .ios-box { background: rgba(30, 30, 35, 0.95); width: 280px; border-radius: 14px; text-align: center; border: 0.5px solid #444; overflow: hidden; animation: iosPop 0.2s ease-out; }
-        @keyframes iosPop { from { transform: scale(1.1); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .locked { filter: blur(10px); pointer-events: none; opacity: 0.5; }
+        
+        /* iOS Popups */
+        .ios-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(5px); }
+        .ios-box { background: #1c1c1e; width: 280px; border-radius: 14px; text-align: center; overflow: hidden; border: 0.5px solid #333; }
         .ios-content { padding: 20px; }
-        .ios-content b { font-size: 17px; color: #fff; }
-        .ios-content p { font-size: 14px; color: #ccc; margin-top: 8px; line-height: 1.4; }
-        .ios-footer { display: flex; border-top: 0.5px solid #444; }
-        .ios-btn { flex: 1; padding: 14px; background: transparent; border: none; font-size: 16px; cursor: pointer; color: #007aff; transition: 0.2s; }
-        .ios-btn:active { background: rgba(255,255,255,0.1); }
-        .ios-btn.cancel { color: #ff3b30; border-right: 0.5px solid #444; }
-        .ios-btn.confirm { font-weight: bold; }
+        .ios-footer { display: flex; border-top: 0.5px solid #333; }
+        .ios-btn { flex: 1; padding: 12px; background: transparent; border: none; color: #007aff; font-size: 16px; cursor: pointer; }
+        .ios-btn.cancel { color: #ff3b30; border-right: 0.5px solid #333; }
     </style>
 </head>
 <body>
 
     <div class="brand">QUOCDAT<span>DV</span></div>
 
-    <div class="intro-section">
-        <h1>HỆ THỐNG CUNG CẤP KEY VIP</h1>
-        <p>Chào mừng bạn đến với hệ thống bán Key tự động. Chúng tôi cung cấp các loại bản quyền phần mềm, tool VIP với giá cả cạnh tranh nhất thị trường. Nhanh chóng, an toàn và bảo mật.</p>
-        <div class="features-grid">
-            <div class="feature-box"><i class="fas fa-bolt"></i> Giao dịch Auto 3s</div>
-            <div class="feature-box"><i class="fas fa-shield-alt"></i> Bảo mật 100%</div>
-            <div class="feature-box"><i class="fas fa-headset"></i> Hỗ trợ 24/7</div>
-        </div>
-    </div>
-
-    <div class="auth-card" id="auth-container">
+    <div class="auth-card">
         <div id="auth-box">
-            <h3 class="auth-title">ĐĂNG NHẬP / ĐĂNG KÝ</h3>
-            <div class="input-group"><input type="email" id="email" placeholder="Nhập Email của bạn"></div>
-            <div class="input-group"><input type="password" id="password" placeholder="Nhập mật khẩu"></div>
+            <h3 class="auth-title">IDENTIFICATION REQUIRED</h3>
+            <div class="input-group"><input type="email" id="email" placeholder="Email Address"></div>
+            <div class="input-group"><input type="password" id="password" placeholder="Password"></div>
             <button class="btn btn-primary" onclick="login()">VÀO HỆ THỐNG 🚀</button>
-            <p style="text-align: center; font-size: 12px; color: #888; margin-top: 15px;">*Nếu tài khoản chưa tồn tại, hệ thống sẽ tự động đăng ký.</p>
         </div>
         
         <div id="user-box" style="display:none; text-align:center;">
-            <i class="fas fa-user-circle" style="font-size: 50px; color: var(--primary); margin-bottom: 10px;"></i>
-            <p id="user-display" style="color:#fff; margin-bottom:5px; font-weight:bold; font-size: 16px;"></p>
-            <p id="balance-display" style="color:#f1c40f; margin-bottom:20px; font-size: 20px; font-family: 'Orbitron';">Số dư: 0đ</p>
-            <button class="btn" style="background:#ff4757; color:#fff" onclick="logout()">ĐĂNG XUẤT</button>
+            <p id="user-display" style="color:var(--primary); font-family: 'Orbitron'; margin-bottom:5px;"></p>
+            <p id="balance-display" style="color:#f1c40f; margin-bottom:15px; font-size: 22px; font-family: 'Orbitron';">0 VNĐ</p>
+            <button class="btn" style="background:#222; color:#fff; font-size: 10px;" onclick="logout()">LOGOUT System</button>
         </div>
     </div>
 
-    <div class="store-container">
-        <div class="store-title"><i class="fas fa-key"></i> DANH MỤC MUA KEY</div>
-        <p id="locked-warning" class="locked-msg">⚠️ Vui lòng đăng nhập để xem và mua Key!</p>
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('store')"><i class="fas fa-shopping-cart"></i> MUA KEY</button>
+        <button class="tab-btn" onclick="switchTab('recharge')"><i class="fas fa-wallet"></i> NẠP THẺ</button>
+    </div>
+
+    <div id="store-section" class="content-section active">
+        <div class="store-title"><i class="fas fa-key"></i> VIP PRODUCTS</div>
         <div id="product-list" class="product-grid locked">
             </div>
     </div>
 
-    <div id="ios-alert" class="ios-overlay">
-        <div class="ios-box">
-            <div class="ios-content">
-                <b>Thông báo</b>
-                <p id="ios-msg"></p>
+    <div id="recharge-section" class="content-section">
+        <div class="store-title"><i class="fas fa-bolt"></i> AUTO RECHARGE</div>
+        <div class="auth-card" style="max-width: 100%; margin: 0 auto;">
+            <div class="input-group">
+                <label>LOẠI THẺ</label>
+                <select id="card_telco">
+                    <option value="VIETTEL">Viettel</option>
+                    <option value="VINAPHONE">Vinaphone</option>
+                    <option value="MOBIFONE">Mobifone</option>
+                    <option value="ZING">Zing</option>
+                </select>
             </div>
-            <div class="ios-footer">
-                <button class="ios-btn confirm" onclick="closeAlert()">Đồng ý</button>
+            <div class="input-group">
+                <label>MỆNH GIÁ</label>
+                <select id="card_amount">
+                    <option value="10000">10,000đ</option>
+                    <option value="20000">20,000đ</option>
+                    <option value="50000">50,000đ</option>
+                    <option value="100000">100,000đ</option>
+                    <option value="200000">200,000đ</option>
+                    <option value="500000">500,000đ</option>
+                </select>
             </div>
+            <div class="input-group">
+                <label>SỐ SERI</label>
+                <input type="text" id="card_serial" placeholder="Nhập số seri thẻ">
+            </div>
+            <div class="input-group">
+                <label>MÃ THẺ</label>
+                <input type="text" id="card_code" placeholder="Nhập mã bí mật">
+            </div>
+            <button class="btn btn-primary" id="btn-recharge" onclick="submitRecharge()">XÁC NHẬN NẠP THẺ</button>
+            <p style="font-size: 10px; color: #555; margin-top: 15px; text-align: center;">Hệ thống tự động duyệt từ 30s - 2p. Vui lòng không thoát trang.</p>
         </div>
     </div>
 
-    <div id="ios-buy-confirm" class="ios-overlay">
+    <div id="ios-alert" class="ios-overlay">
         <div class="ios-box">
-            <div class="ios-content">
-                <b>Xác nhận mua Key</b>
-                <p id="buy-msg"></p>
-            </div>
-            <div class="ios-footer">
-                <button class="ios-btn cancel" onclick="closeBuyPopup()">Hủy</button>
-                <button class="ios-btn confirm" id="confirm-buy-btn">Mua ngay</button>
-            </div>
+            <div class="ios-content"><b id="ios-title">Thông báo</b><p id="ios-msg" style="margin-top:10px; color:#ccc; font-size:14px;"></p></div>
+            <div class="ios-footer"><button class="ios-btn" onclick="closeAlert()">Đóng</button></div>
         </div>
     </div>
 
     <script>
-        // Cấu hình Firebase
+        // --- CONFIGURATION ---
+        const PARTNER_ID = "3368726510"; // THAY BẰNG ID CỦA BẠN
+        const PARTNER_KEY = "3682947265104826501"; // THAY BẰNG KEY CỦA BẠN
+        
         const conf = {
             apiKey: "AIzaSyAnZVbkcjZmVH8QC2mX6en3Rl68D2UnNTE",
             databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -139,46 +144,35 @@
         };
         firebase.initializeApp(conf);
         const db = firebase.database();
-
         let userBalance = 0;
 
+        // Init App
         function init() {
             const user = localStorage.getItem('logged_user');
             
-            // Load sản phẩm từ Admin
+            // Load Products
             db.ref('products').on('value', snap => {
                 const list = document.getElementById('product-list');
                 list.innerHTML = '';
-                
-                if(!snap.exists()) {
-                    list.innerHTML = '<p style="text-align:center; color:#888; grid-column: 1/-1;">Chưa có Key nào trong hệ thống.</p>';
-                    return;
-                }
-
                 snap.forEach(doc => {
                     const p = doc.val();
                     list.innerHTML += `
                         <div class="product-card">
                             <i class="fas fa-fingerprint"></i>
                             <h3>${p.name}</h3>
-                            <span class="price">${p.price.toLocaleString()} VNĐ</span>
-                            <button class="btn-buy" onclick="buyProduct('${doc.key}', ${p.price}, '${p.name}')">MUA NGAY</button>
+                            <span class="price">${p.price.toLocaleString()}đ</span>
+                            <button class="btn" style="background:rgba(0,255,136,0.1); color:var(--primary); border:1px solid var(--primary); font-size:12px;" onclick="buyProduct('${doc.key}', ${p.price}, '${p.name}')">MUA KEY</button>
                         </div>
                     `;
                 });
             });
 
-            // Nếu đã đăng nhập
             if(user) {
                 document.getElementById('auth-box').style.display = 'none';
                 document.getElementById('user-box').style.display = 'block';
                 document.getElementById('user-display').innerText = user;
-                
-                // Mở khóa cửa hàng
                 document.getElementById('product-list').classList.remove('locked');
-                document.getElementById('locked-warning').style.display = 'none';
                 
-                // Lấy số dư real-time
                 let id = user.replace(/[.#$\[\]]/g, '_');
                 db.ref('users/' + id + '/balance').on('value', s => {
                     userBalance = s.val() || 0;
@@ -188,84 +182,90 @@
         }
         init();
 
-        // ĐĂNG NHẬP / ĐĂNG KÝ (Không dùng OTP)
+        // GACHTHEFAST LOGIC
+        async function submitRecharge() {
+            const user = localStorage.getItem('logged_user');
+            if(!user) return showAlert("Vui lòng đăng nhập để nạp thẻ!");
+
+            const telco = document.getElementById('card_telco').value;
+            const amount = document.getElementById('card_amount').value;
+            const serial = document.getElementById('card_serial').value.trim();
+            const code = document.getElementById('card_code').value.trim();
+            const btn = document.getElementById('btn-recharge');
+
+            if(!serial || !code) return showAlert("Vui lòng nhập đầy đủ thông tin thẻ!");
+
+            btn.disabled = true;
+            btn.innerText = "ĐANG GỬI...";
+
+            const id = user.replace(/[.#$\[\]]/g, '_');
+            const requestId = id + '_' + Date.now();
+            const sign = CryptoJS.MD5(PARTNER_KEY + code + serial).toString();
+
+            const url = `https://gachthefast.com/chargingws/v2?sign=${sign}&telco=${telco}&code=${code}&serial=${serial}&amount=${amount}&request_id=${requestId}&partner_id=${PARTNER_ID}&command=charging`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if(data.status == 99 || data.status == 1) {
+                    showAlert("✅ Đã gửi thẻ thành công! Tiền sẽ tự động cộng sau khi hệ thống xác thực.");
+                } else {
+                    showAlert("❌ Lỗi: " + data.message);
+                }
+            } catch (e) {
+                showAlert("⚠️ Lỗi kết nối API. Hãy thử lại sau.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "XÁC NHẬN NẠP THẺ";
+            }
+        }
+
+        // Tab Switcher
+        function switchTab(type) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            
+            if(type === 'store') {
+                document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+                document.getElementById('store-section').classList.add('active');
+            } else {
+                document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+                document.getElementById('recharge-section').classList.add('active');
+            }
+        }
+
+        // Auth & Buy (Kế thừa từ code của bạn)
         async function login() {
             const email = document.getElementById('email').value.trim();
             const pass = document.getElementById('password').value.trim();
-            
-            if(!email || !pass) return showAlert("Vui lòng nhập đầy đủ Email và Mật khẩu!");
-            if(!email.includes('@')) return showAlert("Định dạng Email không hợp lệ!");
-
+            if(!email || !pass) return showAlert("Nhập đủ Email và Pass!");
             let id = email.replace(/[.#$\[\]]/g, '_');
-            
-            try {
-                const check = await db.ref('users/' + id).once('value');
-                if(!check.exists()) {
-                    // Tạo tài khoản mới nếu chưa có
-                    await db.ref('users/' + id).set({ email: email, password: pass, balance: 0 });
-                    showAlert("Đăng ký thành công! Đang vào hệ thống...");
-                } else {
-                    // Kiểm tra mật khẩu nếu đã có tài khoản
-                    if(check.val().password !== pass) {
-                        return showAlert("Sai mật khẩu! Vui lòng thử lại.");
-                    }
-                }
-                
-                // Lưu phiên và reload
-                localStorage.setItem('logged_user', email);
-                setTimeout(() => location.reload(), 1500);
-            } catch (e) {
-                showAlert("Lỗi kết nối máy chủ: " + e.message);
-            }
+            const check = await db.ref('users/' + id).once('value');
+            if(!check.exists()) {
+                await db.ref('users/' + id).set({ email, password: pass, balance: 0 });
+            } else if(check.val().password !== pass) return showAlert("Sai mật khẩu!");
+            localStorage.setItem('logged_user', email);
+            location.reload();
         }
 
-        // MUA HÀNG LOGIC
         function buyProduct(pId, price, name) {
-            const user = localStorage.getItem('logged_user');
-            if(!user) return showAlert("Vui lòng đăng nhập để mua Key!");
-
-            if (userBalance < price) {
-                return showAlert(`Tài khoản không đủ số dư!<br>Bạn cần nạp thêm: <b style="color:#ff3b30">${(price - userBalance).toLocaleString()} VNĐ</b>`);
-            }
-
-            document.getElementById('buy-msg').innerHTML = `Xác nhận mua <b>${name}</b> với giá <span style="color:#f1c40f">${price.toLocaleString()} VNĐ</span>?`;
-            document.getElementById('ios-buy-confirm').style.display = 'flex';
-
-            document.getElementById('confirm-buy-btn').onclick = () => executePurchase(pId, price);
+            if(userBalance < price) return showAlert("Số dư không đủ!");
+            if(confirm(`Xác nhận mua ${name}?`)) executePurchase(pId, price);
         }
 
         async function executePurchase(pId, price) {
-            closeBuyPopup();
-            const email = localStorage.getItem('logged_user');
-            let id = email.replace(/[.#$\[\]]/g, '_');
-            const newBalance = userBalance - price;
-
-            try {
-                // Trừ tiền
-                await db.ref('users/' + id).update({ balance: newBalance });
-                
-                // Lấy link/key tải xuống từ Firebase
-                const pSnap = await db.ref('products/' + pId).once('value');
-                const link = pSnap.val().download_link;
-
-                showAlert("✅ Mua thành công! Đang chuyển hướng lấy Key...");
-                if (link) {
-                    setTimeout(() => window.open(link, '_blank'), 1500);
-                } else {
-                    setTimeout(() => showAlert("Sản phẩm chưa có dữ liệu Key. Vui lòng liên hệ Admin!"), 1500);
-                }
-            } catch (e) { 
-                showAlert("Lỗi giao dịch: " + e.message); 
-            }
+            const id = localStorage.getItem('logged_user').replace(/[.#$\[\]]/g, '_');
+            await db.ref('users/' + id).update({ balance: userBalance - price });
+            const p = await db.ref('products/' + pId).once('value');
+            showAlert("✅ Thành công! Key: " + (p.val().download_link || "Liên hệ Admin"));
         }
 
-        // Các hàm hỗ trợ giao diện
         function showAlert(msg) {
             document.getElementById('ios-msg').innerHTML = msg;
             document.getElementById('ios-alert').style.display = 'flex';
         }
         function closeAlert() { document.getElementById('ios-alert').style.display = 'none'; }
-        function closeBuyPopup() { document.getElementById('ios-buy-confirm').style.display = 'none'; }
         function logout() { localStorage.removeItem('logged_user'); location.reload(); }
     </script>
 </body>
