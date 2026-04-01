@@ -48,7 +48,8 @@
         
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; margin-bottom: 4px; font-size: 11px; color: #888; }
-        .form-group input { width: 100%; padding: 10px; background: #000; border: 1px solid var(--border); color: #fff; border-radius: 6px; outline: none; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; background: #000; border: 1px solid var(--border); color: #fff; border-radius: 6px; outline: none; }
+        .checkbox-group { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-size: 12px; color: var(--primary); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
     </style>
@@ -59,8 +60,9 @@
         <h2 style="font-family:'Orbitron'; color:var(--primary); margin-bottom:30px; font-size: 18px;">QD.ADMIN</h2>
         <div class="nav-item active" onclick="showTab('users', this)"><i class="fas fa-users"></i> NGƯỜI DÙNG</div>
         <div class="nav-item" onclick="showTab('products', this)"><i class="fas fa-box"></i> SẢN PHẨM</div>
+        <div class="nav-item" onclick="showTab('cards', this)"><i class="fas fa-credit-card"></i> DUYỆT THẺ CÀO</div>
         <div class="nav-item" onclick="showTab('add-tab', this)"><i class="fas fa-plus-square"></i> THÊM MỚI</div>
-        <div class="nav-item" style="margin-top:50px; color:#ff4757" onclick="location.href='index.html'"><i class="fas fa-sign-out-alt"></i> THOÁT</div>
+        <div class="nav-item" style="margin-top:50px; color:#ff4757" onclick="sessionStorage.removeItem('admin_logged'); location.href='index.html'"><i class="fas fa-sign-out-alt"></i> THOÁT</div>
     </div>
 
     <div class="main">
@@ -73,7 +75,7 @@
         <div id="users" class="tab-content active">
             <div class="card">
                 <table>
-                    <thead><tr><th>EMAIL</th><th>SỐ DƯ</th><th>THAO TÁC</th></tr></thead>
+                    <thead><tr><th>ID / EMAIL</th><th>SỐ DƯ</th><th>THAO TÁC</th></tr></thead>
                     <tbody id="user-list"></tbody>
                 </table>
             </div>
@@ -82,8 +84,17 @@
         <div id="products" class="tab-content">
             <div class="card">
                 <table>
-                    <thead><tr><th>TÊN</th><th>GIÁ</th><th>LINK</th><th>THAO TÁC</th></tr></thead>
+                    <thead><tr><th>TÊN SẢN PHẨM</th><th>DANH MỤC</th><th>GIÁ</th><th>THAO TÁC</th></tr></thead>
                     <tbody id="product-list"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="cards" class="tab-content">
+            <div class="card">
+                <table>
+                    <thead><tr><th>NGƯỜI DÙNG</th><th>LOẠI - MỆNH GIÁ</th><th>SERI - PIN</th><th>TRẠNG THÁI</th><th>THAO TÁC</th></tr></thead>
+                    <tbody id="card-list"></tbody>
                 </table>
             </div>
         </div>
@@ -91,10 +102,35 @@
         <div id="add-tab" class="tab-content">
             <div class="card" style="max-width: 450px; margin: auto;">
                 <h3 style="color:var(--primary); margin-bottom:15px; font-size:14px;">[ THÊM SẢN PHẨM MỚI ]</h3>
-                <div class="form-group"><label>Tên Sản Phẩm</label><input type="text" id="p-name" placeholder="Ví dụ: Tool VIP"></div>
-                <div class="form-group"><label>Giá Tiền (Nhập 0 nếu Free)</label><input type="number" id="p-price" placeholder="Ví dụ: 0"></div>
-                <div class="form-group"><label>Link Tool/Key</label><input type="text" id="p-link" placeholder="https://..."></div>
-                <button class="btn btn-add" onclick="saveProduct()">LƯU HỆ THỐNG</button>
+                <div class="form-group">
+                    <label>Tên Sản Phẩm</label>
+                    <input type="text" id="p-name" placeholder="Ví dụ: Tool VIP Free Fire">
+                </div>
+                <div class="form-group">
+                    <label>Danh Mục</label>
+                    <select id="p-category">
+                        <option value="tool">Tool Auto</option>
+                        <option value="source">Mã Nguồn Web</option>
+                        <option value="account">Tài Khoản VIP</option>
+                        <option value="tut">Tài liệu/Tut</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Mô tả ngắn</label>
+                    <input type="text" id="p-desc" placeholder="Chức năng chính của sản phẩm...">
+                </div>
+                <div class="form-group">
+                    <label>Giá Tiền (Nhập 0 nếu Free)</label>
+                    <input type="number" id="p-price" placeholder="Ví dụ: 50000">
+                </div>
+                <div class="form-group">
+                    <label>Link Tool/Key (Link Google Drive/Mediafire)</label>
+                    <input type="text" id="p-link" placeholder="https://...">
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="p-hot"> <label for="p-hot" style="margin:0; font-size:13px; color:#fff">Đánh dấu là Sản phẩm HOT</label>
+                </div>
+                <button class="btn btn-add" onclick="saveProduct()">LƯU VÀO HỆ THỐNG</button>
             </div>
         </div>
     </div>
@@ -111,16 +147,16 @@
             el.classList.add('active');
         }
 
-        // Realtime Users
         db.ref('users').on('value', s => {
             const list = document.getElementById('user-list'); list.innerHTML = '';
             let count = 0; let total = 0;
             s.forEach(u => {
                 count++; const d = u.val(); total += (d.balance || 0);
+                const displayEmail = u.key.replace(/_/g, '.');
                 list.innerHTML += `<tr>
-                    <td style="color:var(--accent)">${d.email}</td>
-                    <td style="color:var(--primary)">${(d.balance || 0).toLocaleString()}đ</td>
-                    <td><button class="btn btn-edit" onclick="editBal('${u.key}', ${d.balance || 0})">Sửa</button>
+                    <td style="color:var(--accent)">${displayEmail}</td>
+                    <td style="color:var(--primary); font-weight:bold;">${(d.balance || 0).toLocaleString()}đ</td>
+                    <td><button class="btn btn-edit" onclick="editBal('${u.key}', ${d.balance || 0})">Sửa Tiền</button>
                     <button class="btn btn-delete" onclick="delUser('${u.key}')">Xóa</button></td>
                 </tr>`;
             });
@@ -128,49 +164,95 @@
             document.getElementById('total-revenue').innerText = total.toLocaleString() + "đ";
         });
 
-        // Realtime Products
         db.ref('products').on('value', s => {
             const list = document.getElementById('product-list'); list.innerHTML = '';
             let count = 0;
             s.forEach(p => {
                 count++; const d = p.val();
+                const hotBadge = d.isHot ? '<span style="background:#ff4757; color:#fff; padding:2px 5px; border-radius:3px; font-size:9px; margin-left:5px;">HOT</span>' : '';
                 list.innerHTML += `<tr>
-                    <td><b>${d.name}</b></td>
+                    <td><b>${d.name}</b> ${hotBadge}</td>
+                    <td style="color:var(--accent); text-transform:uppercase; font-size:11px;">${d.category || 'TOOL'}</td>
                     <td style="color:#f1c40f">${(d.price || 0).toLocaleString()}đ</td>
-                    <td style="font-size:10px; opacity:0.4">${d.link || 'Error'}</td>
                     <td><button class="btn btn-delete" onclick="delProd('${p.key}')">Xóa</button></td>
                 </tr>`;
             });
             document.getElementById('count-products').innerText = count;
         });
 
-        // FIX LỖI GIÁ 0Đ
+        db.ref('card_requests').on('value', s => {
+            const list = document.getElementById('card-list'); list.innerHTML = '';
+            s.forEach(c => {
+                const d = c.val();
+                let actions = '';
+                if(d.status === 'pending') {
+                    actions = `<button class="btn btn-edit" style="background:var(--primary)" onclick="approveCard('${c.key}', '${d.user}', ${d.amount})">Duyệt</button>
+                               <button class="btn btn-delete" onclick="rejectCard('${c.key}')">Hủy</button>`;
+                } else if(d.status === 'success') {
+                    actions = `<span style="color:var(--primary); font-weight:bold; font-size:11px;">THÀNH CÔNG</span>`;
+                } else {
+                    actions = `<span style="color:#ff4757; font-weight:bold; font-size:11px;">THẤT BẠI</span>`;
+                }
+                list.innerHTML += `<tr>
+                    <td style="color:var(--accent)">${d.user}</td>
+                    <td><b>${d.type}</b> <br> <span style="color:#f1c40f">${parseInt(d.amount).toLocaleString()}đ</span></td>
+                    <td style="font-family:monospace; font-size:12px; opacity:0.8;">S: ${d.seri}<br>P: ${d.pin}</td>
+                    <td style="font-size:11px; text-transform:uppercase;">${d.status}</td>
+                    <td>${actions}</td>
+                </tr>`;
+            });
+        });
+
         function saveProduct() {
             const n = document.getElementById('p-name').value.trim();
-            const pText = document.getElementById('p-price').value.trim(); // Lấy text để check trống
+            const pText = document.getElementById('p-price').value.trim();
             const l = document.getElementById('p-link').value.trim();
+            const c = document.getElementById('p-category').value;
+            const desc = document.getElementById('p-desc').value.trim();
+            const isHot = document.getElementById('p-hot').checked;
             
-            if(!n || pText === "" || !l) return alert("Điền đủ Tên, Giá và Link!");
+            if(!n || pText === "" || !l) return alert("Hệ thống yêu cầu nhập đủ Tên, Giá và Link!");
 
             db.ref('products').push({
                 name: n,
-                price: parseInt(pText), // Ép kiểu sang số (0 vẫn là 0)
-                link: l
+                category: c,
+                description: desc,
+                price: parseInt(pText),
+                link: l,
+                isHot: isHot
             }).then(() => {
-                alert("Đã thêm sản phẩm!");
+                alert("Đã thêm sản phẩm lên Store!");
                 document.getElementById('p-name').value = '';
                 document.getElementById('p-price').value = '';
                 document.getElementById('p-link').value = '';
+                document.getElementById('p-desc').value = '';
+                document.getElementById('p-hot').checked = false;
                 showTab('products', document.querySelectorAll('.nav-item')[1]);
             });
         }
 
         function editBal(id, old) {
-            const n = prompt("Số dư mới:", old);
-            if (n !== null) db.ref('users/'+id).update({ balance: Number(n) });
+            const n = prompt("Nhập số dư mới cho User này:", old);
+            if (n !== null && n !== "") db.ref('users/'+id).update({ balance: Number(n) });
         }
-        function delUser(id) { if(confirm("Xóa khách này?")) db.ref('users/'+id).remove(); }
-        function delProd(id) { if(confirm("Xóa sản phẩm này?")) db.ref('products/'+id).remove(); }
+
+        function approveCard(id, userEmail, amount) {
+            if(confirm(`Duyệt thẻ này và cộng ${parseInt(amount).toLocaleString()}đ cho ${userEmail}?`)) {
+                const uid = userEmail.replace(/[.#$\[\]]/g, '_');
+                db.ref('users/'+uid+'/balance').once('value').then(snap => {
+                    let bal = snap.val() || 0;
+                    db.ref('users/'+uid).update({balance: bal + parseInt(amount)});
+                    db.ref('card_requests/'+id).update({status: 'success'});
+                });
+            }
+        }
+
+        function rejectCard(id) {
+            if(confirm("Xác nhận hủy thẻ sai/lỗi này?")) db.ref('card_requests/'+id).update({status: 'failed'});
+        }
+
+        function delUser(id) { if(confirm("Xóa toàn bộ dữ liệu khách này?")) db.ref('users/'+id).remove(); }
+        function delProd(id) { if(confirm("Gỡ sản phẩm này khỏi Store?")) db.ref('products/'+id).remove(); }
     </script>
 </body>
 </html>
