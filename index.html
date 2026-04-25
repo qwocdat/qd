@@ -6,6 +6,7 @@
     <title>QUOCDAT SEC | PREMIUM STORE</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -27,38 +28,24 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background: var(--bg); background-image: radial-gradient(circle at 50% 0%, rgba(255, 30, 30, 0.1) 0%, transparent 50%); color: var(--text-main); overflow-x: hidden; line-height: 1.6; }
         
-        /* Scrollbar mượt mà */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: var(--bg); }
         ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
 
-        /* Header phong cách Glassmorphism */
         .header { 
-            background: rgba(10, 0, 0, 0.8); 
-            backdrop-filter: var(--glass-blur); 
-            -webkit-backdrop-filter: var(--glass-blur);
-            position: sticky; top: 0; z-index: 100; padding: 15px 25px; 
-            border-bottom: 1px solid var(--border); 
-            display: flex; justify-content: space-between; align-items: center; 
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); 
-            transition: all 0.3s ease;
+            background: rgba(10, 0, 0, 0.8); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+            position: sticky; top: 0; z-index: 100; padding: 15px 25px; border-bottom: 1px solid var(--border); 
+            display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); transition: all 0.3s ease;
         }
-        
         .logo { font-family: 'Orbitron', sans-serif; color: var(--primary); font-size: 24px; font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 15px var(--primary-glow); cursor: pointer; transition: transform 0.3s ease;}
         .logo:hover { transform: scale(1.05); }
 
         .nav-links { display: flex; gap: 25px; }
         .nav-links button { 
-            background: none; border: none; color: var(--text-muted); 
-            font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: bold; 
-            cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
-            position: relative;
+            background: none; border: none; color: var(--text-muted); font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); position: relative;
         }
         .nav-links button::after {
-            content: ''; position: absolute; width: 0; height: 2px; 
-            bottom: -5px; left: 50%; background-color: var(--primary); 
-            transition: all 0.3s ease; transform: translateX(-50%);
-            box-shadow: 0 0 10px var(--primary-glow);
+            content: ''; position: absolute; width: 0; height: 2px; bottom: -5px; left: 50%; background-color: var(--primary); transition: all 0.3s ease; transform: translateX(-50%); box-shadow: 0 0 10px var(--primary-glow);
         }
         .nav-links button:hover, .nav-links button.active { color: var(--text-main); text-shadow: 0 0 10px rgba(255,255,255,0.3); }
         .nav-links button:hover::after, .nav-links button.active::after { width: 100%; }
@@ -68,23 +55,9 @@
 
         .container { max-width: 1250px; margin: 40px auto; padding: 0 20px; min-height: 70vh; }
         
-        /* Hiệu ứng chuyển cảnh (Transitions) */
-        .section-content { 
-            display: none; 
-            opacity: 0;
-            transform: translateY(20px) scale(0.98);
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .section-content.active { 
-            display: block; 
-            opacity: 1;
-            transform: translateY(0) scale(1);
-            animation: smoothFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        @keyframes smoothFade {
-            0% { opacity: 0; transform: translateY(20px) scale(0.98); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
+        .section-content { display: none; opacity: 0; transform: translateY(20px) scale(0.98); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .section-content.active { display: block; opacity: 1; transform: translateY(0) scale(1); animation: smoothFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes smoothFade { 0% { opacity: 0; transform: translateY(20px) scale(0.98); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
 
         .hero { text-align: center; padding: 60px 20px; background: linear-gradient(180deg, rgba(255, 30, 30, 0.1) 0%, rgba(10,0,0,0.8) 100%); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; overflow: hidden; }
         .hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, var(--primary-glow) 0%, transparent 60%); opacity: 0.1; animation: pulse 6s infinite linear; }
@@ -106,7 +79,6 @@
         .product-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 25px; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; display: flex; flex-direction: column; backdrop-filter: var(--glass-blur); }
         .product-card:hover { border-color: var(--primary); box-shadow: 0 15px 30px rgba(255, 30, 30, 0.2); transform: translateY(-8px) scale(1.02); background: var(--card-hover); z-index: 1; }
         .product-badge { position: absolute; top: -12px; right: -12px; background: linear-gradient(45deg, var(--primary), #ff6b6b); color: #fff; font-size: 11px; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-family: 'Orbitron'; box-shadow: 0 5px 15px var(--primary-glow); }
-        
         .product-card h3 { font-family: 'Orbitron', sans-serif; font-size: 18px; margin-bottom: 12px; color: #fff; line-height: 1.3; }
         .product-card .desc { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; flex-grow: 1; }
         .product-card .price { color: #fff; font-weight: 900; margin-bottom: 20px; font-size: 22px; text-align: center; background: rgba(255, 30, 30, 0.1); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,30,30,0.3); font-family: 'Orbitron'; }
@@ -137,10 +109,17 @@
         .form-control { width: 100%; padding: 15px; background: rgba(0,0,0,0.6); border: 1px solid var(--border); color: #fff; border-radius: 8px; outline: none; transition: all 0.3s ease; font-family: 'Inter', sans-serif; }
         .form-control:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(255,30,30,0.2); background: rgba(0,0,0,0.8); }
 
+        /* FACE ID SCANNER STYLES */
         #login-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 999; backdrop-filter: blur(15px); transition: opacity 0.5s ease; }
         .login-box { background: var(--card); padding: 50px 40px; border-radius: 20px; border: 1px solid var(--primary); text-align: center; width: 400px; box-shadow: 0 0 40px var(--primary-glow); position: relative; overflow: hidden; }
         .login-box::before { content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px; background: linear-gradient(45deg, var(--primary), transparent, var(--primary)); z-index: -1; border-radius: 22px; animation: rotateBorder 3s linear infinite; }
         @keyframes rotateBorder { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .scanner-container { position: relative; width: 200px; height: 200px; margin: 0 auto 20px auto; border-radius: 50%; overflow: hidden; border: 3px solid var(--border); box-shadow: 0 0 20px rgba(255, 30, 30, 0.2); transition: all 0.3s; }
+        .scanner-container.active { border-color: var(--primary); box-shadow: 0 0 30px var(--primary-glow); }
+        #videoElement { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: var(--primary); box-shadow: 0 0 10px var(--primary-glow); animation: scan 2s linear infinite; display: none; }
+        .scanner-container.active .scan-line { display: block; }
 
         .matrix-text { color: var(--primary); text-align: center; font-size: 12px; margin-top: 20px; opacity: 0.8; font-family: monospace; letter-spacing: 1px; }
         
@@ -152,7 +131,6 @@
         .text-center { text-align: center; }
         .mb-20 { margin-bottom: 20px; }
 
-        /* Tiêu đề mục */
         .section-title { font-family: 'Orbitron'; margin-bottom: 25px; color: #fff; display: flex; align-items: center; gap: 10px; font-size: 24px; }
         .section-title i { color: var(--primary); text-shadow: 0 0 10px var(--primary-glow); }
 
@@ -162,17 +140,23 @@
             .user-info { width: 100%; justify-content: space-between; }
             .hero h1 { font-size: 2rem; }
         }
-            </style>
+    </style>
 </head>
 <body>
     <div id="login-modal">
         <div class="login-box">
             <i class="fas fa-fingerprint" style="font-size: 50px; color: var(--primary); margin-bottom: 20px; filter: drop-shadow(0 0 10px var(--primary-glow));"></i>
-            <h2 style="font-family:'Orbitron'; color:#fff; margin-bottom:10px; font-size: 26px;">SYSTEM <span style="color:var(--primary)">LOGIN</span></h2>
-            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 30px;">Xác thực danh tính để truy cập kho lưu trữ</p>
-            <input type="email" id="login-email" class="form-control" placeholder="Nhập Email của bạn..." style="margin-bottom: 25px; text-align: center; font-size: 16px;">
-            <button class="btn btn-buy" onclick="login()"><i class="fas fa-sign-in-alt"></i> CONNECT</button>
-            <p class="matrix-text">Encrypted Connection via QuocDatSec.</p>
+            <h2 style="font-family:'Orbitron'; color:#fff; margin-bottom:10px; font-size: 26px;">BIOMETRIC <span style="color:var(--primary)">LOGIN</span></h2>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">1 Thiết bị - 1 Khuôn mặt duy nhất</p>
+            
+            <div class="scanner-container" id="scanner">
+                <video id="videoElement" autoplay muted playsinline></video>
+                <div class="scan-line"></div>
+            </div>
+
+            <p id="login-status" class="matrix-text" style="font-size: 14px; margin-bottom: 15px;">Đang thiết lập kết nối AI...</p>
+            
+            <button id="btn-scan" class="btn btn-buy hidden" onclick="startFaceScan()"><i class="fas fa-expand"></i> BẮT ĐẦU QUÉT</button>
         </div>
     </div>
 
@@ -363,7 +347,7 @@
         <p style="opacity: 0.4; font-size: 12px; margin-top: 30px;">&copy; 2026 QuocDatSec. System Online. All Rights Reserved.</p>
     </div>
         <script>
-        // Cấu hình Firebase
+        // CẤU HÌNH FIREBASE
         const firebaseConfig = {
             databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
@@ -371,57 +355,145 @@
             firebase.initializeApp(firebaseConfig);
         }
         const db = firebase.database();
+        
         let currentUser = null;
         let userId = null;
         let currentBalance = 0;
         let allProducts = [];
 
-        window.onload = () => {
-            const savedUser = localStorage.getItem('user');
-            if(savedUser) {
-                currentUser = savedUser;
-                userId = currentUser.replace(/[.#$\[\]]/g, '_');
+        // HỆ THỐNG XÁC THỰC THIẾT BỊ
+        let userIP = "unknown_ip";
+        let deviceId = localStorage.getItem('qd_device_id');
+        if(!deviceId) {
+            deviceId = 'SEC_' + Math.random().toString(36).substr(2, 9).toUpperCase();
+            localStorage.setItem('qd_device_id', deviceId);
+        }
+
+        window.onload = async () => {
+            const savedFaceUser = localStorage.getItem('user_face_id');
+            if(savedFaceUser) {
+                // Đã đăng nhập
+                currentUser = savedFaceUser;
+                userId = currentUser;
                 
-                // Hiệu ứng mờ login form
                 const modal = document.getElementById('login-modal');
                 modal.style.opacity = '0';
                 setTimeout(() => modal.classList.add('hidden'), 500);
 
-                document.getElementById('user-display').innerText = currentUser.split('@')[0];
+                // Hiển thị 6 ký tự cuối làm ID
+                document.getElementById('user-display').innerText = "ID: " + userId.substring(userId.length - 6);
+                
                 listenBalance();
                 loadProducts();
                 loadHistory();
+            } else {
+                // Khởi động AI quét mặt
+                await initFaceLogin();
             }
         };
 
-        function login() {
-            const email = document.getElementById('login-email').value.trim();
-            if(!email || !email.includes('@')) {
-                alert("Lỗi: Định dạng Email không hợp lệ!");
+        // ====== AI FACE SCAN LOGIC ======
+        async function initFaceLogin() {
+            const statusText = document.getElementById('login-status');
+            const btnScan = document.getElementById('btn-scan');
+            
+            try {
+                statusText.innerText = "Đang lấy địa chỉ IP mạng...";
+                const res = await fetch('https://api.ipify.org?format=json');
+                const data = await res.json();
+                userIP = data.ip.replace(/\./g, '_');
+
+                statusText.innerText = "Đang kết nối Camera...";
+                const video = document.getElementById('videoElement');
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+
+                statusText.innerText = "Đang tải dữ liệu Mạng Neural AI (Vui lòng đợi)...";
+                const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';
+                await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
+                await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+                await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+
+                statusText.innerText = `Sẵn sàng quét bảo mật!`;
+                btnScan.classList.remove('hidden');
+
+            } catch (err) {
+                statusText.innerText = "Lỗi: Không thể truy cập Camera!";
+                statusText.style.color = "var(--danger)";
+            }
+        }
+
+        async function startFaceScan() {
+            const statusText = document.getElementById('login-status');
+            const scannerBox = document.getElementById('scanner');
+            const video = document.getElementById('videoElement');
+            const btnScan = document.getElementById('btn-scan');
+
+            btnScan.disabled = true;
+            scannerBox.classList.add('active');
+            statusText.innerText = "Đang phân tích 128 điểm trên khuôn mặt...";
+
+            const detection = await faceapi.detectSingleFace(video).withFaceLandmarks().withFaceDescriptor();
+            scannerBox.classList.remove('active');
+
+            if (!detection) {
+                statusText.innerText = "Không tìm thấy khuôn mặt, xin thử lại.";
+                statusText.style.color = "var(--danger)";
+                btnScan.disabled = false;
                 return;
             }
-            localStorage.setItem('user', email);
-            location.reload();
+
+            const currentFaceDesc = Array.from(detection.descriptor);
+            const userKey = userIP + "_" + deviceId;
+
+            db.ref('users_face/' + userKey).once('value').then(snap => {
+                if (snap.exists()) {
+                    // Kiểm tra khớp mặt
+                    const savedFaceDesc = new Float32Array(snap.val().descriptor);
+                    const distance = faceapi.euclideanDistance(currentFaceDesc, savedFaceDesc);
+                    
+                    if (distance < 0.55) {
+                        statusText.innerText = "Xác thực thành công!";
+                        statusText.style.color = "#00ff88";
+                        grantAccess(userKey);
+                    } else {
+                        statusText.innerText = "Khuôn mặt không khớp với thiết bị này!";
+                        statusText.style.color = "var(--danger)";
+                        btnScan.disabled = false;
+                    }
+                } else {
+                    // Đăng ký mới
+                    statusText.innerText = "Đăng ký khuôn mặt mới thành công!";
+                    statusText.style.color = "#00b8ff";
+                    db.ref('users_face/' + userKey).set({
+                        ip: userIP,
+                        device: deviceId,
+                        descriptor: currentFaceDesc,
+                        createdAt: new Date().toLocaleString('vi-VN')
+                    }).then(() => grantAccess(userKey));
+                }
+            });
+        }
+
+        function grantAccess(userIdKey) {
+            localStorage.setItem('user_face_id', userIdKey);
+            const video = document.getElementById('videoElement');
+            if(video.srcObject) video.srcObject.getTracks().forEach(track => track.stop());
+            setTimeout(() => location.reload(), 1500);
         }
 
         function logout() {
-            if(confirm("Ngắt kết nối khỏi hệ thống?")) {
-                localStorage.removeItem('user');
+            if(confirm("Ngắt kết nối và xóa phiên bản đăng nhập sinh trắc học?")) {
+                localStorage.removeItem('user_face_id');
                 location.reload();
             }
         }
 
+        // ====== UI & STORE LOGIC (GIỮ NGUYÊN) ======
         function switchNav(sectionId, btnEl) {
-            document.querySelectorAll('.section-content').forEach(s => {
-                s.classList.remove('active');
-            });
+            document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('#main-nav button').forEach(b => b.classList.remove('active'));
-            
-            // Timeout nhỏ để render mượt hơn
-            setTimeout(() => {
-                document.getElementById(sectionId).classList.add('active');
-            }, 50);
-            
+            setTimeout(() => document.getElementById(sectionId).classList.add('active'), 50);
             btnEl.classList.add('active');
         }
 
@@ -485,8 +557,6 @@
                 const btnClass = p.price === 0 ? 'btn-free' : 'btn-buy';
                 const btnText = p.price === 0 ? '<i class="fas fa-download"></i> TẢI NGAY' : '<i class="fas fa-shopping-cart"></i> THANH TOÁN';
                 const badgeHtml = p.isHot ? '<div class="product-badge"><i class="fas fa-fire"></i> HOT</div>' : '';
-                
-                // Chuyển map category sang text hiển thị đẹp hơn nếu cần
                 let catText = p.category.toUpperCase();
 
                 list.innerHTML += `
@@ -564,7 +634,7 @@
                 if(!hasBuy) buyBody.innerHTML = '<tr><td colspan="4" class="text-center" style="padding: 30px; color: var(--text-muted);">Trống.</td></tr>';
             });
 
-            db.ref('card_requests').orderByChild('user').equalTo(currentUser).on('value', snap => {
+            db.ref('card_requests').orderByChild('user').equalTo(userId).on('value', snap => {
                 const cardBody = document.getElementById('history-card-body');
                 cardBody.innerHTML = '';
                 let hasCard = false;
@@ -590,8 +660,10 @@
             const amt = document.getElementById('bank-amount').value;
             if(!amt || amt < 10000) return alert("System Error: Định mức nạp tối thiểu là 10.000đ!");
             
-            const content = "NAP " + userId;
-            // Đã đổi mã QR sang chuẩn của MB Bank như bạn yêu cầu trước đó
+            // Lấy 6 ký tự cuối của ID để chuyển khoản cho ngắn gọn
+            const shortID = userId.substring(userId.length - 6);
+            const content = "NAP " + shortID;
+            
             const qrUrl = `https://qr.sepay.vn/img?bank=MB&acc=0989249990&template=compact&amount=${amt}&des=${content}`;
             
             document.getElementById('qr-generated').src = qrUrl;
@@ -618,7 +690,7 @@
             btn.disabled = true;
             
             db.ref('card_requests').push({
-                user: currentUser,
+                user: userId,
                 type: type,
                 amount: amount,
                 seri: seri,
