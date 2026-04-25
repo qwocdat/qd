@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>QUOCDAT SEC | PREMIUM STORE</title>
+    <title>QUOCDAT SEC | HWID SYSTEM</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -109,17 +108,16 @@
         .form-control { width: 100%; padding: 15px; background: rgba(0,0,0,0.6); border: 1px solid var(--border); color: #fff; border-radius: 8px; outline: none; transition: all 0.3s ease; font-family: 'Inter', sans-serif; }
         .form-control:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(255,30,30,0.2); background: rgba(0,0,0,0.8); }
 
-        /* FACE ID SCANNER STYLES */
-        #login-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 999; backdrop-filter: blur(15px); transition: opacity 0.5s ease; }
-        .login-box { background: var(--card); padding: 50px 40px; border-radius: 20px; border: 1px solid var(--primary); text-align: center; width: 400px; box-shadow: 0 0 40px var(--primary-glow); position: relative; overflow: hidden; }
+        /* HWID VERIFIER STYLES */
+        #login-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,0,0,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; backdrop-filter: blur(15px); transition: opacity 0.5s ease; }
+        .login-box { background: var(--card); padding: 40px; border-radius: 20px; border: 1px solid var(--primary); text-align: center; width: 420px; box-shadow: 0 0 40px var(--primary-glow); position: relative; overflow: hidden; }
         .login-box::before { content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px; background: linear-gradient(45deg, var(--primary), transparent, var(--primary)); z-index: -1; border-radius: 22px; animation: rotateBorder 3s linear infinite; }
         @keyframes rotateBorder { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        .scanner-container { position: relative; width: 200px; height: 200px; margin: 0 auto 20px auto; border-radius: 50%; overflow: hidden; border: 3px solid var(--border); box-shadow: 0 0 20px rgba(255, 30, 30, 0.2); transition: all 0.3s; }
-        .scanner-container.active { border-color: var(--primary); box-shadow: 0 0 30px var(--primary-glow); }
-        #videoElement { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: var(--primary); box-shadow: 0 0 10px var(--primary-glow); animation: scan 2s linear infinite; display: none; }
-        .scanner-container.active .scan-line { display: block; }
+        .hwid-display { background: rgba(255,30,30,0.1); border: 1px dashed var(--primary); padding: 15px; border-radius: 8px; font-family: 'Orbitron'; font-size: 20px; color: #fff; margin-bottom: 20px; letter-spacing: 2px; position: relative; cursor: pointer; transition: 0.3s; }
+        .hwid-display:hover { background: rgba(255,30,30,0.2); }
+        .hwid-display::after { content: 'COPY'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 10px; background: var(--primary); padding: 3px 8px; border-radius: 5px; opacity: 0; transition: 0.3s; }
+        .hwid-display:hover::after { opacity: 1; }
 
         .matrix-text { color: var(--primary); text-align: center; font-size: 12px; margin-top: 20px; opacity: 0.8; font-family: monospace; letter-spacing: 1px; }
         
@@ -145,18 +143,18 @@
 <body>
     <div id="login-modal">
         <div class="login-box">
-            <i class="fas fa-fingerprint" style="font-size: 50px; color: var(--primary); margin-bottom: 20px; filter: drop-shadow(0 0 10px var(--primary-glow));"></i>
-            <h2 style="font-family:'Orbitron'; color:#fff; margin-bottom:10px; font-size: 26px;">BIOMETRIC <span style="color:var(--primary)">LOGIN</span></h2>
-            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">1 Thiết bị - 1 Khuôn mặt duy nhất</p>
+            <i class="fas fa-microchip" style="font-size: 50px; color: var(--primary); margin-bottom: 20px; filter: drop-shadow(0 0 10px var(--primary-glow));"></i>
+            <h2 style="font-family:'Orbitron'; color:#fff; margin-bottom:10px; font-size: 24px;">DEVICE <span style="color:var(--primary)">VERIFICATION</span></h2>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Thiết bị chưa được cấp phép truy cập hệ thống.</p>
             
-            <div class="scanner-container" id="scanner">
-                <video id="videoElement" autoplay muted playsinline></video>
-                <div class="scan-line"></div>
-            </div>
+            <div style="text-align: left; margin-bottom: 5px; font-size: 12px; color: var(--primary); font-family: 'Orbitron';">MÃ THIẾT BỊ (HWID) CỦA BẠN:</div>
+            <div class="hwid-display" id="hwid-code" onclick="copyHWID()">ĐANG TẠO...</div>
 
-            <p id="login-status" class="matrix-text" style="font-size: 14px; margin-bottom: 15px;">Đang thiết lập kết nối AI...</p>
+            <input type="text" id="access-key" class="form-control" placeholder="Nhập Mã Kích Hoạt (Access Key)..." style="text-align: center; font-size: 15px; letter-spacing: 1px; margin-bottom: 20px; font-family: 'Orbitron'; text-transform: uppercase;">
             
-            <button id="btn-scan" class="btn btn-buy hidden" onclick="startFaceScan()"><i class="fas fa-expand"></i> BẮT ĐẦU QUÉT</button>
+            <button id="btn-verify" class="btn btn-buy" onclick="verifyDevice()"><i class="fas fa-unlock-alt"></i> MỞ KHÓA THIẾT BỊ</button>
+            
+            <p id="verify-status" class="matrix-text" style="font-size: 13px; margin-top: 15px;">Liên hệ Admin để mua Mã Cấp Phép.</p>
         </div>
     </div>
 
@@ -171,10 +169,10 @@
             <button onclick="switchNav('sec-history', this)"><i class="fas fa-list-alt"></i> LỊCH SỬ</button>
         </div>
         <div class="user-info">
-            <i class="fas fa-user-circle" style="color:var(--text-main); font-size: 18px;"></i>
-            <span id="user-display" style="color:#fff; font-weight: 500;">Guest</span>
+            <i class="fas fa-microchip" style="color:var(--text-main); font-size: 18px;"></i>
+            <span id="user-display" style="color:#fff; font-weight: 500; font-family: 'Orbitron';">Guest</span>
             <div class="balance"><span id="balance-display">0</span> VNĐ</div>
-            <button onclick="logout()" title="Đăng xuất" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:18px;transition:0.3s;"><i class="fas fa-sign-out-alt"></i></button>
+            <button onclick="logout()" title="Hủy liên kết thiết bị" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:18px;transition:0.3s;"><i class="fas fa-sign-out-alt"></i></button>
         </div>
     </div>
 
@@ -193,8 +191,8 @@
                     </div>
                     <div class="feature-box">
                         <i class="fas fa-lock"></i>
-                        <h4>Bảo mật tuyệt đối</h4>
-                        <p style="font-size: 13px; margin:0; color:var(--text-muted);">Mọi thao tác đều được mã hóa, đảm bảo an toàn thông tin.</p>
+                        <h4>Khóa HWID</h4>
+                        <p style="font-size: 13px; margin:0; color:var(--text-muted);">Hệ thống nhận diện thiết bị thông minh, chống share tài khoản.</p>
                     </div>
                     <div class="feature-box">
                         <i class="fas fa-gem"></i>
@@ -356,135 +354,93 @@
         }
         const db = firebase.database();
         
-        let currentUser = null;
-        let userId = null;
+        let userId = null; // Đây sẽ là HWID của khách
         let currentBalance = 0;
         let allProducts = [];
 
-        // HỆ THỐNG XÁC THỰC THIẾT BỊ
-        let userIP = "unknown_ip";
-        let deviceId = localStorage.getItem('qd_device_id');
-        if(!deviceId) {
-            deviceId = 'SEC_' + Math.random().toString(36).substr(2, 9).toUpperCase();
-            localStorage.setItem('qd_device_id', deviceId);
+        // HỆ THỐNG TẠO MÃ THIẾT BỊ (HWID)
+        function generateHWID() {
+            let hwid = localStorage.getItem('qd_hwid');
+            if(!hwid) {
+                // Tạo mã dạng SEC-XXXXXX
+                hwid = 'SEC-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+                localStorage.setItem('qd_hwid', hwid);
+            }
+            return hwid;
         }
 
-        window.onload = async () => {
-            const savedFaceUser = localStorage.getItem('user_face_id');
-            if(savedFaceUser) {
-                // Đã đăng nhập
-                currentUser = savedFaceUser;
-                userId = currentUser;
+        window.onload = () => {
+            const hwid = generateHWID();
+            const isVerified = localStorage.getItem('qd_is_verified');
+            
+            if(isVerified === 'true') {
+                // Thiết bị đã xác minh -> Cho vào web
+                userId = hwid;
                 
+                // Hiệu ứng mờ modal
                 const modal = document.getElementById('login-modal');
                 modal.style.opacity = '0';
                 setTimeout(() => modal.classList.add('hidden'), 500);
 
-                // Hiển thị 6 ký tự cuối làm ID
-                document.getElementById('user-display').innerText = "ID: " + userId.substring(userId.length - 6);
+                // Hiển thị HWID lên thanh Header
+                document.getElementById('user-display').innerText = userId;
                 
                 listenBalance();
                 loadProducts();
                 loadHistory();
             } else {
-                // Khởi động AI quét mặt
-                await initFaceLogin();
+                // Thiết bị chưa xác minh -> Hiện modal yêu cầu nhập Key
+                document.getElementById('hwid-code').innerText = hwid;
             }
         };
 
-        // ====== AI FACE SCAN LOGIC ======
-        async function initFaceLogin() {
-            const statusText = document.getElementById('login-status');
-            const btnScan = document.getElementById('btn-scan');
-            
-            try {
-                statusText.innerText = "Đang lấy địa chỉ IP mạng...";
-                const res = await fetch('https://api.ipify.org?format=json');
-                const data = await res.json();
-                userIP = data.ip.replace(/\./g, '_');
-
-                statusText.innerText = "Đang kết nối Camera...";
-                const video = document.getElementById('videoElement');
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                video.srcObject = stream;
-
-                statusText.innerText = "Đang tải dữ liệu Mạng Neural AI (Vui lòng đợi)...";
-                const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';
-                await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
-                await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
-                await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
-
-                statusText.innerText = `Sẵn sàng quét bảo mật!`;
-                btnScan.classList.remove('hidden');
-
-            } catch (err) {
-                statusText.innerText = "Lỗi: Không thể truy cập Camera!";
-                statusText.style.color = "var(--danger)";
-            }
-        }
-
-        async function startFaceScan() {
-            const statusText = document.getElementById('login-status');
-            const scannerBox = document.getElementById('scanner');
-            const video = document.getElementById('videoElement');
-            const btnScan = document.getElementById('btn-scan');
-
-            btnScan.disabled = true;
-            scannerBox.classList.add('active');
-            statusText.innerText = "Đang phân tích 128 điểm trên khuôn mặt...";
-
-            const detection = await faceapi.detectSingleFace(video).withFaceLandmarks().withFaceDescriptor();
-            scannerBox.classList.remove('active');
-
-            if (!detection) {
-                statusText.innerText = "Không tìm thấy khuôn mặt, xin thử lại.";
-                statusText.style.color = "var(--danger)";
-                btnScan.disabled = false;
-                return;
-            }
-
-            const currentFaceDesc = Array.from(detection.descriptor);
-            const userKey = userIP + "_" + deviceId;
-
-            db.ref('users_face/' + userKey).once('value').then(snap => {
-                if (snap.exists()) {
-                    // Kiểm tra khớp mặt
-                    const savedFaceDesc = new Float32Array(snap.val().descriptor);
-                    const distance = faceapi.euclideanDistance(currentFaceDesc, savedFaceDesc);
-                    
-                    if (distance < 0.55) {
-                        statusText.innerText = "Xác thực thành công!";
-                        statusText.style.color = "#00ff88";
-                        grantAccess(userKey);
-                    } else {
-                        statusText.innerText = "Khuôn mặt không khớp với thiết bị này!";
-                        statusText.style.color = "var(--danger)";
-                        btnScan.disabled = false;
-                    }
-                } else {
-                    // Đăng ký mới
-                    statusText.innerText = "Đăng ký khuôn mặt mới thành công!";
-                    statusText.style.color = "#00b8ff";
-                    db.ref('users_face/' + userKey).set({
-                        ip: userIP,
-                        device: deviceId,
-                        descriptor: currentFaceDesc,
-                        createdAt: new Date().toLocaleString('vi-VN')
-                    }).then(() => grantAccess(userKey));
-                }
+        // HÀM XỬ LÝ NÚT COPY HWID
+        function copyHWID() {
+            const hwid = document.getElementById('hwid-code').innerText;
+            navigator.clipboard.writeText(hwid).then(() => {
+                alert("Đã sao chép HWID: " + hwid + "\nHãy gửi mã này cho Admin để mua Key.");
             });
         }
 
-        function grantAccess(userIdKey) {
-            localStorage.setItem('user_face_id', userIdKey);
-            const video = document.getElementById('videoElement');
-            if(video.srcObject) video.srcObject.getTracks().forEach(track => track.stop());
-            setTimeout(() => location.reload(), 1500);
+        // HÀM XÁC MINH MÃ KÍCH HOẠT (ACCESS KEY)
+        function verifyDevice() {
+            const inputKey = document.getElementById('access-key').value.trim().toUpperCase();
+            const statusText = document.getElementById('verify-status');
+            const btn = document.getElementById('btn-verify');
+
+            if(!inputKey) {
+                statusText.innerText = "Vui lòng nhập Mã Kích Hoạt!";
+                statusText.style.color = "var(--danger)";
+                return;
+            }
+
+            btn.innerHTML = "<i class='fas fa-circle-notch fa-spin'></i> ĐANG GIẢI MÃ...";
+            btn.disabled = true;
+
+            // KIỂM TRA KEY (Ở đây đang cài mặc định là SEC2026 cho bạn test)
+            // Sau này bạn có thể lưu key trên Firebase để check cho an toàn hơn.
+            setTimeout(() => {
+                if(inputKey === 'SEC2026') {
+                    statusText.innerText = "Xác minh thành công! Đang cấp phép thiết bị...";
+                    statusText.style.color = "#00ff88";
+                    
+                    // Lưu trạng thái đã xác minh
+                    localStorage.setItem('qd_is_verified', 'true');
+                    
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    statusText.innerText = "Mã Kích Hoạt không chính xác hoặc đã hết hạn!";
+                    statusText.style.color = "var(--danger)";
+                    btn.innerHTML = "<i class='fas fa-unlock-alt'></i> MỞ KHÓA THIẾT BỊ";
+                    btn.disabled = false;
+                }
+            }, 1000); // Giả lập độ trễ giải mã cho ngầu
         }
 
+        // HÀM ĐĂNG XUẤT (XÓA LIÊN KẾT THIẾT BỊ)
         function logout() {
-            if(confirm("Ngắt kết nối và xóa phiên bản đăng nhập sinh trắc học?")) {
-                localStorage.removeItem('user_face_id');
+            if(confirm("Cảnh báo: Hành động này sẽ hủy liên kết thiết bị. Bạn sẽ cần nhập lại Mã Cấp Phép để vào lại. Tiếp tục?")) {
+                localStorage.removeItem('qd_is_verified');
                 location.reload();
             }
         }
@@ -660,9 +616,8 @@
             const amt = document.getElementById('bank-amount').value;
             if(!amt || amt < 10000) return alert("System Error: Định mức nạp tối thiểu là 10.000đ!");
             
-            // Lấy 6 ký tự cuối của ID để chuyển khoản cho ngắn gọn
-            const shortID = userId.substring(userId.length - 6);
-            const content = "NAP " + shortID;
+            // Lấy thẳng HWID của khách (Dạng SEC-XXXX) làm nội dung chuyển khoản
+            const content = "NAP " + userId.replace('-', '');
             
             const qrUrl = `https://qr.sepay.vn/img?bank=MB&acc=0989249990&template=compact&amount=${amt}&des=${content}`;
             
