@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>QUOCDAT SEC | AUTO HWID SYSTEM</title>
+    <title>QUOCDAT SEC | SECURE STORE</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
@@ -42,9 +42,7 @@
         .nav-links button { 
             background: none; border: none; color: var(--text-muted); font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); position: relative;
         }
-        .nav-links button::after {
-            content: ''; position: absolute; width: 0; height: 2px; bottom: -5px; left: 50%; background-color: var(--primary); transition: all 0.3s ease; transform: translateX(-50%); box-shadow: 0 0 10px var(--primary-glow);
-        }
+        .nav-links button::after { content: ''; position: absolute; width: 0; height: 2px; bottom: -5px; left: 50%; background-color: var(--primary); transition: all 0.3s ease; transform: translateX(-50%); box-shadow: 0 0 10px var(--primary-glow); }
         .nav-links button:hover, .nav-links button.active { color: var(--text-main); text-shadow: 0 0 10px rgba(255,255,255,0.3); }
         .nav-links button:hover::after, .nav-links button.active::after { width: 100%; }
 
@@ -93,17 +91,9 @@
         .status-failed { color: var(--primary); }
 
         .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); font-family: 'Orbitron', sans-serif; letter-spacing: 1px; font-size: 14px; position: relative; overflow: hidden; }
-        .btn::after { content: ''; position: absolute; top: 50%; left: 50%; width: 300%; height: 300%; background: rgba(255,255,255,0.1); transform: translate(-50%, -50%) scale(0); border-radius: 50%; transition: transform 0.5s ease; }
-        .btn:active::after { transform: translate(-50%, -50%) scale(1); transition: 0s; }
-        
         .btn-buy { background: linear-gradient(45deg, #cc0000, var(--primary)); color: #fff; box-shadow: 0 5px 15px var(--primary-glow); }
         .btn-buy:hover { transform: translateY(-2px); box-shadow: 0 8px 25px var(--primary-glow); filter: brightness(1.1); }
         .btn-free { background: #fff; color: #000; box-shadow: 0 5px 15px rgba(255,255,255,0.2); }
-        .btn-free:hover { background: #f0f0f0; transform: translateY(-2px); }
-        
-        /* Chỉnh lại nút Telegram */
-        .btn-telegram { background: #0088cc; color: #fff; box-shadow: 0 5px 15px rgba(0, 136, 204, 0.4); }
-        .btn-telegram:hover { filter: brightness(1.2); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0, 136, 204, 0.6); }
 
         .box-naptien { background: var(--card); border: 1px solid var(--border); padding: 40px; border-radius: 16px; max-width: 550px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: var(--glass-blur); }
         .form-group { margin-bottom: 25px; text-align: left; }
@@ -111,18 +101,21 @@
         .form-control { width: 100%; padding: 15px; background: rgba(0,0,0,0.6); border: 1px solid var(--border); color: #fff; border-radius: 8px; outline: none; transition: all 0.3s ease; font-family: 'Inter', sans-serif; }
         .form-control:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(255,30,30,0.2); background: rgba(0,0,0,0.8); }
 
-        #login-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,0,0,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; backdrop-filter: blur(15px); transition: opacity 0.5s ease; }
-        .login-box { background: var(--card); padding: 40px; border-radius: 20px; border: 1px solid var(--primary); text-align: center; width: 420px; box-shadow: 0 0 40px var(--primary-glow); position: relative; overflow: hidden; }
+        /* ANTI-DDOS SCREEN STYLES */
+        #login-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,0,0,0.98); display: flex; justify-content: center; align-items: center; z-index: 999; backdrop-filter: blur(15px); transition: opacity 0.5s ease; }
+        .login-box { background: var(--card); padding: 40px; border-radius: 20px; border: 1px solid var(--primary); text-align: center; width: 420px; box-shadow: 0 0 50px var(--primary-glow); position: relative; overflow: hidden; }
         .login-box::before { content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px; background: linear-gradient(45deg, var(--primary), transparent, var(--primary)); z-index: -1; border-radius: 22px; animation: rotateBorder 3s linear infinite; }
         @keyframes rotateBorder { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        .hwid-display { background: rgba(255,30,30,0.1); border: 1px dashed var(--primary); padding: 15px; border-radius: 8px; font-family: 'Orbitron'; font-size: 20px; color: #fff; margin-bottom: 20px; letter-spacing: 2px; position: relative; cursor: pointer; transition: 0.3s; }
-        .hwid-display:hover { background: rgba(255,30,30,0.2); }
-        .hwid-display::after { content: 'COPY'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 10px; background: var(--primary); padding: 3px 8px; border-radius: 5px; opacity: 0; transition: 0.3s; }
-        .hwid-display:hover::after { opacity: 1; }
+        .loading-bar-container { width: 100%; height: 6px; background: rgba(255,30,30,0.1); border-radius: 10px; margin-top: 25px; overflow: hidden; position: relative; }
+        .loading-bar { position: absolute; top: 0; left: -50%; width: 50%; height: 100%; background: var(--primary); box-shadow: 0 0 15px var(--primary); animation: ddosLoad 1.5s infinite ease-in-out; border-radius: 10px; }
+        @keyframes ddosLoad { 0% { left: -50%; width: 30%; } 50% { width: 60%; } 100% { left: 100%; width: 30%; } }
+        @keyframes pulseIcon { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; filter: drop-shadow(0 0 25px var(--primary)); } 100% { transform: scale(1); opacity: 0.8; } }
 
-        .matrix-text { color: var(--primary); text-align: center; font-size: 12px; margin-top: 20px; opacity: 0.8; font-family: monospace; letter-spacing: 1px; }
-        
+        .terminal-box { background: rgba(0,0,0,0.8); border: 1px solid var(--border); padding: 15px; border-radius: 8px; text-align: left; margin-top: 20px; }
+        .terminal-text { font-family: monospace; font-size: 12px; margin-bottom: 5px; display: flex; justify-content: space-between; }
+        .terminal-val { color: var(--primary); }
+
         .footer { background: #050000; border-top: 1px solid var(--border); padding: 40px 20px; text-align: center; margin-top: 60px; color: var(--text-muted); font-size: 14px; }
         .footer a { color: var(--text-main); text-decoration: none; transition: color 0.3s ease; }
         .footer a:hover { color: var(--primary); }
@@ -144,18 +137,19 @@
 <body>
     <div id="login-modal">
         <div class="login-box">
-            <i class="fas fa-microchip" style="font-size: 50px; color: var(--primary); margin-bottom: 20px; filter: drop-shadow(0 0 10px var(--primary-glow));"></i>
-            <h2 style="font-family:'Orbitron'; color:#fff; margin-bottom:10px; font-size: 24px;">DEVICE <span style="color:var(--primary)">LOCKED</span></h2>
-            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Thiết bị chưa được cấp phép truy cập hệ thống.</p>
+            <i class="fas fa-shield-virus" style="font-size: 55px; color: var(--primary); margin-bottom: 15px; animation: pulseIcon 1.5s infinite;"></i>
+            <h2 style="font-family:'Orbitron'; color:#fff; margin-bottom:5px; font-size: 22px;">ANTI-DDOS <span style="color:var(--primary)">SYSTEM</span></h2>
+            <p style="font-size: 13px; color: var(--text-muted);">Hệ thống đang kiểm tra trình duyệt của bạn...</p>
             
-            <div style="text-align: left; margin-bottom: 5px; font-size: 12px; color: var(--primary); font-family: 'Orbitron';">MÃ THIẾT BỊ (HWID) CỦA BẠN:</div>
-            <div class="hwid-display" id="hwid-code" onclick="copyHWID()">ĐANG TẠO...</div>
+            <div class="terminal-box">
+                <div class="terminal-text"><span style="color: #888;">[Target]:</span> <span class="terminal-val">QUOCDAT.SEC</span></div>
+                <div class="terminal-text"><span style="color: #888;">[HWID Auth]:</span> <span id="ddos-hwid" class="terminal-val">Scannig...</span></div>
+                <div class="terminal-text"><span style="color: #888;">[Status]:</span> <span id="ddos-status" class="terminal-val" style="color: #f1c40f;">Requesting...</span></div>
+            </div>
 
-            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Bấm nút bên dưới để gửi yêu cầu mở khóa thiết bị đến Telegram Bot của Admin.</p>
-            
-            <button id="btn-verify" class="btn btn-telegram" onclick="openTelegram()"><i class="fab fa-telegram-plane"></i> GỬI DUYỆT QUA TELEGRAM</button>
-            
-            <p id="verify-status" class="matrix-text" style="font-size: 13px; margin-top: 15px; animation: pulse 1.5s infinite;"><i class="fas fa-satellite-dish"></i> Hệ thống đang chờ Server duyệt...</p>
+            <div class="loading-bar-container">
+                <div class="loading-bar"></div>
+            </div>
         </div>
     </div>
 
@@ -171,9 +165,8 @@
         </div>
         <div class="user-info">
             <i class="fas fa-microchip" style="color:var(--text-main); font-size: 18px;"></i>
-            <span id="user-display" style="color:#fff; font-weight: 500; font-family: 'Orbitron';">Guest</span>
+            <span id="user-display" style="color:#fff; font-weight: 500; font-family: 'Orbitron';">Loading...</span>
             <div class="balance"><span id="balance-display">0</span> VNĐ</div>
-            <button onclick="logout()" title="Hủy liên kết thiết bị" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:18px;transition:0.3s;"><i class="fas fa-sign-out-alt"></i></button>
         </div>
     </div>
 
@@ -191,9 +184,9 @@
                         <p style="font-size: 13px; margin:0; color:var(--text-muted);">Giao dịch cộng tiền và giao hàng 100% tự động bằng API.</p>
                     </div>
                     <div class="feature-box">
-                        <i class="fab fa-telegram-plane"></i>
-                        <h4>Duyệt Bot Telegram</h4>
-                        <p style="font-size: 13px; margin:0; color:var(--text-muted);">Mở khóa thiết bị hoàn toàn tự động thông qua Chatbot.</p>
+                        <i class="fas fa-shield-virus"></i>
+                        <h4>Bảo vệ Anti-DDoS</h4>
+                        <p style="font-size: 13px; margin:0; color:var(--text-muted);">Tường lửa chống bão hòa truy cập, lọc proxy xấu tự động.</p>
                     </div>
                     <div class="feature-box">
                         <i class="fas fa-gem"></i>
@@ -344,9 +337,9 @@
             <a href="#" style="background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px;"><i class="fas fa-headset"></i> Hỗ trợ Zalo</a>
         </div>
         <p style="opacity: 0.4; font-size: 12px; margin-top: 30px;">&copy; 2026 QuocDatSec. System Online. All Rights Reserved.</p>
-                    </div>
-                            <script>
-        // CẤU HÌNH FIREBASE VÀ BOT
+    </div>
+        <script>
+        // CẤU HÌNH FIREBASE
         const firebaseConfig = {
             databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
@@ -355,13 +348,11 @@
         }
         const db = firebase.database();
         
-        // !!! QUAN TRỌNG: THAY TÊN BOT TELEGRAM CỦA BẠN VÀO ĐÂY (bỏ chữ @)
-        const botUsername = "TenBotCuaBan_Bot"; 
-
-        let userId = null; // HWID
+        let userId = null; // Dùng luôn HWID làm ID người dùng
         let currentBalance = 0;
         let allProducts = [];
 
+        // HÀM TẠO HOẶC LẤY HWID
         function generateHWID() {
             let hwid = localStorage.getItem('qd_hwid');
             if(!hwid) {
@@ -371,61 +362,55 @@
             return hwid;
         }
 
+        // AUTO CHẠY KHI VÀO WEB
         window.onload = () => {
             const hwid = generateHWID();
-            const isVerified = localStorage.getItem('qd_is_verified');
+            userId = hwid; 
             
-            if(isVerified === 'true') {
-                userId = hwid;
-                const modal = document.getElementById('login-modal');
-                modal.style.opacity = '0';
-                setTimeout(() => modal.classList.add('hidden'), 500);
+            // Hiện HWID lên bảng DDOS và Header
+            document.getElementById('ddos-hwid').innerText = hwid;
+            document.getElementById('user-display').innerText = hwid;
 
-                document.getElementById('user-display').innerText = userId;
-                
-                listenBalance();
-                loadProducts();
-                loadHistory();
-            } else {
-                // Hiển thị mã
-                document.getElementById('hwid-code').innerText = hwid;
-                
-                // Lắng nghe Firebase Realtime (Chờ Bot Telegram đổi dữ liệu thành true)
-                db.ref('verified_hwids/' + hwid).on('value', snap => {
-                    if (snap.exists() && snap.val() === true) {
-                        document.getElementById('verify-status').innerHTML = "<i class='fas fa-check-circle'></i> Duyệt thành công! Đang vào hệ thống...";
-                        document.getElementById('verify-status').style.color = "#00ff88";
-                        document.getElementById('verify-status').style.animation = "none";
-                        
-                        localStorage.setItem('qd_is_verified', 'true');
-                        setTimeout(() => location.reload(), 1500);
-                    }
-                });
-            }
+            // MÔ PHỎNG QUÁ TRÌNH KIỂM TRA BẢO MẬT (DDOS CHECK)
+            const ddosSteps = [
+                "Đang phân tích Request ID...",
+                "Kiểm tra tính toàn vẹn của IP...",
+                "Đang lọc các Proxy độc hại...",
+                "Xác thực an toàn thành công!"
+            ];
+            
+            let step = 0;
+            const statusEl = document.getElementById('ddos-status');
+            
+            // Cứ 800ms nhảy 1 dòng chữ, xong thì mở khóa
+            const checkInterval = setInterval(() => {
+                step++;
+                if (step < ddosSteps.length) {
+                    statusEl.innerText = ddosSteps[step];
+                } else {
+                    clearInterval(checkInterval);
+                    statusEl.style.color = "#00ff88"; // Đổi màu xanh thành công
+                    
+                    // Hiệu ứng Fade Out cho màn hình khóa
+                    const modal = document.getElementById('login-modal');
+                    modal.style.opacity = '0';
+                    setTimeout(() => {
+                        modal.classList.add('hidden');
+                        // Bắt đầu tải dữ liệu Firebase sau khi vào web
+                        initApp(); 
+                    }, 500);
+                }
+            }, 800);
         };
 
-        function copyHWID() {
-            const hwid = document.getElementById('hwid-code').innerText;
-            navigator.clipboard.writeText(hwid).then(() => {
-                alert("Đã sao chép HWID: " + hwid);
-            });
+        // KHỞI ĐỘNG KẾT NỐI DATABASE
+        function initApp() {
+            listenBalance();
+            loadProducts();
+            loadHistory();
         }
 
-        function openTelegram() {
-            const hwid = document.getElementById('hwid-code').innerText;
-            // Mở link Telegram, tự động điền lệnh /start HWID
-            const teleLink = `https://t.me/${quocdatdvbot}?start=${hwid}`;
-            window.open(teleLink, '_blank');
-        }
-
-        function logout() {
-            if(confirm("Cảnh báo: Hành động này sẽ hủy liên kết thiết bị. Bạn sẽ cần Admin duyệt lại để vào. Tiếp tục?")) {
-                localStorage.removeItem('qd_is_verified');
-                location.reload();
-            }
-        }
-
-        // ====== UI & STORE LOGIC (GIỮ NGUYÊN) ======
+        // ====== LOGIC GIAO DIỆN & FIREBASE ======
         function switchNav(sectionId, btnEl) {
             document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('#main-nav button').forEach(b => b.classList.remove('active'));
@@ -445,6 +430,8 @@
             db.ref('users/' + userId + '/balance').on('value', snap => {
                 currentBalance = snap.val() || 0;
                 document.getElementById('balance-display').innerText = currentBalance.toLocaleString();
+                
+                // Màn hình nạp tiền xanh lá nếu vừa nhận được tiền
                 if(window.isWaitingForBank && currentBalance > window.oldBalance) {
                     const received = currentBalance - window.oldBalance;
                     document.getElementById('invoice-area').innerHTML = `
@@ -539,16 +526,12 @@
         function saveHistory(type, itemName, amount, link) {
             const timeStr = new Date().toLocaleString('vi-VN');
             db.ref('users/' + userId + '/history').push({
-                type: type,
-                item: itemName,
-                amount: amount,
-                link: link || '',
-                time: timeStr,
-                status: 'success'
+                type: type, item: itemName, amount: amount, link: link || '', time: timeStr, status: 'success'
             });
         }
 
         function loadHistory() {
+            // Lịch sử mua hàng
             db.ref('users/' + userId + '/history').on('value', snap => {
                 const buyBody = document.getElementById('history-buy-body');
                 buyBody.innerHTML = '';
@@ -570,6 +553,7 @@
                 if(!hasBuy) buyBody.innerHTML = '<tr><td colspan="4" class="text-center" style="padding: 30px; color: var(--text-muted);">Trống.</td></tr>';
             });
 
+            // Lịch sử nạp thẻ
             db.ref('card_requests').orderByChild('user').equalTo(userId).on('value', snap => {
                 const cardBody = document.getElementById('history-card-body');
                 cardBody.innerHTML = '';
@@ -596,8 +580,8 @@
             const amt = document.getElementById('bank-amount').value;
             if(!amt || amt < 10000) return alert("System Error: Định mức nạp tối thiểu là 10.000đ!");
             
+            // Gắn thẳng HWID vào nội dung nạp MB Bank (VD: NAP SEC123456)
             const content = "NAP " + userId.replace('-', '');
-            
             const qrUrl = `https://qr.sepay.vn/img?bank=MB&acc=0989249990&template=compact&amount=${amt}&des=${content}`;
             
             document.getElementById('qr-generated').src = qrUrl;
@@ -625,12 +609,8 @@
             
             db.ref('card_requests').push({
                 user: userId,
-                type: type,
-                amount: amount,
-                seri: seri,
-                pin: pin,
-                status: 'pending',
-                time: new Date().toLocaleString('vi-VN')
+                type: type, amount: amount, seri: seri, pin: pin,
+                status: 'pending', time: new Date().toLocaleString('vi-VN')
             }).then(() => {
                 alert("Upload thành công! Dữ liệu đang được Server xử lý, vui lòng check Lịch Sử.");
                 document.getElementById('card-serial').value = '';
