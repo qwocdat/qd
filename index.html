@@ -162,7 +162,7 @@
             .user-info { width: 100%; justify-content: space-between; }
             .hero h1 { font-size: 2rem; }
         }
-    </style>
+            </style>
 </head>
 <body>
     <div id="login-modal">
@@ -267,4 +267,377 @@
                     <div style="background:#fff; padding:15px; display:inline-block; border-radius:12px; margin-bottom:20px; box-shadow: 0 0 20px var(--primary-glow);">
                         <img id="qr-generated" src="" style="width:250px; height:250px; object-fit: contain;">
                     </div>
-                    <div style="background: rgba(0,0,0,0.6); padding: 20px; border-radius: 12px; border: 1px dashed v
+                    <div style="background: rgba(0,0,0,0.6); padding: 20px; border-radius: 12px; border: 1px dashed var(--primary); margin-bottom: 20px; text-align: left;">
+                        <p style="font-size:15px; margin-bottom:10px; color: var(--text-muted)">Số tiền chuyển: <b id="inv-amt" style="color:#fff; font-size:20px; float: right;">0đ</b></p>
+                        <p style="font-size:15px; color: var(--text-muted)">Nội dung chuyển: <b id="inv-msg" style="color:var(--primary); font-family: 'Orbitron'; font-size:18px; float: right;"></b></p>
+                        <div style="clear: both;"></div>
+                        <p style="font-size:12px; color:var(--danger); margin-top:15px; text-align: center;"><i class="fas fa-exclamation-triangle"></i> Bắt buộc nhập chính xác nội dung chuyển khoản</p>
+                    </div>
+                    <div id="auto-listen-status" class="matrix-text" style="animation: pulse 1.5s infinite; font-size: 14px;">
+                        <i class="fas fa-satellite-dish"></i> Hệ thống đang chờ tiền về... Xin đừng đóng trang này.
+                    </div>
+                </div>
+            </div>
+
+            <div id="s-card" class="box-naptien hidden">
+                <h3 class="text-center mb-20" style="color:#fff; font-family:'Orbitron'; font-size: 22px;">NẠP THẺ <span style="color:var(--primary)">CÀO</span></h3>
+                <p class="text-center mb-20" style="font-size:13px; color:var(--danger);">*Lưu ý: Phí gạch thẻ là 20%</p>
+                <div class="form-group">
+                    <label>Nhà mạng</label>
+                    <select id="card-type" class="form-control">
+                        <option value="VIETTEL">Viettel</option>
+                        <option value="VINAPHONE">Vinaphone</option>
+                        <option value="MOBIFONE">Mobifone</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Mệnh giá thẻ</label>
+                    <select id="card-amount" class="form-control">
+                        <option value="10000">10.000đ</option>
+                        <option value="20000">20.000đ</option>
+                        <option value="50000">50.000đ</option>
+                        <option value="100000">100.000đ</option>
+                        <option value="200000">200.000đ</option>
+                        <option value="500000">500.000đ</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Số Seri</label>
+                    <input type="text" id="card-serial" class="form-control" placeholder="Nhập Serial in trên thẻ">
+                </div>
+                <div class="form-group">
+                    <label>Mã Thẻ (PIN)</label>
+                    <input type="text" id="card-pin" class="form-control" placeholder="Nhập Mã thẻ (Dưới lớp tráng bạc)">
+                </div>
+                <button class="btn btn-buy" onclick="submitCard()"><i class="fas fa-paper-plane"></i> GỬI YÊU CẦU NẠP</button>
+            </div>
+        </div>
+
+        <div id="sec-history" class="section-content">
+            <h2 class="section-title"><i class="fas fa-history"></i> NHẬT KÝ HOẠT ĐỘNG</h2>
+            
+            <h4 style="margin: 30px 0 15px 0; color: #fff; font-family: 'Orbitron'; font-size: 18px;">> LỊCH SỬ MUA HÀNG</h4>
+            <div class="table-container mb-20">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>THỜI GIAN</th>
+                            <th>SẢN PHẨM</th>
+                            <th>CHI PHÍ</th>
+                            <th>TRẠNG THÁI / LINK</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-buy-body">
+                        <tr><td colspan="4" class="text-center" style="padding: 30px; color: var(--text-muted);">Chưa có giao dịch nào được ghi nhận.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4 style="margin: 40px 0 15px 0; color: #fff; font-family: 'Orbitron'; font-size: 18px;">> LỊCH SỬ NẠP THẺ</h4>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>THỜI GIAN</th>
+                            <th>NHÀ MẠNG</th>
+                            <th>MỆNH GIÁ</th>
+                            <th>TRẠNG THÁI</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-card-body">
+                        <tr><td colspan="4" class="text-center" style="padding: 30px; color: var(--text-muted);">Chưa có dữ liệu nạp thẻ.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <h3 style="font-family: 'Orbitron'; color: #fff; margin-bottom: 10px; font-size: 20px;">QUOCDAT <span style="color:var(--primary)">SEC</span></h3>
+        <p style="margin-bottom: 20px;">Nền tảng cung cấp giải pháp, tài nguyên số và công cụ tối ưu.</p>
+        <div style="margin: 20px 0; display: flex; justify-content: center; gap: 20px;">
+            <a href="#" style="background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px;"><i class="fab fa-facebook-f"></i> Fanpage</a>
+            <a href="#" style="background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px;"><i class="fab fa-telegram-plane"></i> Kênh Thông Báo</a>
+            <a href="#" style="background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px;"><i class="fas fa-headset"></i> Hỗ trợ Zalo</a>
+        </div>
+        <p style="opacity: 0.4; font-size: 12px; margin-top: 30px;">&copy; 2026 QuocDatSec. System Online. All Rights Reserved.</p>
+    </div>
+        <script>
+        // Cấu hình Firebase
+        const firebaseConfig = {
+            databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app"
+        };
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+        let currentUser = null;
+        let userId = null;
+        let currentBalance = 0;
+        let allProducts = [];
+
+        window.onload = () => {
+            const savedUser = localStorage.getItem('user');
+            if(savedUser) {
+                currentUser = savedUser;
+                userId = currentUser.replace(/[.#$\[\]]/g, '_');
+                
+                // Hiệu ứng mờ login form
+                const modal = document.getElementById('login-modal');
+                modal.style.opacity = '0';
+                setTimeout(() => modal.classList.add('hidden'), 500);
+
+                document.getElementById('user-display').innerText = currentUser.split('@')[0];
+                listenBalance();
+                loadProducts();
+                loadHistory();
+            }
+        };
+
+        function login() {
+            const email = document.getElementById('login-email').value.trim();
+            if(!email || !email.includes('@')) {
+                alert("Lỗi: Định dạng Email không hợp lệ!");
+                return;
+            }
+            localStorage.setItem('user', email);
+            location.reload();
+        }
+
+        function logout() {
+            if(confirm("Ngắt kết nối khỏi hệ thống?")) {
+                localStorage.removeItem('user');
+                location.reload();
+            }
+        }
+
+        function switchNav(sectionId, btnEl) {
+            document.querySelectorAll('.section-content').forEach(s => {
+                s.classList.remove('active');
+            });
+            document.querySelectorAll('#main-nav button').forEach(b => b.classList.remove('active'));
+            
+            // Timeout nhỏ để render mượt hơn
+            setTimeout(() => {
+                document.getElementById(sectionId).classList.add('active');
+            }, 50);
+            
+            btnEl.classList.add('active');
+        }
+
+        function switchNap(id, btnEl) {
+            document.getElementById('s-bank').classList.add('hidden');
+            document.getElementById('s-card').classList.add('hidden');
+            document.getElementById(id).classList.remove('hidden');
+            btnEl.parentElement.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            btnEl.classList.add('active');
+        }
+
+        function listenBalance() {
+            db.ref('users/' + userId + '/balance').on('value', snap => {
+                currentBalance = snap.val() || 0;
+                document.getElementById('balance-display').innerText = currentBalance.toLocaleString();
+                if(window.isWaitingForBank && currentBalance > window.oldBalance) {
+                    const received = currentBalance - window.oldBalance;
+                    document.getElementById('invoice-area').innerHTML = `
+                        <div style="padding: 40px 20px; color: #00ff88; animation: smoothFade 0.5s ease;">
+                            <i class="fas fa-check-circle" style="font-size: 70px; margin-bottom:20px; filter: drop-shadow(0 0 20px rgba(0,255,136,0.6));"></i>
+                            <h3 style="font-family:'Orbitron'; font-size:24px;">NẠP TIỀN THÀNH CÔNG</h3>
+                            <p style="color:#fff; margin-top:10px; font-size:16px;">Hệ thống đã cộng: <span style="color:#00ff88; font-weight:bold;">+${received.toLocaleString()} VNĐ</span></p>
+                        </div>
+                    `;
+                    window.isWaitingForBank = false;
+                    setTimeout(() => location.reload(), 3000);
+                }
+            });
+        }
+
+        function loadProducts() {
+            db.ref('products').on('value', snap => {
+                allProducts = [];
+                snap.forEach(child => {
+                    let p = child.val();
+                    p.key = child.key;
+                    p.category = p.category || 'tool'; 
+                    allProducts.push(p);
+                });
+                renderProducts('all');
+            });
+        }
+
+        function renderProducts(category) {
+            const list = document.getElementById('product-list');
+            list.innerHTML = '';
+            const filtered = category === 'all' 
+                ? allProducts 
+                : allProducts.filter(p => p.category === category);
+            
+            if(filtered.length === 0) {
+                list.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 60px; color: var(--text-muted); background: var(--card); border-radius: 12px; border: 1px dashed var(--border);">
+                    <i class="fas fa-box-open" style="font-size: 40px; margin-bottom: 15px; opacity: 0.5;"></i>
+                    <br>Kho dữ liệu trống cho danh mục này.
+                </div>`;
+                return;
+            }
+
+            filtered.forEach(p => {
+                const priceText = p.price === 0 ? 'FREE' : p.price.toLocaleString() + ' đ';
+                const btnClass = p.price === 0 ? 'btn-free' : 'btn-buy';
+                const btnText = p.price === 0 ? '<i class="fas fa-download"></i> TẢI NGAY' : '<i class="fas fa-shopping-cart"></i> THANH TOÁN';
+                const badgeHtml = p.isHot ? '<div class="product-badge"><i class="fas fa-fire"></i> HOT</div>' : '';
+                
+                // Chuyển map category sang text hiển thị đẹp hơn nếu cần
+                let catText = p.category.toUpperCase();
+
+                list.innerHTML += `
+                    <div class="product-card">
+                        ${badgeHtml}
+                        <div style="font-size: 11px; color: var(--primary); margin-bottom: 5px; font-family: 'Orbitron'; letter-spacing: 1px;">[ ${catText} ]</div>
+                        <h3>${p.name}</h3>
+                        <p class="desc">${p.description || 'Chưa có thông tin mô tả cụ thể.'}</p>
+                        <div class="price">${priceText}</div>
+                        <button class="btn ${btnClass}" onclick="buyItem('${p.key}', ${p.price}, '${p.link}', '${p.name}')">${btnText}</button>
+                    </div>
+                `;
+            });
+        }
+
+        function filterCategory(cat, btnEl) {
+            document.querySelectorAll('#category-filter .cat-btn').forEach(b => b.classList.remove('active'));
+            btnEl.classList.add('active');
+            renderProducts(cat);
+        }
+
+        function buyItem(key, price, link, name) {
+            if(!link || link === "undefined") return alert("System Error: Admin chưa thiết lập dữ liệu đầu ra!");
+            if(price === 0) {
+                alert("Xác thực thành công! Hệ thống đang giải mã Link...");
+                saveHistory('BUY', name, price, link);
+                window.open(link, '_blank');
+                return;
+            }
+            if(currentBalance < price) {
+                alert(`Từ chối truy cập! Tài khoản còn thiếu ${(price - currentBalance).toLocaleString()}đ.`);
+                switchNav('sec-deposit', document.querySelectorAll('#main-nav button')[2]);
+                return;
+            }
+            if(confirm(`Khởi tạo thanh toán ${price.toLocaleString()}đ cho gói [ ${name} ]?`)) {
+                db.ref('users/' + userId).update({ balance: currentBalance - price }).then(() => {
+                    alert("Giao dịch hoàn tất! Hệ thống sẽ chuyển hướng bạn tới dữ liệu.");
+                    saveHistory('BUY', name, price, link);
+                    window.open(link, '_blank');
+                });
+            }
+        }
+
+        function saveHistory(type, itemName, amount, link) {
+            const timeStr = new Date().toLocaleString('vi-VN');
+            db.ref('users/' + userId + '/history').push({
+                type: type,
+                item: itemName,
+                amount: amount,
+                link: link || '',
+                time: timeStr,
+                status: 'success'
+            });
+        }
+
+        function loadHistory() {
+            db.ref('users/' + userId + '/history').on('value', snap => {
+                const buyBody = document.getElementById('history-buy-body');
+                buyBody.innerHTML = '';
+                let hasBuy = false;
+                snap.forEach(child => {
+                    const h = child.val();
+                    if(h.type === 'BUY') {
+                        hasBuy = true;
+                        buyBody.innerHTML += `
+                            <tr>
+                                <td><i class="far fa-clock" style="color:var(--text-muted)"></i> ${h.time}</td>
+                                <td style="font-weight: 500;">${h.item}</td>
+                                <td style="color:#fff; font-weight: bold;">-${parseInt(h.amount).toLocaleString()}đ</td>
+                                <td><a href="${h.link}" target="_blank" style="color:var(--primary); text-decoration: none; padding: 5px 10px; background: rgba(255,30,30,0.1); border-radius: 5px; border: 1px solid var(--border);"><i class="fas fa-external-link-alt"></i> Mở File</a></td>
+                            </tr>
+                        `;
+                    }
+                });
+                if(!hasBuy) buyBody.innerHTML = '<tr><td colspan="4" class="text-center" style="padding: 30px; color: var(--text-muted);">Trống.</td></tr>';
+            });
+
+            db.ref('card_requests').orderByChild('user').equalTo(currentUser).on('value', snap => {
+                const cardBody = document.getElementById('history-card-body');
+                cardBody.innerHTML = '';
+                let hasCard = false;
+                snap.forEach(child => {
+                    hasCard = true;
+                    const c = child.val();
+                    let statusClass = c.status === 'pending' ? 'status-pending' : (c.status === 'success' ? 'status-success' : 'status-failed');
+                    let statusText = c.status === 'pending' ? '<i class="fas fa-sync fa-spin"></i> Đang xử lý' : (c.status === 'success' ? '<i class="fas fa-check"></i> Thành công' : '<i class="fas fa-times"></i> Thất bại');
+                    cardBody.innerHTML += `
+                        <tr>
+                            <td><i class="far fa-clock" style="color:var(--text-muted)"></i> ${c.time}</td>
+                            <td style="font-weight: bold;">${c.type}</td>
+                            <td>${parseInt(c.amount).toLocaleString()}đ</td>
+                            <td class="${statusClass}">${statusText}</td>
+                        </tr>
+                    `;
+                });
+                if(!hasCard) cardBody.innerHTML = '<tr><td colspan="4" class="text-center" style="padding: 30px; color: var(--text-muted);">Trống.</td></tr>';
+            });
+        }
+
+        function createInvoice() {
+            const amt = document.getElementById('bank-amount').value;
+            if(!amt || amt < 10000) return alert("System Error: Định mức nạp tối thiểu là 10.000đ!");
+            
+            const content = "NAP " + userId;
+            // Đã đổi mã QR sang chuẩn của MB Bank như bạn yêu cầu trước đó
+            const qrUrl = `https://qr.sepay.vn/img?bank=MB&acc=0989249990&template=compact&amount=${amt}&des=${content}`;
+            
+            document.getElementById('qr-generated').src = qrUrl;
+            document.getElementById('inv-amt').innerText = parseInt(amt).toLocaleString() + " VNĐ";
+            document.getElementById('inv-msg').innerText = content;
+            
+            document.getElementById('bank-input-area').classList.add('hidden');
+            document.getElementById('invoice-area').classList.remove('hidden');
+            
+            window.oldBalance = currentBalance;
+            window.isWaitingForBank = true;
+        }
+
+        function submitCard() {
+            const type = document.getElementById('card-type').value;
+            const amount = document.getElementById('card-amount').value;
+            const seri = document.getElementById('card-serial').value.trim();
+            const pin = document.getElementById('card-pin').value.trim();
+            
+            if(!seri || !pin) return alert("System Error: Vui lòng cung cấp đầy đủ thông tin thẻ!");
+            
+            const btn = event.target;
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> ĐANG MÃ HÓA VÀ GỬI...";
+            btn.disabled = true;
+            
+            db.ref('card_requests').push({
+                user: currentUser,
+                type: type,
+                amount: amount,
+                seri: seri,
+                pin: pin,
+                status: 'pending',
+                time: new Date().toLocaleString('vi-VN')
+            }).then(() => {
+                alert("Upload thành công! Dữ liệu đang được Server xử lý, vui lòng check Lịch Sử.");
+                document.getElementById('card-serial').value = '';
+                document.getElementById('card-pin').value = '';
+                btn.innerHTML = "<i class='fas fa-paper-plane'></i> GỬI YÊU CẦU NẠP";
+                btn.disabled = false;
+                switchNav('sec-history', document.querySelectorAll('#main-nav button')[3]);
+            }).catch(e => {
+                alert("Connection Error: " + e.message);
+                btn.innerHTML = "<i class='fas fa-paper-plane'></i> GỬI YÊU CẦU NẠP";
+                btn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>
