@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SENSITIVITY GENERATOR</title>
+    <title>FF SENSITIVITY</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -11,7 +11,7 @@
             --primary: #ff1e1e;
             --primary-glow: rgba(255, 30, 30, 0.5);
             --bg: #0a0000;
-            --card: rgba(15, 5, 5, 0.75);
+            --card: rgba(15, 5, 5, 0.85);
             --border: #3d0a0a;
             --text-main: #ffffff;
             --text-muted: #888888;
@@ -25,87 +25,97 @@
             background-image: radial-gradient(circle at 50% 0%, rgba(255, 30, 30, 0.15) 0%, transparent 60%);
         }
 
-        /* Glassmorphism Card */
         .calc-container {
-            background: var(--card); border: 1px solid var(--border); border-radius: 24px;
-            padding: 40px; width: 100%; max-width: 450px;
+            background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+            padding: 30px; width: 100%; max-width: 480px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 20px rgba(255,30,30,0.1) inset;
             backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
             position: relative; overflow: hidden;
         }
 
-        /* Header */
-        .header-title { font-family: 'Orbitron'; font-size: 26px; text-align: center; color: #fff; margin-bottom: 5px; }
+        .header-title { font-family: 'Orbitron'; font-size: 24px; text-align: center; color: #fff; margin-bottom: 5px; }
         .header-title span { color: var(--primary); text-shadow: 0 0 15px var(--primary-glow); }
-        .header-desc { font-size: 13px; color: var(--text-muted); text-align: center; margin-bottom: 30px; letter-spacing: 1px; }
+        .header-desc { font-size: 13px; color: var(--text-muted); text-align: center; margin-bottom: 25px; letter-spacing: 1px; }
 
-        /* Form Elements */
-        .form-group { margin-bottom: 25px; }
+        .form-group { margin-bottom: 20px; }
         .form-label { display: block; font-family: 'Orbitron'; font-size: 12px; color: var(--primary); margin-bottom: 10px; letter-spacing: 1px; }
         
         .form-control {
             width: 100%; padding: 15px; background: rgba(0,0,0,0.6); border: 1px solid var(--border);
-            color: #fff; border-radius: 12px; outline: none; transition: 0.3s; font-size: 15px; text-align: center;
+            color: #fff; border-radius: 10px; outline: none; transition: 0.3s; font-size: 15px; text-align: center;
         }
         .form-control:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(255,30,30,0.2); }
 
-        /* OS Selector Switch */
-        .os-selector { display: flex; gap: 10px; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 12px; border: 1px solid var(--border); }
+        .os-selector { display: flex; gap: 10px; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 10px; border: 1px solid var(--border); }
         .os-btn {
             flex: 1; padding: 12px; background: transparent; border: none; color: var(--text-muted);
-            font-family: 'Orbitron'; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.3s;
+            font-family: 'Orbitron'; font-weight: bold; border-radius: 6px; cursor: pointer; transition: 0.3s;
         }
         .os-btn.active { background: var(--primary); color: #fff; box-shadow: 0 0 15px var(--primary-glow); }
 
-        /* Action Button */
         .btn-calc {
-            width: 100%; padding: 16px; margin-top: 10px; background: linear-gradient(45deg, #cc0000, var(--primary));
-            border: none; border-radius: 12px; color: #fff; font-family: 'Orbitron'; font-size: 16px; font-weight: bold;
+            width: 100%; padding: 15px; margin-top: 10px; background: linear-gradient(45deg, #cc0000, var(--primary));
+            border: none; border-radius: 10px; color: #fff; font-family: 'Orbitron'; font-size: 15px; font-weight: bold;
             cursor: pointer; transition: 0.3s; box-shadow: 0 5px 20px var(--primary-glow);
         }
-        .btn-calc:hover { transform: translateY(-3px); filter: brightness(1.2); }
+        .btn-calc:hover { transform: translateY(-2px); filter: brightness(1.2); }
 
-        /* Analyzing Overlay */
+        /* LOADING OVERLAY */
         .analyzing-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); backdrop-filter: blur(8px); z-index: 10;
+            background: rgba(5,0,0,0.95); backdrop-filter: blur(8px); z-index: 10;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             opacity: 0; pointer-events: none; transition: 0.3s;
         }
         .analyzing-overlay.active { opacity: 1; pointer-events: auto; }
         .radar {
-            width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--primary);
+            width: 70px; height: 70px; border-radius: 50%; border: 2px solid var(--primary);
             position: relative; overflow: hidden; box-shadow: 0 0 20px var(--primary-glow); margin-bottom: 20px;
         }
         .radar::after { content: ''; position: absolute; top: 50%; left: 50%; width: 50%; height: 50%; background: var(--primary); transform-origin: 0 0; animation: scan 1.5s linear infinite; opacity: 0.5; }
         @keyframes scan { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .term-text { font-family: monospace; color: var(--primary); font-size: 13px; text-align: center; }
 
-        /* Result View */
+        /* KẾT QUẢ & HIỆU ỨNG FREE FIRE */
         .result-view { display: none; animation: slideUp 0.5s ease; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
-        .sens-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        .sens-item {
-            background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 15px;
-            border-radius: 12px; text-align: center; position: relative; overflow: hidden;
+        .ff-slider-row {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 15px; background: rgba(255,255,255,0.02); padding: 10px 15px;
+            border-radius: 8px; border-left: 3px solid var(--primary);
         }
-        .sens-item::before { content:''; position:absolute; top:0; left:0; width:4px; height:100%; background:var(--primary); }
-        
-        .extra-box {
-            background: rgba(255,30,30,0.05); border: 1px dashed var(--primary); padding: 15px;
-            border-radius: 12px; text-align: center; flex: 1;
+        .ff-label { width: 35%; font-size: 11px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; }
+        .ff-track {
+            flex-grow: 1; height: 12px; background: rgba(0,0,0,0.8); border: 1px solid var(--border);
+            border-radius: 6px; margin: 0 15px; position: relative; overflow: hidden;
         }
+        .ff-fill {
+            position: absolute; top: 0; left: 0; height: 100%; width: 0%;
+            background: linear-gradient(90deg, #ff4d4d, #ff0000);
+            box-shadow: 0 0 10px rgba(255,0,0,0.5); border-radius: 6px;
+        }
+        .ff-val { width: 15%; font-family: 'Orbitron'; font-size: 18px; font-weight: bold; color: #fff; text-align: right; text-shadow: 0 0 8px rgba(255,255,255,0.3); }
+
+        /* BIỂU ĐỒ PHÂN TÍCH */
+        .chart-box { margin-top: 25px; padding: 20px; background: rgba(255,30,30,0.05); border: 1px dashed var(--primary); border-radius: 12px; }
+        .chart-title { font-family: 'Orbitron'; font-size: 12px; color: var(--primary); text-align: center; margin-bottom: 15px; letter-spacing: 1px; }
         
-        .s-name { font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px; font-weight: bold;}
-        .s-val { font-family: 'Orbitron'; font-size: 24px; color: #fff; font-weight: bold; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+        .chart-row { display: flex; align-items: center; margin-bottom: 10px; }
+        .c-label { width: 40%; font-size: 10px; color: #ccc; }
+        .c-track { flex-grow: 1; height: 6px; background: rgba(0,0,0,0.5); border-radius: 3px; overflow: hidden; position: relative; }
+        .c-fill { position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: #00ff88; transition: width 1.5s cubic-bezier(0.25, 0.8, 0.25, 1); }
+
+        .extra-stats { display: flex; gap: 15px; margin-top: 15px; }
+        .e-box { flex: 1; background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; }
+        .e-name { font-size: 10px; color: var(--text-muted); margin-bottom: 5px; font-weight: bold; }
+        .e-val { font-family: 'Orbitron'; font-size: 16px; color: #fff; font-weight: bold; }
 
         .btn-back {
-            width: 100%; padding: 12px; margin-top: 25px; background: transparent; border: 1px solid var(--text-muted);
-            border-radius: 12px; color: var(--text-muted); font-family: 'Orbitron'; cursor: pointer; transition: 0.3s;
+            width: 100%; padding: 12px; margin-top: 20px; background: transparent; border: 1px solid var(--text-muted);
+            border-radius: 10px; color: var(--text-muted); font-family: 'Orbitron'; font-size: 13px; cursor: pointer; transition: 0.3s;
         }
         .btn-back:hover { border-color: #fff; color: #fff; }
-        
         .hidden { display: none !important; }
     </style>
 </head>
@@ -118,8 +128,8 @@
         </div>
 
         <div id="input-view">
-            <div class="header-title">AIM <span>CALCULATOR</span></div>
-            <div class="header-desc">THUẬT TOÁN TẠO SENSITIVITY CHUẨN XÁC CỐ ĐỊNH</div>
+            <div class="header-title">Sensi <span>TOOL</span></div>
+            <div class="header-desc">CÔNG CỤ TẠO SENSITIVITY CHUẨN XÁC CỐ ĐỊNH</div>
 
             <div class="form-group">
                 <label class="form-label"><i class="fab fa-apple"></i> NỀN TẢNG (OS)</label>
@@ -134,38 +144,78 @@
                 <input type="text" id="device-name" class="form-control" placeholder="VD: iPhone 13 Pro Max, Samsung S23...">
             </div>
 
-            <button class="btn-calc" onclick="startAnalysis()"><i class="fas fa-cogs"></i> PHÂN TÍCH THIẾT BỊ</button>
+            <button class="btn-calc" onclick="startAnalysis()"><i class="fas fa-cogs"></i> TIẾN HÀNH PHÂN TÍCH</button>
         </div>
 
         <div id="result-view" class="result-view">
             <div class="header-title">RESULT <span>FOUND</span></div>
             <div class="header-desc" id="result-device-name" style="color: var(--primary);">Thiết bị: iOS</div>
             
-            <div class="sens-grid">
-                <div class="sens-item"><div class="s-name">Nhìn Xung Quanh</div><div class="s-val" id="s-nxq">0</div></div>
-                <div class="sens-item"><div class="s-name">Red Dot</div><div class="s-val" id="s-reddot">0</div></div>
-                <div class="sens-item"><div class="s-name">Ống Ngắm 2X</div><div class="s-val" id="s-2x">0</div></div>
-                <div class="sens-item"><div class="s-name">Ống Ngắm 4X</div><div class="s-val" id="s-4x">0</div></div>
-                <div class="sens-item"><div class="s-name">Súng Ngắm (AWM)</div><div class="s-val" id="s-awm">0</div></div>
-                <div class="sens-item"><div class="s-name">Nhìn Tự Do</div><div class="s-val" id="s-ntd">0</div></div>
+            <div class="ff-sliders">
+                <div class="ff-slider-row">
+                    <div class="ff-label">Nhìn Xung Quanh</div>
+                    <div class="ff-track"><div class="ff-fill" id="fill-nxq"></div></div>
+                    <div class="ff-val" id="val-nxq">0</div>
+                </div>
+                <div class="ff-slider-row">
+                    <div class="ff-label">Red Dot</div>
+                    <div class="ff-track"><div class="ff-fill" id="fill-rd"></div></div>
+                    <div class="ff-val" id="val-rd">0</div>
+                </div>
+                <div class="ff-slider-row">
+                    <div class="ff-label">Ống Ngắm 2X</div>
+                    <div class="ff-track"><div class="ff-fill" id="fill-2x"></div></div>
+                    <div class="ff-val" id="val-2x">0</div>
+                </div>
+                <div class="ff-slider-row">
+                    <div class="ff-label">Ống Ngắm 4X</div>
+                    <div class="ff-track"><div class="ff-fill" id="fill-4x"></div></div>
+                    <div class="ff-val" id="val-4x">0</div>
+                </div>
+                <div class="ff-slider-row">
+                    <div class="ff-label">Súng Ngắm (AWM)</div>
+                    <div class="ff-track"><div class="ff-fill" id="fill-awm"></div></div>
+                    <div class="ff-val" id="val-awm">0</div>
+                </div>
+                <div class="ff-slider-row">
+                    <div class="ff-label">Nhìn Tự Do</div>
+                    <div class="ff-track"><div class="ff-fill" id="fill-ntd"></div></div>
+                    <div class="ff-val" id="val-ntd">0</div>
+                </div>
             </div>
 
-            <div style="display: flex; gap: 15px; margin-top: 15px;">
-                <div class="extra-box">
-                    <div class="s-name"><i class="fas fa-crosshairs"></i> NÚT BẮN</div>
-                    <div id="res-fire" class="s-val" style="color: var(--primary);">0%</div>
+            <div class="chart-box">
+                <div class="chart-title"><i class="fas fa-chart-bar"></i> BIỂU ĐỒ PHÂN TÍCH</div>
+                
+                <div class="chart-row">
+                    <div class="c-label">Tỷ lệ Headshot</div>
+                    <div class="c-track"><div class="c-fill" id="chart-hs"></div></div>
                 </div>
-                <div class="extra-box">
-                    <div class="s-name"><i class="fas fa-mouse"></i> DPI</div>
-                    <div id="res-dpi" class="s-val" style="color: #00ff88; font-size: 18px; padding-top:5px;">Mặc định</div>
+                <div class="chart-row">
+                    <div class="c-label">Tốc độ Tracking</div>
+                    <div class="c-track"><div class="c-fill" id="chart-spd"></div></div>
+                </div>
+                <div class="chart-row">
+                    <div class="c-label">Độ ổn định tâm</div>
+                    <div class="c-track"><div class="c-fill" id="chart-stb"></div></div>
+                </div>
+
+                <div class="extra-stats">
+                    <div class="e-box">
+                        <div class="e-name"><i class="fas fa-crosshairs" style="color:var(--primary)"></i> NÚT BẮN</div>
+                        <div id="res-fire" class="e-val">0%</div>
+                    </div>
+                    <div class="e-box">
+                        <div class="e-name"><i class="fas fa-mouse" style="color:#00ff88"></i> MỨC DPI</div>
+                        <div id="res-dpi" class="e-val" style="color:#00ff88;">0</div>
+                    </div>
                 </div>
             </div>
 
             <button class="btn-back" onclick="resetForm()"><i class="fas fa-redo"></i> TRA CỨU THIẾT BỊ KHÁC</button>
         </div>
     </div>
-
-    <script>
+        <script>
         let currentOS = 'iOS';
 
         function setOS(os, btn) {
@@ -174,17 +224,37 @@
             btn.classList.add('active');
         }
 
-        // THUẬT TOÁN BĂM CHUỖI (HASH STRING)
-        // Cùng 1 chữ truyền vào sẽ LUÔN LUÔN ra cùng 1 số cố định
+        // BỘ LỌC TỪ KHÓA NHẬN DIỆN THIẾT BỊ
+        const iosKeywords = ['iphone', 'ipad', 'ip', 'apple', 'ios'];
+        const androidKeywords = ['samsung', 'oppo', 'vivo', 'xiaomi', 'redmi', 'poco', 'realme', 'asus', 'rog', 'huawei', 'galaxy', 'vsmart', 'tecno', 'sony', 'pixel'];
+
+        function validateDevice(deviceStr) {
+            let lowerDev = deviceStr.toLowerCase();
+            
+            let isIOS = iosKeywords.some(kw => lowerDev.includes(kw));
+            let isAndroid = androidKeywords.some(kw => lowerDev.includes(kw));
+
+            if (currentOS === 'Android' && isIOS) {
+                alert(`⚠️ LỖI NHẬN DIỆN:\n[${deviceStr}] là thiết bị Apple. Vui lòng đổi Nền tảng sang iOS!`);
+                return false;
+            }
+            if (currentOS === 'iOS' && isAndroid) {
+                alert(`⚠️ LỖI NHẬN DIỆN:\n[${deviceStr}] là thiết bị Android. Vui lòng đổi Nền tảng sang Android!`);
+                return false;
+            }
+            return true;
+        }
+
+        // THUẬT TOÁN BĂM (GIỮ CỐ ĐỊNH KẾT QUẢ CHO 1 MÁY)
         function getHashValue(seedString, salt, min, max) {
             let str = seedString + "_" + salt;
             let hash = 0;
             for (let i = 0; i < str.length; i++) {
                 let char = str.charCodeAt(i);
                 hash = ((hash << 5) - hash) + char;
-                hash = hash & hash; // Convert to 32bit integer
+                hash = hash & hash;
             }
-            hash = Math.abs(hash); // Lấy số dương
+            hash = Math.abs(hash);
             return min + (hash % (max - min + 1));
         }
 
@@ -192,11 +262,13 @@
             let device = document.getElementById('device-name').value.trim();
 
             if(!device) {
-                alert("Vui lòng nhập tên thiết bị của bạn!");
+                alert("Vui lòng nhập tên thiết bị!");
                 return;
             }
 
-            // Chuẩn hóa tên máy (ví dụ: "iPhone 13" và " iphone  13" sẽ ra cùng 1 kết quả)
+            // GỌI HÀM KIỂM TRA LOGIC TÊN MÁY VS HỆ ĐIỀU HÀNH
+            if(!validateDevice(device)) return;
+
             let seedInput = currentOS + "_" + device.toLowerCase().replace(/\s/g, '');
 
             const overlay = document.getElementById('loading-overlay');
@@ -204,12 +276,12 @@
             overlay.classList.add('active');
 
             const logs = [
-                "Đang tính toán mã băm phần cứng...",
-                `Quét độ phân giải ${currentOS}...`,
-                `Trích xuất dữ liệu mặt kính [${device}]...`,
-                "Phân tích xung nhịp & tốc độ phản hồi...",
-                "Tạo thông số cố định...",
-                "Hoàn tất! Đang xuất dữ liệu..."
+                "Đang kiểm tra chéo nền tảng...",
+                `Xác thực thiết bị [${currentOS} - ${device}]...`,
+                "Tải thông số cảm ứng & màn hình...",
+                "Khớp lệnh kéo tâm Free Fire...",
+                "Đang render thanh trượt UI...",
+                "Hoàn tất! Cấp quyền truy xuất..."
             ];
 
             let step = 0;
@@ -218,9 +290,9 @@
                 step++;
                 if(step >= logs.length) {
                     clearInterval(logInterval);
-                    setTimeout(() => showResults(device, seedInput), 600);
+                    setTimeout(() => showResults(device, seedInput), 500);
                 }
-            }, 600);
+            }, 500);
         }
 
         function showResults(device, seedInput) {
@@ -228,55 +300,92 @@
             document.getElementById('input-view').style.display = 'none';
             document.getElementById('result-view').style.display = 'block';
 
-            document.getElementById('result-device-name').innerText = `Thiết bị: ${device}`;
+            document.getElementById('result-device-name').innerText = `Target: ${device}`;
 
-            // TẠO DỮ LIỆU CỐ ĐỊNH DỰA TRÊN TÊN MÁY (SEED)
-            let baseNXQ, baseRedDot, base2x, base4x, baseAwm, baseNTD, fireBtn, dpiText;
+            // TÍNH TOÁN DỮ LIỆU
+            let v_nxq, v_rd, v_2x, v_4x, v_awm, v_ntd, fireBtn, dpiText;
+            let hsRate, spdRate, stbRate; // Các chỉ số cho biểu đồ
 
             if(currentOS === 'iOS') {
-                baseNXQ = getHashValue(seedInput, 'nxq', 95, 100);
-                baseRedDot = getHashValue(seedInput, 'rd', 90, 99);
-                base2x = getHashValue(seedInput, '2x', 88, 98);
-                base4x = getHashValue(seedInput, '4x', 85, 95);
-                baseAwm = getHashValue(seedInput, 'awm', 30, 55);
-                baseNTD = getHashValue(seedInput, 'ntd', 60, 85);
+                v_nxq = getHashValue(seedInput, 'nxq', 96, 100);
+                v_rd = getHashValue(seedInput, 'rd', 92, 99);
+                v_2x = getHashValue(seedInput, '2x', 90, 98);
+                v_4x = getHashValue(seedInput, '4x', 85, 95);
+                v_awm = getHashValue(seedInput, 'awm', 35, 55);
+                v_ntd = getHashValue(seedInput, 'ntd', 65, 85);
                 
-                fireBtn = getHashValue(seedInput, 'fire', 35, 55);
-                dpiText = "Mặc định"; // iOS thường để mặc định
+                fireBtn = getHashValue(seedInput, 'fire', 40, 56);
+                dpiText = "Mặc định"; 
+                
+                hsRate = getHashValue(seedInput, 'hs', 88, 96);
+                spdRate = getHashValue(seedInput, 'spd', 85, 95);
+                stbRate = getHashValue(seedInput, 'stb', 90, 98);
             } else {
-                baseNXQ = getHashValue(seedInput, 'nxq', 96, 100);
-                baseRedDot = getHashValue(seedInput, 'rd', 95, 100);
-                base2x = getHashValue(seedInput, '2x', 90, 100);
-                base4x = getHashValue(seedInput, '4x', 90, 100);
-                baseAwm = getHashValue(seedInput, 'awm', 45, 70);
-                baseNTD = getHashValue(seedInput, 'ntd', 75, 95);
+                v_nxq = getHashValue(seedInput, 'nxq', 98, 100);
+                v_rd = getHashValue(seedInput, 'rd', 95, 100);
+                v_2x = getHashValue(seedInput, '2x', 92, 100);
+                v_4x = getHashValue(seedInput, '4x', 90, 100);
+                v_awm = getHashValue(seedInput, 'awm', 45, 70);
+                v_ntd = getHashValue(seedInput, 'ntd', 75, 95);
                 
-                fireBtn = getHashValue(seedInput, 'fire', 40, 60);
-                let dpiNum = getHashValue(seedInput, 'dpi', 45, 65) * 10; // ra các số 450, 460... 650
+                fireBtn = getHashValue(seedInput, 'fire', 45, 62);
+                let dpiNum = getHashValue(seedInput, 'dpi', 45, 65) * 10;
                 dpiText = dpiNum; 
+                
+                hsRate = getHashValue(seedInput, 'hs', 85, 93);
+                spdRate = getHashValue(seedInput, 'spd', 90, 99);
+                stbRate = getHashValue(seedInput, 'stb', 80, 90);
             }
 
-            // Chạy hiệu ứng số mượt mà
-            animateNumber('s-nxq', baseNXQ);
-            animateNumber('s-reddot', baseRedDot);
-            animateNumber('s-2x', base2x);
-            animateNumber('s-4x', base4x);
-            animateNumber('s-awm', baseAwm);
-            animateNumber('s-ntd', baseNTD);
-            animateNumber('res-fire', fireBtn, '%');
-            
-            document.getElementById('res-dpi').innerText = dpiText;
+            // CHẠY HIỆU ỨNG SLIDER GAME FF
+            // Phải dùng timeout nhỏ để trình duyệt kịp hiển thị block rồi mới chạy animation width
+            setTimeout(() => {
+                animateFFSlider('nxq', v_nxq);
+                animateFFSlider('rd', v_rd);
+                animateFFSlider('2x', v_2x);
+                animateFFSlider('4x', v_4x);
+                animateFFSlider('awm', v_awm);
+                animateFFSlider('ntd', v_ntd);
+
+                animateNumber('res-fire', fireBtn, '%');
+                if(currentOS === 'iOS') {
+                    document.getElementById('res-dpi').innerText = dpiText;
+                } else {
+                    animateNumber('res-dpi', dpiText, '');
+                }
+
+                // Chạy thanh biểu đồ
+                document.getElementById('chart-hs').style.width = hsRate + '%';
+                document.getElementById('chart-spd').style.width = spdRate + '%';
+                document.getElementById('chart-stb').style.width = stbRate + '%';
+            }, 100);
         }
 
-        // Hàm giả lập hiệu ứng đếm số
+        // HÀM HIỆU ỨNG KÉO THANH TRƯỢT FREE FIRE
+        function animateFFSlider(id, endVal) {
+            const fillBar = document.getElementById('fill-' + id);
+            const valText = document.getElementById('val-' + id);
+            
+            let current = 0;
+            const steps = 30; // 30 khung hình
+            const inc = endVal / steps;
+
+            const timer = setInterval(() => {
+                current += inc;
+                if(current >= endVal) {
+                    current = endVal;
+                    clearInterval(timer);
+                }
+                fillBar.style.width = current + '%';
+                valText.innerText = Math.floor(current);
+            }, 25);
+        }
+
+        // HÀM HIỆU ỨNG NHẢY SỐ ĐƠN THUẦN
         function animateNumber(id, endVal, suffix = "") {
             const el = document.getElementById(id);
             let start = 0;
-            const duration = 800; // 0.8 giây
-            const stepTime = 20; 
-            const steps = duration / stepTime;
-            const inc = endVal / steps;
-
+            const inc = endVal / 30;
             const timer = setInterval(() => {
                 start += inc;
                 if(start >= endVal) {
@@ -285,15 +394,18 @@
                 } else {
                     el.innerText = Math.floor(start) + suffix;
                 }
-            }, stepTime);
+            }, 25);
         }
 
         function resetForm() {
+            // Reset CSS chart trước khi ẩn
+            document.getElementById('chart-hs').style.width = '0%';
+            document.getElementById('chart-spd').style.width = '0%';
+            document.getElementById('chart-stb').style.width = '0%';
+            
             document.getElementById('result-view').style.display = 'none';
             document.getElementById('input-view').style.display = 'block';
-            // Không xóa tên thiết bị để test nhập lại vẫn ra số đó
         }
     </script>
 </body>
 </html>
-      
