@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FF SENSITIVITY</title>
+    <title>QD.SEC | FF SENSITIVITY</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -15,6 +15,7 @@
             --border: #3d0a0a;
             --text-main: #ffffff;
             --text-muted: #888888;
+            --danger: #ff0033;
             --glass-blur: blur(20px);
         }
 
@@ -76,6 +77,32 @@
         @keyframes scan { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .term-text { font-family: monospace; color: var(--primary); font-size: 13px; text-align: center; }
 
+        /* CUSTOM ALERT POPUP (MỚI) */
+        #custom-alert {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            z-index: 9999; display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding: 20px;
+        }
+        #custom-alert.active { opacity: 1; pointer-events: auto; }
+        .alert-box {
+            background: var(--card); border: 1px solid var(--danger); border-radius: 20px;
+            padding: 35px 25px; width: 100%; max-width: 380px; text-align: center;
+            box-shadow: 0 10px 40px rgba(255, 0, 0, 0.4), inset 0 0 15px rgba(255, 0, 0, 0.1);
+            transform: scale(0.8) translateY(30px); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #custom-alert.active .alert-box { transform: scale(1) translateY(0); }
+        .alert-icon { font-size: 45px; color: var(--danger); margin-bottom: 15px; filter: drop-shadow(0 0 10px rgba(255,0,0,0.6)); animation: pulseWarning 1.5s infinite; }
+        @keyframes pulseWarning { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.15); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
+        .alert-title { font-family: 'Orbitron'; font-size: 20px; color: #fff; margin-bottom: 12px; letter-spacing: 1.5px; }
+        .alert-message { font-size: 14px; color: var(--text-muted); margin-bottom: 25px; line-height: 1.6; white-space: pre-line; }
+        .alert-btn {
+            width: 100%; padding: 14px; background: rgba(255,0,51,0.1); border: 1px solid var(--danger);
+            border-radius: 10px; color: var(--danger); font-family: 'Orbitron'; font-weight: bold; font-size: 14px;
+            cursor: pointer; transition: 0.3s;
+        }
+        .alert-btn:hover { background: var(--danger); color: #fff; box-shadow: 0 0 20px rgba(255,0,51,0.5); }
+
         /* KẾT QUẢ & HIỆU ỨNG FREE FIRE */
         .result-view { display: none; animation: slideUp 0.5s ease; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -121,6 +148,15 @@
 </head>
 <body>
 
+    <div id="custom-alert">
+        <div class="alert-box">
+            <i class="fas fa-exclamation-triangle alert-icon"></i>
+            <div class="alert-title" id="alert-title">SYSTEM ERROR</div>
+            <div class="alert-message" id="alert-msg">Nội dung lỗi hiển thị ở đây.</div>
+            <button class="alert-btn" onclick="closeCustomAlert()">ĐÃ HIỂU</button>
+        </div>
+    </div>
+
     <div class="calc-container">
         <div class="analyzing-overlay" id="loading-overlay">
             <div class="radar"></div>
@@ -128,8 +164,8 @@
         </div>
 
         <div id="input-view">
-            <div class="header-title">Sensi <span>TOOL</span></div>
-            <div class="header-desc">CÔNG CỤ TẠO SENSITIVITY CHUẨN XÁC CỐ ĐỊNH</div>
+            <div class="header-title">AIM <span>CALCULATOR</span></div>
+            <div class="header-desc">THUẬT TOÁN TẠO SENSITIVITY CHUẨN XÁC CỐ ĐỊNH</div>
 
             <div class="form-group">
                 <label class="form-label"><i class="fab fa-apple"></i> NỀN TẢNG (OS)</label>
@@ -218,6 +254,17 @@
         <script>
         let currentOS = 'iOS';
 
+        // HÀM ĐIỀU KHIỂN CUSTOM POPUP LỖI
+        function showCustomAlert(title, message) {
+            document.getElementById('alert-title').innerText = title;
+            document.getElementById('alert-msg').innerText = message;
+            document.getElementById('custom-alert').classList.add('active');
+        }
+
+        function closeCustomAlert() {
+            document.getElementById('custom-alert').classList.remove('active');
+        }
+
         function setOS(os, btn) {
             currentOS = os;
             document.querySelectorAll('.os-btn').forEach(b => b.classList.remove('active'));
@@ -235,11 +282,11 @@
             let isAndroid = androidKeywords.some(kw => lowerDev.includes(kw));
 
             if (currentOS === 'Android' && isIOS) {
-                alert(`⚠️ LỖI NHẬN DIỆN:\n[${deviceStr}] là thiết bị Apple. Vui lòng đổi Nền tảng sang iOS!`);
+                showCustomAlert("SAI NỀN TẢNG OS", `"${deviceStr}" là thiết bị của Apple.\n\nVui lòng đổi Nền tảng bên trên sang nút [iOS] để tiếp tục phân tích!`);
                 return false;
             }
             if (currentOS === 'iOS' && isAndroid) {
-                alert(`⚠️ LỖI NHẬN DIỆN:\n[${deviceStr}] là thiết bị Android. Vui lòng đổi Nền tảng sang Android!`);
+                showCustomAlert("SAI NỀN TẢNG OS", `"${deviceStr}" là thiết bị Android.\n\nVui lòng đổi Nền tảng bên trên sang nút [Android] để tiếp tục phân tích!`);
                 return false;
             }
             return true;
@@ -262,7 +309,7 @@
             let device = document.getElementById('device-name').value.trim();
 
             if(!device) {
-                alert("Vui lòng nhập tên thiết bị!");
+                showCustomAlert("DỮ LIỆU TRỐNG", "Bạn chưa nhập Tên thiết bị!\n\nHệ thống cần Tên máy để tính toán độ nhạy, ví dụ: iPhone 13, Samsung S22...");
                 return;
             }
 
@@ -338,7 +385,6 @@
             }
 
             // CHẠY HIỆU ỨNG SLIDER GAME FF
-            // Phải dùng timeout nhỏ để trình duyệt kịp hiển thị block rồi mới chạy animation width
             setTimeout(() => {
                 animateFFSlider('nxq', v_nxq);
                 animateFFSlider('rd', v_rd);
@@ -361,13 +407,12 @@
             }, 100);
         }
 
-        // HÀM HIỆU ỨNG KÉO THANH TRƯỢT FREE FIRE
         function animateFFSlider(id, endVal) {
             const fillBar = document.getElementById('fill-' + id);
             const valText = document.getElementById('val-' + id);
             
             let current = 0;
-            const steps = 30; // 30 khung hình
+            const steps = 30;
             const inc = endVal / steps;
 
             const timer = setInterval(() => {
@@ -381,7 +426,6 @@
             }, 25);
         }
 
-        // HÀM HIỆU ỨNG NHẢY SỐ ĐƠN THUẦN
         function animateNumber(id, endVal, suffix = "") {
             const el = document.getElementById(id);
             let start = 0;
@@ -398,7 +442,6 @@
         }
 
         function resetForm() {
-            // Reset CSS chart trước khi ẩn
             document.getElementById('chart-hs').style.width = '0%';
             document.getElementById('chart-spd').style.width = '0%';
             document.getElementById('chart-stb').style.width = '0%';
