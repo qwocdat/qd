@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SENSITIVITY GENERATOR</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #ff1e1e;
+            --primary-glow: rgba(255, 30, 30, 0.5);
+            --bg: #0a0000;
+            --card: rgba(15, 5, 5, 0.75);
+            --border: #3d0a0a;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --glass-blur: blur(20px);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { 
+            background: var(--bg); color: var(--text-main); min-height: 100vh; 
+            display: flex; justify-content: center; align-items: center; padding: 20px;
+            background-image: radial-gradient(circle at 50% 0%, rgba(255, 30, 30, 0.15) 0%, transparent 60%);
+        }
+
+        /* Glassmorphism Card */
+        .calc-container {
+            background: var(--card); border: 1px solid var(--border); border-radius: 24px;
+            padding: 40px; width: 100%; max-width: 450px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 20px rgba(255,30,30,0.1) inset;
+            backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+            position: relative; overflow: hidden;
+        }
+
+        /* Header */
+        .header-title { font-family: 'Orbitron'; font-size: 26px; text-align: center; color: #fff; margin-bottom: 5px; }
+        .header-title span { color: var(--primary); text-shadow: 0 0 15px var(--primary-glow); }
+        .header-desc { font-size: 13px; color: var(--text-muted); text-align: center; margin-bottom: 30px; letter-spacing: 1px; }
+
+        /* Form Elements */
+        .form-group { margin-bottom: 25px; }
+        .form-label { display: block; font-family: 'Orbitron'; font-size: 12px; color: var(--primary); margin-bottom: 10px; letter-spacing: 1px; }
+        
+        .form-control {
+            width: 100%; padding: 15px; background: rgba(0,0,0,0.6); border: 1px solid var(--border);
+            color: #fff; border-radius: 12px; outline: none; transition: 0.3s; font-size: 15px; text-align: center;
+        }
+        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(255,30,30,0.2); }
+
+        /* OS Selector Switch */
+        .os-selector { display: flex; gap: 10px; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 12px; border: 1px solid var(--border); }
+        .os-btn {
+            flex: 1; padding: 12px; background: transparent; border: none; color: var(--text-muted);
+            font-family: 'Orbitron'; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.3s;
+        }
+        .os-btn.active { background: var(--primary); color: #fff; box-shadow: 0 0 15px var(--primary-glow); }
+
+        /* Action Button */
+        .btn-calc {
+            width: 100%; padding: 16px; margin-top: 10px; background: linear-gradient(45deg, #cc0000, var(--primary));
+            border: none; border-radius: 12px; color: #fff; font-family: 'Orbitron'; font-size: 16px; font-weight: bold;
+            cursor: pointer; transition: 0.3s; box-shadow: 0 5px 20px var(--primary-glow);
+        }
+        .btn-calc:hover { transform: translateY(-3px); filter: brightness(1.2); }
+
+        /* Analyzing Overlay */
+        .analyzing-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); backdrop-filter: blur(8px); z-index: 10;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: 0.3s;
+        }
+        .analyzing-overlay.active { opacity: 1; pointer-events: auto; }
+        .radar {
+            width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--primary);
+            position: relative; overflow: hidden; box-shadow: 0 0 20px var(--primary-glow); margin-bottom: 20px;
+        }
+        .radar::after { content: ''; position: absolute; top: 50%; left: 50%; width: 50%; height: 50%; background: var(--primary); transform-origin: 0 0; animation: scan 1.5s linear infinite; opacity: 0.5; }
+        @keyframes scan { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .term-text { font-family: monospace; color: var(--primary); font-size: 13px; text-align: center; }
+
+        /* Result View */
+        .result-view { display: none; animation: slideUp 0.5s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .sens-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .sens-item {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 15px;
+            border-radius: 12px; text-align: center; position: relative; overflow: hidden;
+        }
+        .sens-item::before { content:''; position:absolute; top:0; left:0; width:4px; height:100%; background:var(--primary); }
+        
+        .extra-box {
+            background: rgba(255,30,30,0.05); border: 1px dashed var(--primary); padding: 15px;
+            border-radius: 12px; text-align: center; flex: 1;
+        }
+        
+        .s-name { font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px; font-weight: bold;}
+        .s-val { font-family: 'Orbitron'; font-size: 24px; color: #fff; font-weight: bold; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+
+        .btn-back {
+            width: 100%; padding: 12px; margin-top: 25px; background: transparent; border: 1px solid var(--text-muted);
+            border-radius: 12px; color: var(--text-muted); font-family: 'Orbitron'; cursor: pointer; transition: 0.3s;
+        }
+        .btn-back:hover { border-color: #fff; color: #fff; }
+        
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="calc-container">
+        <div class="analyzing-overlay" id="loading-overlay">
+            <div class="radar"></div>
+            <div class="term-text" id="term-log">Khởi tạo Module AI...</div>
+        </div>
+
+        <div id="input-view">
+            <div class="header-title">AIM <span>CALCULATOR</span></div>
+            <div class="header-desc">THUẬT TOÁN TẠO SENSITIVITY CHUẨN XÁC CỐ ĐỊNH</div>
+
+            <div class="form-group">
+                <label class="form-label"><i class="fab fa-apple"></i> NỀN TẢNG (OS)</label>
+                <div class="os-selector">
+                    <button class="os-btn active" onclick="setOS('iOS', this)">iOS</button>
+                    <button class="os-btn" onclick="setOS('Android', this)">Android</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label"><i class="fas fa-mobile-alt"></i> TÊN THIẾT BỊ</label>
+                <input type="text" id="device-name" class="form-control" placeholder="VD: iPhone 13 Pro Max, Samsung S23...">
+            </div>
+
+            <button class="btn-calc" onclick="startAnalysis()"><i class="fas fa-cogs"></i> PHÂN TÍCH THIẾT BỊ</button>
+        </div>
+
+        <div id="result-view" class="result-view">
+            <div class="header-title">RESULT <span>FOUND</span></div>
+            <div class="header-desc" id="result-device-name" style="color: var(--primary);">Thiết bị: iOS</div>
+            
+            <div class="sens-grid">
+                <div class="sens-item"><div class="s-name">Nhìn Xung Quanh</div><div class="s-val" id="s-nxq">0</div></div>
+                <div class="sens-item"><div class="s-name">Red Dot</div><div class="s-val" id="s-reddot">0</div></div>
+                <div class="sens-item"><div class="s-name">Ống Ngắm 2X</div><div class="s-val" id="s-2x">0</div></div>
+                <div class="sens-item"><div class="s-name">Ống Ngắm 4X</div><div class="s-val" id="s-4x">0</div></div>
+                <div class="sens-item"><div class="s-name">Súng Ngắm (AWM)</div><div class="s-val" id="s-awm">0</div></div>
+                <div class="sens-item"><div class="s-name">Nhìn Tự Do</div><div class="s-val" id="s-ntd">0</div></div>
+            </div>
+
+            <div style="display: flex; gap: 15px; margin-top: 15px;">
+                <div class="extra-box">
+                    <div class="s-name"><i class="fas fa-crosshairs"></i> NÚT BẮN</div>
+                    <div id="res-fire" class="s-val" style="color: var(--primary);">0%</div>
+                </div>
+                <div class="extra-box">
+                    <div class="s-name"><i class="fas fa-mouse"></i> DPI</div>
+                    <div id="res-dpi" class="s-val" style="color: #00ff88; font-size: 18px; padding-top:5px;">Mặc định</div>
+                </div>
+            </div>
+
+            <button class="btn-back" onclick="resetForm()"><i class="fas fa-redo"></i> TRA CỨU THIẾT BỊ KHÁC</button>
+        </div>
+    </div>
+
+    <script>
+        let currentOS = 'iOS';
+
+        function setOS(os, btn) {
+            currentOS = os;
+            document.querySelectorAll('.os-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // THUẬT TOÁN BĂM CHUỖI (HASH STRING)
+        // Cùng 1 chữ truyền vào sẽ LUÔN LUÔN ra cùng 1 số cố định
+        function getHashValue(seedString, salt, min, max) {
+            let str = seedString + "_" + salt;
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                let char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            hash = Math.abs(hash); // Lấy số dương
+            return min + (hash % (max - min + 1));
+        }
+
+        function startAnalysis() {
+            let device = document.getElementById('device-name').value.trim();
+
+            if(!device) {
+                alert("Vui lòng nhập tên thiết bị của bạn!");
+                return;
+            }
+
+            // Chuẩn hóa tên máy (ví dụ: "iPhone 13" và " iphone  13" sẽ ra cùng 1 kết quả)
+            let seedInput = currentOS + "_" + device.toLowerCase().replace(/\s/g, '');
+
+            const overlay = document.getElementById('loading-overlay');
+            const term = document.getElementById('term-log');
+            overlay.classList.add('active');
+
+            const logs = [
+                "Đang tính toán mã băm phần cứng...",
+                `Quét độ phân giải ${currentOS}...`,
+                `Trích xuất dữ liệu mặt kính [${device}]...`,
+                "Phân tích xung nhịp & tốc độ phản hồi...",
+                "Tạo thông số cố định...",
+                "Hoàn tất! Đang xuất dữ liệu..."
+            ];
+
+            let step = 0;
+            const logInterval = setInterval(() => {
+                term.innerText = logs[step];
+                step++;
+                if(step >= logs.length) {
+                    clearInterval(logInterval);
+                    setTimeout(() => showResults(device, seedInput), 600);
+                }
+            }, 600);
+        }
+
+        function showResults(device, seedInput) {
+            document.getElementById('loading-overlay').classList.remove('active');
+            document.getElementById('input-view').style.display = 'none';
+            document.getElementById('result-view').style.display = 'block';
+
+            document.getElementById('result-device-name').innerText = `Thiết bị: ${device}`;
+
+            // TẠO DỮ LIỆU CỐ ĐỊNH DỰA TRÊN TÊN MÁY (SEED)
+            let baseNXQ, baseRedDot, base2x, base4x, baseAwm, baseNTD, fireBtn, dpiText;
+
+            if(currentOS === 'iOS') {
+                baseNXQ = getHashValue(seedInput, 'nxq', 95, 100);
+                baseRedDot = getHashValue(seedInput, 'rd', 90, 99);
+                base2x = getHashValue(seedInput, '2x', 88, 98);
+                base4x = getHashValue(seedInput, '4x', 85, 95);
+                baseAwm = getHashValue(seedInput, 'awm', 30, 55);
+                baseNTD = getHashValue(seedInput, 'ntd', 60, 85);
+                
+                fireBtn = getHashValue(seedInput, 'fire', 35, 55);
+                dpiText = "Mặc định"; // iOS thường để mặc định
+            } else {
+                baseNXQ = getHashValue(seedInput, 'nxq', 96, 100);
+                baseRedDot = getHashValue(seedInput, 'rd', 95, 100);
+                base2x = getHashValue(seedInput, '2x', 90, 100);
+                base4x = getHashValue(seedInput, '4x', 90, 100);
+                baseAwm = getHashValue(seedInput, 'awm', 45, 70);
+                baseNTD = getHashValue(seedInput, 'ntd', 75, 95);
+                
+                fireBtn = getHashValue(seedInput, 'fire', 40, 60);
+                let dpiNum = getHashValue(seedInput, 'dpi', 45, 65) * 10; // ra các số 450, 460... 650
+                dpiText = dpiNum; 
+            }
+
+            // Chạy hiệu ứng số mượt mà
+            animateNumber('s-nxq', baseNXQ);
+            animateNumber('s-reddot', baseRedDot);
+            animateNumber('s-2x', base2x);
+            animateNumber('s-4x', base4x);
+            animateNumber('s-awm', baseAwm);
+            animateNumber('s-ntd', baseNTD);
+            animateNumber('res-fire', fireBtn, '%');
+            
+            document.getElementById('res-dpi').innerText = dpiText;
+        }
+
+        // Hàm giả lập hiệu ứng đếm số
+        function animateNumber(id, endVal, suffix = "") {
+            const el = document.getElementById(id);
+            let start = 0;
+            const duration = 800; // 0.8 giây
+            const stepTime = 20; 
+            const steps = duration / stepTime;
+            const inc = endVal / steps;
+
+            const timer = setInterval(() => {
+                start += inc;
+                if(start >= endVal) {
+                    clearInterval(timer);
+                    el.innerText = endVal + suffix;
+                } else {
+                    el.innerText = Math.floor(start) + suffix;
+                }
+            }, stepTime);
+        }
+
+        function resetForm() {
+            document.getElementById('result-view').style.display = 'none';
+            document.getElementById('input-view').style.display = 'block';
+            // Không xóa tên thiết bị để test nhập lại vẫn ra số đó
+        }
+    </script>
+</body>
+</html>
+      
