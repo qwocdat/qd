@@ -30,7 +30,6 @@
         .site-selector select option { background: var(--bg-main); color: #fff; }
 
         .nav-item { padding: 16px; color: var(--text-sub); cursor: pointer; border-radius: 12px; margin-bottom: 8px; transition: all 0.3s; display: flex; align-items: center; gap: 15px; font-weight: 600; font-size: 14px; }
-        .nav-item i { font-size: 18px; }
         .nav-item.active { background: linear-gradient(90deg, rgba(0, 229, 255, 0.15), transparent); border-left: 4px solid var(--primary); color: var(--primary); }
         
         .main { flex: 1; padding: 40px; overflow-y: auto; z-index: 10; position: relative; scroll-behavior: smooth; }
@@ -66,21 +65,22 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
 
-        /* TỐI ƯU HIỂN THỊ ĐIỆN THOẠI (CSS RESPONSIVE) */
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); z-index: 998; opacity: 0; visibility: hidden; transition: 0.3s; }
+        .overlay.show { opacity: 1; visibility: visible; }
+        .bottom-sheet { position: fixed; bottom: -100%; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: #151923; border-radius: 20px 20px 0 0; border-top: 1px solid var(--cyan); z-index: 999; transition: 0.3s; max-height: 85vh; display: flex; flex-direction: column; }
+        .bottom-sheet.show { bottom: 0; }
+        
         @media screen and (max-width: 768px) {
             body { flex-direction: column; overflow-y: auto; display: block; }
-            .sidebar { width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; border-right: none; border-bottom: 1px solid var(--border); padding: 15px; }
+            .sidebar { width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; border-bottom: 1px solid var(--border); padding: 15px; }
             .sidebar h2, .site-selector { width: 100%; text-align: center; }
             .nav-item { flex: 1 1 45%; justify-content: center; font-size: 12px; padding: 12px 10px; margin-bottom: 5px; }
             .main { padding: 15px; overflow: visible; }
             .card { padding: 15px; }
-            .grid-stats { grid-template-columns: 1fr; }
-            .form-row-mobile { flex-direction: column; }
         }
     </style>
 </head>
 <body>
-
     <div class="ambient-bg"></div>
 
     <div id="login-screen">
@@ -94,7 +94,8 @@
     </div>
 
     <div class="sidebar">
-        <h2 style="font-family:'JetBrains Mono', monospace; color:#fff; font-size: 18px; letter-spacing: 2px; margin-bottom: 20px;">QD.SEC ADMIN</h2>
+        <h2 style="font-family:'JetBrains Mono', monospace; color:#fff; font-size: 18px; letter-spacing: 2px; margin-bottom: 20px; text-align: center;">QD.SEC ADMIN</h2>
+        
         <div class="site-selector">
             <i class="fas fa-globe" style="color: var(--primary);"></i>
             <select id="site-switch" onchange="switchWebsite()">
@@ -102,21 +103,22 @@
                 <option value="quocdat_online/">Web: quocdat.online</option>
             </select>
         </div>
+
         <div class="nav-item active" onclick="showTab('dashboard', this)"><i class="fas fa-chart-pie"></i> Bảng Thống Kê</div>
         <div class="nav-item" onclick="showTab('deposits', this)"><i class="fas fa-university"></i> Duyệt Tiền Nạp</div>
         <div class="nav-item" onclick="showTab('users', this)"><i class="fas fa-users"></i> Khách Hàng</div>
         <div class="nav-item" onclick="showTab('products', this)"><i class="fas fa-box-open"></i> Kho Sản Phẩm</div>
+        
         <div style="flex:1"></div>
-        <div class="nav-item" style="color:var(--red); border: 1px solid rgba(255, 71, 87, 0.2);" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Thoát An Toàn</div>
+        <div class="nav-item" style="color:var(--red); border: 1px solid rgba(255, 71, 87, 0.2); justify-content:center; margin-top:15px;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Thoát An Toàn</div>
     </div>
-
-    <div class="main">
+        <div class="main">
         <div id="dashboard" class="tab-content active">
             <h2 style="margin-bottom: 25px; font-size: 24px; font-weight: 700;">Tổng Quan <span id="dash-site-name" style="color:var(--primary)">Bot Store</span></h2>
             <div class="grid-stats">
                 <div class="stat-box"><span>Khách Hàng</span><h2 id="count-users">0</h2></div>
-                <div class="stat-box"><span>Tổng Dòng Tiền</span><h2 id="total-revenue" style="color:var(--green)">0đ</h2></div>
-                <div class="stat-box"><span>Sản Phẩm Đang Bán</span><h2 id="count-products" style="color:var(--purple)">0</h2></div>
+                <div class="stat-box"><span>Tổng Dòng Tiền (Nạp)</span><h2 id="total-revenue" style="color:var(--green)">0đ</h2></div>
+                <div class="stat-box"><span>Số Sản Phẩm Đang Bán</span><h2 id="count-products" style="color:var(--purple)">0</h2></div>
             </div>
         </div>
 
@@ -125,7 +127,7 @@
             <div class="card" style="padding: 0;">
                 <div class="table-responsive">
                     <table>
-                        <thead style="background: rgba(0,0,0,0.3);"><tr><th>MÃ KHÁCH (HWID)</th><th>SỐ TIỀN KHÁCH CHUYỂN</th><th>THỜI GIAN LỆNH</th><th>TRẠNG THÁI</th><th>THAO TÁC</th></tr></thead>
+                        <thead style="background: rgba(0,0,0,0.3);"><tr><th>MÃ KHÁCH & HWID</th><th>SỐ TIỀN CHUYỂN</th><th>THỜI GIAN LỆNH</th><th>TRẠNG THÁI</th><th>THAO TÁC</th></tr></thead>
                         <tbody id="deposit-list"></tbody>
                     </table>
                 </div>
@@ -133,11 +135,11 @@
         </div>
 
         <div id="users" class="tab-content">
-            <h2 style="margin-bottom: 25px; font-size: 24px; font-weight: 700;"><i class="fas fa-users" style="color:var(--primary);"></i> Quản Lý Dữ Liệu Khách</h2>
+            <h2 style="margin-bottom: 25px; font-size: 24px; font-weight: 700;"><i class="fas fa-users" style="color:var(--primary);"></i> Quản Lý Khách Hàng</h2>
             <div class="card" style="padding: 0;">
                 <div class="table-responsive">
                     <table>
-                        <thead style="background: rgba(0,0,0,0.3);"><tr><th>MÃ HWID BẢO MẬT</th><th>IP TRUY CẬP</th><th>SỐ DƯ HIỆN TẠI</th><th>TỔNG ĐÃ NẠP</th><th>CÔNG CỤ</th></tr></thead>
+                        <thead style="background: rgba(0,0,0,0.3);"><tr><th>THÔNG TIN KHÁCH</th><th>SỐ DƯ HIỆN TẠI</th><th>TỔNG NẠP</th><th>CÔNG CỤ</th></tr></thead>
                         <tbody id="user-list"></tbody>
                     </table>
                 </div>
@@ -145,84 +147,52 @@
         </div>
 
         <div id="products" class="tab-content">
-            <h2 style="margin-bottom: 25px; font-size: 24px; font-weight: 700;"><i class="fas fa-box" style="color:var(--primary);"></i> Trung Tâm Sản Phẩm</h2>
-            <div style="display: flex; gap: 30px; align-items: flex-start; flex-wrap: wrap;">
-                
-                <div class="card" style="flex: 1 1 100%; min-width: 300px; padding: 0;">
-                    <div class="table-responsive">
-                        <table>
-                            <thead style="background: rgba(0,0,0,0.3);"><tr><th>TÊN ỨNG DỤNG / GAME</th><th>LOẠI HIỂN THỊ</th><th>BẢNG GIÁ ĐANG BÁN</th><th>CÔNG CỤ</th></tr></thead>
-                            <tbody id="product-list"></tbody>
-                        </table>
-                    </div>
-                </div>
-                
-                <div class="card" style="flex: 1 1 100%; min-width: 300px;" id="product-form-card">
-                    <h3 id="form-title" style="margin-bottom: 20px; color:var(--primary);"><i class="fas fa-plus-circle"></i> Đăng Sản Phẩm Mới</h3>
-                    
-                    <div style="display:flex; gap:10px;" class="form-row-mobile">
-                        <div class="form-group" style="flex:2"><label>Tên Ứng dụng</label><input type="text" id="p-name" placeholder="Ví dụ: Drip iOS"></div>
-                        <div class="form-group" style="flex:1">
-                            <label>Icon Danh Mục</label>
-                            <select id="p-cat"><option value="khac">📦 Mặc định (Tím)</option><option value="tool">🤖 Tool (Cyan)</option><option value="account">🛡️ Tài Khoản (Vàng)</option></select>
-                        </div>
-                    </div>
-                    
-                    <label style="display:block; font-size:13px; color:var(--primary); font-weight:bold; margin: 10px 0 15px 0;">CẤU HÌNH GÓI (Nhập Giá Gốc để tạo gạch ngang)</label>
-                    
-                    <div class="price-box">
-                        <label>Gói 1 Ngày</label>
-                        <div style="display:flex; gap:10px;">
-                            <input type="number" id="p-1d-old" placeholder="Giá Gốc (VD: 15000)">
-                            <input type="number" id="p-1d-new" placeholder="Giá Bán Thực Tế (VD: 10000)">
-                        </div>
-                    </div>
-                    <div class="price-box">
-                        <label>Gói 3 Ngày</label>
-                        <div style="display:flex; gap:10px;">
-                            <input type="number" id="p-3d-old" placeholder="Giá Gốc">
-                            <input type="number" id="p-3d-new" placeholder="Giá Bán Thực Tế">
-                        </div>
-                    </div>
-                    <div class="price-box">
-                        <label>Gói 7 Ngày</label>
-                        <div style="display:flex; gap:10px;">
-                            <input type="number" id="p-7d-old" placeholder="Giá Gốc">
-                            <input type="number" id="p-7d-new" placeholder="Giá Bán Thực Tế">
-                        </div>
-                    </div>
-                    <div class="price-box">
-                        <label>Gói 15 Ngày</label>
-                        <div style="display:flex; gap:10px;">
-                            <input type="number" id="p-15d-old" placeholder="Giá Gốc">
-                            <input type="number" id="p-15d-new" placeholder="Giá Bán Thực Tế">
-                        </div>
-                    </div>
-                    <div class="price-box">
-                        <label>Gói 30 Ngày</label>
-                        <div style="display:flex; gap:10px;">
-                            <input type="number" id="p-30d-old" placeholder="Giá Gốc">
-                            <input type="number" id="p-30d-new" placeholder="Giá Bán Thực Tế">
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; gap: 10px;">
-                        <button id="btn-save-prod" class="btn" style="flex:1; padding:16px; background:var(--primary); color:#000; font-size:14px; margin-top:10px;" onclick="saveProduct()"><i class="fas fa-cloud-upload-alt"></i> TẢI LÊN</button>
-                        <button id="btn-cancel-edit" class="btn" style="display:none; flex:1; padding:16px; background:var(--border); color:#fff; font-size:14px; margin-top:10px;" onclick="cancelEdit()"><i class="fas fa-times"></i> HỦY BỎ</button>
-                    </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 25px;">
+                <h2 style="font-size: 24px; font-weight: 700;"><i class="fas fa-box" style="color:var(--primary);"></i> Cửa Hàng</h2>
+                <button onclick="openAddSheet()" style="background:var(--cyan); color:#000; border:none; padding:10px 15px; border-radius:8px; font-weight:bold; cursor:pointer;"><i class="fas fa-plus"></i> Đăng SP Mới</button>
+            </div>
+            
+            <div class="card" style="padding: 0;">
+                <div class="table-responsive">
+                    <table>
+                        <thead style="background: rgba(0,0,0,0.3);"><tr><th>TÊN ỨNG DỤNG</th><th>LOẠI DANH MỤC</th><th>BẢNG GIÁ ĐANG BÁN</th><th>CÔNG CỤ</th></tr></thead>
+                        <tbody id="product-list"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
+        <div id="overlay" class="overlay" onclick="closeAddSheet()"></div>
+    <div id="add-sheet" class="bottom-sheet">
+        <div style="padding: 15px; text-align: center; border-bottom: 1px solid var(--border);">
+            <div style="width: 40px; height: 4px; background: #303645; border-radius: 2px; margin: 0 auto 15px auto;" onclick="closeAddSheet()"></div>
+            <h3 id="form-title" style="font-size:16px; color:var(--cyan);"><i class="fas fa-plus-circle"></i> ĐĂNG SẢN PHẨM MỚI</h3>
+        </div>
+        <div style="padding: 20px; overflow-y: auto; flex: 1;">
+            <div style="display:flex; gap:10px;">
+                <div class="form-group" style="flex:2"><label>Tên Ứng dụng</label><input type="text" id="p-name" placeholder="Ví dụ: Drip iOS"></div>
+                <div class="form-group" style="flex:1"><label>Danh Mục</label><select id="p-cat"><option value="khac">Mặc định</option><option value="tool">Tool</option><option value="account">Tài Khoản</option></select></div>
+            </div>
+            
+            <label style="display:block; font-size:12px; color:var(--cyan); font-weight:bold; margin: 10px 0 10px 0;">BẢNG GIÁ (Để trống nếu không bán)</label>
+            
+            <div class="price-box"><label>Gói 1 Ngày</label><div style="display:flex; gap:10px;"><input type="number" id="p-1d-old" placeholder="Giá Cũ (Gạch ngang)"><input type="number" id="p-1d-new" placeholder="Giá Bán Thực Tế" style="border-color:var(--cyan)"></div></div>
+            <div class="price-box"><label>Gói 3 Ngày</label><div style="display:flex; gap:10px;"><input type="number" id="p-3d-old" placeholder="Giá Cũ (Gạch ngang)"><input type="number" id="p-3d-new" placeholder="Giá Bán Thực Tế" style="border-color:var(--cyan)"></div></div>
+            <div class="price-box"><label>Gói 7 Ngày</label><div style="display:flex; gap:10px;"><input type="number" id="p-7d-old" placeholder="Giá Cũ (Gạch ngang)"><input type="number" id="p-7d-new" placeholder="Giá Bán Thực Tế" style="border-color:var(--cyan)"></div></div>
+            <div class="price-box"><label>Gói 15 Ngày</label><div style="display:flex; gap:10px;"><input type="number" id="p-15d-old" placeholder="Giá Cũ (Gạch ngang)"><input type="number" id="p-15d-new" placeholder="Giá Bán Thực Tế" style="border-color:var(--cyan)"></div></div>
+            <div class="price-box"><label>Gói 30 Ngày</label><div style="display:flex; gap:10px;"><input type="number" id="p-30d-old" placeholder="Giá Cũ (Gạch ngang)"><input type="number" id="p-30d-new" placeholder="Giá Bán Thực Tế" style="border-color:var(--cyan)"></div></div>
+            
+            <button id="btn-save-prod" style="width:100%; background:linear-gradient(135deg, var(--cyan), #00b0ff); color:#000; border:none; padding:16px; border-radius:12px; font-weight:bold; font-size:15px; margin-top:10px; cursor:pointer;" onclick="saveProduct()">TẢI LÊN CỬA HÀNG</button>
+        </div>
+    </div>
         <script>
-        // 1. ĐĂNG NHẬP & CHUYỂN TAB
         function checkLogin() {
             if(document.getElementById('admin-pass').value === 'ngdaiquocdat') {
                 sessionStorage.setItem('admin_auth', 'true');
                 document.getElementById('login-screen').style.opacity = '0';
                 setTimeout(() => { document.getElementById('login-screen').style.display = 'none'; }, 500);
                 initFirebase();
-            } else alert("Sai mật khẩu truy cập!");
+            } else alert("Mật khẩu không chính xác!");
         }
         function logout() { sessionStorage.removeItem('admin_auth'); location.reload(); }
         if(sessionStorage.getItem('admin_auth') === 'true') { document.getElementById('login-screen').style.display = 'none'; initFirebase(); }
@@ -233,14 +203,13 @@
             document.getElementById(id).classList.add('active'); el.classList.add('active');
         }
 
-        // 2. KHỞI TẠO FIREBASE & MULTI-SITE
+        function openAddSheet() { document.getElementById('overlay').classList.add('show'); document.getElementById('add-sheet').classList.add('show'); }
+        function closeAddSheet() { document.getElementById('overlay').classList.remove('show'); document.getElementById('add-sheet').classList.remove('show'); cancelEdit(); }
+
         const firebaseConfig = { databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app" };
         let db; let sitePrefix = ""; let dbListeners = []; let editingProductId = null;
 
-        function initFirebase() {
-            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-            db = firebase.database(); loadData();
-        }
+        function initFirebase() { if (!firebase.apps.length) firebase.initializeApp(firebaseConfig); db = firebase.database(); loadData(); }
 
         function switchWebsite() {
             sitePrefix = document.getElementById('site-switch').value; 
@@ -251,7 +220,6 @@
         }
         function clearListeners() { dbListeners.forEach(ref => ref.off()); dbListeners = []; }
 
-        // 3. TẢI DỮ LIỆU ĐỘNG (REALTIME)
         function loadData() {
             clearListeners();
 
@@ -263,24 +231,25 @@
                     snap.forEach(child => {
                         countUsr++; const u = child.val() || {}; const hwid = child.key;
                         const bal = Number(u.balance) || 0; const dep = Number(u.total_deposit) || 0; totalRev += dep;
+                        const uname = u.username || 'Chưa có tên'; const device = u.device || 'Thiết bị lạ';
                         
                         list.innerHTML += `<tr>
                             <td>
-                                <div style="color:var(--primary); font-weight:bold; font-size:15px;">${u.username || 'User Mới'}</div>
+                                <div style="color:var(--primary); font-weight:bold; font-size:15px;">${uname}</div>
                                 <div style="font-size:11px; color:var(--text-sub); font-family:monospace">Mã: ${hwid}</div>
+                                <div style="font-size:11px; color:var(--text-sub);">${device}</div>
                             </td>
-                            <td style="font-size:12px; color:var(--text-sub);">${u.ip || 'Unknown'}</td>
-                            <td style="color:var(--green); font-family:monospace; font-weight:bold;">${bal.toLocaleString()}đ</td>
-                            <td style="color:var(--text-sub); font-family:monospace;">${dep.toLocaleString()}đ</td>
+                            <td style="color:var(--green); font-family:'JetBrains Mono', monospace; font-size:15px; font-weight:bold;">${bal.toLocaleString()}đ</td>
+                            <td style="color:var(--text-sub); font-family:'JetBrains Mono', monospace;">${dep.toLocaleString()}đ</td>
                             <td>
                                 <div style="display:flex; gap:5px;">
-                                    <button class="btn btn-edit" onclick="editBalance('${hwid}', ${bal})"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-delete" onclick="deleteUser('${hwid}')"><i class="fas fa-trash"></i></button>
+                                    <button class="btn btn-edit" onclick="editBalance('${hwid}', ${bal})"><i class="fas fa-edit"></i> Sửa</button>
+                                    <button class="btn btn-delete" onclick="deleteUser('${hwid}')"><i class="fas fa-trash"></i> Xóa</button>
                                 </div>
                             </td>
                         </tr>`;
                     });
-                } else { list.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-sub);">Không có dữ liệu</td></tr>'; }
+                } else { list.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-sub);">Không có dữ liệu</td></tr>'; }
                 document.getElementById('count-users').innerText = countUsr; document.getElementById('total-revenue').innerText = totalRev.toLocaleString() + 'đ';
             });
 
@@ -292,12 +261,25 @@
                     let reqs = []; snap.forEach(child => { reqs.push({id: child.key, ...child.val()}); });
                     reqs.reverse().forEach(req => {
                         const isPending = req.status === 'pending';
+                        let timeStr = new Date(Number(req.time || req.id)).toLocaleString('vi-VN');
+                        
+                        let reqTypeHtml = '';
+                        if (req.type && req.type.includes('Thẻ')) {
+                            reqTypeHtml = `<div style="font-size:11px; color:var(--text-sub); margin-top:4px; font-family:monospace; background:rgba(0,0,0,0.4); padding:6px; border-radius:6px;">Loại: <span style="color:#fff">${req.type}</span><br>Mã PIN: <span style="color:#fff">${req.pin}</span><br>Seri: <span style="color:#fff">${req.serial}</span></div>`;
+                        } else {
+                            reqTypeHtml = `<div style="font-size:11px; color:var(--cyan); margin-top:4px;"><i class="fas fa-qrcode"></i> CK Ngân Hàng</div>`;
+                        }
+
                         list.innerHTML += `<tr>
-                            <td><strong style="color:#fff;">${req.username || 'User'}</strong><br><span style="font-family:monospace; font-size:11px; color:var(--text-sub)">${req.user}</span></td>
-                            <td style="color:var(--green); font-family:monospace; font-weight:bold;">+ ${Number(req.amount).toLocaleString()}đ</td>
-                            <td style="font-size:12px; color:var(--text-sub);">${new Date(Number(req.time || req.id)).toLocaleString('vi-VN')}</td>
-                            <td>${isPending ? '<span style="color:#ffaa00; font-weight:bold; font-size:11px;">CHỜ DUYỆT</span>' : '<span style="color:var(--green); font-weight:bold; font-size:11px;">ĐÃ CỘNG</span>'}</td>
-                            <td>${isPending ? `<button class="btn btn-approve" onclick="approveDeposit('${req.id}', '${req.user}', ${req.amount})">DUYỆT</button>` : '<span style="color:var(--text-sub); font-size:12px;">Xong</span>'}</td>
+                            <td>
+                                <strong style="color:#fff;">${req.username || 'User'}</strong><br>
+                                <span style="font-family:monospace; font-size:11px; color:var(--text-sub)">${req.user}</span>
+                                ${reqTypeHtml}
+                            </td>
+                            <td style="color:var(--green); font-family:monospace; font-size:16px; font-weight:bold;">+ ${Number(req.amount).toLocaleString()}đ</td>
+                            <td style="font-size:12px; color:var(--text-sub);">${timeStr}</td>
+                            <td>${isPending ? '<span style="background:rgba(255, 170, 0, 0.15); color:#ffaa00; padding:6px 10px; border-radius:6px; font-size:11px; font-weight:bold;"><i class="fas fa-spinner fa-spin"></i> CHỜ DUYỆT</span>' : '<span style="background:rgba(0, 255, 136, 0.15); color:var(--green); padding:6px 10px; border-radius:6px; font-size:11px; font-weight:bold;"><i class="fas fa-check"></i> ĐÃ CỘNG</span>'}</td>
+                            <td>${isPending ? `<button class="btn btn-approve" onclick="approveDeposit('${req.id}', '${req.user}', ${req.amount})"><i class="fas fa-check-double"></i> CỘNG TIỀN</button>` : '<span style="color:var(--text-sub); font-size:12px;"><i class="fas fa-lock"></i> Đã đóng</span>'}</td>
                         </tr>`;
                     });
                 } else { list.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-sub);">Không có lệnh nạp</td></tr>'; }
@@ -314,21 +296,20 @@
                         if (p.prices) {
                             ['1', '3', '7', '15', '30'].forEach(d => {
                                 if(p.prices[d] && p.prices[d].new > 0) {
-                                    const oldP = p.prices[d].old; const newP = p.prices[d].new;
+                                    const oldP = p.prices[d].old || 0; const newP = p.prices[d].new;
                                     let oldHtml = (oldP > newP) ? `<del style="color:var(--red)">${oldP.toLocaleString()}đ</del> ` : '';
-                                    pkgsText += `${d}N: ${oldHtml}${newP.toLocaleString()}đ<br>`;
+                                    pkgsText += `${d} Ngày: ${oldHtml}<span style="color:var(--green);font-weight:bold;">${newP.toLocaleString()}đ</span><br>`;
                                 }
                             });
                         } else { pkgsText = `<span style="color:var(--red);">Gói Lỗi - Cần Xóa</span>`; }
                         
                         let catColor = p.category == 'tool' ? 'var(--primary)' : (p.category == 'account' ? '#ffaa00' : 'var(--purple)');
-                        const safeName = (p.name || '').replace(/'/g, "\\'");
-                        const safePrices = encodeURIComponent(JSON.stringify(p.prices || {}));
+                        const safeName = (p.name || '').replace(/'/g, "\\'"); const safePrices = encodeURIComponent(JSON.stringify(p.prices || {}));
 
                         list.innerHTML += `<tr>
                             <td style="font-weight:600; color:#fff;">${p.name || 'Lỗi'}</td>
                             <td><span style="border: 1px solid ${catColor}; color:${catColor}; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold; text-transform:uppercase;">${p.category || 'khác'}</span></td>
-                            <td style="color:var(--text-sub); font-size:12px; font-family:monospace; line-height:1.6;">${pkgsText}</td>
+                            <td style="color:var(--text-sub); font-size:12px; font-family:monospace; line-height:1.5;">${pkgsText}</td>
                             <td>
                                 <div style="display:flex; gap:5px;">
                                     <button class="btn btn-edit" onclick="editProduct('${child.key}', '${safeName}', '${p.category}', '${safePrices}')"><i class="fas fa-edit"></i></button>
@@ -342,7 +323,7 @@
             });
         }
 
-        // 4. HÀM THỰC THI (WRITE FIREBASE)
+        // --- 5. HÀM THỰC THI FIREBASE ---
         function approveDeposit(reqId, hwid, amount) {
             if(confirm(`Xác nhận duyệt cộng +${Number(amount).toLocaleString()}đ cho khách [${hwid}]?`)) {
                 db.ref(sitePrefix + 'users/' + hwid).once('value', snap => {
@@ -350,88 +331,55 @@
                     db.ref(sitePrefix + 'users/' + hwid).update({ balance: (Number(user.balance) || 0) + Number(amount), total_deposit: (Number(user.total_deposit) || 0) + Number(amount) });
                     db.ref(sitePrefix + 'card_requests/' + reqId).update({ status: 'success' });
                     db.ref(sitePrefix + 'users/' + hwid + '/history').once('value', histSnap => {
-                        histSnap.forEach(h => {
-                            if(h.val().status === 'PENDING' && Number(h.val().amount) === Number(amount)) {
-                                db.ref(sitePrefix + 'users/' + hwid + '/history/' + h.key).update({ status: 'SUCCESS' });
-                            }
-                        });
+                        histSnap.forEach(h => { if(h.val().status === 'PENDING' && Number(h.val().amount) === Number(amount)) db.ref(sitePrefix + 'users/' + hwid + '/history/' + h.key).update({ status: 'SUCCESS' }); });
                     });
-                });
+                }).catch(e => alert("Lỗi Firebase: " + e.message));
             }
         }
 
-        function editBalance(hwid, bal) { const n = prompt(`Sửa số dư:`, bal); if(n) db.ref(sitePrefix + 'users/' + hwid).update({ balance: Number(n) }); }
+        function editBalance(hwid, bal) { const n = prompt(`Sửa số dư:`, bal); if(n !== null && n !== "") db.ref(sitePrefix + 'users/' + hwid).update({ balance: Number(n) }); }
         function deleteUser(hwid) { if(confirm("Xóa vĩnh viễn dữ liệu người này?")) db.ref(sitePrefix + 'users/' + hwid).remove(); }
-        function deleteProduct(id) { if(confirm("Gỡ vĩnh viễn sản phẩm?")) db.ref(sitePrefix + 'products/' + id).remove(); }
+        function deleteProduct(id) { if(confirm("Gỡ vĩnh viễn sản phẩm khỏi Bot?")) db.ref(sitePrefix + 'products/' + id).remove(); }
 
-        // 5. CHỈNH SỬA / THÊM SẢN PHẨM (2 Ô GIÁ)
+        // --- 6. CHỈNH SỬA / THÊM SẢN PHẨM ---
         function editProduct(id, name, cat, pricesStr) {
-            editingProductId = id; 
-            document.getElementById('p-name').value = name;
-            document.getElementById('p-cat').value = cat || 'khac';
-
+            editingProductId = id; document.getElementById('p-name').value = name; document.getElementById('p-cat').value = cat || 'khac';
             let prices = JSON.parse(decodeURIComponent(pricesStr));
-            document.getElementById('p-1d-old').value = prices['1'] ? (prices['1'].old || '') : '';
-            document.getElementById('p-1d-new').value = prices['1'] ? prices['1'].new : '';
-            document.getElementById('p-3d-old').value = prices['3'] ? (prices['3'].old || '') : '';
-            document.getElementById('p-3d-new').value = prices['3'] ? prices['3'].new : '';
-            document.getElementById('p-7d-old').value = prices['7'] ? (prices['7'].old || '') : '';
-            document.getElementById('p-7d-new').value = prices['7'] ? prices['7'].new : '';
-            document.getElementById('p-15d-old').value = prices['15'] ? (prices['15'].old || '') : '';
-            document.getElementById('p-15d-new').value = prices['15'] ? prices['15'].new : '';
-            document.getElementById('p-30d-old').value = prices['30'] ? (prices['30'].old || '') : '';
-            document.getElementById('p-30d-new').value = prices['30'] ? prices['30'].new : '';
-
-            document.getElementById('form-title').innerHTML = '<i class="fas fa-edit"></i> Chỉnh Sửa Sản Phẩm';
+            ['1','3','7','15','30'].forEach(d => {
+                document.getElementById(`p-${d}d-old`).value = prices[d] ? (prices[d].old || '') : '';
+                document.getElementById(`p-${d}d-new`).value = prices[d] ? prices[d].new : '';
+            });
+            document.getElementById('form-title').innerHTML = '<i class="fas fa-edit"></i> CHỈNH SỬA SẢN PHẨM';
             document.getElementById('btn-save-prod').innerHTML = '<i class="fas fa-save"></i> LƯU THAY ĐỔI';
-            document.getElementById('btn-save-prod').style.background = 'var(--purple)';
-            document.getElementById('btn-cancel-edit').style.display = 'block';
-            document.getElementById('product-form-card').scrollIntoView({behavior: "smooth", block: "start"});
+            document.getElementById('btn-save-prod').style.background = 'linear-gradient(135deg, var(--purple), #651fff)';
+            openAddSheet();
         }
 
         function cancelEdit() {
-            editingProductId = null;
-            document.getElementById('p-name').value = ''; document.getElementById('p-cat').value = 'khac';
-            document.getElementById('p-1d-old').value = ''; document.getElementById('p-1d-new').value = '';
-            document.getElementById('p-3d-old').value = ''; document.getElementById('p-3d-new').value = '';
-            document.getElementById('p-7d-old').value = ''; document.getElementById('p-7d-new').value = '';
-            document.getElementById('p-15d-old').value = ''; document.getElementById('p-15d-new').value = '';
-            document.getElementById('p-30d-old').value = ''; document.getElementById('p-30d-new').value = '';
-
-            document.getElementById('form-title').innerHTML = '<i class="fas fa-plus-circle"></i> Đăng Sản Phẩm Mới';
+            editingProductId = null; document.getElementById('p-name').value = ''; document.getElementById('p-cat').value = 'khac';
+            ['1','3','7','15','30'].forEach(d => { document.getElementById(`p-${d}d-old`).value = ''; document.getElementById(`p-${d}d-new`).value = ''; });
+            document.getElementById('form-title').innerHTML = '<i class="fas fa-plus-circle"></i> ĐĂNG SẢN PHẨM MỚI';
             document.getElementById('btn-save-prod').innerHTML = '<i class="fas fa-cloud-upload-alt"></i> TẢI LÊN CỬA HÀNG';
-            document.getElementById('btn-save-prod').style.background = 'var(--primary)';
-            document.getElementById('btn-cancel-edit').style.display = 'none';
+            document.getElementById('btn-save-prod').style.background = 'linear-gradient(135deg, var(--cyan), #00b0ff)';
         }
 
         function saveProduct() {
-            const name = document.getElementById('p-name').value;
-            const cat = document.getElementById('p-cat').value;
+            const name = document.getElementById('p-name').value; const cat = document.getElementById('p-cat').value;
+            const pricesObj = {}; let hasPrice = false;
             
-            const p1o = Number(document.getElementById('p-1d-old').value) || 0; const p1n = Number(document.getElementById('p-1d-new').value) || 0;
-            const p3o = Number(document.getElementById('p-3d-old').value) || 0; const p3n = Number(document.getElementById('p-3d-new').value) || 0;
-            const p7o = Number(document.getElementById('p-7d-old').value) || 0; const p7n = Number(document.getElementById('p-7d-new').value) || 0;
-            const p15o = Number(document.getElementById('p-15d-old').value) || 0; const p15n = Number(document.getElementById('p-15d-new').value) || 0;
-            const p30o = Number(document.getElementById('p-30d-old').value) || 0; const p30n = Number(document.getElementById('p-30d-new').value) || 0;
+            ['1','3','7','15','30'].forEach(d => {
+                const oldP = Number(document.getElementById(`p-${d}d-old`).value) || 0;
+                const newP = Number(document.getElementById(`p-${d}d-new`).value) || 0;
+                if(newP > 0) { pricesObj[d] = { old: oldP, new: newP }; hasPrice = true; }
+            });
             
             if(!name) return alert("Vui lòng điền Tên ứng dụng!");
-            if(p1n===0 && p3n===0 && p7n===0 && p15n===0 && p30n===0) return alert("Vui lòng nhập giá Bán cho ít nhất 1 gói!");
-            
-            const pricesObj = {};
-            if(p1n > 0) pricesObj['1'] = { old: p1o, new: p1n };
-            if(p3n > 0) pricesObj['3'] = { old: p3o, new: p3n };
-            if(p7n > 0) pricesObj['7'] = { old: p7o, new: p7n };
-            if(p15n > 0) pricesObj['15'] = { old: p15o, new: p15n };
-            if(p30n > 0) pricesObj['30'] = { old: p30o, new: p30n };
+            if(!hasPrice) return alert("Vui lòng nhập giá Bán Thực Tế cho ít nhất 1 gói!");
             
             if (editingProductId) {
-                db.ref(sitePrefix + 'products/' + editingProductId).update({ name, category: cat, prices: pricesObj }).then(() => {
-                    alert("Cập nhật thành công!"); cancelEdit();
-                });
+                db.ref(sitePrefix + 'products/' + editingProductId).update({ name, category: cat, prices: pricesObj }).then(() => { alert("Cập nhật thành công!"); closeAddSheet(); });
             } else {
-                db.ref(sitePrefix + 'products').push({ name, category: cat, prices: pricesObj }).then(() => {
-                    alert("Đã đẩy sản phẩm lên!"); cancelEdit();
-                });
+                db.ref(sitePrefix + 'products').push({ name, category: cat, prices: pricesObj }).then(() => { alert("Đã đẩy sản phẩm lên!"); closeAddSheet(); });
             }
         }
     </script>
