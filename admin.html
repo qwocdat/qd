@@ -3,256 +3,392 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ADMIN PANEL | QUOCDAT SEC</title>
+    <title>QD.ADMIN | TRUNG TÂM ĐIỀU KHIỂN</title>
     
-    <script>
-        var isAdmin = sessionStorage.getItem('admin_logged');
-        if (isAdmin !== 'true') {
-            var pass = prompt("HỆ THỐNG QUẢN TRỊ\nNhập mật khẩu Admin:");
-            if (pass === "ngdaiquocdat") {
-                sessionStorage.setItem('admin_logged', 'true');
-            } else {
-                alert("Sai mật khẩu!"); window.location.href = "index.html";
-            }
-        }
-    </script>
-
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root { --primary: #00ff88; --bg: #0a0a0f; --card: #15151e; --border: #2a2a35; --accent: #00b8ff; }
+        :root { --primary: #00e5ff; --bg-main: #0b0e14; --bg-card: rgba(21, 25, 35, 0.7); --border: rgba(33, 38, 49, 0.8); --green: #00ff88; --red: #ff4757; --purple: #8b5cf6; --text-sub: #8b949e; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg); color: #fff; display: flex; min-height: 100vh; overflow-x: hidden; }
+        body { background: var(--bg-main); color: #fff; display: flex; min-height: 100vh; overflow: hidden; }
         
-        .sidebar { width: 240px; background: #000; border-right: 1px solid var(--border); padding: 20px; flex-shrink: 0; }
-        .nav-item { padding: 12px; color: #888; cursor: pointer; border-radius: 8px; margin-bottom: 5px; transition: 0.3s; display: flex; align-items: center; gap: 10px; font-size: 14px; }
-        .nav-item:hover, .nav-item.active { background: var(--card); color: var(--primary); }
+        /* HIỆU ỨNG NỀN */
+        .ambient-bg { position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 50% 50%, rgba(0, 229, 255, 0.03) 0%, transparent 60%); animation: pulseBg 8s infinite alternate ease-in-out; z-index: 0; pointer-events: none; }
+        @keyframes pulseBg { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
+
+        /* MÀN HÌNH ĐĂNG NHẬP */
+        #login-screen { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(11, 14, 20, 0.95); backdrop-filter: blur(10px); z-index: 9999; display: flex; justify-content: center; align-items: center; transition: 0.5s; }
+        .login-box { background: var(--bg-card); padding: 40px; border-radius: 20px; border: 1px solid var(--primary); width: 100%; max-width: 380px; text-align: center; box-shadow: 0 0 30px rgba(0, 229, 255, 0.15); animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .login-box input { width: 100%; padding: 16px; margin: 25px 0; background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: #fff; border-radius: 12px; outline: none; text-align: center; font-size: 18px; font-family: 'JetBrains Mono', monospace; transition: 0.3s; }
+        .login-box input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 229, 255, 0.2); }
+        .btn-login { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary), #00b0ff); color: #000; border: none; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
         
-        .main { flex: 1; padding: 25px; overflow-y: auto; }
-        .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        .stat-box { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid var(--border); text-align: center; }
-        .stat-box h2 { font-family: 'Orbitron'; color: var(--primary); font-size: 20px; margin-top: 5px; }
+        /* SIDEBAR */
+        .sidebar { width: 280px; background: rgba(7, 9, 13, 0.8); backdrop-filter: blur(20px); border-right: 1px solid var(--border); padding: 25px 20px; flex-shrink: 0; display: flex; flex-direction: column; z-index: 10; position: relative; }
         
-        .card { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 10px; color: #555; font-size: 11px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
-        td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 13px; }
+        /* NÚT CHỌN WEB */
+        .site-selector { background: rgba(0,0,0,0.5); border: 1px solid var(--primary); border-radius: 12px; padding: 12px; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.3s; }
+        .site-selector:hover { background: rgba(0, 229, 255, 0.1); }
+        .site-selector select { background: transparent; border: none; color: var(--primary); font-size: 14px; font-weight: bold; width: 100%; outline: none; cursor: pointer; font-family: 'JetBrains Mono', monospace; }
+        .site-selector select option { background: var(--bg-main); color: #fff; }
+
+        .nav-item { padding: 16px; color: var(--text-sub); cursor: pointer; border-radius: 12px; margin-bottom: 8px; transition: all 0.3s; display: flex; align-items: center; gap: 15px; font-weight: 600; font-size: 14px; }
+        .nav-item i { font-size: 18px; transition: 0.3s; }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; transform: translateX(5px); }
+        .nav-item.active { background: linear-gradient(90deg, rgba(0, 229, 255, 0.15), transparent); border-left: 4px solid var(--primary); color: var(--primary); }
         
-        .btn { padding: 7px 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; font-size: 11px; }
-        .btn-edit { background: var(--accent); color: #000; }
-        .btn-delete { background: #ff4757; color: #fff; margin-left: 5px; }
-        .btn-add { background: var(--primary); color: #000; width: 100%; margin-top: 10px; font-family: 'Orbitron'; }
+        /* CONTENT */
+        .main { flex: 1; padding: 40px; overflow-y: auto; z-index: 10; position: relative; scroll-behavior: smooth; }
+        .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-box { background: var(--bg-card); backdrop-filter: blur(10px); padding: 25px; border-radius: 16px; border: 1px solid var(--border); transition: 0.3s; }
+        .stat-box h2 { font-family: 'JetBrains Mono', monospace; color: var(--green); font-size: 28px; margin-top: 10px; font-weight: 700; }
+        .stat-box span { color: var(--text-sub); font-size: 12px; text-transform: uppercase; font-weight: 600; letter-spacing: 1px; }
         
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; margin-bottom: 4px; font-size: 11px; color: #888; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; background: #000; border: 1px solid var(--border); color: #fff; border-radius: 6px; outline: none; }
-        .checkbox-group { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-size: 12px; color: var(--primary); }
+        .card { background: var(--bg-card); backdrop-filter: blur(10px); border-radius: 16px; border: 1px solid var(--border); padding: 25px; margin-bottom: 25px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        th { text-align: left; padding: 15px; color: var(--text-sub); font-size: 12px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        td { padding: 18px 15px; border-bottom: 1px solid rgba(255,255,255,0.02); font-size: 14px; vertical-align: middle; }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+        
+        .btn { padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 12px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-edit { background: rgba(139, 92, 246, 0.1); color: var(--purple); border: 1px solid rgba(139, 92, 246, 0.3); }
+        .btn-approve { background: rgba(0, 255, 136, 0.1); color: var(--green); border: 1px solid rgba(0, 255, 136, 0.3); padding: 10px 18px;}
+        .btn-delete { background: rgba(255, 71, 87, 0.1); color: var(--red); border: 1px solid rgba(255, 71, 87, 0.3); }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-size: 13px; color: var(--text-sub); font-weight: 600; }
+        .form-group input, .form-group select { width: 100%; padding: 14px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); color: #fff; border-radius: 10px; outline: none; transition: 0.3s; font-family: 'Inter', sans-serif; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(0, 229, 255, 0.1); }
+        
         .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .tab-content.active { display: block; animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes slideUpFade { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
     </style>
 </head>
 <body>
 
+    <div class="ambient-bg"></div>
+
+    <div id="login-screen">
+        <div class="login-box">
+            <div style="font-size: 40px; color: var(--primary); margin-bottom: 10px;"><i class="fas fa-fingerprint"></i></div>
+            <h2 style="color:var(--primary); font-family:'JetBrains Mono', monospace; font-size: 24px;">HỆ THỐNG QUẢN TRỊ</h2>
+            <p style="color:var(--text-sub); font-size:13px; margin-top:5px;">Vui lòng xác thực danh tính để vào Admin</p>
+            <input type="password" id="admin-pass" placeholder="••••••••" onkeypress="if(event.key === 'Enter') checkLogin()">
+            <button class="btn-login" onclick="checkLogin()"><i class="fas fa-unlock-alt" style="margin-right:8px;"></i> MỞ KHÓA</button>
+        </div>
+    </div>
+
     <div class="sidebar">
-        <h2 style="font-family:'Orbitron'; color:var(--primary); margin-bottom:30px; font-size: 18px;">QD.ADMIN</h2>
-        <div class="nav-item active" onclick="showTab('users', this)"><i class="fas fa-users"></i> NGƯỜI DÙNG</div>
-        <div class="nav-item" onclick="showTab('products', this)"><i class="fas fa-box"></i> SẢN PHẨM</div>
-        <div class="nav-item" onclick="showTab('cards', this)"><i class="fas fa-credit-card"></i> DUYỆT THẺ CÀO</div>
-        <div class="nav-item" onclick="showTab('add-tab', this)"><i class="fas fa-plus-square"></i> THÊM MỚI</div>
-        <div class="nav-item" style="margin-top:50px; color:#ff4757" onclick="sessionStorage.removeItem('admin_logged'); location.href='index.html'"><i class="fas fa-sign-out-alt"></i> THOÁT</div>
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--primary), #00b0ff); border-radius: 16px; margin: 0 auto 15px auto; display: flex; justify-content: center; align-items: center; font-size: 28px; color: #000; box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h2 style="font-family:'JetBrains Mono', monospace; color:#fff; font-size: 18px; letter-spacing: 2px;">QD.SEC ADMIN</h2>
+        </div>
+
+        <div class="site-selector">
+            <i class="fas fa-globe" style="color: var(--primary);"></i>
+            <select id="site-switch" onchange="switchWebsite()">
+                <option value="">Hệ Thống Bot Store</option>
+                <option value="quocdat_online/">Web: quocdat.online</option>
+            </select>
+        </div>
+
+        <div class="nav-item active" onclick="showTab('dashboard', this)"><i class="fas fa-chart-pie"></i> Bảng Thống Kê</div>
+        <div class="nav-item" onclick="showTab('deposits', this)"><i class="fas fa-university"></i> Duyệt Tiền Nạp</div>
+        <div class="nav-item" onclick="showTab('users', this)"><i class="fas fa-users"></i> Khách Hàng</div>
+        <div class="nav-item" onclick="showTab('products', this)"><i class="fas fa-box-open"></i> Kho Sản Phẩm</div>
+        
+        <div style="flex:1"></div>
+        <div class="nav-item" style="color:var(--red); border: 1px solid rgba(255, 71, 87, 0.2);" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Thoát An Toàn</div>
     </div>
 
     <div class="main">
-        <div class="grid-stats">
-            <div class="stat-box"><div>USERS</div><h2 id="count-users">0</h2></div>
-            <div class="stat-box"><div>PRODUCTS</div><h2 id="count-products">0</h2></div>
-            <div class="stat-box"><div>SYSTEM CASH</div><h2 id="total-revenue">0đ</h2></div>
+        
+        <div id="dashboard" class="tab-content active">
+            <h2 style="margin-bottom: 25px; font-size: 24px; font-weight: 700;">Tổng Quan <span id="dash-site-name" style="color:var(--primary)">Hệ Thống Bot Store</span></h2>
+            <div class="grid-stats">
+                <div class="stat-box">
+                    <div style="position:absolute; top:20px; right:20px; font-size:30px; color:rgba(255,255,255,0.05);"><i class="fas fa-users"></i></div>
+                    <span>Khách Hàng Kích Hoạt</span>
+                    <h2 id="count-users">0</h2>
+                </div>
+                <div class="stat-box">
+                    <div style="position:absolute; top:20px; right:20px; font-size:30px; color:rgba(0,255,136,0.05);"><i class="fas fa-wallet"></i></div>
+                    <span>Tổng Dòng Tiền (Nạp)</span>
+                    <h2 id="total-revenue" style="color:var(--green)">0đ</h2>
+                </div>
+                <div class="stat-box">
+                    <div style="position:absolute; top:20px; right:20px; font-size:30px; color:rgba(139, 92, 246, 0.05);"><i class="fas fa-shopping-bag"></i></div>
+                    <span>Sản Phẩm Đang Bán</span>
+                    <h2 id="count-products" style="color:var(--purple)">0</h2>
+                </div>
+            </div>
         </div>
 
-        <div id="users" class="tab-content active">
-            <div class="card">
+        <div id="deposits" class="tab-content">
+            <h2 style="margin-bottom: 25px; font-size: 24px; font-weight: 700;"><i class="fas fa-bell" style="color:var(--primary); margin-right:10px;"></i> Lệnh Nạp Chờ Duyệt</h2>
+            <div class="card" style="padding: 0; overflow: hidden;">
                 <table>
-                    <thead><tr><th>ID / EMAIL</th><th>SỐ DƯ</th><th>THAO TÁC</th></tr></thead>
+                    <thead style="background: rgba(0,0,0,0.3);"><tr><th>MÃ KHÁCH (HWID)</th><th>SỐ TIỀN KHÁCH CHUYỂN</th><th>THỜI GIAN LỆNH</th><th>TRẠNG THÁI</th><th>THAO TÁC</th></tr></thead>
+                    <tbody id="deposit-list"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="users" class="tab-content">
+            <h2 style="margin-bottom: 25px; font-size: 24px; font-weight: 700;"><i class="fas fa-users" style="color:var(--primary); margin-right:10px;"></i> Quản Lý Dữ Liệu Khách</h2>
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <table>
+                    <thead style="background: rgba(0,0,0,0.3);"><tr><th>MÃ HWID BẢO MẬT</th><th>IP TRUY CẬP</th><th>SỐ DƯ HIỆN TẠI</th><th>TỔNG ĐÃ NẠP</th><th>CÔNG CỤ</th></tr></thead>
                     <tbody id="user-list"></tbody>
                 </table>
             </div>
         </div>
 
         <div id="products" class="tab-content">
-            <div class="card">
-                <table>
-                    <thead><tr><th>TÊN SẢN PHẨM</th><th>DANH MỤC</th><th>GIÁ</th><th>THAO TÁC</th></tr></thead>
-                    <tbody id="product-list"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="cards" class="tab-content">
-            <div class="card">
-                <table>
-                    <thead><tr><th>NGƯỜI DÙNG</th><th>LOẠI - MỆNH GIÁ</th><th>SERI - PIN</th><th>TRẠNG THÁI</th><th>THAO TÁC</th></tr></thead>
-                    <tbody id="card-list"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="add-tab" class="tab-content">
-            <div class="card" style="max-width: 450px; margin: auto;">
-                <h3 style="color:var(--primary); margin-bottom:15px; font-size:14px;">[ THÊM SẢN PHẨM MỚI ]</h3>
-                <div class="form-group">
-                    <label>Tên Sản Phẩm</label>
-                    <input type="text" id="p-name" placeholder="Ví dụ: Tool VIP Free Fire">
+            <h2 style="margin-bottom: 25px; font-size: 24px; font-weight: 700;"><i class="fas fa-box" style="color:var(--primary); margin-right:10px;"></i> Trung Tâm Sản Phẩm</h2>
+            <div style="display: flex; gap: 30px; align-items: flex-start;">
+                
+                <div class="card" style="flex: 2; padding: 0; overflow: hidden;">
+                    <table>
+                        <thead style="background: rgba(0,0,0,0.3);"><tr><th>TÊN ỨNG DỤNG / GAME</th><th>LOẠI HIỂN THỊ</th><th>GIÁ CÁC GÓI</th><th>XÓA</th></tr></thead>
+                        <tbody id="product-list"></tbody>
+                    </table>
                 </div>
-                <div class="form-group">
-                    <label>Danh Mục</label>
-                    <select id="p-category">
-                        <option value="tool">Tool Auto</option>
-                        <option value="source">Mã Nguồn Web</option>
-                        <option value="account">Tài Khoản VIP</option>
-                        <option value="tut">Tài liệu/Tut</option>
-                    </select>
+                
+                <div class="card" style="flex: 1; height: fit-content;">
+                    <h3 style="margin-bottom: 20px; color:var(--primary); display:flex; align-items:center; gap:8px;"><i class="fas fa-plus-circle"></i> Đăng Sản Phẩm Mới</h3>
+                    <div class="form-group"><label>Tên Ứng dụng (Vd: Drip iOS)</label><input type="text" id="p-name" placeholder="Nhập tên hiển thị..."></div>
+                    <div class="form-group">
+                        <label>Icon Danh Mục</label>
+                        <select id="p-cat">
+                            <option value="khac">📦 Mặc định (Tím)</option>
+                            <option value="tool">🤖 Tool / Hack (Cyan)</option>
+                            <option value="account">🛡️ Tài Khoản (Vàng)</option>
+                        </select>
+                    </div>
+                    
+                    <label style="display:block; font-size:13px; color:var(--primary); font-weight:bold; margin: 20px 0 10px 0; border-bottom:1px solid var(--border); padding-bottom:5px;">CẤU HÌNH GÓI (Để trống nếu không bán)</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div class="form-group"><label>1 Ngày (đ)</label><input type="number" id="p-1d" placeholder="10000"></div>
+                        <div class="form-group"><label>3 Ngày (đ)</label><input type="number" id="p-3d" placeholder="20000"></div>
+                        <div class="form-group"><label>7 Ngày (đ)</label><input type="number" id="p-7d" placeholder="50000"></div>
+                        <div class="form-group"><label>15 Ngày (đ)</label><input type="number" id="p-15d" placeholder="80000"></div>
+                        <div class="form-group" style="grid-column: 1 / -1;"><label>30 Ngày (đ)</label><input type="number" id="p-30d" placeholder="130000"></div>
+                    </div>
+                    
+                    <button class="btn" style="width:100%; padding:14px; background:var(--primary); color:#000; font-size:14px; margin-top:10px; justify-content:center; text-transform:uppercase;" onclick="saveProduct()"><i class="fas fa-cloud-upload-alt"></i> Tải Lên Cửa Hàng</button>
                 </div>
-                <div class="form-group">
-                    <label>Mô tả ngắn</label>
-                    <input type="text" id="p-desc" placeholder="Chức năng chính của sản phẩm...">
-                </div>
-                <div class="form-group">
-                    <label>Giá Tiền (Nhập 0 nếu Free)</label>
-                    <input type="number" id="p-price" placeholder="Ví dụ: 50000">
-                </div>
-                <div class="form-group">
-                    <label>Link Tool/Key (Link Google Drive/Mediafire)</label>
-                    <input type="text" id="p-link" placeholder="https://...">
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="p-hot"> <label for="p-hot" style="margin:0; font-size:13px; color:#fff">Đánh dấu là Sản phẩm HOT</label>
-                </div>
-                <button class="btn btn-add" onclick="saveProduct()">LƯU VÀO HỆ THỐNG</button>
             </div>
         </div>
     </div>
+        <script>
+        // 1. BẢO MẬT ĐĂNG NHẬP
+        function checkLogin() {
+            if(document.getElementById('admin-pass').value === 'ngdaiquocdat') {
+                sessionStorage.setItem('admin_auth', 'true');
+                document.getElementById('login-screen').style.opacity = '0';
+                setTimeout(() => { document.getElementById('login-screen').style.display = 'none'; }, 500);
+                initFirebase();
+            } else alert("Sai mật khẩu truy cập!");
+        }
+        function logout() { sessionStorage.removeItem('admin_auth'); location.reload(); }
+        if(sessionStorage.getItem('admin_auth') === 'true') {
+            document.getElementById('login-screen').style.display = 'none'; initFirebase();
+        }
 
-    <script>
-        const firebaseConfig = { databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app" };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        function showTab(tId, el) {
+        // CHUYỂN TAB UI
+        function showTab(id, el) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(tId).classList.add('active');
-            el.classList.add('active');
+            document.getElementById(id).classList.add('active'); el.classList.add('active');
         }
 
-        db.ref('users').on('value', s => {
-            const list = document.getElementById('user-list'); list.innerHTML = '';
-            let count = 0; let total = 0;
-            s.forEach(u => {
-                count++; const d = u.val(); total += (d.balance || 0);
-                const displayEmail = u.key.replace(/_/g, '.');
-                list.innerHTML += `<tr>
-                    <td style="color:var(--accent)">${displayEmail}</td>
-                    <td style="color:var(--primary); font-weight:bold;">${(d.balance || 0).toLocaleString()}đ</td>
-                    <td><button class="btn btn-edit" onclick="editBal('${u.key}', ${d.balance || 0})">Sửa Tiền</button>
-                    <button class="btn btn-delete" onclick="delUser('${u.key}')">Xóa</button></td>
-                </tr>`;
-            });
-            document.getElementById('count-users').innerText = count;
-            document.getElementById('total-revenue').innerText = total.toLocaleString() + "đ";
-        });
+        // 2. KHỞI TẠO FIREBASE & MULTI-SITE
+        const firebaseConfig = { databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app" };
+        let db;
+        let sitePrefix = ""; // Mặc định là Bot Store (lưu ở root /)
+        let dbListeners = []; // Lưu các luồng đang nghe để ngắt khi đổi web
 
-        db.ref('products').on('value', s => {
-            const list = document.getElementById('product-list'); list.innerHTML = '';
-            let count = 0;
-            s.forEach(p => {
-                count++; const d = p.val();
-                const hotBadge = d.isHot ? '<span style="background:#ff4757; color:#fff; padding:2px 5px; border-radius:3px; font-size:9px; margin-left:5px;">HOT</span>' : '';
-                list.innerHTML += `<tr>
-                    <td><b>${d.name}</b> ${hotBadge}</td>
-                    <td style="color:var(--accent); text-transform:uppercase; font-size:11px;">${d.category || 'TOOL'}</td>
-                    <td style="color:#f1c40f">${(d.price || 0).toLocaleString()}đ</td>
-                    <td><button class="btn btn-delete" onclick="delProd('${p.key}')">Xóa</button></td>
-                </tr>`;
-            });
-            document.getElementById('count-products').innerText = count;
-        });
+        function initFirebase() {
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+            loadData();
+        }
 
-        db.ref('card_requests').on('value', s => {
-            const list = document.getElementById('card-list'); list.innerHTML = '';
-            s.forEach(c => {
-                const d = c.val();
-                let actions = '';
-                if(d.status === 'pending') {
-                    actions = `<button class="btn btn-edit" style="background:var(--primary)" onclick="approveCard('${c.key}', '${d.user}', ${d.amount})">Duyệt</button>
-                               <button class="btn btn-delete" onclick="rejectCard('${c.key}')">Hủy</button>`;
-                } else if(d.status === 'success') {
-                    actions = `<span style="color:var(--primary); font-weight:bold; font-size:11px;">THÀNH CÔNG</span>`;
-                } else {
-                    actions = `<span style="color:#ff4757; font-weight:bold; font-size:11px;">THẤT BẠI</span>`;
-                }
-                list.innerHTML += `<tr>
-                    <td style="color:var(--accent)">${d.user}</td>
-                    <td><b>${d.type}</b> <br> <span style="color:#f1c40f">${parseInt(d.amount).toLocaleString()}đ</span></td>
-                    <td style="font-family:monospace; font-size:12px; opacity:0.8;">S: ${d.seri}<br>P: ${d.pin}</td>
-                    <td style="font-size:11px; text-transform:uppercase;">${d.status}</td>
-                    <td>${actions}</td>
-                </tr>`;
-            });
-        });
-
-        function saveProduct() {
-            const n = document.getElementById('p-name').value.trim();
-            const pText = document.getElementById('p-price').value.trim();
-            const l = document.getElementById('p-link').value.trim();
-            const c = document.getElementById('p-category').value;
-            const desc = document.getElementById('p-desc').value.trim();
-            const isHot = document.getElementById('p-hot').checked;
+        // Đổi Web Quản Lý (quocdat.online vs Bot Store)
+        function switchWebsite() {
+            const selector = document.getElementById('site-switch');
+            sitePrefix = selector.value; 
+            document.getElementById('dash-site-name').innerText = selector.options[selector.selectedIndex].text;
             
-            if(!n || pText === "" || !l) return alert("Hệ thống yêu cầu nhập đủ Tên, Giá và Link!");
+            // Xóa rác UI cũ
+            document.getElementById('user-list').innerHTML = '<tr><td colspan="5" style="text-align:center;">Đang tải dữ liệu...</td></tr>';
+            document.getElementById('deposit-list').innerHTML = '';
+            document.getElementById('product-list').innerHTML = '';
+            
+            loadData();
+        }
 
-            db.ref('products').push({
-                name: n,
-                category: c,
-                description: desc,
-                price: parseInt(pText),
-                link: l,
-                isHot: isHot
-            }).then(() => {
-                alert("Đã thêm sản phẩm lên Store!");
-                document.getElementById('p-name').value = '';
-                document.getElementById('p-price').value = '';
-                document.getElementById('p-link').value = '';
-                document.getElementById('p-desc').value = '';
-                document.getElementById('p-hot').checked = false;
-                showTab('products', document.querySelectorAll('.nav-item')[1]);
+        function clearListeners() {
+            dbListeners.forEach(ref => ref.off());
+            dbListeners = [];
+        }
+
+        // 3. TẢI DỮ LIỆU ĐỘNG (REALTIME)
+        function loadData() {
+            clearListeners(); // Xóa luồng nghe của web cũ trước khi gắn luồng mới
+
+            // Lắng nghe Khách Hàng
+            let refUsers = db.ref(sitePrefix + 'users');
+            dbListeners.push(refUsers);
+            refUsers.on('value', snap => {
+                const list = document.getElementById('user-list'); list.innerHTML = '';
+                let countUsr = 0; let totalRev = 0;
+                
+                if(snap.exists()) {
+                    snap.forEach(child => {
+                        countUsr++; const u = child.val(); const hwid = child.key;
+                        const bal = Number(u.balance) || 0; const dep = Number(u.total_deposit) || 0;
+                        totalRev += dep;
+                        
+                        list.innerHTML += `<tr>
+                            <td><div style="font-family:'JetBrains Mono', monospace; color:var(--primary); font-weight:bold; background:rgba(0, 229, 255, 0.1); padding:6px 10px; border-radius:6px; display:inline-block;"><i class="fas fa-mobile-alt" style="margin-right:6px"></i>${hwid}</div></td>
+                            <td style="font-size:12px; color:var(--text-sub);">${u.ip || 'Unknown IP'}</td>
+                            <td style="color:var(--green); font-family:'JetBrains Mono', monospace; font-size:15px; font-weight:bold;">${bal.toLocaleString()}đ</td>
+                            <td style="color:var(--text-sub); font-family:'JetBrains Mono', monospace;">${dep.toLocaleString()}đ</td>
+                            <td>
+                                <button class="btn btn-edit" onclick="editBalance('${hwid}', ${bal})"><i class="fas fa-edit"></i> Sửa Dư</button>
+                                <button class="btn btn-delete" style="margin-left:5px" onclick="deleteUser('${hwid}')"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>`;
+                    });
+                } else { list.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-sub);">Không có dữ liệu</td></tr>'; }
+                document.getElementById('count-users').innerText = countUsr;
+                document.getElementById('total-revenue').innerText = totalRev.toLocaleString() + 'đ';
+            });
+
+            // Lắng nghe Lệnh Nạp Tiền
+            let refDeps = db.ref(sitePrefix + 'card_requests');
+            dbListeners.push(refDeps);
+            refDeps.on('value', snap => {
+                const list = document.getElementById('deposit-list'); list.innerHTML = '';
+                if(snap.exists()) {
+                    let reqs = [];
+                    snap.forEach(child => { reqs.push({id: child.key, ...child.val()}); });
+                    
+                    reqs.reverse().forEach(req => {
+                        const isPending = req.status === 'pending';
+                        list.innerHTML += `<tr>
+                            <td><strong style="font-family:'JetBrains Mono', monospace; color:#fff;">${req.user}</strong></td>
+                            <td style="color:var(--green); font-family:'JetBrains Mono', monospace; font-size:16px; font-weight:bold;">+ ${Number(req.amount).toLocaleString()}đ</td>
+                            <td style="font-size:12px; color:var(--text-sub);">${new Date(Number(req.id)).toLocaleString('vi-VN')}</td>
+                            <td>${isPending ? '<span style="background:rgba(255, 170, 0, 0.15); color:#ffaa00; padding:6px 10px; border-radius:6px; font-size:11px; font-weight:bold;"><i class="fas fa-spinner fa-spin"></i> CHỜ DUYỆT</span>' : '<span style="background:rgba(0, 255, 136, 0.15); color:var(--green); padding:6px 10px; border-radius:6px; font-size:11px; font-weight:bold;"><i class="fas fa-check"></i> ĐÃ CỘNG</span>'}</td>
+                            <td>${isPending ? `<button class="btn btn-approve" onclick="approveDeposit('${req.id}', '${req.user}', ${req.amount})"><i class="fas fa-check-double"></i> DUYỆT TIỀN</button>` : '<span style="color:var(--text-sub); font-size:12px;"><i class="fas fa-lock"></i> Đã đóng</span>'}</td>
+                        </tr>`;
+                    });
+                } else { list.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-sub);">Không có dữ liệu nạp</td></tr>'; }
+            });
+
+            // Lắng nghe Sản Phẩm
+            let refProds = db.ref(sitePrefix + 'products');
+            dbListeners.push(refProds);
+            refProds.on('value', snap => {
+                const list = document.getElementById('product-list'); list.innerHTML = '';
+                let countProd = 0;
+                if(snap.exists()) {
+                    snap.forEach(child => {
+                        countProd++; const p = child.val() || {}; let pkgsText = '';
+                        
+                        if (p.prices) {
+                            if(p.prices['1']) pkgsText += `1N: ${Number(p.prices['1']).toLocaleString()}đ<br>`;
+                            if(p.prices['3']) pkgsText += `3N: ${Number(p.prices['3']).toLocaleString()}đ<br>`;
+                            if(p.prices['7']) pkgsText += `7N: ${Number(p.prices['7']).toLocaleString()}đ<br>`;
+                            if(p.prices['15']) pkgsText += `15N: ${Number(p.prices['15']).toLocaleString()}đ<br>`;
+                            if(p.prices['30']) pkgsText += `30N: ${Number(p.prices['30']).toLocaleString()}đ`;
+                        } else if (p.price) {
+                            pkgsText = `<span style="color:var(--red); font-weight:bold;"><i class="fas fa-exclamation-triangle"></i> Gói Cũ: ${Number(p.price).toLocaleString()}đ (Cần Xóa)</span>`;
+                        } else { pkgsText = 'Chưa thiết lập giá'; }
+                        
+                        let catColor = p.category == 'tool' ? 'var(--primary)' : (p.category == 'account' ? '#ffaa00' : 'var(--purple)');
+
+                        list.innerHTML += `<tr>
+                            <td style="font-weight:600; color:#fff;">${p.name || 'Sản phẩm lỗi'}</td>
+                            <td><span style="border: 1px solid ${catColor}; color:${catColor}; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold; text-transform:uppercase;">${p.category || 'khác'}</span></td>
+                            <td style="color:var(--text-sub); font-size:12px; font-family:monospace; line-height:1.5;">${pkgsText}</td>
+                            <td><button class="btn btn-delete" onclick="deleteProduct('${child.key}')"><i class="fas fa-trash"></i></button></td>
+                        </tr>`;
+                    });
+                } else { list.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-sub);">Chưa có sản phẩm</td></tr>'; }
+                document.getElementById('count-products').innerText = countProd;
             });
         }
 
-        function editBal(id, old) {
-            const n = prompt("Nhập số dư mới cho User này:", old);
-            if (n !== null && n !== "") db.ref('users/'+id).update({ balance: Number(n) });
-        }
-
-        function approveCard(id, userEmail, amount) {
-            if(confirm(`Duyệt thẻ này và cộng ${parseInt(amount).toLocaleString()}đ cho ${userEmail}?`)) {
-                const uid = userEmail.replace(/[.#$\[\]]/g, '_');
-                db.ref('users/'+uid+'/balance').once('value').then(snap => {
-                    let bal = snap.val() || 0;
-                    db.ref('users/'+uid).update({balance: bal + parseInt(amount)});
-                    db.ref('card_requests/'+id).update({status: 'success'});
+        // --- 4. HÀM THỰC THI FIREBASE ---
+        function approveDeposit(reqId, hwid, amount) {
+            if(confirm(`Xác nhận duyệt cộng ${Number(amount).toLocaleString()}đ cho khách [${hwid}]?`)) {
+                db.ref(sitePrefix + 'users/' + hwid).once('value', snap => {
+                    let user = snap.val() || {};
+                    db.ref(sitePrefix + 'users/' + hwid).update({ 
+                        balance: (Number(user.balance) || 0) + Number(amount), 
+                        total_deposit: (Number(user.total_deposit) || 0) + Number(amount) 
+                    });
+                    db.ref(sitePrefix + 'card_requests/' + reqId).update({ status: 'success' });
+                    
+                    db.ref(sitePrefix + 'users/' + hwid + '/history').once('value', histSnap => {
+                        histSnap.forEach(h => {
+                            if(h.val().status === 'PENDING' && Number(h.val().amount) === Number(amount)) {
+                                db.ref(sitePrefix + 'users/' + hwid + '/history/' + h.key).update({ status: 'SUCCESS' });
+                            }
+                        });
+                    });
                 });
             }
         }
 
-        function rejectCard(id) {
-            if(confirm("Xác nhận hủy thẻ sai/lỗi này?")) db.ref('card_requests/'+id).update({status: 'failed'});
+        function editBalance(hwid, bal) { 
+            const n = prompt(`Nhập số dư mới cho mã khách [${hwid}]:`, bal); 
+            if(n !== null && n !== "") db.ref(sitePrefix + 'users/' + hwid).update({ balance: Number(n) }); 
         }
 
-        function delUser(id) { if(confirm("Xóa toàn bộ dữ liệu khách này?")) db.ref('users/'+id).remove(); }
-        function delProd(id) { if(confirm("Gỡ sản phẩm này khỏi Store?")) db.ref('products/'+id).remove(); }
+        function deleteUser(hwid) { if(confirm("Xóa vĩnh viễn dữ liệu khách hàng này?")) db.ref(sitePrefix + 'users/' + hwid).remove(); }
+        function deleteProduct(id) { if(confirm("Gỡ vĩnh viễn sản phẩm khỏi Bot?")) db.ref(sitePrefix + 'products/' + id).remove(); }
+
+        function saveProduct() {
+            const name = document.getElementById('p-name').value;
+            const cat = document.getElementById('p-cat').value;
+            
+            const p1 = Number(document.getElementById('p-1d').value) || 0;
+            const p3 = Number(document.getElementById('p-3d').value) || 0;
+            const p7 = Number(document.getElementById('p-7d').value) || 0;
+            const p15 = Number(document.getElementById('p-15d').value) || 0;
+            const p30 = Number(document.getElementById('p-30d').value) || 0;
+            
+            if(!name) return alert("Vui lòng điền Tên ứng dụng!");
+            if(p1===0 && p3===0 && p7===0 && p15===0 && p30===0) return alert("Vui lòng nhập giá cho ít nhất 1 gói!");
+            
+            const pricesObj = {};
+            if(p1 > 0) pricesObj['1'] = p1; if(p3 > 0) pricesObj['3'] = p3; if(p7 > 0) pricesObj['7'] = p7;
+            if(p15 > 0) pricesObj['15'] = p15; if(p30 > 0) pricesObj['30'] = p30;
+            
+            db.ref(sitePrefix + 'products').push({ name, category: cat, prices: pricesObj }).then(() => {
+                alert("Đã đẩy sản phẩm lên hệ thống thành công!");
+                document.getElementById('p-name').value = '';
+                document.getElementById('p-1d').value = ''; document.getElementById('p-3d').value = '';
+                document.getElementById('p-7d').value = ''; document.getElementById('p-15d').value = ''; document.getElementById('p-30d').value = '';
+            });
+        }
     </script>
 </body>
 </html>
