@@ -55,18 +55,6 @@
         .section-content.active { display: block; opacity: 1; transform: translateY(0) scale(1); animation: smoothFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes smoothFade { 0% { opacity: 0; transform: translateY(20px) scale(0.98); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
 
-        .hero { text-align: center; padding: 60px 20px; background: linear-gradient(180deg, rgba(255, 30, 30, 0.1) 0%, rgba(10,0,0,0.8) 100%); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; overflow: hidden; }
-        .hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, var(--primary-glow) 0%, transparent 60%); opacity: 0.1; animation: pulse 6s infinite linear; }
-        .hero h1 { font-family: 'Orbitron', sans-serif; font-size: 3rem; color: #fff; margin-bottom: 20px; text-shadow: 0 0 20px var(--primary-glow); }
-        .hero h1 span { color: var(--primary); }
-        .hero p { color: var(--text-muted); font-size: 1.1rem; max-width: 650px; margin: 0 auto 30px auto; }
-
-        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 25px; margin-top: 40px; }
-        .feature-box { background: var(--card); padding: 25px; border-radius: 12px; border: 1px solid var(--border); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); backdrop-filter: var(--glass-blur); }
-        .feature-box:hover { border-color: var(--primary); transform: translateY(-10px); box-shadow: 0 10px 20px rgba(255, 30, 30, 0.15); }
-        .feature-box i { font-size: 35px; color: var(--primary); margin-bottom: 15px; filter: drop-shadow(0 0 8px var(--primary-glow)); }
-        .feature-box h4 { font-family: 'Orbitron'; margin-bottom: 10px; font-size: 18px; }
-
         /* SEARCH BAR STYLES */
         .search-container { position: relative; max-width: 100%; margin-bottom: 30px; }
         .search-container .form-control { width: 100%; padding: 15px 15px 15px 50px; border-radius: 30px; background: rgba(0,0,0,0.6); border: 1px solid var(--border); color: #fff; outline: none; transition: all 0.3s ease; font-size: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); backdrop-filter: var(--glass-blur);}
@@ -133,7 +121,6 @@
             .header { flex-direction: column; gap: 15px; padding: 15px; border-radius: 0 0 20px 20px; }
             .nav-links { width: 100%; justify-content: center; overflow-x: auto; padding-bottom: 10px; }
             .user-info { width: 100%; justify-content: space-between; }
-            .hero h1 { font-size: 2rem; }
         }
     </style>
 </head>
@@ -174,29 +161,6 @@
 
     <div class="container">
         <div id="sec-store" class="section-content active">
-            <div class="hero">
-                <h1>HỆ SINH THÁI <span>ĐA NHIỆM</span></h1>
-                <p>Nền tảng phân phối tự động các sản phẩm số, mã nguồn, tool tối ưu hóa và tài khoản. Giao dịch mã hóa, xử lý mượt mà trong tích tắc.</p>
-                
-                <div class="features-grid">
-                    <div class="feature-box">
-                        <i class="fas fa-cogs"></i>
-                        <h4>Xử lý tự động</h4>
-                        <p style="font-size: 13px; margin:0; color:var(--text-muted);">Giao dịch cộng tiền và giao hàng 100% tự động bằng API.</p>
-                    </div>
-                    <div class="feature-box">
-                        <i class="fas fa-shield-virus"></i>
-                        <h4>Bảo vệ Anti-DDoS</h4>
-                        <p style="font-size: 13px; margin:0; color:var(--text-muted);">Tường lửa chống bão hòa truy cập, lọc proxy xấu tự động.</p>
-                    </div>
-                    <div class="feature-box">
-                        <i class="fas fa-gem"></i>
-                        <h4>Đa dạng sản phẩm</h4>
-                        <p style="font-size: 13px; margin:0; color:var(--text-muted);">Từ Tool Auto, Source Web đến Item Game, mọi thứ bạn cần.</p>
-                    </div>
-                </div>
-            </div>
-
             <h2 class="section-title"><i class="fas fa-box-open"></i> KHO SẢN PHẨM</h2>
             
             <div class="search-container">
@@ -332,8 +296,8 @@
         </div>
         <p style="opacity: 0.4; font-size: 12px; margin-top: 30px;">&copy; 2026 QuocDatSec. System Online. All Rights Reserved.</p>
     </div>
-        <script>
-        // CẤU HÌNH FIREBASE
+    
+    <script>
         const firebaseConfig = {
             databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
@@ -440,11 +404,10 @@
                     p.category = p.category || 'tool'; 
                     allProducts.push(p);
                 });
-                renderProducts(allProducts); // Render toàn bộ sản phẩm lúc đầu
+                renderProducts(allProducts);
             });
         }
 
-        // HÀM MỚI: TÌM KIẾM SẢN PHẨM
         function searchProducts() {
             const query = document.getElementById('search-input').value.toLowerCase();
             const filtered = allProducts.filter(p => 
@@ -454,7 +417,6 @@
             renderProducts(filtered);
         }
 
-        // ĐÃ CHỈNH SỬA: CHỈ NHẬN MẢNG DỮ LIỆU ĐẦU VÀO ĐỂ TƯƠNG THÍCH VỚI TÌM KIẾM
         function renderProducts(productsToRender) {
             const list = document.getElementById('product-list');
             list.innerHTML = '';
@@ -497,7 +459,6 @@
             }
             if(currentBalance < price) {
                 alert(`Từ chối truy cập! Tài khoản còn thiếu ${(price - currentBalance).toLocaleString()}đ.`);
-                // Chuyển sang tab nạp tiền (Index 1 do đã xóa trang chủ)
                 switchNav('sec-deposit', document.querySelectorAll('#main-nav button')[1]);
                 return;
             }
@@ -601,7 +562,6 @@
                 document.getElementById('card-pin').value = '';
                 btn.innerHTML = "<i class='fas fa-paper-plane'></i> GỬI YÊU CẦU NẠP";
                 btn.disabled = false;
-                // Chuyển sang tab lịch sử (Index 2 do đã xóa trang chủ)
                 switchNav('sec-history', document.querySelectorAll('#main-nav button')[2]);
             }).catch(e => {
                 alert("Connection Error: " + e.message);
