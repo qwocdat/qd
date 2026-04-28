@@ -67,9 +67,12 @@
         .feature-box i { font-size: 35px; color: var(--primary); margin-bottom: 15px; filter: drop-shadow(0 0 8px var(--primary-glow)); }
         .feature-box h4 { font-family: 'Orbitron'; margin-bottom: 10px; font-size: 18px; }
 
-        .category-bar { display: flex; gap: 12px; margin-bottom: 30px; overflow-x: auto; padding-bottom: 10px; }
-        .cat-btn { background: rgba(0,0,0,0.5); border: 1px solid var(--border); color: var(--text-muted); padding: 10px 25px; border-radius: 30px; cursor: pointer; transition: all 0.3s ease; white-space: nowrap; font-weight: 500; backdrop-filter: var(--glass-blur); }
-        .cat-btn.active, .cat-btn:hover { background: var(--primary); border-color: var(--primary); color: #fff; box-shadow: 0 0 15px var(--primary-glow); transform: translateY(-2px); }
+        /* SEARCH BAR STYLES */
+        .search-container { position: relative; max-width: 100%; margin-bottom: 30px; }
+        .search-container .form-control { width: 100%; padding: 15px 15px 15px 50px; border-radius: 30px; background: rgba(0,0,0,0.6); border: 1px solid var(--border); color: #fff; outline: none; transition: all 0.3s ease; font-size: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); backdrop-filter: var(--glass-blur);}
+        .search-container .form-control:focus { border-color: var(--primary); box-shadow: 0 0 20px rgba(255, 30, 30, 0.2); background: rgba(10,0,0,0.8); }
+        .search-container .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--text-muted); transition: all 0.3s ease; font-size: 18px; }
+        .search-container .form-control:focus + .search-icon { color: var(--primary); text-shadow: 0 0 10px var(--primary-glow); }
 
         .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
         .product-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 25px; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; display: flex; flex-direction: column; backdrop-filter: var(--glass-blur); }
@@ -128,7 +131,7 @@
 
         @media (max-width: 768px) {
             .header { flex-direction: column; gap: 15px; padding: 15px; border-radius: 0 0 20px 20px; }
-            .nav-links { width: 100%; justify-content: flex-start; overflow-x: auto; padding-bottom: 10px; }
+            .nav-links { width: 100%; justify-content: center; overflow-x: auto; padding-bottom: 10px; }
             .user-info { width: 100%; justify-content: space-between; }
             .hero h1 { font-size: 2rem; }
         }
@@ -154,12 +157,11 @@
     </div>
 
     <div class="header">
-        <div class="logo" onclick="switchNav('sec-home', document.querySelectorAll('.nav-links button')[0])">
+        <div class="logo" onclick="switchNav('sec-store', document.querySelectorAll('.nav-links button')[0])">
             <i class="fas fa-shield-virus"></i> QD<span>.SEC</span>
         </div>
         <div class="nav-links" id="main-nav">
-            <button class="active" onclick="switchNav('sec-home', this)"><i class="fas fa-home"></i> TRANG CHỦ</button>
-            <button onclick="switchNav('sec-store', this)"><i class="fas fa-shopping-bag"></i> CỬA HÀNG</button>
+            <button class="active" onclick="switchNav('sec-store', this)"><i class="fas fa-store"></i> CỬA HÀNG</button>
             <button onclick="switchNav('sec-deposit', this)"><i class="fas fa-wallet"></i> NẠP TIỀN</button>
             <button onclick="switchNav('sec-history', this)"><i class="fas fa-list-alt"></i> LỊCH SỬ</button>
         </div>
@@ -171,11 +173,10 @@
     </div>
 
     <div class="container">
-        <div id="sec-home" class="section-content active">
+        <div id="sec-store" class="section-content active">
             <div class="hero">
                 <h1>HỆ SINH THÁI <span>ĐA NHIỆM</span></h1>
                 <p>Nền tảng phân phối tự động các sản phẩm số, mã nguồn, tool tối ưu hóa và tài khoản. Giao dịch mã hóa, xử lý mượt mà trong tích tắc.</p>
-                <button class="btn btn-buy" style="max-width: 280px; margin-top:15px; padding: 16px; font-size: 16px;" onclick="document.querySelectorAll('.nav-links button')[1].click()"><i class="fas fa-rocket"></i> VÀO CỬA HÀNG NGAY</button>
                 
                 <div class="features-grid">
                     <div class="feature-box">
@@ -195,19 +196,12 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div id="sec-store" class="section-content">
-            <h2 class="section-title"><i class="fas fa-store"></i> KHO SẢN PHẨM</h2>
+            <h2 class="section-title"><i class="fas fa-box-open"></i> KHO SẢN PHẨM</h2>
             
-            <div class="category-bar" id="category-filter">
-                <button class="cat-btn active" onclick="filterCategory('all', this)">Tất cả</button>
-                <button class="cat-btn" onclick="filterCategory('tool', this)">Tool Auto & Hack</button>
-                <button class="cat-btn" onclick="filterCategory('source', this)">Mã Nguồn Web</button>
-                <button class="cat-btn" onclick="filterCategory('account', this)">Tài Khoản VIP</button>
-                <button class="cat-btn" onclick="filterCategory('game', this)">Vật phẩm Game</button>
-                <button class="cat-btn" onclick="filterCategory('tut', this)">Tài liệu/Thủ thuật</button>
-                <button class="cat-btn" onclick="filterCategory('service', this)">Dịch vụ khác</button>
+            <div class="search-container">
+                <input type="text" id="search-input" class="form-control" placeholder="Nhập tên sản phẩm hoặc từ khóa bạn cần tìm..." onkeyup="searchProducts()">
+                <i class="fas fa-search search-icon"></i>
             </div>
 
             <div class="product-grid" id="product-list">
@@ -348,11 +342,10 @@
         }
         const db = firebase.database();
         
-        let userId = null; // Dùng luôn HWID làm ID người dùng
+        let userId = null; 
         let currentBalance = 0;
         let allProducts = [];
 
-        // HÀM TẠO HOẶC LẤY HWID
         function generateHWID() {
             let hwid = localStorage.getItem('qd_hwid');
             if(!hwid) {
@@ -362,16 +355,13 @@
             return hwid;
         }
 
-        // AUTO CHẠY KHI VÀO WEB
         window.onload = () => {
             const hwid = generateHWID();
             userId = hwid; 
             
-            // Hiện HWID lên bảng DDOS và Header
             document.getElementById('ddos-hwid').innerText = hwid;
             document.getElementById('user-display').innerText = hwid;
 
-            // MÔ PHỎNG QUÁ TRÌNH KIỂM TRA BẢO MẬT (DDOS CHECK)
             const ddosSteps = [
                 "Đang phân tích Request ID...",
                 "Kiểm tra tính toàn vẹn của IP...",
@@ -382,35 +372,30 @@
             let step = 0;
             const statusEl = document.getElementById('ddos-status');
             
-            // Cứ 800ms nhảy 1 dòng chữ, xong thì mở khóa
             const checkInterval = setInterval(() => {
                 step++;
                 if (step < ddosSteps.length) {
                     statusEl.innerText = ddosSteps[step];
                 } else {
                     clearInterval(checkInterval);
-                    statusEl.style.color = "#00ff88"; // Đổi màu xanh thành công
+                    statusEl.style.color = "#00ff88"; 
                     
-                    // Hiệu ứng Fade Out cho màn hình khóa
                     const modal = document.getElementById('login-modal');
                     modal.style.opacity = '0';
                     setTimeout(() => {
                         modal.classList.add('hidden');
-                        // Bắt đầu tải dữ liệu Firebase sau khi vào web
                         initApp(); 
                     }, 500);
                 }
             }, 800);
         };
 
-        // KHỞI ĐỘNG KẾT NỐI DATABASE
         function initApp() {
             listenBalance();
             loadProducts();
             loadHistory();
         }
 
-        // ====== LOGIC GIAO DIỆN & FIREBASE ======
         function switchNav(sectionId, btnEl) {
             document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('#main-nav button').forEach(b => b.classList.remove('active'));
@@ -431,7 +416,6 @@
                 currentBalance = snap.val() || 0;
                 document.getElementById('balance-display').innerText = currentBalance.toLocaleString();
                 
-                // Màn hình nạp tiền xanh lá nếu vừa nhận được tiền
                 if(window.isWaitingForBank && currentBalance > window.oldBalance) {
                     const received = currentBalance - window.oldBalance;
                     document.getElementById('invoice-area').innerHTML = `
@@ -456,26 +440,34 @@
                     p.category = p.category || 'tool'; 
                     allProducts.push(p);
                 });
-                renderProducts('all');
+                renderProducts(allProducts); // Render toàn bộ sản phẩm lúc đầu
             });
         }
 
-        function renderProducts(category) {
+        // HÀM MỚI: TÌM KIẾM SẢN PHẨM
+        function searchProducts() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const filtered = allProducts.filter(p => 
+                p.name.toLowerCase().includes(query) || 
+                (p.description && p.description.toLowerCase().includes(query))
+            );
+            renderProducts(filtered);
+        }
+
+        // ĐÃ CHỈNH SỬA: CHỈ NHẬN MẢNG DỮ LIỆU ĐẦU VÀO ĐỂ TƯƠNG THÍCH VỚI TÌM KIẾM
+        function renderProducts(productsToRender) {
             const list = document.getElementById('product-list');
             list.innerHTML = '';
-            const filtered = category === 'all' 
-                ? allProducts 
-                : allProducts.filter(p => p.category === category);
             
-            if(filtered.length === 0) {
+            if(productsToRender.length === 0) {
                 list.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 60px; color: var(--text-muted); background: var(--card); border-radius: 12px; border: 1px dashed var(--border);">
-                    <i class="fas fa-box-open" style="font-size: 40px; margin-bottom: 15px; opacity: 0.5;"></i>
-                    <br>Kho dữ liệu trống cho danh mục này.
+                    <i class="fas fa-search" style="font-size: 40px; margin-bottom: 15px; opacity: 0.5;"></i>
+                    <br>Không tìm thấy dữ liệu nào phù hợp.
                 </div>`;
                 return;
             }
 
-            filtered.forEach(p => {
+            productsToRender.forEach(p => {
                 const priceText = p.price === 0 ? 'FREE' : p.price.toLocaleString() + ' đ';
                 const btnClass = p.price === 0 ? 'btn-free' : 'btn-buy';
                 const btnText = p.price === 0 ? '<i class="fas fa-download"></i> TẢI NGAY' : '<i class="fas fa-shopping-cart"></i> THANH TOÁN';
@@ -495,12 +487,6 @@
             });
         }
 
-        function filterCategory(cat, btnEl) {
-            document.querySelectorAll('#category-filter .cat-btn').forEach(b => b.classList.remove('active'));
-            btnEl.classList.add('active');
-            renderProducts(cat);
-        }
-
         function buyItem(key, price, link, name) {
             if(!link || link === "undefined") return alert("System Error: Admin chưa thiết lập dữ liệu đầu ra!");
             if(price === 0) {
@@ -511,7 +497,8 @@
             }
             if(currentBalance < price) {
                 alert(`Từ chối truy cập! Tài khoản còn thiếu ${(price - currentBalance).toLocaleString()}đ.`);
-                switchNav('sec-deposit', document.querySelectorAll('#main-nav button')[2]);
+                // Chuyển sang tab nạp tiền (Index 1 do đã xóa trang chủ)
+                switchNav('sec-deposit', document.querySelectorAll('#main-nav button')[1]);
                 return;
             }
             if(confirm(`Khởi tạo thanh toán ${price.toLocaleString()}đ cho gói [ ${name} ]?`)) {
@@ -531,7 +518,6 @@
         }
 
         function loadHistory() {
-            // Lịch sử mua hàng
             db.ref('users/' + userId + '/history').on('value', snap => {
                 const buyBody = document.getElementById('history-buy-body');
                 buyBody.innerHTML = '';
@@ -553,7 +539,6 @@
                 if(!hasBuy) buyBody.innerHTML = '<tr><td colspan="4" class="text-center" style="padding: 30px; color: var(--text-muted);">Trống.</td></tr>';
             });
 
-            // Lịch sử nạp thẻ
             db.ref('card_requests').orderByChild('user').equalTo(userId).on('value', snap => {
                 const cardBody = document.getElementById('history-card-body');
                 cardBody.innerHTML = '';
@@ -580,7 +565,6 @@
             const amt = document.getElementById('bank-amount').value;
             if(!amt || amt < 10000) return alert("System Error: Định mức nạp tối thiểu là 10.000đ!");
             
-            // Gắn thẳng HWID vào nội dung nạp MB Bank (VD: NAP SEC123456)
             const content = "NAP " + userId.replace('-', '');
             const qrUrl = `https://qr.sepay.vn/img?bank=MB&acc=0989249990&template=compact&amount=${amt}&des=${content}`;
             
@@ -617,7 +601,8 @@
                 document.getElementById('card-pin').value = '';
                 btn.innerHTML = "<i class='fas fa-paper-plane'></i> GỬI YÊU CẦU NẠP";
                 btn.disabled = false;
-                switchNav('sec-history', document.querySelectorAll('#main-nav button')[3]);
+                // Chuyển sang tab lịch sử (Index 2 do đã xóa trang chủ)
+                switchNav('sec-history', document.querySelectorAll('#main-nav button')[2]);
             }).catch(e => {
                 alert("Connection Error: " + e.message);
                 btn.innerHTML = "<i class='fas fa-paper-plane'></i> GỬI YÊU CẦU NẠP";
