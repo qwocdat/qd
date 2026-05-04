@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=yes, orientation=portrait">
   <title>Booster Hub Pro • Free Fire</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <style>
     :root {
       --bg: #0b0b14;
@@ -27,15 +30,8 @@
       --shadow-float: 0 12px 28px rgba(255,0,0,0.5), 0 0 0 2px rgba(255,255,255,0.2);
     }
 
-    * { 
-      margin: 0; 
-      padding: 0; 
-      box-sizing: border-box; 
-      -webkit-tap-highlight-color: transparent; 
-    }
-    
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html { font-size: 16px; }
-    
     body {
       font-family: var(--font);
       background: var(--bg);
@@ -47,24 +43,12 @@
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      /* FIX LỖI CUỘN TRANG (chừa khoảng trống cho tai thỏ/camera) */
-      padding: max(35px, env(safe-area-inset-top)) 10px max(40px, env(safe-area-inset-bottom));
+      padding: 12px 10px 40px;
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
       letter-spacing: -0.01em;
       user-select: none;
       -webkit-user-select: none;
-    }
-
-    /* HIỆU ỨNG BỤI */
-    #dustCanvas { 
-      position: fixed; 
-      top: 0; 
-      left: 0; 
-      width: 100vw; 
-      height: 100vh; 
-      z-index: -1; 
-      pointer-events: none; 
     }
 
     .app-container {
@@ -73,13 +57,6 @@
       display: flex;
       flex-direction: column;
       gap: 14px;
-      margin-top: 8px;
-      animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    @keyframes fadeIn { 
-      from { opacity: 0; transform: scale(0.97); } 
-      to { opacity: 1; transform: scale(1); } 
     }
 
     /* HEADER */
@@ -99,8 +76,8 @@
     .device-logo {
       width: 42px; height: 42px; border-radius: 14px;
       background: var(--glass); display: flex; align-items: center; justify-content: center;
-      font-size: 1.6rem; border: 1px solid rgba(255,255,255,0.15);
-      flex-shrink: 0;
+      font-size: 1.4rem; border: 1px solid rgba(255,255,255,0.15);
+      flex-shrink: 0; color: #fff;
     }
     .device-info { flex: 1; min-width: 100px; }
     .device-name { font-size: 0.9rem; font-weight: 600; color: var(--text); line-height: 1.2; }
@@ -118,7 +95,6 @@
       box-shadow: 0 0 12px #00ff88; animation: pulse 1.2s infinite;
     }
     .active-label { font-size: 0.7rem; font-weight: 700; color: #00ff88; animation: pulseText 1.2s infinite; }
-    
     @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(1.6)} }
     @keyframes pulseText { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
@@ -126,6 +102,7 @@
     .section-title {
       font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
       color: var(--text-secondary); padding: 0 4px; margin-bottom: 2px;
+      display: flex; align-items: center; gap: 6px;
     }
 
     /* TOGGLE LIST */
@@ -146,32 +123,19 @@
       overflow: hidden;
     }
     .toggle-row.liquid-active { animation: liquidPress 0.45s ease-out; }
-    
     @keyframes liquidPress {
       0% { background: rgba(255,255,255,0.08); transform: scale(0.97); }
       40% { background: rgba(255,255,255,0.14); transform: scale(0.99); }
       100% { background: var(--surface); transform: scale(1); }
     }
-    
     .toggle-label {
-      font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; color: var(--text);
+      font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 10px; color: var(--text);
       flex: 1; min-width: 0;
     }
-    .toggle-label .icon { font-size: 1.2rem; width: 24px; text-align: center; flex-shrink: 0; }
+    .toggle-label .icon { font-size: 1.1rem; width: 24px; text-align: center; flex-shrink: 0; }
 
     /* NÚT TÙY CHỈNH TÂM ẢO */
-    .btn-custom-aim { 
-      background: rgba(255,255,255,0.1); 
-      border: 1px solid var(--glass-border); 
-      color: #fff; 
-      font-size: 0.7rem; 
-      font-weight: bold; 
-      padding: 6px 12px; 
-      border-radius: 12px; 
-      margin-right: 10px; 
-      cursor: pointer; 
-      transition: 0.2s; 
-    }
+    .btn-custom-aim { background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); color: #fff; font-size: 0.7rem; font-weight: bold; padding: 6px 12px; border-radius: 12px; margin-right: 10px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 4px; }
     .btn-custom-aim:active { transform: scale(0.9); background: rgba(255,255,255,0.2); }
 
     /* iOS Switch */
@@ -224,7 +188,7 @@
       border: none; color: #000; font-weight: 800; font-size: 0.8rem;
       padding: 10px 20px; border-radius: 20px; cursor: pointer;
       box-shadow: 0 4px 16px rgba(0,200,83,0.3); letter-spacing: 0.04em;
-      transition: all var(--transition-ios);
+      transition: all var(--transition-ios); display: flex; align-items: center; gap: 6px;
     }
     .script-btn:active { transform: scale(0.92); background: #00ff7f; }
     .script-console {
@@ -232,7 +196,7 @@
       font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.65rem;
       color: #00ff88; max-height: 80px; overflow-y: auto; min-height: 40px;
       border: 1px solid rgba(255,255,255,0.08); letter-spacing: 0.02em;
-      display: none; white-space: pre-wrap;
+      display: none; white-space: pre-wrap; margin-top: 8px;
     }
 
     /* GAME BUTTONS */
@@ -241,6 +205,7 @@
       flex: 1; padding: 16px 10px; border-radius: 20px; font-weight: 800; font-size: 0.85rem;
       text-align: center; border: 2px solid; cursor: pointer; transition: all var(--transition-ios);
       color: #fff; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      display: flex; justify-content: center; align-items: center; gap: 6px;
     }
     .game-btn.ff { background: linear-gradient(135deg, #ff4d1c, #ff6b35); border-color: rgba(255,140,80,0.5); box-shadow: 0 0 20px rgba(255,107,53,0.4); }
     .game-btn.ff:active { box-shadow: 0 0 35px #ff6b35; transform: scale(0.94); }
@@ -249,21 +214,33 @@
 
     /* FLOATING SHOOT BUTTON (TÂM ẢO) */
     .floating-shoot {
-      position: fixed; bottom: 70px; right: 24px; width: 68px; height: 68px;
-      background: radial-gradient(circle at 30% 30%, #ff5e5e, #c0392b);
-      border-radius: 50%; box-shadow: var(--shadow-float);
-      display: none; align-items: center; justify-content: center;
-      font-size: 2.2rem; color: #fff; z-index: 999; cursor: pointer;
-      transition: transform 0.1s ease, box-shadow 0.2s, background 0.3s, font-size 0.3s;
-      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      background: transparent;
+      border-radius: 50%;
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      cursor: move;
+      transition: transform 0.1s ease, box-shadow 0.2s;
+      overflow: hidden;
       animation: floatPulse 1.8s ease-in-out infinite, flyIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-      transform: scale(0);
     }
     .floating-shoot.visible {
       display: flex;
       animation: floatPulse 1.8s ease-in-out infinite, flyIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     }
-    
+    .floating-shoot img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
     @keyframes flyIn {
       0% { transform: scale(0) translateY(50px); opacity: 0; }
       100% { transform: scale(1) translateY(0); opacity: 1; }
@@ -272,7 +249,7 @@
       0%,100% { transform: translateY(0); }
       50% { transform: translateY(-6px); }
     }
-    .floating-shoot:active { transform: scale(0.85) !important; box-shadow: 0 8px 20px rgba(255,0,0,0.7); }
+    .floating-shoot:active { transform: scale(0.85) !important; box-shadow: 0 0 40px rgba(255, 0, 0, 1); }
 
     /* MODAL OVERLAY */
     .modal-overlay {
@@ -292,14 +269,19 @@
       from { transform: scale(0.8) translateY(30px); opacity: 0; }
       to { transform: scale(1) translateY(0); opacity: 1; }
     }
+    .checkmark-svg { width: 70px; height: 70px; margin: 0 auto 10px; display: block; }
+    .checkmark-circle { stroke: #4cd964; stroke-width: 4; fill: none; stroke-dasharray: 157; stroke-dashoffset: 157; animation: circle-draw 0.5s ease-out forwards; }
+    .checkmark-check { stroke: #4cd964; stroke-width: 4; fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 50; stroke-dashoffset: 50; animation: check-draw 0.4s 0.3s ease-out forwards; }
+    @keyframes circle-draw { to { stroke-dashoffset: 0; } }
+    @keyframes check-draw { to { stroke-dashoffset: 0; } }
     .modal-box h3 { font-weight: 800; margin: 12px 0 6px; font-size: 1.1rem; }
     .modal-box p { font-size: 0.8rem; color: #aaa; margin-bottom: 14px; }
-    .modal-box button.btn-close {
-      padding: 10px 28px; border-radius: 20px;
+    .modal-box button {
+      padding: 10px 28px; border-radius: 20px; width: 100%;
       background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
-      color: #fff; font-weight: 700; cursor: pointer; transition: 0.2s; width: 100%; margin-top: 10px;
+      color: #fff; font-weight: 700; cursor: pointer; transition: 0.2s;
     }
-    .modal-box button.btn-close:active { background: rgba(255,255,255,0.2); }
+    .modal-box button:active { background: rgba(255,255,255,0.2); }
 
     /* FOOTER */
     .footer-info {
@@ -318,7 +300,6 @@
     .input-group label { display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600; }
     .glass-input { width: 100%; padding: 14px; background: rgba(0,0,0,0.3); border: 1.5px solid var(--glass-border); border-radius: 12px; color: #fff; }
 
-    /* Responsive adjustments */
     @media (max-width: 380px) {
       .header-card { padding: 12px 12px; gap: 8px; }
       .device-logo { width: 36px; height: 36px; font-size: 1.3rem; border-radius: 10px; }
@@ -329,16 +310,17 @@
       input:checked + .slider::before { transform: translateX(18px); }
       .fps-opt { font-size: 0.7rem; padding: 8px 6px; }
       .game-btn { font-size: 0.75rem; padding: 14px 8px; }
-      .floating-shoot { width: 60px; height: 60px; font-size: 1.8rem; bottom: 50px; right: 16px; }
+      .floating-shoot { width: 60px; height: 60px; font-size: 1.8rem; }
+    }
+    @media (min-width: 420px) {
+      .toggle-row { padding: 14px 18px; }
     }
   </style>
 </head>
 <body>
-  <canvas id="dustCanvas"></canvas>
-
   <div class="app-container">
     <div class="header-card">
-      <div class="device-logo" id="deviceEmoji">📱</div>
+      <div class="device-logo" id="deviceEmoji"><i class="fa-solid fa-mobile-screen"></i></div>
       <div class="device-info">
         <div class="device-name" id="deviceBrand">Đang nhận diện...</div>
         <div class="device-detail" id="devicePlatform"></div>
@@ -352,7 +334,7 @@
       </div>
     </div>
 
-    <div class="section-title">⚡ BẢNG ĐIỀU KHIỂN</div>
+    <div class="section-title"><i class="fa-solid fa-sliders" style="color:var(--text-secondary);"></i> BẢNG ĐIỀU KHIỂN</div>
     <div class="toggle-list" id="toggleList"></div>
 
     <div class="fps-section">
@@ -370,32 +352,36 @@
 
     <div class="script-section">
       <div class="script-status">
-        <span style="font-weight:700;">📜 Script Run</span>
-        <button class="script-btn" id="scriptTrigger">KÍCH HOẠT</button>
+        <span style="font-weight:700; display:flex; align-items:center; gap:6px;"><i class="fa-solid fa-code"></i> Script Run</span>
+        <button class="script-btn" id="scriptTrigger"><i class="fa-solid fa-play"></i> KÍCH HOẠT</button>
       </div>
       <div class="script-console" id="scriptConsole"></div>
     </div>
 
     <div class="game-row">
-      <button class="game-btn ff" id="btnFF">🔥 FREE FIRE</button>
-      <button class="game-btn ff-max" id="btnFFMax">⚡ FREE FIRE MAX</button>
+      <button class="game-btn ff" id="btnFF"><i class="fa-solid fa-fire"></i> FREE FIRE</button>
+      <button class="game-btn ff-max" id="btnFFMax"><i class="fa-solid fa-bolt"></i> FF MAX</button>
     </div>
 
     <div class="footer-info">
-      <span>📞 Dev Zalo: <span class="dev-zalo" onclick="window.open('https://zalo.me/0989249990','_blank')">0989249990</span></span>
+      <span><i class="fa-solid fa-phone"></i> Dev Zalo: <span class="dev-zalo" onclick="window.open('https://zalo.me/0989249990','_blank')">0989249990</span></span>
       <span class="live-clock" id="clock">00:00:00</span>
     </div>
-
-    <button class="script-btn" style="background:transparent; border:1px solid #aaa; color:#aaa; margin-top: 10px;" onclick="sessionStorage.removeItem('isLoggedIn'); window.location.href='index.html'">Đăng Xuất Khỏi App</button>
   </div>
 
-  <div class="floating-shoot" id="floatingShoot">🔫</div>
+  <div class="floating-shoot draggable" id="floatingShoot">
+      <img id="floatingShootImg" src="uploaded:61192.png" alt="Target Crosshair">
+  </div>
 
   <div class="modal-overlay" id="scriptModal">
     <div class="modal-box">
-      <h3 style="color:#4cd964;">Thành Công!</h3>
+      <svg class="checkmark-svg" viewBox="0 0 52 52">
+        <circle class="checkmark-circle" cx="26" cy="26" r="23" />
+        <path class="checkmark-check" d="M16 28 l7 7 l13 -13" />
+      </svg>
+      <h3>Thành Công!</h3>
       <p>Script đã chạy hoàn tất.</p>
-      <button class="btn-close" id="closeScriptModal">ĐÓNG LẠI</button>
+      <button id="closeScriptModal">ĐÓNG LẠI</button>
     </div>
   </div>
 
@@ -403,423 +389,453 @@
     <div class="modal-box">
       <h3>Cấu Hình Tâm Ảo</h3>
       <div class="crosshair-opts">
-        <div class="cross-opt active" data-icon="🔫">🔫</div>
-        <div class="cross-opt" data-icon="🎯">🎯</div>
-        <div class="cross-opt" data-icon="➕">➕</div>
-        <div class="cross-opt" data-icon="🔴">🔴</div>
+        <div class="cross-opt active" data-icon="Target">
+            <img src="uploaded:61192.png" alt="Target Crosshair" style="width:100%;height:100%;">
+        </div>
+        <div class="cross-opt" data-icon='<i class="fa-solid fa-crosshairs"></i>'><i class="fa-solid fa-crosshairs"></i></div>
+        <div class="cross-opt" data-icon='<i class="fa-solid fa-plus"></i>'><i class="fa-solid fa-plus"></i></div>
+        <div class="cross-opt" data-icon='<i class="fa-solid fa-circle"></i>'><i class="fa-solid fa-circle"></i></div>
       </div>
       <div class="input-group">
         <label>Màu nền (Hex/Tên):</label>
-        <input type="color" id="crossColor" class="glass-input" style="padding: 0; height: 40px; cursor: pointer;" value="#ff5e5e">
+        <input type="color" id="crossColor" class="glass-input" style="padding: 0; height: 40px; cursor: pointer;" value="#ff0000">
       </div>
       <div class="input-group">
         <label>Kích thước (px):</label>
         <input type="range" id="crossSize" min="40" max="100" value="68" style="width:100%;">
       </div>
-      <button class="btn-close" id="closeCrosshairModal" style="background:var(--ios-blue);">LƯU & ĐÓNG</button>
+      <button id="closeCrosshairModal" style="background:var(--ios-blue);">LƯU & ĐÓNG</button>
     </div>
   </div>
 
   <script>
-    // ==========================================
-    // 1. KIỂM TRA BẢO MẬT (PHẢI ĐĂNG NHẬP MỚI VÀO ĐƯỢC)
-    // ==========================================
-    if (!sessionStorage.getItem('isLoggedIn')) {
-      window.location.href = 'index.html';
-    }
-
-    // ==========================================
-    // 2. HIỆU ỨNG BỤI (DUST BACKGROUND)
-    // ==========================================
-    const dCanvas = document.getElementById('dustCanvas');
-    const dCtx = dCanvas.getContext('2d');
-    let particles = [];
-    
-    function resizeDust() {
-      dCanvas.width = window.innerWidth;
-      dCanvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resizeDust);
-    resizeDust();
-    
-    for (let i = 0; i < 40; i++) {
-      particles.push({
-        x: Math.random() * dCanvas.width,
-        y: Math.random() * dCanvas.height,
-        r: Math.random() * 2 + 0.5,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        alpha: Math.random() * 0.5 + 0.1
-      });
-    }
-    
-    function drawDust() {
-      dCtx.clearRect(0, 0, dCanvas.width, dCanvas.height);
-      particles.forEach(p => {
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0 || p.x > dCanvas.width) p.vx *= -1;
-        if (p.y < 0 || p.y > dCanvas.height) p.vy *= -1;
-        
-        dCtx.beginPath();
-        dCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        dCtx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
-        dCtx.fill();
-      });
-      requestAnimationFrame(drawDust);
-    }
-    drawDust();
-
-    // ==========================================
-    // 3. HIỆU ỨNG ÂM THANH (AUDIO CONTEXT)
-    // ==========================================
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    let audioCtx = null;
-    
-    function getCtx() {
-      if (!audioCtx) audioCtx = new AudioCtx();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      return audioCtx;
-    }
-    
-    function beep(f = 1000, d = 0.07, type = 'sine', v = 0.2) {
-      try {
-        const c = getCtx();
-        const o = c.createOscillator();
-        const g = c.createGain();
-        o.type = type;
-        o.frequency.setValueAtTime(f, c.currentTime);
-        g.gain.setValueAtTime(v, c.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + d);
-        o.connect(g);
-        g.connect(c.destination);
-        o.start();
-        o.stop(c.currentTime + d);
-      } catch (e) {}
-    }
-    
-    function clickSound() {
-      beep(1100, 0.06, 'sine', 0.18);
-      setTimeout(() => beep(1400, 0.05, 'sine', 0.14), 50);
-    }
-    
-    function toggleSound() {
-      beep(800, 0.04, 'sine', 0.12);
-      setTimeout(() => beep(600, 0.04, 'sine', 0.1), 40);
-    }
-
-    // ==========================================
-    // 4. NHẬN DIỆN THIẾT BỊ
-    // ==========================================
-    const ua = navigator.userAgent.toLowerCase();
-    let brand = 'Thiết bị', emoji = '📱', platform = navigator.platform || 'Thiết bị di động';
-    
-    if (ua.includes('iphone') || ua.includes('ipad')) { brand = 'Apple iPhone/iPad'; emoji = '🍎'; }
-    else if (ua.includes('macintosh')) { brand = 'Apple Mac'; emoji = '💻'; }
-    else if (ua.includes('samsung') || ua.includes('sm-')) { brand = 'Samsung'; emoji = '📱'; }
-    else if (ua.includes('xiaomi') || ua.includes('redmi')) { brand = 'Xiaomi'; emoji = '📱'; }
-    else if (ua.includes('oppo')) { brand = 'OPPO'; emoji = '📱'; }
-    else if (ua.includes('huawei') || ua.includes('honor')) { brand = 'Huawei'; emoji = '📱'; }
-    else if (ua.includes('windows')) { brand = 'Windows PC'; emoji = '🖥️'; platform = 'Windows'; }
-    
-    document.getElementById('deviceEmoji').textContent = emoji;
-    document.getElementById('deviceBrand').textContent = brand;
-    document.getElementById('devicePlatform').textContent = platform;
-
-    // ==========================================
-    // 5. TẠO DANH SÁCH TÍNH NĂNG (TOGGLES)
-    // ==========================================
-    const togglesData = [
-      { id: 'headlock', label: 'HEAD LOCK', icon: '👑' },
-      { id: 'fixrung', label: 'Fix Rung Tâm', icon: '🎯' },
-      { id: 'giamlac', label: 'Giảm Lạc Đạn', icon: '🔫' },
-      { id: 'booster', label: 'BOOSTER RAM', icon: '🚀' },
-      { id: 'extracly', label: 'Extracly +', icon: '⚡' },
-      { id: 'aimlock', label: 'AimLock', icon: '🔒' }
-    ];
-    
-    const toggleList = document.getElementById('toggleList');
-    const floatShoot = document.getElementById('floatingShoot');
-    
-    togglesData.forEach(item => {
-      const row = document.createElement('div');
-      row.className = 'toggle-row';
-      
-      let customBtnHtml = '';
-      if (item.id === 'aimlock') {
-        customBtnHtml = `<button class="btn-custom-aim" id="btnCustomAim">⚙️ Tùy chỉnh</button>`;
+    (function() {
+      // ========== AUDIO ==========
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      let audioCtx = null;
+      function getCtx() { if (!audioCtx) audioCtx = new AudioCtx(); if (audioCtx.state === 'suspended') audioCtx.resume(); return audioCtx; }
+      function beep(f=1000, d=0.07, type='sine', v=0.2) {
+        try { const c=getCtx(); const o=c.createOscillator(); const g=c.createGain(); o.type=type; o.frequency.setValueAtTime(f,c.currentTime); g.gain.setValueAtTime(v,c.currentTime); g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d); o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime+d); } catch(e){}
       }
-      
-      row.innerHTML = `
-        <div class="toggle-label"><span class="icon">${item.icon}</span> ${item.label}</div>
-        <div style="display:flex; align-items:center;">
-          ${customBtnHtml}
-          <label class="ios-switch">
-            <input type="checkbox" id="toggle-${item.id}">
-            <span class="slider"></span>
-          </label>
-        </div>
-      `;
-      toggleList.appendChild(row);
-      
-      const input = row.querySelector('input');
-      
-      // Bật modal Tùy chỉnh AimLock
-      if (item.id === 'aimlock') {
-        document.getElementById('btnCustomAim').addEventListener('click', () => {
-          clickSound();
-          document.getElementById('crosshairModal').classList.add('open');
-        });
-      }
-      
-      // Bật/tắt các công tắc
-      input.addEventListener('change', function() {
-        toggleSound();
-        row.classList.add('liquid-active');
-        setTimeout(() => row.classList.remove('liquid-active'), 450);
-        
-        // Hiện/ẩn nút bắn Tâm Ảo khi AimLock thay đổi
-        if (item.id === 'aimlock') {
-          if (input.checked) {
-            floatShoot.classList.add('visible');
-            floatShoot.style.display = 'flex';
-          } else {
-            floatShoot.classList.remove('visible');
-            floatShoot.style.display = 'none';
-          }
-        }
-      });
-    });
+      function clickSound() { beep(1100,0.06,'sine',0.18); setTimeout(()=>beep(1400,0.05,'sine',0.14),50); }
+      function toggleSound() { beep(800,0.04,'sine',0.12); setTimeout(()=>beep(600,0.04,'sine',0.1),40); }
 
-    // ==========================================
-    // 6. LOGIC TÙY CHỈNH TÂM ẢO (CROSSHAIR MODAL)
-    // ==========================================
-    let currentCrossIcon = '🔫';
-    
-    document.querySelectorAll('.cross-opt').forEach(opt => {
-      opt.addEventListener('click', function() {
-        document.querySelectorAll('.cross-opt').forEach(o => o.classList.remove('active'));
-        this.classList.add('active');
-        currentCrossIcon = this.getAttribute('data-icon');
-        clickSound();
-      });
-    });
-    
-    document.getElementById('closeCrosshairModal').addEventListener('click', () => {
-      const color = document.getElementById('crossColor').value;
-      const size = document.getElementById('crossSize').value;
-      
-      floatShoot.textContent = currentCrossIcon;
-      floatShoot.style.width = size + 'px';
-      floatShoot.style.height = size + 'px';
-      floatShoot.style.fontSize = (size * 0.45) + 'px';
-      floatShoot.style.background = `radial-gradient(circle at 30% 30%, ${color}, #111)`;
-      
-      document.getElementById('crosshairModal').classList.remove('open');
-      beep(500, 0.05, 'triangle', 0.1);
-    });
-    
-    // Hiệu ứng khi bấm vào Tâm ảo trên màn hình
-    floatShoot.addEventListener('click', () => {
-      clickSound();
-      beep(200, 0.1, 'square', 0.25);
-      floatShoot.style.transform = 'scale(0.8)';
-      setTimeout(() => floatShoot.style.transform = '', 120);
-    });
+      // ========== DEVICE DETECTION ==========
+      const ua = navigator.userAgent.toLowerCase();
+      let brand='Thiết bị', emoji='<i class="fa-solid fa-mobile-screen"></i>', platform = navigator.platform || 'Thiết bị di động';
+      if(ua.includes('iphone')||ua.includes('ipad')) { brand='Apple iPhone/iPad'; emoji='<i class="fa-brands fa-apple"></i>'; }
+      else if(ua.includes('macintosh')) { brand='Apple Mac'; emoji='<i class="fa-solid fa-laptop"></i>'; }
+      else if(ua.includes('samsung')||ua.includes('sm-')) { brand='Samsung'; emoji='<i class="fa-brands fa-android"></i>'; }
+      else if(ua.includes('xiaomi')||ua.includes('redmi')) { brand='Xiaomi'; emoji='<i class="fa-brands fa-android"></i>'; }
+      else if(ua.includes('oppo')) { brand='OPPO'; emoji='<i class="fa-brands fa-android"></i>'; }
+      else if(ua.includes('huawei')||ua.includes('honor')) { brand='Huawei'; emoji='<i class="fa-brands fa-android"></i>'; }
+      else if(ua.includes('windows')) { brand='Windows PC'; emoji='<i class="fa-brands fa-windows"></i>'; platform='Windows'; }
+      document.getElementById('deviceEmoji').innerHTML = emoji;
+      document.getElementById('deviceBrand').textContent = brand;
+      document.getElementById('devicePlatform').textContent = platform;
 
-    // ==========================================
-    // 7. BIỂU ĐỒ FPS (FPS CHART)
-    // ==========================================
-    const canvas = document.getElementById('fpsCanvas');
-    const fpsDisplay = document.getElementById('fpsValue');
-    let targetFPS = 60, currentFPS = 60;
-    let historyData = new Array(60).fill(60);
-    
-    function drawChart() {
-      const wrapper = canvas.parentElement;
-      const w = wrapper.clientWidth;
-      const h = wrapper.clientHeight;
-      canvas.width = w;
-      canvas.height = h;
-      
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, w, h);
-      
-      // Vẽ Grid ngang
-      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-      ctx.lineWidth = 1;
-      for (let i = 0; i <= 4; i++) {
-        const y = (h / 4) * i;
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(w, y);
-        ctx.stroke();
-      }
-      
-      const maxF = Math.max(targetFPS * 1.3, 160);
-      const range = maxF;
-      const stepX = w / (historyData.length - 1);
-      
-      // Vẽ đường FPS phát sáng
-      ctx.shadowColor = '#00ff88';
-      ctx.shadowBlur = 8;
-      ctx.strokeStyle = '#00ff88';
-      ctx.lineWidth = 2.5;
-      
-      ctx.beginPath();
-      historyData.forEach((v, i) => {
-        const x = i * stepX;
-        const y = h - (v / range) * h;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      });
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-      
-      // Đổ bóng Gradient bên dưới đường FPS
-      ctx.beginPath();
-      historyData.forEach((v, i) => {
-        const x = i * stepX;
-        const y = h - (v / range) * h;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      });
-      ctx.lineTo(w, h);
-      ctx.lineTo(0, h);
-      ctx.closePath();
-      
-      const grad = ctx.createLinearGradient(0, 0, 0, h);
-      grad.addColorStop(0, 'rgba(0,255,136,0.2)');
-      grad.addColorStop(0.8, 'rgba(0,255,136,0.02)');
-      grad.addColorStop(1, 'transparent');
-      ctx.fillStyle = grad;
-      ctx.fill();
-    }
-    
-    function updateFPS() {
-      const diff = targetFPS - currentFPS;
-      currentFPS += diff * 0.14 + (Math.random() - 0.5) * 3;
-      if (Math.abs(diff) < 0.5) currentFPS = targetFPS + (Math.random() - 0.5) * 2;
-      currentFPS = Math.max(20, Math.min(targetFPS * 1.15, currentFPS));
-      
-      historyData.push(currentFPS);
-      if (historyData.length > 60) historyData.shift();
-      
-      fpsDisplay.textContent = Math.round(currentFPS);
-    }
-    
-    document.querySelectorAll('.fps-opt').forEach(btn => {
-      btn.addEventListener('click', function() {
-        const fps = parseInt(this.dataset.fps);
-        targetFPS = fps;
-        document.querySelectorAll('.fps-opt').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        currentFPS = historyData[historyData.length - 1] || fps;
-        beep(700 + fps / 2, 0.06, 'sine', 0.13);
-      });
-    });
-    
-    function animationLoop() {
-      updateFPS();
-      drawChart();
-      requestAnimationFrame(animationLoop);
-    }
-    animationLoop();
-    window.addEventListener('resize', drawChart);
-
-    // ==========================================
-    // 8. HỆ THỐNG KÍCH HOẠT SCRIPT
-    // ==========================================
-    const scriptBtn = document.getElementById('scriptTrigger');
-    const scriptConsole = document.getElementById('scriptConsole');
-    const scriptModal = document.getElementById('scriptModal');
-    let scriptRunning = false;
-    
-    function simulateScript() {
-      if (scriptRunning) return;
-      scriptRunning = true;
-      scriptBtn.textContent = 'ĐANG CHẠY...';
-      scriptBtn.style.background = 'linear-gradient(135deg, #ff3b30, #ff5e3a)';
-      scriptConsole.style.display = 'block';
-      scriptConsole.textContent = '';
-      
-      const lines = [
-        '> Initializing engine...',
-        '> Loading config.xml',
-        '> Injecting libboost.so',
-        '> Patching memory offsets',
-        '> Optimizing touch response',
-        '> Verifying integrity',
-        '> Script executed successfully.'
+      // ========== MẢNG CẤU HÌNH ICON FONT AWESOME ==========
+      const togglesData = [
+        { id:'headlock', label:'HEAD LOCK', icon:'<i class="fa-solid fa-crosshairs" style="color:#ff3b30;"></i>' },
+        { id:'fixrung', label:'Fix Rung Tâm', icon:'<i class="fa-solid fa-bullseye" style="color:#ff9500;"></i>' },
+        { id:'giamlac', label:'Giảm Lạc Đạn', icon:'<i class="fa-solid fa-compress" style="color:#34c759;"></i>' },
+        { id:'booster', label:'BOOSTER RAM', icon:'<i class="fa-solid fa-rocket" style="color:#0a84ff;"></i>' },
+        { id:'extracly', label:'Extracly +', icon:'<i class="fa-solid fa-bolt" style="color:#ffd60a;"></i>' },
+        { id:'aimlock', label:'AimLock', icon:'<i class="fa-solid fa-lock" style="color:#bf5af2;"></i>' }
       ];
-      let i = 0;
-      
-      const interval = setInterval(() => {
-        if (i < lines.length) {
-          scriptConsole.textContent += lines[i] + '\n';
-          scriptConsole.scrollTop = scriptConsole.scrollHeight;
-          beep(500 + Math.random() * 200, 0.03, 'square', 0.08);
-          i++;
-        } else {
-          clearInterval(interval);
-          setTimeout(() => {
-            scriptConsole.style.display = 'none';
-            scriptBtn.textContent = 'KÍCH HOẠT';
-            scriptBtn.style.background = 'linear-gradient(135deg, #00c853, #00e676)';
-            scriptRunning = false;
-            scriptModal.classList.add('open');
-          }, 400);
+      const toggleList = document.getElementById('toggleList');
+      const toggleStates = {};
+      const floatShoot = document.getElementById('floatingShoot');
+      const floatShootImg = document.getElementById('floatingShootImg');
+
+      togglesData.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'toggle-row';
+        
+        let customBtnHtml = '';
+        if (item.id === 'aimlock') {
+            customBtnHtml = `<button class="btn-custom-aim" id="btnCustomAim"><i class="fa-solid fa-gear"></i> Tùy chỉnh</button>`;
         }
-      }, 450);
-    }
-    
-    scriptBtn.addEventListener('click', () => {
-      clickSound();
-      simulateScript();
-    });
-    
-    document.getElementById('closeScriptModal').addEventListener('click', () => {
-      scriptModal.classList.remove('open');
-      beep(500, 0.05, 'triangle', 0.1);
-    });
+        
+        row.innerHTML = `
+          <div class="toggle-label"><span class="icon">${item.icon}</span> ${item.label}</div>
+          <div style="display:flex; align-items:center;">
+            ${customBtnHtml}
+            <label class="ios-switch">
+              <input type="checkbox" id="toggle-${item.id}" data-id="${item.id}">
+              <span class="slider"></span>
+            </label>
+          </div>
+        `;
+        toggleList.appendChild(row);
+        const input = row.querySelector('input');
+        toggleStates[item.id] = false;
 
-    // ==========================================
-    // 9. MỞ GAME
-    // ==========================================
-    function openGameDirect(packageName, urlScheme) {
-      clickSound();
-      const isAndroid = ua.includes('android');
-      const isIOS = ua.includes('iphone') || ua.includes('ipad');
-      
-      if (isAndroid) {
-        window.location.href = `intent://#Intent;scheme=${urlScheme};package=${packageName};end`;
-      } else if (isIOS) {
-        window.location.href = `${urlScheme}://`;
-      } else {
-        alert('Vui lòng mở game trên thiết bị di động.');
+        if (item.id === 'aimlock') {
+            document.getElementById('btnCustomAim').addEventListener('click', () => {
+                clickSound();
+                document.getElementById('crosshairModal').classList.add('open');
+            });
+        }
+
+        input.addEventListener('change', function(e) {
+          toggleStates[item.id] = input.checked;
+          toggleSound();
+          row.classList.add('liquid-active');
+          setTimeout(() => row.classList.remove('liquid-active'), 450);
+
+          // Hiệu ứng bay cho Tâm Ảo
+          if (item.id === 'aimlock') {
+            if (input.checked) {
+              const savedX = localStorage.getItem('qd_crosshair_lastX');
+              const savedY = localStorage.getItem('qd_crosshair_lastY');
+              if (savedX && savedY) {
+                updateElementPosition(savedX, savedY);
+              } else {
+                resetPosition();
+              }
+              floatShoot.classList.add('visible');
+              floatShoot.style.display = 'flex';
+            } else {
+              floatShoot.classList.remove('visible');
+              floatShoot.style.display = 'none';
+            }
+          }
+        });
+      });
+
+      // ========== NÚT BẮN ẢO (DRAGGABLE LOGIC) ==========
+      let isDragging = false;
+      let dragOffsetX, dragOffsetY;
+      let lastX, lastY;
+
+      function resetPosition() {
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        lastX = viewportWidth / 2;
+        lastY = viewportHeight / 2;
+        updateElementPosition(lastX, lastY);
       }
-    }
-    
-    document.getElementById('btnFF').addEventListener('click', () => {
-      openGameDirect('com.dts.freefireth', 'freefire');
-    });
-    document.getElementById('btnFFMax').addEventListener('click', () => {
-      openGameDirect('com.dts.freefiremax', 'freefiremax');
-    });
 
-    // ==========================================
-    // 10. ĐỒNG HỒ THỜI GIAN THỰC
-    // ==========================================
-    function updateClock() {
-      const now = new Date();
-      document.getElementById('clock').textContent = 
-        `🕐 ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-    }
-    updateClock();
-    setInterval(updateClock, 1000);
+      function updateElementPosition(x, y) {
+        floatShoot.style.left = `${x}px`;
+        floatShoot.style.top = `${y}px`;
+        floatShoot.style.transform = 'translate(-50%, -50%)'; 
+      }
 
-    // Ẩn tâm ảo lúc đầu
-    floatShoot.style.display = 'none';
+      function onMouseDown(e) {
+        e.preventDefault();
+        isDragging = true;
+        dragOffsetX = e.clientX - floatShoot.getBoundingClientRect().left;
+        dragOffsetY = e.clientY - floatShoot.getBoundingClientRect().top;
+        floatShoot.style.animation = 'none';
+        floatShoot.style.transition = 'none';
+      }
+
+      function onMouseMove(e) {
+        if (!isDragging) return;
+        lastX = e.clientX - dragOffsetX + (floatShoot.offsetWidth / 2);
+        lastY = e.clientY - dragOffsetY + (floatShoot.offsetHeight / 2);
+        updateElementPosition(lastX, lastY);
+      }
+
+      function onMouseUp(e) {
+        isDragging = false;
+        floatShoot.style.animation = '';
+        floatShoot.style.transition = 'transform 0.1s ease, box-shadow 0.2s';
+        localStorage.setItem('qd_crosshair_lastX', lastX);
+        localStorage.setItem('qd_crosshair_lastY', lastY);
+      }
+
+      function onTouchStart(e) {
+        isDragging = true;
+        const touch = e.touches[0];
+        dragOffsetX = touch.clientX - floatShoot.getBoundingClientRect().left;
+        dragOffsetY = touch.clientY - floatShoot.getBoundingClientRect().top;
+        floatShoot.style.animation = 'none';
+        floatShoot.style.transition = 'none';
+      }
+
+      function onTouchMove(e) {
+        if (!isDragging) return;
+        const touch = e.touches[0];
+        lastX = touch.clientX - dragOffsetX + (floatShoot.offsetWidth / 2);
+        lastY = touch.clientY - dragOffsetY + (floatShoot.offsetHeight / 2);
+        updateElementPosition(lastX, lastY);
+      }
+
+      function onTouchEnd(e) {
+        isDragging = false;
+        floatShoot.style.animation = '';
+        floatShoot.style.transition = 'transform 0.1s ease, box-shadow 0.2s';
+        localStorage.setItem('qd_crosshair_lastX', lastX);
+        localStorage.setItem('qd_crosshair_lastY', lastY);
+      }
+
+      floatShoot.addEventListener('mousedown', onMouseDown);
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+
+      floatShoot.addEventListener('touchstart', onTouchStart, {passive: false});
+      document.addEventListener('touchmove', onTouchMove, {passive: false});
+      document.addEventListener('touchend', onTouchEnd);
+
+      const savedX = localStorage.getItem('qd_crosshair_lastX');
+      const savedY = localStorage.getItem('qd_crosshair_lastY');
+      if (savedX && savedY) {
+        lastX = savedX;
+        lastY = savedY;
+        updateElementPosition(lastX, lastY);
+      } else {
+        resetPosition();
+      }
+
+      floatShoot.addEventListener('click', () => {
+        clickSound();
+        beep(200,0.1,'square',0.25);
+        floatShoot.style.transform = 'scale(0.8)';
+        floatShoot.style.boxShadow = '0 0 40px rgba(255, 0, 0, 1)'; 
+        setTimeout(() => {
+            floatShoot.style.transform = '';
+            floatShoot.style.boxShadow = '0 0 20px rgba(255, 0, 0, 0.5)';
+        }, 120);
+      });
+
+      // ========== MODAL TÙY CHỈNH TÂM ẢO ==========
+      const crossColorInput = document.getElementById('crossColor');
+      const crossSizeInput = document.getElementById('crossSize');
+      const crossOpts = document.querySelectorAll('.cross-opt');
+      const closeCrosshairModalBtn = document.getElementById('closeCrosshairModal');
+      
+      let selectedIcon = 'Target'; 
+
+      crossOpts.forEach(opt => {
+          opt.addEventListener('click', function() {
+              crossOpts.forEach(o => o.classList.remove('active'));
+              this.classList.add('active');
+              selectedIcon = this.getAttribute('data-icon');
+              clickSound();
+          });
+      });
+
+      if (ua.includes('iphone') || ua.includes('ipad')) {
+          crossColorInput.addEventListener('touchstart', function(e) {
+              e.stopPropagation();
+          });
+      }
+
+      closeCrosshairModalBtn.addEventListener('click', () => {
+          const color = crossColorInput.value;
+          const size = crossSizeInput.value;
+          
+          floatShoot.style.width = `${size}px`;
+          floatShoot.style.height = `${size}px`;
+          
+          if (selectedIcon === 'Target') {
+              floatShootImg.src = 'uploaded:61192.png'; // Lấy ảnh mới
+              floatShootImg.style.display = 'block'; 
+              floatShoot.innerHTML = ''; 
+              floatShoot.style.background = 'transparent'; 
+              floatShoot.style.boxShadow = `0 0 20px ${color}`; 
+              floatShoot.appendChild(floatShootImg);
+          } else {
+              floatShootImg.style.display = 'none'; 
+              floatShoot.innerHTML = selectedIcon; 
+              
+              if (selectedIcon === '<i class="fa-solid fa-circle"></i>') {
+                  floatShoot.style.background = `radial-gradient(circle at 30% 30%, ${color}, #111)`;
+                  floatShoot.style.color = '#fff';
+                  floatShoot.style.fontSize = `${size * 0.45}px`;
+                  floatShoot.style.boxShadow = `0 0 20px ${color}80`; 
+              } else {
+                  floatShoot.style.background = 'rgba(0,0,0,0.3)';
+                  floatShoot.style.color = color;
+                  floatShoot.style.fontSize = `${size * 0.45}px`;
+                  floatShoot.style.boxShadow = `0 0 20px rgba(0, 0, 0, 0.5)`;
+              }
+          }
+          
+          document.getElementById('crosshairModal').classList.remove('open');
+          beep(500, 0.05, 'triangle', 0.1);
+      });
+
+      // ========== FPS CHART ==========
+      const canvas = document.getElementById('fpsCanvas');
+      const fpsDisplay = document.getElementById('fpsValue');
+      let targetFPS = 60, currentFPS = 60;
+      let history = new Array(60).fill(60);
+
+      function resizeCanvas() {
+        const wrapper = canvas.parentElement;
+        const w = wrapper.clientWidth;
+        const h = wrapper.clientHeight;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
+          canvas.width = w * dpr;
+          canvas.height = h * dpr;
+          canvas.style.width = w + 'px';
+          canvas.style.height = h + 'px';
+        }
+      }
+
+      function drawChart() {
+        resizeCanvas();
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width, h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+        // Grid
+        ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 4; i++) {
+          const y = (h / 4) * i;
+          ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+        }
+        const maxF = Math.max(targetFPS * 1.3, 160), minF = 0, range = maxF - minF;
+        const stepX = w / (history.length - 1);
+        // Glow line
+        ctx.shadowColor = '#00ff88'; ctx.shadowBlur = 8;
+        ctx.strokeStyle = '#00ff88'; ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        history.forEach((v, i) => {
+          const x = i * stepX;
+          const y = h - ((v - minF) / range) * h;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        // Fill
+        ctx.beginPath();
+        history.forEach((v, i) => {
+          const x = i * stepX;
+          const y = h - ((v - minF) / range) * h;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath();
+        const grad = ctx.createLinearGradient(0, 0, 0, h);
+        grad.addColorStop(0, 'rgba(0,255,136,0.2)');
+        grad.addColorStop(0.8, 'rgba(0,255,136,0.02)');
+        grad.addColorStop(1, 'transparent');
+        ctx.fillStyle = grad;
+        ctx.fill();
+      }
+
+      function updateFPS() {
+        const diff = targetFPS - currentFPS;
+        currentFPS += diff * 0.14 + (Math.random() - 0.5) * 3;
+        if (Math.abs(diff) < 0.5) currentFPS = targetFPS + (Math.random() - 0.5) * 2;
+        currentFPS = Math.max(20, Math.min(targetFPS * 1.15, currentFPS));
+        history.push(currentFPS);
+        if (history.length > 60) history.shift();
+        fpsDisplay.textContent = Math.round(currentFPS);
+      }
+
+      document.querySelectorAll('.fps-opt').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const fps = parseInt(this.dataset.fps);
+          targetFPS = fps;
+          document.querySelectorAll('.fps-opt').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          currentFPS = history[history.length - 1] || fps;
+          beep(700 + fps / 2, 0.06, 'sine', 0.13);
+        });
+      });
+
+      function animationLoop() {
+        updateFPS();
+        drawChart();
+        requestAnimationFrame(animationLoop);
+      }
+      animationLoop();
+      window.addEventListener('resize', drawChart);
+
+      // ========== SCRIPT ENGINE ==========
+      const scriptBtn = document.getElementById('scriptTrigger');
+      const scriptConsole = document.getElementById('scriptConsole');
+      const scriptModal = document.getElementById('scriptModal');
+      const closeModal = document.getElementById('closeScriptModal');
+      let scriptRunning = false;
+
+      function simulateScript() {
+        if (scriptRunning) return;
+        scriptRunning = true;
+        scriptBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ĐANG CHẠY...';
+        scriptBtn.style.background = 'linear-gradient(135deg, #ff3b30, #ff5e3a)';
+        scriptConsole.style.display = 'block';
+        scriptConsole.textContent = '';
+        const lines = [
+          '> Initializing engine...',
+          '> Loading config.xml',
+          '> Injecting libboost.so',
+          '> Patching memory offsets',
+          '> Optimizing touch response',
+          '> Verifying integrity',
+          '> Script executed successfully.'
+        ];
+        let i = 0;
+        const interval = setInterval(() => {
+          if (i < lines.length) {
+            scriptConsole.textContent += lines[i] + '\n';
+            scriptConsole.scrollTop = scriptConsole.scrollHeight;
+            beep(500 + Math.random() * 200, 0.03, 'square', 0.08);
+            i++;
+          } else {
+            clearInterval(interval);
+            setTimeout(() => {
+              scriptConsole.style.display = 'none';
+              scriptBtn.innerHTML = '<i class="fa-solid fa-play"></i> KÍCH HOẠT';
+              scriptBtn.style.background = 'linear-gradient(135deg, #00c853, #00e676)';
+              scriptRunning = false;
+              scriptModal.classList.add('open');
+            }, 400);
+          }
+        }, 450);
+      }
+
+      scriptBtn.addEventListener('click', () => {
+        clickSound();
+        simulateScript();
+      });
+
+      closeModal.addEventListener('click', () => {
+        scriptModal.classList.remove('open');
+        beep(500, 0.05, 'triangle', 0.1);
+      });
+      scriptModal.addEventListener('click', (e) => {
+        if (e.target === scriptModal) scriptModal.classList.remove('open');
+      });
+
+      // ========== MỞ GAME TRỰC TIẾP (KHÔNG GOOGLE PLAY) ==========
+      function openGameDirect(packageName, urlScheme) {
+        clickSound();
+        const isAndroid = ua.includes('android');
+        const isIOS = ua.includes('iphone') || ua.includes('ipad');
+        if (isAndroid) {
+          window.location.href = `intent://#Intent;scheme=${urlScheme};package=${packageName};end`;
+        } else if (isIOS) {
+          window.location.href = `${urlScheme}://`;
+        } else {
+          alert('Vui lòng mở game trên thiết bị di động.');
+        }
+      }
+
+      document.getElementById('btnFF').addEventListener('click', () => {
+        openGameDirect('com.dts.freefireth', 'freefire');
+      });
+      document.getElementById('btnFFMax').addEventListener('click', () => {
+        openGameDirect('com.dts.freefiremax', 'freefiremax');
+      });
+
+      // ========== ĐỒNG HỒ ==========
+      function updateClock() {
+        const now = new Date();
+        document.getElementById('clock').innerHTML = `<i class="fa-regular fa-clock"></i> ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+      }
+      updateClock();
+      setInterval(updateClock, 1000);
+
+    })();
   </script>
 </body>
 </html>
