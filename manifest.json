@@ -1,6 +1,7 @@
 {
   "name": "AimHead",
   "short_name": "AimHead",
+  "description": "Công cụ AimHead",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#121212",
