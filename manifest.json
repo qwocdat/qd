@@ -2,13 +2,13 @@
   "name": "AimHead",
   "short_name": "AimHead",
   "description": "Công cụ AimHead",
-  "start_url": "./index.html",
+  "start_url":
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#00ffcc",
   "icons": [
     {
-      "src": "icon.png",
+      "src": "headlock.png",
       "sizes": "512x512",
       "type": "image/png"
     }
