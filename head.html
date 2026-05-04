@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=yes">
+  <title>Admin Panel • Booster Hub</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    :root {
+      --bg: #0b0b14; --surface: rgba(20, 20, 38, 0.85); --glass-border: rgba(255, 255, 255, 0.12);
+      --text: #f0f0f8; --text-secondary: #b0b0c8; --ios-blue: #0a84ff; --danger: #ff3b30; --radius-lg: 28px;
+      --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      --shadow-glass: 0 8px 30px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { font-family: var(--font); background: var(--bg); background-image: radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.1) 0%, transparent 60%), radial-gradient(ellipse at 50% 100%, rgba(64,156,255,0.08) 0%, transparent 60%); color: var(--text); min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: max(35px, env(safe-area-inset-top)) 10px max(40px, env(safe-area-inset-bottom)); }
+    #dustCanvas { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+    .screen { width: 100%; display: flex; justify-content: center; animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+    .glass-panel { background: var(--surface); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); border: 1.5px solid var(--glass-border); border-radius: var(--radius-lg); padding: 24px; width: 100%; max-width: 420px; box-shadow: var(--shadow-glass); margin-top: 5vh; }
+    .glass-panel h2 { text-align: center; margin-bottom: 20px; font-weight: 800; background: linear-gradient(135deg, #fff, #aaa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600; }
+    .glass-input, .glass-select { width: 100%; padding: 14px; background: rgba(0,0,0,0.3); border: 1.5px solid var(--glass-border); border-radius: 12px; color: #fff; font-size: 1rem; outline: none; transition: 0.3s; }
+    .glass-input:focus, .glass-select:focus { border-color: var(--ios-blue); box-shadow: 0 0 15px rgba(10,132,255,0.3); }
+    .glass-select option { background: #1c1c2e; color: #fff; }
+    .btn-primary { width: 100%; padding: 14px; background: linear-gradient(135deg, #0a84ff, #005bb5); border: none; border-radius: 12px; color: #fff; font-weight: 800; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+    .btn-primary:active { transform: scale(0.96); }
+    .btn-secondary { background: transparent; border: 1px solid var(--glass-border); color: var(--text-secondary); margin-top: 10px; }
+    .key-list { margin-top: 20px; max-height: 250px; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 10px; border: 1px solid var(--glass-border); }
+    .key-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.8rem; }
+    .key-item:last-child { border-bottom: none; }
+    .key-item span { color: #00ff88; font-family: monospace; font-weight: bold; font-size: 0.95rem;}
+    .btn-delete { background: var(--danger); border: none; color: white; padding: 6px 10px; border-radius: 8px; font-size: 0.7rem; cursor: pointer; font-weight:bold;}
+  </style>
+</head>
+<body>
+  <canvas id="dustCanvas"></canvas>
+  <div class="screen">
+    <div class="glass-panel">
+      <h2>PANEL ADMIN</h2>
+      <div class="input-group">
+        <label>Tạo Key Custom (Để trống sẽ random FS-xxxx):</label>
+        <div style="display: flex; gap:10px;">
+          <input type="text" id="adminCustomKey" class="glass-input" placeholder="FS-XXXX..." style="margin-bottom:0;">
+          <button class="btn-primary" id="btnRandomKey" style="width: 100px; padding: 0;">🎲 Random</button>
+        </div>
+      </div>
+      <div class="input-group" style="display: flex; gap:10px;">
+        <div style="flex:1;">
+          <label>Thời gian:</label>
+          <select id="adminDuration" class="glass-select">
+            <option value="lifetime">Vĩnh viễn</option>
+            <option value="3">3 Ngày</option>
+            <option value="7">7 Ngày</option>
+            <option value="15">15 Ngày</option>
+            <option value="30">30 Ngày</option>
+          </select>
+        </div>
+        <div style="flex:1;">
+          <label>Giới hạn thiết bị:</label>
+          <input type="number" id="adminDevices" class="glass-input" value="1" min="1">
+        </div>
+      </div>
+      <button class="btn-primary" id="btnCreateKey">➕ TẠO KEY MỚI</button>
+      
+      <div class="key-list" id="adminKeyList">Đang tải danh sách...</div>
+      
+      <button class="btn-primary btn-secondary" onclick="window.location.href='index.html'">🔙 Quay lại Đăng Nhập</button>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // KHỞI TẠO FIREBASE QUOC DAT
+    // ==========================================
+    const firebaseConfig = {
+      databaseURL: "https://keyquocdat-default-rtdb.asia-southeast1.firebasedatabase.app"
+    };
+
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    const db = firebase.database();
+
+    // Hiệu ứng bụi
+    const dCanvas = document.getElementById('dustCanvas'); const dCtx = dCanvas.getContext('2d'); let particles = [];
+    function resizeDust() { dCanvas.width = window.innerWidth; dCanvas.height = window.innerHeight; }
+    window.addEventListener('resize', resizeDust); resizeDust();
+    for(let i=0; i<40; i++) particles.push({ x: Math.random() * dCanvas.width, y: Math.random() * dCanvas.height, r: Math.random() * 2 + 0.5, vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5, alpha: Math.random() * 0.5 + 0.1 });
+    function drawDust() { dCtx.clearRect(0,0, dCanvas.width, dCanvas.height); particles.forEach(p => { p.x += p.vx; p.y += p.vy; if(p.x < 0 || p.x > dCanvas.width) p.vx *= -1; if(p.y < 0 || p.y > dCanvas.height) p.vy *= -1; dCtx.beginPath(); dCtx.arc(p.x, p.y, p.r, 0, Math.PI*2); dCtx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`; dCtx.fill(); }); requestAnimationFrame(drawDust); } drawDust();
+
+    // Render danh sách Key realtime từ Firebase
+    function renderAdminKeys() {
+      db.ref('keys').on('value', (snapshot) => {
+        const list = document.getElementById('adminKeyList'); 
+        list.innerHTML = '';
+        const data = snapshot.val();
+        
+        if (!data) {
+          list.innerHTML = '<div style="text-align:center; padding: 10px; color:#aaa;">Chưa có key nào.</div>';
+          return;
+        }
+
+        Object.keys(data).reverse().forEach(key => {
+          let k = data[key];
+          let exTxt = k.expire ? new Date(k.expire).toLocaleDateString('vi-VN') : 'Vĩnh viễn';
+          let devCount = k.devices ? Object.keys(k.devices).length : 0;
+          
+          list.innerHTML += `
+            <div class="key-item">
+              <div>
+                <span>${k.code}</span><br>
+                <small style="color:#aaa;">Đã dùng: ${devCount}/${k.limit} máy | HSD: ${exTxt}</small>
+              </div>
+              <button class="btn-delete" onclick="deleteKey('${k.code}')">XÓA</button>
+            </div>
+          `;
+        });
+      });
+    }
+
+    document.getElementById('btnRandomKey').addEventListener('click', () => {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'; let key = 'FS-';
+      for(let i=0; i<9; i++) key += chars.charAt(Math.floor(Math.random() * chars.length));
+      document.getElementById('adminCustomKey').value = key;
+    });
+
+    document.getElementById('btnCreateKey').addEventListener('click', () => {
+      let val = document.getElementById('adminCustomKey').value.trim();
+      if(!val) { alert('Vui lòng nhập hoặc Random Key!'); return; }
+      
+      const dur = document.getElementById('adminDuration').value;
+      const limit = parseInt(document.getElementById('adminDevices').value) || 1;
+      let expireTime = dur === 'lifetime' ? null : Date.now() + (parseInt(dur) * 24 * 60 * 60 * 1000);
+
+      // Check key có tồn tại chưa rồi mới đẩy lên Firebase
+      db.ref('keys/' + val).once('value', (snap) => {
+        if(snap.exists()) {
+          alert('Key này đã tồn tại trên hệ thống!');
+        } else {
+          db.ref('keys/' + val).set({
+            code: val,
+            limit: limit,
+            expire: expireTime,
+            devices: {}
+          });
+          document.getElementById('adminCustomKey').value = '';
+        }
+      });
+    });
+
+    // Xóa Key trên Firebase
+    window.deleteKey = function(keyCode) {
+      if(confirm('Chắc chắn xóa Key: ' + keyCode + ' ?')) {
+        db.ref('keys/' + keyCode).remove();
+      }
+    };
+
+    // Bắt đầu tải dữ liệu
+    renderAdminKeys();
+  </script>
+</body>
+</html>
