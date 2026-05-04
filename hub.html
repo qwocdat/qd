@@ -212,12 +212,13 @@
     .game-btn.ff-max { background: linear-gradient(135deg, #1a73e8, #4da6ff); border-color: rgba(100,180,255,0.5); box-shadow: 0 0 20px rgba(77,166,255,0.4); }
     .game-btn.ff-max:active { box-shadow: 0 0 35px #4da6ff; transform: scale(0.94); }
 
-    /* FLOATING SHOOT BUTTON (TÂM ẢO) */
+    /* FLOATING SHOOT BUTTON (TÂM ẢO CÓ ĐIỀU CHỈNH TRỤC X Y) */
     .floating-shoot {
       position: fixed;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
+      /* Mặc định nằm ngay giữa màn hình kết hợp với biến offset X Y */
+      left: calc(50% + var(--cross-x, 0px));
+      top: calc(50% + var(--cross-y, 0px));
+      
       width: 80px;
       height: 80px;
       background: transparent;
@@ -227,29 +228,33 @@
       align-items: center;
       justify-content: center;
       z-index: 999;
-      cursor: move;
-      transition: transform 0.1s ease, box-shadow 0.2s;
+      cursor: pointer;
       overflow: hidden;
-      animation: floatPulse 1.8s ease-in-out infinite, flyIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      /* Giữ nguyên Translate -50% -50% để tâm ngắm luôn luôn ở chính xác giữa 1 điểm */
     }
     .floating-shoot.visible {
       display: flex;
-      animation: floatPulse 1.8s ease-in-out infinite, flyIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      /* Hiệu ứng bay kết hợp với nhịp đập */
+      animation: flyIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards, floatPulse 1.8s ease-in-out 0.5s infinite;
     }
     .floating-shoot img {
         width: 100%;
         height: 100%;
         object-fit: contain;
     }
+    
     @keyframes flyIn {
-      0% { transform: scale(0) translateY(50px); opacity: 0; }
-      100% { transform: scale(1) translateY(0); opacity: 1; }
+      0% { transform: translate(-50%, -50%) scale(0) translateY(50px); opacity: 0; }
+      100% { transform: translate(-50%, -50%) scale(1) translateY(0); opacity: 1; }
     }
     @keyframes floatPulse {
-      0%,100% { transform: translateY(0); }
-      50% { transform: translateY(-6px); }
+      0%,100% { transform: translate(-50%, -50%) translateY(0) scale(1); }
+      50% { transform: translate(-50%, -50%) translateY(-6px) scale(1); }
     }
-    .floating-shoot:active { transform: scale(0.85) !important; box-shadow: 0 0 40px rgba(255, 0, 0, 1); }
+    .floating-shoot:active { 
+      transform: translate(-50%, -50%) scale(0.85) !important; 
+      box-shadow: 0 0 40px rgba(255, 0, 0, 1); 
+    }
 
     /* MODAL OVERLAY */
     .modal-overlay {
@@ -262,7 +267,7 @@
     .modal-box {
       background: #1c1c2e; border: 1.5px solid rgba(255,255,255,0.2);
       border-radius: 24px; padding: 24px 20px; text-align: center;
-      max-width: 300px; width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+      max-width: 320px; width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.7);
       animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     @keyframes popIn {
@@ -296,9 +301,25 @@
     .crosshair-opts { display: flex; justify-content: space-around; margin: 15px 0; }
     .cross-opt { font-size: 1.5rem; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 12px; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
     .cross-opt.active { border-color: #00ff88; background: rgba(0,255,136,0.2); }
-    .input-group { margin-bottom: 16px; text-align: left;}
-    .input-group label { display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600; }
+    .input-group { margin-bottom: 16px; text-align: left; }
+    .input-group label { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600; }
+    .input-group label span { color: var(--ios-blue); font-weight: bold; }
     .glass-input { width: 100%; padding: 14px; background: rgba(0,0,0,0.3); border: 1.5px solid var(--glass-border); border-radius: 12px; color: #fff; }
+
+    /* Range slider custom style */
+    input[type=range] {
+      -webkit-appearance: none; width: 100%; background: transparent;
+    }
+    input[type=range]:focus { outline: none; }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%; height: 6px; cursor: pointer; background: rgba(255,255,255,0.1);
+      border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);
+    }
+    input[type=range]::-webkit-slider-thumb {
+      height: 20px; width: 20px; border-radius: 50%; background: var(--ios-blue);
+      cursor: pointer; -webkit-appearance: none; margin-top: -8px;
+      box-shadow: 0 0 10px rgba(10,132,255,0.5);
+    }
 
     @media (max-width: 380px) {
       .header-card { padding: 12px 12px; gap: 8px; }
@@ -310,7 +331,6 @@
       input:checked + .slider::before { transform: translateX(18px); }
       .fps-opt { font-size: 0.7rem; padding: 8px 6px; }
       .game-btn { font-size: 0.75rem; padding: 14px 8px; }
-      .floating-shoot { width: 60px; height: 60px; font-size: 1.8rem; }
     }
     @media (min-width: 420px) {
       .toggle-row { padding: 14px 18px; }
@@ -369,7 +389,7 @@
     </div>
   </div>
 
-  <div class="floating-shoot draggable" id="floatingShoot">
+  <div class="floating-shoot" id="floatingShoot">
       <img id="floatingShootImg" src="uploaded:61192.png" alt="Target Crosshair">
   </div>
 
@@ -387,7 +407,7 @@
 
   <div class="modal-overlay" id="crosshairModal">
     <div class="modal-box">
-      <h3>Cấu Hình Tâm Ảo</h3>
+      <h3 style="margin-top: 0;">Cấu Hình Tâm Ảo</h3>
       <div class="crosshair-opts">
         <div class="cross-opt active" data-icon="Target">
             <img src="uploaded:61192.png" alt="Target Crosshair" style="width:100%;height:100%;">
@@ -396,15 +416,28 @@
         <div class="cross-opt" data-icon='<i class="fa-solid fa-plus"></i>'><i class="fa-solid fa-plus"></i></div>
         <div class="cross-opt" data-icon='<i class="fa-solid fa-circle"></i>'><i class="fa-solid fa-circle"></i></div>
       </div>
+      
       <div class="input-group">
-        <label>Màu nền (Hex/Tên):</label>
+        <label>Màu viền (Hex/Tên):</label>
         <input type="color" id="crossColor" class="glass-input" style="padding: 0; height: 40px; cursor: pointer;" value="#ff0000">
       </div>
+      
       <div class="input-group">
-        <label>Kích thước (px):</label>
-        <input type="range" id="crossSize" min="40" max="100" value="68" style="width:100%;">
+        <label>Kích thước (px): <span id="valSize">80</span></label>
+        <input type="range" id="crossSize" min="40" max="150" value="80">
       </div>
-      <button id="closeCrosshairModal" style="background:var(--ios-blue);">LƯU & ĐÓNG</button>
+      
+      <div class="input-group">
+        <label>Trái / Phải (X): <span id="valX">0</span></label>
+        <input type="range" id="crossX" min="-300" max="300" value="0">
+      </div>
+      
+      <div class="input-group">
+        <label>Lên / Xuống (Y): <span id="valY">0</span></label>
+        <input type="range" id="crossY" min="-400" max="400" value="0">
+      </div>
+      
+      <button id="closeCrosshairModal" style="background:var(--ios-blue); margin-top: 10px;">LƯU & ĐÓNG</button>
     </div>
   </div>
 
@@ -446,7 +479,6 @@
       const toggleList = document.getElementById('toggleList');
       const toggleStates = {};
       const floatShoot = document.getElementById('floatingShoot');
-      const floatShootImg = document.getElementById('floatingShootImg');
 
       togglesData.forEach(item => {
         const row = document.createElement('div');
@@ -484,16 +516,8 @@
           row.classList.add('liquid-active');
           setTimeout(() => row.classList.remove('liquid-active'), 450);
 
-          // Hiệu ứng bay cho Tâm Ảo
           if (item.id === 'aimlock') {
             if (input.checked) {
-              const savedX = localStorage.getItem('qd_crosshair_lastX');
-              const savedY = localStorage.getItem('qd_crosshair_lastY');
-              if (savedX && savedY) {
-                updateElementPosition(savedX, savedY);
-              } else {
-                resetPosition();
-              }
               floatShoot.classList.add('visible');
               floatShoot.style.display = 'flex';
             } else {
@@ -504,111 +528,51 @@
         });
       });
 
-      // ========== NÚT BẮN ẢO (DRAGGABLE LOGIC) ==========
-      let isDragging = false;
-      let dragOffsetX, dragOffsetY;
-      let lastX, lastY;
-
-      function resetPosition() {
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        lastX = viewportWidth / 2;
-        lastY = viewportHeight / 2;
-        updateElementPosition(lastX, lastY);
-      }
-
-      function updateElementPosition(x, y) {
-        floatShoot.style.left = `${x}px`;
-        floatShoot.style.top = `${y}px`;
-        floatShoot.style.transform = 'translate(-50%, -50%)'; 
-      }
-
-      function onMouseDown(e) {
-        e.preventDefault();
-        isDragging = true;
-        dragOffsetX = e.clientX - floatShoot.getBoundingClientRect().left;
-        dragOffsetY = e.clientY - floatShoot.getBoundingClientRect().top;
-        floatShoot.style.animation = 'none';
-        floatShoot.style.transition = 'none';
-      }
-
-      function onMouseMove(e) {
-        if (!isDragging) return;
-        lastX = e.clientX - dragOffsetX + (floatShoot.offsetWidth / 2);
-        lastY = e.clientY - dragOffsetY + (floatShoot.offsetHeight / 2);
-        updateElementPosition(lastX, lastY);
-      }
-
-      function onMouseUp(e) {
-        isDragging = false;
-        floatShoot.style.animation = '';
-        floatShoot.style.transition = 'transform 0.1s ease, box-shadow 0.2s';
-        localStorage.setItem('qd_crosshair_lastX', lastX);
-        localStorage.setItem('qd_crosshair_lastY', lastY);
-      }
-
-      function onTouchStart(e) {
-        isDragging = true;
-        const touch = e.touches[0];
-        dragOffsetX = touch.clientX - floatShoot.getBoundingClientRect().left;
-        dragOffsetY = touch.clientY - floatShoot.getBoundingClientRect().top;
-        floatShoot.style.animation = 'none';
-        floatShoot.style.transition = 'none';
-      }
-
-      function onTouchMove(e) {
-        if (!isDragging) return;
-        const touch = e.touches[0];
-        lastX = touch.clientX - dragOffsetX + (floatShoot.offsetWidth / 2);
-        lastY = touch.clientY - dragOffsetY + (floatShoot.offsetHeight / 2);
-        updateElementPosition(lastX, lastY);
-      }
-
-      function onTouchEnd(e) {
-        isDragging = false;
-        floatShoot.style.animation = '';
-        floatShoot.style.transition = 'transform 0.1s ease, box-shadow 0.2s';
-        localStorage.setItem('qd_crosshair_lastX', lastX);
-        localStorage.setItem('qd_crosshair_lastY', lastY);
-      }
-
-      floatShoot.addEventListener('mousedown', onMouseDown);
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('mouseup', onMouseUp);
-
-      floatShoot.addEventListener('touchstart', onTouchStart, {passive: false});
-      document.addEventListener('touchmove', onTouchMove, {passive: false});
-      document.addEventListener('touchend', onTouchEnd);
-
-      const savedX = localStorage.getItem('qd_crosshair_lastX');
-      const savedY = localStorage.getItem('qd_crosshair_lastY');
-      if (savedX && savedY) {
-        lastX = savedX;
-        lastY = savedY;
-        updateElementPosition(lastX, lastY);
-      } else {
-        resetPosition();
-      }
-
-      floatShoot.addEventListener('click', () => {
-        clickSound();
-        beep(200,0.1,'square',0.25);
-        floatShoot.style.transform = 'scale(0.8)';
-        floatShoot.style.boxShadow = '0 0 40px rgba(255, 0, 0, 1)'; 
-        setTimeout(() => {
-            floatShoot.style.transform = '';
-            floatShoot.style.boxShadow = '0 0 20px rgba(255, 0, 0, 0.5)';
-        }, 120);
-      });
-
-      // ========== MODAL TÙY CHỈNH TÂM ẢO ==========
+      // ========== TÙY CHỈNH TÂM ẢO (VỊ TRÍ X Y & SIZE MỚI) ==========
       const crossColorInput = document.getElementById('crossColor');
       const crossSizeInput = document.getElementById('crossSize');
+      const crossXInput = document.getElementById('crossX');
+      const crossYInput = document.getElementById('crossY');
+      const valSize = document.getElementById('valSize');
+      const valX = document.getElementById('valX');
+      const valY = document.getElementById('valY');
+      
       const crossOpts = document.querySelectorAll('.cross-opt');
       const closeCrosshairModalBtn = document.getElementById('closeCrosshairModal');
+      const floatShootImg = document.getElementById('floatingShootImg');
       
       let selectedIcon = 'Target'; 
 
+      // Khôi phục vị trí X, Y, Size từ LocalStorage
+      let savedX = localStorage.getItem('qd_crosshair_x') || 0;
+      let savedY = localStorage.getItem('qd_crosshair_y') || 0;
+      let savedSize = localStorage.getItem('qd_crosshair_size') || 80;
+
+      crossXInput.value = savedX; valX.innerText = savedX;
+      crossYInput.value = savedY; valY.innerText = savedY;
+      crossSizeInput.value = savedSize; valSize.innerText = savedSize;
+
+      floatShoot.style.setProperty('--cross-x', `${savedX}px`);
+      floatShoot.style.setProperty('--cross-y', `${savedY}px`);
+      floatShoot.style.width = `${savedSize}px`;
+      floatShoot.style.height = `${savedSize}px`;
+
+      // Xem trước khi kéo Slider
+      crossXInput.addEventListener('input', (e) => {
+          valX.innerText = e.target.value;
+          floatShoot.style.setProperty('--cross-x', `${e.target.value}px`);
+      });
+      crossYInput.addEventListener('input', (e) => {
+          valY.innerText = e.target.value;
+          floatShoot.style.setProperty('--cross-y', `${e.target.value}px`);
+      });
+      crossSizeInput.addEventListener('input', (e) => {
+          valSize.innerText = e.target.value;
+          floatShoot.style.width = `${e.target.value}px`;
+          floatShoot.style.height = `${e.target.value}px`;
+      });
+
+      // Chỉnh Icon
       crossOpts.forEach(opt => {
           opt.addEventListener('click', function() {
               crossOpts.forEach(o => o.classList.remove('active'));
@@ -618,21 +582,18 @@
           });
       });
 
-      if (ua.includes('iphone') || ua.includes('ipad')) {
-          crossColorInput.addEventListener('touchstart', function(e) {
-              e.stopPropagation();
-          });
-      }
-
+      // Nút Lưu Modal
       closeCrosshairModalBtn.addEventListener('click', () => {
           const color = crossColorInput.value;
           const size = crossSizeInput.value;
           
-          floatShoot.style.width = `${size}px`;
-          floatShoot.style.height = `${size}px`;
+          // Lưu vào LocalStorage
+          localStorage.setItem('qd_crosshair_x', crossXInput.value);
+          localStorage.setItem('qd_crosshair_y', crossYInput.value);
+          localStorage.setItem('qd_crosshair_size', crossSizeInput.value);
           
           if (selectedIcon === 'Target') {
-              floatShootImg.src = 'uploaded:61192.png'; // Lấy ảnh mới
+              floatShootImg.src = 'uploaded:61192.png'; 
               floatShootImg.style.display = 'block'; 
               floatShoot.innerHTML = ''; 
               floatShoot.style.background = 'transparent'; 
@@ -659,6 +620,11 @@
           beep(500, 0.05, 'triangle', 0.1);
       });
 
+      floatShoot.addEventListener('click', () => {
+        clickSound();
+        beep(200,0.1,'square',0.25);
+      });
+
       // ========== FPS CHART ==========
       const canvas = document.getElementById('fpsCanvas');
       const fpsDisplay = document.getElementById('fpsValue');
@@ -683,7 +649,6 @@
         const ctx = canvas.getContext('2d');
         const w = canvas.width, h = canvas.height;
         ctx.clearRect(0, 0, w, h);
-        // Grid
         ctx.strokeStyle = 'rgba(255,255,255,0.06)';
         ctx.lineWidth = 1;
         for (let i = 0; i <= 4; i++) {
@@ -692,7 +657,6 @@
         }
         const maxF = Math.max(targetFPS * 1.3, 160), minF = 0, range = maxF - minF;
         const stepX = w / (history.length - 1);
-        // Glow line
         ctx.shadowColor = '#00ff88'; ctx.shadowBlur = 8;
         ctx.strokeStyle = '#00ff88'; ctx.lineWidth = 2.5;
         ctx.beginPath();
@@ -704,7 +668,6 @@
         });
         ctx.stroke();
         ctx.shadowBlur = 0;
-        // Fill
         ctx.beginPath();
         history.forEach((v, i) => {
           const x = i * stepX;
@@ -806,7 +769,7 @@
         if (e.target === scriptModal) scriptModal.classList.remove('open');
       });
 
-      // ========== MỞ GAME TRỰC TIẾP (KHÔNG GOOGLE PLAY) ==========
+      // ========== MỞ GAME TRỰC TIẾP ==========
       function openGameDirect(packageName, urlScheme) {
         clickSound();
         const isAndroid = ua.includes('android');
