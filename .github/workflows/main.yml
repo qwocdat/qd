@@ -1,0 +1,12 @@
+name: Build AimHead APK
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build APK
+        uses: pavi2410/pwa-to-apk@v1
+        with:
+          url: https://quocdat.vercel.app/
+          
