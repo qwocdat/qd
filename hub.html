@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=yes, orientation=portrait">
+  <title>Booster Hub Pro • Free Fire</title>
+  <style>
+    :root {
+      --bg: #0b0b14;
+      --surface: rgba(20, 20, 38, 0.85);
+      --glass: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --text: #f0f0f8;
+      --text-secondary: #b0b0c8;
+      --accent: #ff6b35;
+      --ios-blue: #0a84ff;
+      --ios-green: #34c759;
+      --danger: #ff3b30;
+      --neon-ff: #ff5e3a;
+      --neon-max: #409cff;
+      --radius-lg: 28px;
+      --radius-md: 18px;
+      --radius-sm: 12px;
+      --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+      --transition-ios: 0.28s cubic-bezier(0.4, 0.0, 0.2, 1.0);
+      --shadow-glass: 0 8px 30px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08);
+      --shadow-float: 0 12px 28px rgba(255,0,0,0.5), 0 0 0 2px rgba(255,255,255,0.2);
+    }
+
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+      -webkit-tap-highlight-color: transparent; 
+    }
+    
+    html { font-size: 16px; }
+    
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      background-image: radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.1) 0%, transparent 60%),
+                        radial-gradient(ellipse at 50% 100%, rgba(64,156,255,0.08) 0%, transparent 60%);
+      color: var(--text);
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      /* FIX LỖI CUỘN TRANG (chừa khoảng trống cho tai thỏ/camera) */
+      padding: max(35px, env(safe-area-inset-top)) 10px max(40px, env(safe-area-inset-bottom));
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      letter-spacing: -0.01em;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* HIỆU ỨNG BỤI */
+    #dustCanvas { 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100vw; 
+      height: 100vh; 
+      z-index: -1; 
+      pointer-events: none; 
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 430px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 8px;
+      animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    @keyframes fadeIn { 
+      from { opacity: 0; transform: scale(0.97); } 
+      to { opacity: 1; transform: scale(1); } 
+    }
+
+    /* HEADER */
+    .header-card {
+      background: var(--surface);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1.5px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: var(--shadow-glass);
+      flex-wrap: wrap;
+    }
+    .device-logo {
+      width: 42px; height: 42px; border-radius: 14px;
+      background: var(--glass); display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; border: 1px solid rgba(255,255,255,0.15);
+      flex-shrink: 0;
+    }
+    .device-info { flex: 1; min-width: 100px; }
+    .device-name { font-size: 0.9rem; font-weight: 600; color: var(--text); line-height: 1.2; }
+    .device-detail { font-size: 0.7rem; color: var(--text-secondary); }
+    .app-logo-area { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+    .app-logo {
+      width: 40px; height: 40px; border-radius: 14px;
+      background: linear-gradient(135deg, #ff6b35, #ff3b5c);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 1.2rem; color: #fff;
+    }
+    .active-badge { display: flex; align-items: center; gap: 5px; }
+    .active-dot {
+      width: 10px; height: 10px; border-radius: 50%; background: #00ff88;
+      box-shadow: 0 0 12px #00ff88; animation: pulse 1.2s infinite;
+    }
+    .active-label { font-size: 0.7rem; font-weight: 700; color: #00ff88; animation: pulseText 1.2s infinite; }
+    
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(1.6)} }
+    @keyframes pulseText { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+    /* SECTION TITLE */
+    .section-title {
+      font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--text-secondary); padding: 0 4px; margin-bottom: 2px;
+    }
+
+    /* TOGGLE LIST */
+    .toggle-list { display: flex; flex-direction: column; gap: 8px; }
+    .toggle-row {
+      background: var(--surface);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1.5px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-glass);
+      transition: background var(--transition-ios);
+      position: relative;
+      overflow: hidden;
+    }
+    .toggle-row.liquid-active { animation: liquidPress 0.45s ease-out; }
+    
+    @keyframes liquidPress {
+      0% { background: rgba(255,255,255,0.08); transform: scale(0.97); }
+      40% { background: rgba(255,255,255,0.14); transform: scale(0.99); }
+      100% { background: var(--surface); transform: scale(1); }
+    }
+    
+    .toggle-label {
+      font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; color: var(--text);
+      flex: 1; min-width: 0;
+    }
+    .toggle-label .icon { font-size: 1.2rem; width: 24px; text-align: center; flex-shrink: 0; }
+
+    /* NÚT TÙY CHỈNH TÂM ẢO */
+    .btn-custom-aim { 
+      background: rgba(255,255,255,0.1); 
+      border: 1px solid var(--glass-border); 
+      color: #fff; 
+      font-size: 0.7rem; 
+      font-weight: bold; 
+      padding: 6px 12px; 
+      border-radius: 12px; 
+      margin-right: 10px; 
+      cursor: pointer; 
+      transition: 0.2s; 
+    }
+    .btn-custom-aim:active { transform: scale(0.9); background: rgba(255,255,255,0.2); }
+
+    /* iOS Switch */
+    .ios-switch { position: relative; width: 51px; height: 31px; flex-shrink: 0; }
+    .ios-switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(120,120,140,0.4); border-radius: 31px;
+      transition: all var(--transition-ios); border: 1px solid rgba(255,255,255,0.15);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    }
+    .slider::before {
+      content: ""; position: absolute; height: 27px; width: 27px; left: 2px; bottom: 1px;
+      background: #ffffff; border-radius: 50%; transition: all var(--transition-ios);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.1);
+    }
+    input:checked + .slider { background: var(--ios-green); border-color: rgba(52,199,89,0.5); }
+    input:checked + .slider::before { transform: translateX(20px); }
+    .slider:active::before { width: 31px; }
+
+    /* FPS SECTION */
+    .fps-section {
+      background: var(--surface); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+      border: 1.5px solid var(--glass-border); border-radius: var(--radius-lg);
+      padding: 14px 14px; box-shadow: var(--shadow-glass);
+    }
+    .fps-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+    .fps-current { font-size: 2rem; font-weight: 900; color: #00ff88; text-shadow: 0 0 20px rgba(0,255,136,0.4); line-height: 1; }
+    .fps-chart-wrap { height: 90px; border-radius: 12px; overflow: hidden; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.08); margin-bottom: 10px; }
+    canvas { width: 100%; height: 100%; display: block; }
+    .fps-selector { display: flex; gap: 8px; }
+    .fps-opt {
+      flex: 1; padding: 10px 8px; border-radius: 12px; background: var(--glass);
+      border: 1.5px solid var(--glass-border); color: var(--text-secondary);
+      font-weight: 700; font-size: 0.8rem; text-align: center; cursor: pointer;
+      transition: all var(--transition-ios);
+    }
+    .fps-opt.active { background: rgba(10,132,255,0.2); border-color: var(--ios-blue); color: #fff; box-shadow: 0 0 16px rgba(10,132,255,0.2); }
+    .fps-opt:active { transform: scale(0.94); background: rgba(10,132,255,0.3); }
+
+    /* SCRIPT SECTION */
+    .script-section {
+      background: var(--surface); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+      border: 1.5px solid var(--glass-border); border-radius: var(--radius-lg);
+      padding: 14px 14px; box-shadow: var(--shadow-glass);
+    }
+    .script-status { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .script-btn {
+      background: linear-gradient(135deg, #00c853, #00e676);
+      border: none; color: #000; font-weight: 800; font-size: 0.8rem;
+      padding: 10px 20px; border-radius: 20px; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0,200,83,0.3); letter-spacing: 0.04em;
+      transition: all var(--transition-ios);
+    }
+    .script-btn:active { transform: scale(0.92); background: #00ff7f; }
+    .script-console {
+      background: #0a0a14; border-radius: 10px; padding: 8px 10px;
+      font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.65rem;
+      color: #00ff88; max-height: 80px; overflow-y: auto; min-height: 40px;
+      border: 1px solid rgba(255,255,255,0.08); letter-spacing: 0.02em;
+      display: none; white-space: pre-wrap;
+    }
+
+    /* GAME BUTTONS */
+    .game-row { display: flex; gap: 10px; }
+    .game-btn {
+      flex: 1; padding: 16px 10px; border-radius: 20px; font-weight: 800; font-size: 0.85rem;
+      text-align: center; border: 2px solid; cursor: pointer; transition: all var(--transition-ios);
+      color: #fff; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    }
+    .game-btn.ff { background: linear-gradient(135deg, #ff4d1c, #ff6b35); border-color: rgba(255,140,80,0.5); box-shadow: 0 0 20px rgba(255,107,53,0.4); }
+    .game-btn.ff:active { box-shadow: 0 0 35px #ff6b35; transform: scale(0.94); }
+    .game-btn.ff-max { background: linear-gradient(135deg, #1a73e8, #4da6ff); border-color: rgba(100,180,255,0.5); box-shadow: 0 0 20px rgba(77,166,255,0.4); }
+    .game-btn.ff-max:active { box-shadow: 0 0 35px #4da6ff; transform: scale(0.94); }
+
+    /* FLOATING SHOOT BUTTON (TÂM ẢO) */
+    .floating-shoot {
+      position: fixed; bottom: 70px; right: 24px; width: 68px; height: 68px;
+      background: radial-gradient(circle at 30% 30%, #ff5e5e, #c0392b);
+      border-radius: 50%; box-shadow: var(--shadow-float);
+      display: none; align-items: center; justify-content: center;
+      font-size: 2.2rem; color: #fff; z-index: 999; cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.2s, background 0.3s, font-size 0.3s;
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      animation: floatPulse 1.8s ease-in-out infinite, flyIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      transform: scale(0);
+    }
+    .floating-shoot.visible {
+      display: flex;
+      animation: floatPulse 1.8s ease-in-out infinite, flyIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    
+    @keyframes flyIn {
+      0% { transform: scale(0) translateY(50px); opacity: 0; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    @keyframes floatPulse {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    .floating-shoot:active { transform: scale(0.85) !important; box-shadow: 0 8px 20px rgba(255,0,0,0.7); }
+
+    /* MODAL OVERLAY */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      z-index: 1100; display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      background: #1c1c2e; border: 1.5px solid rgba(255,255,255,0.2);
+      border-radius: 24px; padding: 24px 20px; text-align: center;
+      max-width: 300px; width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+      animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes popIn {
+      from { transform: scale(0.8) translateY(30px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .modal-box h3 { font-weight: 800; margin: 12px 0 6px; font-size: 1.1rem; }
+    .modal-box p { font-size: 0.8rem; color: #aaa; margin-bottom: 14px; }
+    .modal-box button.btn-close {
+      padding: 10px 28px; border-radius: 20px;
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+      color: #fff; font-weight: 700; cursor: pointer; transition: 0.2s; width: 100%; margin-top: 10px;
+    }
+    .modal-box button.btn-close:active { background: rgba(255,255,255,0.2); }
+
+    /* FOOTER */
+    .footer-info {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.7rem; color: var(--text-secondary); padding: 6px 8px;
+      flex-wrap: wrap; gap: 8px;
+    }
+    .live-clock { font-weight: 700; background: rgba(255,255,255,0.06); padding: 6px 12px; border-radius: 16px; white-space: nowrap; }
+    .dev-zalo { color: #ffcc00; cursor: pointer; font-weight: 600; }
+
+    /* Custom Tâm Ảo UI */
+    .crosshair-opts { display: flex; justify-content: space-around; margin: 15px 0; }
+    .cross-opt { font-size: 1.5rem; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 12px; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
+    .cross-opt.active { border-color: #00ff88; background: rgba(0,255,136,0.2); }
+    .input-group { margin-bottom: 16px; text-align: left;}
+    .input-group label { display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600; }
+    .glass-input { width: 100%; padding: 14px; background: rgba(0,0,0,0.3); border: 1.5px solid var(--glass-border); border-radius: 12px; color: #fff; }
+
+    /* Responsive adjustments */
+    @media (max-width: 380px) {
+      .header-card { padding: 12px 12px; gap: 8px; }
+      .device-logo { width: 36px; height: 36px; font-size: 1.3rem; border-radius: 10px; }
+      .app-logo { width: 34px; height: 34px; font-size: 1rem; border-radius: 10px; }
+      .toggle-label { font-size: 0.75rem; }
+      .ios-switch { width: 45px; height: 27px; }
+      .slider::before { height: 23px; width: 23px; }
+      input:checked + .slider::before { transform: translateX(18px); }
+      .fps-opt { font-size: 0.7rem; padding: 8px 6px; }
+      .game-btn { font-size: 0.75rem; padding: 14px 8px; }
+      .floating-shoot { width: 60px; height: 60px; font-size: 1.8rem; bottom: 50px; right: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="dustCanvas"></canvas>
+
+  <div class="app-container">
+    <div class="header-card">
+      <div class="device-logo" id="deviceEmoji">📱</div>
+      <div class="device-info">
+        <div class="device-name" id="deviceBrand">Đang nhận diện...</div>
+        <div class="device-detail" id="devicePlatform"></div>
+      </div>
+      <div class="app-logo-area">
+        <div class="app-logo">BH</div>
+        <div class="active-badge">
+          <span class="active-dot"></span>
+          <span class="active-label">ACTIVE</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">⚡ BẢNG ĐIỀU KHIỂN</div>
+    <div class="toggle-list" id="toggleList"></div>
+
+    <div class="fps-section">
+      <div class="fps-header">
+        <span class="fps-current" id="fpsValue">60</span>
+        <span style="color:#aaa; font-size:0.7rem; font-weight:600;">FPS</span>
+      </div>
+      <div class="fps-chart-wrap"><canvas id="fpsCanvas"></canvas></div>
+      <div class="fps-selector">
+        <button class="fps-opt active" data-fps="60">60</button>
+        <button class="fps-opt" data-fps="120">120</button>
+        <button class="fps-opt" data-fps="144">144</button>
+      </div>
+    </div>
+
+    <div class="script-section">
+      <div class="script-status">
+        <span style="font-weight:700;">📜 Script Run</span>
+        <button class="script-btn" id="scriptTrigger">KÍCH HOẠT</button>
+      </div>
+      <div class="script-console" id="scriptConsole"></div>
+    </div>
+
+    <div class="game-row">
+      <button class="game-btn ff" id="btnFF">🔥 FREE FIRE</button>
+      <button class="game-btn ff-max" id="btnFFMax">⚡ FREE FIRE MAX</button>
+    </div>
+
+    <div class="footer-info">
+      <span>📞 Dev Zalo: <span class="dev-zalo" onclick="window.open('https://zalo.me/0989249990','_blank')">0989249990</span></span>
+      <span class="live-clock" id="clock">00:00:00</span>
+    </div>
+
+    <button class="script-btn" style="background:transparent; border:1px solid #aaa; color:#aaa; margin-top: 10px;" onclick="sessionStorage.removeItem('isLoggedIn'); window.location.href='index.html'">Đăng Xuất Khỏi App</button>
+  </div>
+
+  <div class="floating-shoot" id="floatingShoot">🔫</div>
+
+  <div class="modal-overlay" id="scriptModal">
+    <div class="modal-box">
+      <h3 style="color:#4cd964;">Thành Công!</h3>
+      <p>Script đã chạy hoàn tất.</p>
+      <button class="btn-close" id="closeScriptModal">ĐÓNG LẠI</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="crosshairModal">
+    <div class="modal-box">
+      <h3>Cấu Hình Tâm Ảo</h3>
+      <div class="crosshair-opts">
+        <div class="cross-opt active" data-icon="🔫">🔫</div>
+        <div class="cross-opt" data-icon="🎯">🎯</div>
+        <div class="cross-opt" data-icon="➕">➕</div>
+        <div class="cross-opt" data-icon="🔴">🔴</div>
+      </div>
+      <div class="input-group">
+        <label>Màu nền (Hex/Tên):</label>
+        <input type="color" id="crossColor" class="glass-input" style="padding: 0; height: 40px; cursor: pointer;" value="#ff5e5e">
+      </div>
+      <div class="input-group">
+        <label>Kích thước (px):</label>
+        <input type="range" id="crossSize" min="40" max="100" value="68" style="width:100%;">
+      </div>
+      <button class="btn-close" id="closeCrosshairModal" style="background:var(--ios-blue);">LƯU & ĐÓNG</button>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // 1. KIỂM TRA BẢO MẬT (PHẢI ĐĂNG NHẬP MỚI VÀO ĐƯỢC)
+    // ==========================================
+    if (!sessionStorage.getItem('isLoggedIn')) {
+      window.location.href = 'index.html';
+    }
+
+    // ==========================================
+    // 2. HIỆU ỨNG BỤI (DUST BACKGROUND)
+    // ==========================================
+    const dCanvas = document.getElementById('dustCanvas');
+    const dCtx = dCanvas.getContext('2d');
+    let particles = [];
+    
+    function resizeDust() {
+      dCanvas.width = window.innerWidth;
+      dCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeDust);
+    resizeDust();
+    
+    for (let i = 0; i < 40; i++) {
+      particles.push({
+        x: Math.random() * dCanvas.width,
+        y: Math.random() * dCanvas.height,
+        r: Math.random() * 2 + 0.5,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        alpha: Math.random() * 0.5 + 0.1
+      });
+    }
+    
+    function drawDust() {
+      dCtx.clearRect(0, 0, dCanvas.width, dCanvas.height);
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0 || p.x > dCanvas.width) p.vx *= -1;
+        if (p.y < 0 || p.y > dCanvas.height) p.vy *= -1;
+        
+        dCtx.beginPath();
+        dCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        dCtx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
+        dCtx.fill();
+      });
+      requestAnimationFrame(drawDust);
+    }
+    drawDust();
+
+    // ==========================================
+    // 3. HIỆU ỨNG ÂM THANH (AUDIO CONTEXT)
+    // ==========================================
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    
+    function getCtx() {
+      if (!audioCtx) audioCtx = new AudioCtx();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+    
+    function beep(f = 1000, d = 0.07, type = 'sine', v = 0.2) {
+      try {
+        const c = getCtx();
+        const o = c.createOscillator();
+        const g = c.createGain();
+        o.type = type;
+        o.frequency.setValueAtTime(f, c.currentTime);
+        g.gain.setValueAtTime(v, c.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + d);
+        o.connect(g);
+        g.connect(c.destination);
+        o.start();
+        o.stop(c.currentTime + d);
+      } catch (e) {}
+    }
+    
+    function clickSound() {
+      beep(1100, 0.06, 'sine', 0.18);
+      setTimeout(() => beep(1400, 0.05, 'sine', 0.14), 50);
+    }
+    
+    function toggleSound() {
+      beep(800, 0.04, 'sine', 0.12);
+      setTimeout(() => beep(600, 0.04, 'sine', 0.1), 40);
+    }
+
+    // ==========================================
+    // 4. NHẬN DIỆN THIẾT BỊ
+    // ==========================================
+    const ua = navigator.userAgent.toLowerCase();
+    let brand = 'Thiết bị', emoji = '📱', platform = navigator.platform || 'Thiết bị di động';
+    
+    if (ua.includes('iphone') || ua.includes('ipad')) { brand = 'Apple iPhone/iPad'; emoji = '🍎'; }
+    else if (ua.includes('macintosh')) { brand = 'Apple Mac'; emoji = '💻'; }
+    else if (ua.includes('samsung') || ua.includes('sm-')) { brand = 'Samsung'; emoji = '📱'; }
+    else if (ua.includes('xiaomi') || ua.includes('redmi')) { brand = 'Xiaomi'; emoji = '📱'; }
+    else if (ua.includes('oppo')) { brand = 'OPPO'; emoji = '📱'; }
+    else if (ua.includes('huawei') || ua.includes('honor')) { brand = 'Huawei'; emoji = '📱'; }
+    else if (ua.includes('windows')) { brand = 'Windows PC'; emoji = '🖥️'; platform = 'Windows'; }
+    
+    document.getElementById('deviceEmoji').textContent = emoji;
+    document.getElementById('deviceBrand').textContent = brand;
+    document.getElementById('devicePlatform').textContent = platform;
+
+    // ==========================================
+    // 5. TẠO DANH SÁCH TÍNH NĂNG (TOGGLES)
+    // ==========================================
+    const togglesData = [
+      { id: 'headlock', label: 'HEAD LOCK', icon: '👑' },
+      { id: 'fixrung', label: 'Fix Rung Tâm', icon: '🎯' },
+      { id: 'giamlac', label: 'Giảm Lạc Đạn', icon: '🔫' },
+      { id: 'booster', label: 'BOOSTER RAM', icon: '🚀' },
+      { id: 'extracly', label: 'Extracly +', icon: '⚡' },
+      { id: 'aimlock', label: 'AimLock', icon: '🔒' }
+    ];
+    
+    const toggleList = document.getElementById('toggleList');
+    const floatShoot = document.getElementById('floatingShoot');
+    
+    togglesData.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'toggle-row';
+      
+      let customBtnHtml = '';
+      if (item.id === 'aimlock') {
+        customBtnHtml = `<button class="btn-custom-aim" id="btnCustomAim">⚙️ Tùy chỉnh</button>`;
+      }
+      
+      row.innerHTML = `
+        <div class="toggle-label"><span class="icon">${item.icon}</span> ${item.label}</div>
+        <div style="display:flex; align-items:center;">
+          ${customBtnHtml}
+          <label class="ios-switch">
+            <input type="checkbox" id="toggle-${item.id}">
+            <span class="slider"></span>
+          </label>
+        </div>
+      `;
+      toggleList.appendChild(row);
+      
+      const input = row.querySelector('input');
+      
+      // Bật modal Tùy chỉnh AimLock
+      if (item.id === 'aimlock') {
+        document.getElementById('btnCustomAim').addEventListener('click', () => {
+          clickSound();
+          document.getElementById('crosshairModal').classList.add('open');
+        });
+      }
+      
+      // Bật/tắt các công tắc
+      input.addEventListener('change', function() {
+        toggleSound();
+        row.classList.add('liquid-active');
+        setTimeout(() => row.classList.remove('liquid-active'), 450);
+        
+        // Hiện/ẩn nút bắn Tâm Ảo khi AimLock thay đổi
+        if (item.id === 'aimlock') {
+          if (input.checked) {
+            floatShoot.classList.add('visible');
+            floatShoot.style.display = 'flex';
+          } else {
+            floatShoot.classList.remove('visible');
+            floatShoot.style.display = 'none';
+          }
+        }
+      });
+    });
+
+    // ==========================================
+    // 6. LOGIC TÙY CHỈNH TÂM ẢO (CROSSHAIR MODAL)
+    // ==========================================
+    let currentCrossIcon = '🔫';
+    
+    document.querySelectorAll('.cross-opt').forEach(opt => {
+      opt.addEventListener('click', function() {
+        document.querySelectorAll('.cross-opt').forEach(o => o.classList.remove('active'));
+        this.classList.add('active');
+        currentCrossIcon = this.getAttribute('data-icon');
+        clickSound();
+      });
+    });
+    
+    document.getElementById('closeCrosshairModal').addEventListener('click', () => {
+      const color = document.getElementById('crossColor').value;
+      const size = document.getElementById('crossSize').value;
+      
+      floatShoot.textContent = currentCrossIcon;
+      floatShoot.style.width = size + 'px';
+      floatShoot.style.height = size + 'px';
+      floatShoot.style.fontSize = (size * 0.45) + 'px';
+      floatShoot.style.background = `radial-gradient(circle at 30% 30%, ${color}, #111)`;
+      
+      document.getElementById('crosshairModal').classList.remove('open');
+      beep(500, 0.05, 'triangle', 0.1);
+    });
+    
+    // Hiệu ứng khi bấm vào Tâm ảo trên màn hình
+    floatShoot.addEventListener('click', () => {
+      clickSound();
+      beep(200, 0.1, 'square', 0.25);
+      floatShoot.style.transform = 'scale(0.8)';
+      setTimeout(() => floatShoot.style.transform = '', 120);
+    });
+
+    // ==========================================
+    // 7. BIỂU ĐỒ FPS (FPS CHART)
+    // ==========================================
+    const canvas = document.getElementById('fpsCanvas');
+    const fpsDisplay = document.getElementById('fpsValue');
+    let targetFPS = 60, currentFPS = 60;
+    let historyData = new Array(60).fill(60);
+    
+    function drawChart() {
+      const wrapper = canvas.parentElement;
+      const w = wrapper.clientWidth;
+      const h = wrapper.clientHeight;
+      canvas.width = w;
+      canvas.height = h;
+      
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, w, h);
+      
+      // Vẽ Grid ngang
+      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 4; i++) {
+        const y = (h / 4) * i;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+      
+      const maxF = Math.max(targetFPS * 1.3, 160);
+      const range = maxF;
+      const stepX = w / (historyData.length - 1);
+      
+      // Vẽ đường FPS phát sáng
+      ctx.shadowColor = '#00ff88';
+      ctx.shadowBlur = 8;
+      ctx.strokeStyle = '#00ff88';
+      ctx.lineWidth = 2.5;
+      
+      ctx.beginPath();
+      historyData.forEach((v, i) => {
+        const x = i * stepX;
+        const y = h - (v / range) * h;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      
+      // Đổ bóng Gradient bên dưới đường FPS
+      ctx.beginPath();
+      historyData.forEach((v, i) => {
+        const x = i * stepX;
+        const y = h - (v / range) * h;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.lineTo(w, h);
+      ctx.lineTo(0, h);
+      ctx.closePath();
+      
+      const grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, 'rgba(0,255,136,0.2)');
+      grad.addColorStop(0.8, 'rgba(0,255,136,0.02)');
+      grad.addColorStop(1, 'transparent');
+      ctx.fillStyle = grad;
+      ctx.fill();
+    }
+    
+    function updateFPS() {
+      const diff = targetFPS - currentFPS;
+      currentFPS += diff * 0.14 + (Math.random() - 0.5) * 3;
+      if (Math.abs(diff) < 0.5) currentFPS = targetFPS + (Math.random() - 0.5) * 2;
+      currentFPS = Math.max(20, Math.min(targetFPS * 1.15, currentFPS));
+      
+      historyData.push(currentFPS);
+      if (historyData.length > 60) historyData.shift();
+      
+      fpsDisplay.textContent = Math.round(currentFPS);
+    }
+    
+    document.querySelectorAll('.fps-opt').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const fps = parseInt(this.dataset.fps);
+        targetFPS = fps;
+        document.querySelectorAll('.fps-opt').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        currentFPS = historyData[historyData.length - 1] || fps;
+        beep(700 + fps / 2, 0.06, 'sine', 0.13);
+      });
+    });
+    
+    function animationLoop() {
+      updateFPS();
+      drawChart();
+      requestAnimationFrame(animationLoop);
+    }
+    animationLoop();
+    window.addEventListener('resize', drawChart);
+
+    // ==========================================
+    // 8. HỆ THỐNG KÍCH HOẠT SCRIPT
+    // ==========================================
+    const scriptBtn = document.getElementById('scriptTrigger');
+    const scriptConsole = document.getElementById('scriptConsole');
+    const scriptModal = document.getElementById('scriptModal');
+    let scriptRunning = false;
+    
+    function simulateScript() {
+      if (scriptRunning) return;
+      scriptRunning = true;
+      scriptBtn.textContent = 'ĐANG CHẠY...';
+      scriptBtn.style.background = 'linear-gradient(135deg, #ff3b30, #ff5e3a)';
+      scriptConsole.style.display = 'block';
+      scriptConsole.textContent = '';
+      
+      const lines = [
+        '> Initializing engine...',
+        '> Loading config.xml',
+        '> Injecting libboost.so',
+        '> Patching memory offsets',
+        '> Optimizing touch response',
+        '> Verifying integrity',
+        '> Script executed successfully.'
+      ];
+      let i = 0;
+      
+      const interval = setInterval(() => {
+        if (i < lines.length) {
+          scriptConsole.textContent += lines[i] + '\n';
+          scriptConsole.scrollTop = scriptConsole.scrollHeight;
+          beep(500 + Math.random() * 200, 0.03, 'square', 0.08);
+          i++;
+        } else {
+          clearInterval(interval);
+          setTimeout(() => {
+            scriptConsole.style.display = 'none';
+            scriptBtn.textContent = 'KÍCH HOẠT';
+            scriptBtn.style.background = 'linear-gradient(135deg, #00c853, #00e676)';
+            scriptRunning = false;
+            scriptModal.classList.add('open');
+          }, 400);
+        }
+      }, 450);
+    }
+    
+    scriptBtn.addEventListener('click', () => {
+      clickSound();
+      simulateScript();
+    });
+    
+    document.getElementById('closeScriptModal').addEventListener('click', () => {
+      scriptModal.classList.remove('open');
+      beep(500, 0.05, 'triangle', 0.1);
+    });
+
+    // ==========================================
+    // 9. MỞ GAME
+    // ==========================================
+    function openGameDirect(packageName, urlScheme) {
+      clickSound();
+      const isAndroid = ua.includes('android');
+      const isIOS = ua.includes('iphone') || ua.includes('ipad');
+      
+      if (isAndroid) {
+        window.location.href = `intent://#Intent;scheme=${urlScheme};package=${packageName};end`;
+      } else if (isIOS) {
+        window.location.href = `${urlScheme}://`;
+      } else {
+        alert('Vui lòng mở game trên thiết bị di động.');
+      }
+    }
+    
+    document.getElementById('btnFF').addEventListener('click', () => {
+      openGameDirect('com.dts.freefireth', 'freefire');
+    });
+    document.getElementById('btnFFMax').addEventListener('click', () => {
+      openGameDirect('com.dts.freefiremax', 'freefiremax');
+    });
+
+    // ==========================================
+    // 10. ĐỒNG HỒ THỜI GIAN THỰC
+    // ==========================================
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock').textContent = 
+        `🕐 ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // Ẩn tâm ảo lúc đầu
+    floatShoot.style.display = 'none';
+  </script>
+</body>
+</html>
