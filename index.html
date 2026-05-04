@@ -2,90 +2,1143 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AimHead</title>
-    
-    <link rel="manifest" href="manifest.json">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Booster Hub - Free Fire</title>
     <style>
         :root {
-            --neon-color: #00ffcc;
-            --bg-color: #0a0a0a;
-            --glass-bg: rgba(255, 255, 255, 0.1);
+            --bg: #0a0a0f;
+            --surface: rgba(22, 22, 35, 0.75);
+            --surface-2: rgba(30, 30, 48, 0.7);
+            --glass: rgba(255, 255, 255, 0.06);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-hover: rgba(255, 255, 255, 0.12);
+            --text: #e8e8f0;
+            --text-secondary: #b0b0c0;
+            --accent: #ff6b35;
+            --accent2: #ff9f43;
+            --neon-ff: #ff6b35;
+            --neon-ff-glow: rgba(255, 107, 53, 0.5);
+            --neon-max: #4da6ff;
+            --neon-max-glow: rgba(77, 166, 255, 0.5);
+            --success: #00e676;
+            --danger: #ff3d5c;
+            --warning: #ffc107;
+            --ios-blue: #007aff;
+            --radius-lg: 26px;
+            --radius-md: 18px;
+            --radius-sm: 12px;
+            --radius-btn: 22px;
+            --font-system: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+            --transition-fast: 0.18s cubic-bezier(0.25, 0.8, 0.25, 1.2);
+            --transition-smooth: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            --shadow-neon-ff: 0 0 20px var(--neon-ff-glow), 0 0 50px rgba(255, 107, 53, 0.25);
+            --shadow-neon-max: 0 0 20px var(--neon-max-glow), 0 0 50px rgba(77, 166, 255, 0.25);
         }
-        body {
+
+        * {
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            background-color: var(--bg-color);
-            color: white;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-system);
+            background: var(--bg);
+            background-image:
+                radial-gradient(ellipse at 20% 10%, rgba(255, 107, 53, 0.08) 0%, transparent 55%),
+                radial-gradient(ellipse at 80% 85%, rgba(77, 166, 255, 0.06) 0%, transparent 55%),
+                radial-gradient(ellipse at 50% 50%, rgba(120, 80, 200, 0.04) 0%, transparent 70%);
+            color: var(--text);
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 12px 10px 30px;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            letter-spacing: -0.01em;
+        }
+
+        /* === MAIN CONTAINER === */
+        .app-container {
+            width: 100%;
+            max-width: 460px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding: 6px 4px;
+        }
+
+        /* === HEADER CARD === */
+        .header-card {
+            background: var(--surface);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1.5px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 16px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            box-shadow: var(--shadow-glass);
+            position: relative;
+            overflow: hidden;
+            flex-wrap: wrap;
+        }
+        .header-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, transparent 50%, rgba(255, 255, 255, 0.02) 100%);
+            pointer-events: none;
+        }
+        .device-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 140px;
+        }
+        .device-logo {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            background: var(--glass);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            flex-shrink: 0;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .device-name {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            line-height: 1.3;
+            word-break: break-word;
+        }
+        .device-name strong {
+            display: block;
+            font-size: 0.95rem;
+            color: var(--text);
+            font-weight: 600;
+        }
+        .app-logo-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .app-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #ff6b35, #ff3d5c);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(255, 60, 80, 0.35);
+            letter-spacing: -0.5px;
+        }
+        /* Active blinking dot */
+        .active-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .active-dot {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: #00ff88;
+            box-shadow: 0 0 12px #00ff88, 0 0 24px rgba(0, 255, 136, 0.5);
+            animation: pulse-dot 1.2s ease-in-out infinite;
+        }
+        .active-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #00ff88;
+            letter-spacing: 0.03em;
+            animation: pulse-text 1.2s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.35;
+                transform: scale(1.7);
+            }
+        }
+        @keyframes pulse-text {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* === SECTION TITLES === */
+        .section-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-secondary);
+            padding: 0 6px;
+            margin-bottom: 2px;
+        }
+
+        /* === CONTROL GRID === */
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        @media (max-width: 360px) {
+            .control-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+        }
+        .ctrl-btn {
+            position: relative;
+            background: var(--surface-2);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1.5px solid var(--glass-border);
+            border-radius: var(--radius-btn);
+            padding: 14px 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text);
+            cursor: pointer;
+            text-align: center;
+            letter-spacing: 0.02em;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            transition: all var(--transition-fast);
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
+            gap: 4px;
+            min-height: 64px;
+            justify-content: center;
+            word-break: break-word;
         }
-        .header {
+        .ctrl-btn .btn-icon {
+            font-size: 1.3rem;
+            line-height: 1;
+        }
+        .ctrl-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+            pointer-events: none;
+        }
+        .ctrl-btn:active {
+            transform: scale(0.94);
+            border-color: rgba(255, 255, 255, 0.35);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), inset 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+        .ctrl-btn:active::after {
+            opacity: 1;
+        }
+        .ctrl-btn.liquid-active {
+            animation: liquid-press 0.45s ease-out;
+        }
+        @keyframes liquid-press {
+            0% {
+                background: rgba(255, 255, 255, 0.18);
+                transform: scale(0.92);
+            }
+            40% {
+                background: rgba(255, 255, 255, 0.25);
+                transform: scale(0.96);
+            }
+            100% {
+                background: var(--surface-2);
+                transform: scale(1);
+            }
+        }
+        .ctrl-btn .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.35);
+            transform: scale(0);
+            animation: ripple-effect 0.6s ease-out forwards;
+            pointer-events: none;
+        }
+        @keyframes ripple-effect {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* === FPS SECTION === */
+        .fps-section {
+            background: var(--surface);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1.5px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 16px 16px;
+            box-shadow: var(--shadow-glass);
+        }
+        .fps-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .fps-label {
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.03em;
+            color: var(--text);
+        }
+        .fps-current {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #00ff88;
+            letter-spacing: -1px;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+            line-height: 1;
+        }
+        .fps-chart-wrap {
             width: 100%;
-            padding: 20px 0;
-            text-align: center;
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            height: 100px;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 10px;
         }
-        h1 {
-            margin: 0;
-            font-size: 24px;
-            color: var(--neon-color);
-            text-shadow: 0 0 10px var(--neon-color);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-        .container {
-            padding: 20px;
+        #fpsCanvas {
             width: 100%;
-            max-width: 400px;
-            box-sizing: border-box;
-            margin-top: 20px;
+            height: 100%;
+            display: block;
         }
-        .card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        .fps-selector {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
         }
-        .btn-active {
-            width: 100%;
-            padding: 15px;
-            margin-top: 10px;
-            border-radius: 10px;
-            background: transparent;
-            color: var(--neon-color);
-            border: 1px solid var(--neon-color);
-            font-weight: bold;
-            font-size: 16px;
-            text-transform: uppercase;
+        .fps-option {
+            flex: 1;
+            min-width: 55px;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            background: var(--glass);
+            border: 1.5px solid var(--glass-border);
+            color: var(--text-secondary);
+            font-weight: 700;
+            font-size: 0.85rem;
             cursor: pointer;
-            box-shadow: 0 0 5px var(--neon-color);
+            text-align: center;
+            transition: all var(--transition-fast);
+            letter-spacing: 0.03em;
         }
-        .btn-active:active {
-            background: var(--neon-color);
-            color: black;
-            box-shadow: 0 0 20px var(--neon-color);
+        .fps-option.active {
+            background: rgba(0, 122, 255, 0.2);
+            border-color: var(--ios-blue);
+            color: #fff;
+            box-shadow: 0 0 18px rgba(0, 122, 255, 0.25);
+        }
+        .fps-option:active {
+            transform: scale(0.93);
+            background: rgba(0, 122, 255, 0.3);
+        }
+
+        /* === TAM AO BUTTON === */
+        .tam-ao-trigger {
+            width: 100%;
+            padding: 15px 20px;
+            border-radius: var(--radius-btn);
+            background: var(--surface-2);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1.5px solid var(--glass-border);
+            color: var(--text);
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-align: center;
+            letter-spacing: 0.04em;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .tam-ao-trigger:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* === POPUP / MODAL === */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition-smooth);
+            padding: 20px;
+        }
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-popup {
+            background: #1c1c2e;
+            border: 2px solid rgba(255, 255, 255, 0.18);
+            border-radius: var(--radius-lg);
+            padding: 24px 20px;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes popIn {
+            from {
+                transform: scale(0.85) translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+        .modal-popup h3 {
+            font-size: 1.1rem;
+            font-weight: 800;
+            text-align: center;
+            letter-spacing: 0.03em;
+            color: #fff;
+        }
+        .modal-popup label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            letter-spacing: 0.03em;
+        }
+        .modal-popup input[type="range"] {
+            width: 100%;
+            accent-color: var(--ios-blue);
+            height: 6px;
+            border-radius: 3px;
+        }
+        .modal-popup .range-value {
+            text-align: center;
+            font-weight: 700;
+            color: #fff;
+        }
+        .modal-close {
+            align-self: center;
+            padding: 10px 28px;
+            border-radius: 20px;
+            background: rgba(255, 45, 85, 0.25);
+            border: 1px solid rgba(255, 45, 85, 0.4);
+            color: #ff5c7a;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.03em;
+            transition: all var(--transition-fast);
+        }
+        .modal-close:active {
+            background: rgba(255, 45, 85, 0.45);
+            transform: scale(0.93);
+        }
+
+        /* === SCRIPT SECTION === */
+        .script-section {
+            background: var(--surface);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1.5px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            box-shadow: var(--shadow-glass);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .script-label {
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.03em;
+        }
+        .script-activate {
+            padding: 11px 22px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, #00c853, #00e676);
+            border: none;
+            color: #000;
+            font-weight: 800;
+            font-size: 0.85rem;
+            cursor: pointer;
+            letter-spacing: 0.04em;
+            box-shadow: 0 4px 18px rgba(0, 200, 80, 0.35);
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+        }
+        .script-activate:active {
+            transform: scale(0.9);
+            box-shadow: 0 2px 8px rgba(0, 200, 80, 0.5);
+            background: #00ff7f;
+        }
+
+        /* === GAME BUTTONS === */
+        .game-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .game-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 16px 16px;
+            border-radius: var(--radius-btn);
+            font-weight: 800;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-align: center;
+            letter-spacing: 0.04em;
+            border: 2px solid transparent;
+            transition: all var(--transition-fast);
+            position: relative;
+            overflow: hidden;
+            color: #fff;
+            text-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+        }
+        .game-btn.ff {
+            background: linear-gradient(135deg, #ff4d1c, #ff6b35);
+            border-color: rgba(255, 140, 80, 0.5);
+            box-shadow: var(--shadow-neon-ff);
+        }
+        .game-btn.ff:active {
+            box-shadow: 0 0 35px var(--neon-ff-glow), 0 0 70px rgba(255, 107, 53, 0.4);
+            transform: scale(0.94);
+            background: linear-gradient(135deg, #ff5e2d, #ff7f50);
+        }
+        .game-btn.ff-max {
+            background: linear-gradient(135deg, #1a73e8, #4da6ff);
+            border-color: rgba(100, 180, 255, 0.5);
+            box-shadow: var(--shadow-neon-max);
+        }
+        .game-btn.ff-max:active {
+            box-shadow: 0 0 35px var(--neon-max-glow), 0 0 70px rgba(77, 166, 255, 0.4);
+            transform: scale(0.94);
+            background: linear-gradient(135deg, #2b80f0, #5cb8ff);
+        }
+        .game-btn .game-icon {
+            font-size: 1.4rem;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        /* === FOOTER === */
+        .footer-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 10px 12px;
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.03em;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--radius-sm);
+        }
+        .dev-contact {
+            font-weight: 600;
+            color: #ffc107;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .dev-contact:hover {
+            color: #ffdb4d;
+        }
+        .live-clock {
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: #fff;
+            letter-spacing: 0.05em;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 5px 12px;
+            border-radius: 16px;
+            white-space: nowrap;
+        }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 380px) {
+            .header-card {
+                padding: 12px 14px;
+                gap: 8px;
+            }
+            .device-logo {
+                width: 34px;
+                height: 34px;
+                font-size: 1.3rem;
+                border-radius: 10px;
+            }
+            .app-logo {
+                width: 36px;
+                height: 36px;
+                font-size: 1.2rem;
+                border-radius: 12px;
+            }
+            .ctrl-btn {
+                padding: 10px 6px;
+                font-size: 0.68rem;
+                min-height: 54px;
+                border-radius: 16px;
+            }
+            .fps-option {
+                padding: 8px 10px;
+                font-size: 0.75rem;
+            }
+            .game-btn {
+                padding: 12px 12px;
+                font-size: 0.78rem;
+            }
+            .fps-current {
+                font-size: 1.5rem;
+            }
+            .fps-chart-wrap {
+                height: 75px;
+            }
+        }
+        @media (min-width: 420px) {
+            .ctrl-btn {
+                font-size: 0.8rem;
+                padding: 16px 10px;
+                min-height: 70px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>AimHead</h1>
-    </div>
-    <div class="container">
-        <div class="card">
-            <h2 style="color: var(--neon-color); margin-top: 0;">Bảng Điều Khiển</h2>
-            <p style="opacity: 0.8; font-size: 14px;">Hệ thống đã sẵn sàng kết nối.</p>
-            <button class="btn-active" onclick="alert('AimHead đang chạy ngầm!')">Kích Hoạt</button>
+    <div class="app-container">
+        <!-- ========== HEADER: Device + App Logo + Active Status ========== -->
+        <div class="header-card">
+            <div class="device-info">
+                <div class="device-logo" id="deviceLogo">📱</div>
+                <div class="device-name" id="deviceName">
+                    <strong>Thiết bị</strong>
+                    Đang nhận diện...
+                </div>
+            </div>
+            <div class="app-logo-area">
+                <div class="app-logo">BH</div>
+                <div class="active-indicator">
+                    <span class="active-dot"></span>
+                    <span class="active-label">ACTIVE</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== CONTROL PANEL ========== -->
+        <div class="section-title">⚙️ Bảng Điều Khiển</div>
+        <div class="control-grid" id="controlGrid">
+            <button class="ctrl-btn" data-action="HEAD LOCK👑"><span class="btn-icon">👑</span>HEAD LOCK</button>
+            <button class="ctrl-btn" data-action="Fix Rung Tâm"><span class="btn-icon">🎯</span>Fix Rung Tâm</button>
+            <button class="ctrl-btn" data-action="Giảm Lạc Đạn"><span class="btn-icon">🔫</span>Giảm Lạc Đạn</button>
+            <button class="ctrl-btn" data-action="BOOSTER RAM"><span class="btn-icon">🚀</span>BOOSTER RAM</button>
+            <button class="ctrl-btn" data-action="Extracly +"><span class="btn-icon">⚡</span>Extracly +</button>
+            <button class="ctrl-btn" data-action="AimLock"><span class="btn-icon">🔒</span>AimLock</button>
+        </div>
+
+        <!-- ========== FPS SECTION ========== -->
+        <div class="fps-section">
+            <div class="fps-header">
+                <span class="fps-label">📊 Biểu Đồ FPS</span>
+                <span class="fps-current" id="fpsDisplay">60</span>
+            </div>
+            <div class="fps-chart-wrap">
+                <canvas id="fpsCanvas"></canvas>
+            </div>
+            <div class="fps-selector" id="fpsSelector">
+                <button class="fps-option active" data-fps="60">60 FPS</button>
+                <button class="fps-option" data-fps="120">120 FPS</button>
+                <button class="fps-option" data-fps="144">144 FPS</button>
+            </div>
+        </div>
+
+        <!-- ========== TÂM ẢO TRIGGER ========== -->
+        <button class="tam-ao-trigger" id="tamAoiTrigger">
+            <span>🎯</span> TÂM ẢO <span>⚙️</span>
+        </button>
+
+        <!-- ========== SCRIPT SECTION ========== -->
+        <div class="script-section">
+            <span class="script-label">📜 Script Run</span>
+            <button class="script-activate" id="scriptActivate">KÍCH HOẠT</button>
+        </div>
+
+        <!-- ========== GAME BUTTONS ========== -->
+        <div class="game-buttons">
+            <button class="game-btn ff" id="btnFreeFire">
+                <span class="game-icon">🔥</span> FREE FIRE
+            </button>
+            <button class="game-btn ff-max" id="btnFreeFireMax">
+                <span class="game-icon">⚡</span> FREE FIRE MAX
+            </button>
+        </div>
+
+        <!-- ========== FOOTER ========== -->
+        <div class="footer-info">
+            <span>📞 Dev Zalo: <span class="dev-contact" onclick="window.open('https://zalo.me/0989249990','_blank')">0989249990</span></span>
+            <span class="live-clock" id="liveClock">00:00:00</span>
         </div>
     </div>
+
+    <!-- ========== TÂM ẢO POPUP MODAL ========== -->
+    <div class="modal-overlay" id="tamAoiModal">
+        <div class="modal-popup">
+            <h3>🎯 Tùy Chỉnh Tâm Ảo</h3>
+            <label>Độ Nhạy Cảm Biến: <span id="sensitivityValue">50</span>%</label>
+            <input type="range" id="sensitivitySlider" min="10" max="100" value="50" step="1">
+            <label>Kích Thước Tâm: <span id="sizeValue">30</span>px</label>
+            <input type="range" id="sizeSlider" min="15" max="60" value="30" step="1">
+            <label>Độ Trong Suốt: <span id="opacityValue">80</span>%</label>
+            <input type="range" id="opacitySlider" min="20" max="100" value="80" step="1">
+            <button class="modal-close" id="modalClose">ĐÓNG LẠI</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ==================== AUDIO: Beep "tít tít" ====================
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            let audioCtx = null;
+
+            function getAudioContext() {
+                if (!audioCtx) {
+                    audioCtx = new AudioCtx();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                return audioCtx;
+            }
+
+            function playBeep(freq = 900, duration = 0.08, type = 'sine', vol = 0.25) {
+                try {
+                    const ctx = getAudioContext();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                    gain.gain.setValueAtTime(vol, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + duration);
+                } catch (e) {
+                    // silent
+                }
+            }
+
+            function playClickSound() {
+                playBeep(1000, 0.07, 'sine', 0.22);
+                setTimeout(() => playBeep(1300, 0.06, 'sine', 0.18), 60);
+            }
+
+            // ==================== DEVICE DETECTION ====================
+            function detectDevice() {
+                const ua = navigator.userAgent || '';
+                let brand = 'Thiết bị';
+                let logo = '📱';
+                const uaLower = ua.toLowerCase();
+
+                if (uaLower.includes('iphone') || uaLower.includes('ipad') || uaLower.includes('ipod')) {
+                    brand = 'Apple iPhone/iPad';
+                    logo = '🍎';
+                } else if (uaLower.includes('macintosh') || uaLower.includes('mac os')) {
+                    brand = 'Apple Mac';
+                    logo = '💻';
+                } else if (uaLower.includes('samsung') || uaLower.includes('sm-')) {
+                    brand = 'Samsung Galaxy';
+                    logo = '📱';
+                } else if (uaLower.includes('xiaomi') || uaLower.includes('redmi') || uaLower.includes('poco') || uaLower
+                    .includes('mi ')) {
+                    brand = 'Xiaomi';
+                    logo = '📱';
+                } else if (uaLower.includes('oppo') || uaLower.includes('cph')) {
+                    brand = 'OPPO';
+                    logo = '📱';
+                } else if (uaLower.includes('vivo')) {
+                    brand = 'Vivo';
+                    logo = '📱';
+                } else if (uaLower.includes('huawei') || uaLower.includes('honor')) {
+                    brand = 'Huawei/Honor';
+                    logo = '📱';
+                } else if (uaLower.includes('realme')) {
+                    brand = 'Realme';
+                    logo = '📱';
+                } else if (uaLower.includes('oneplus')) {
+                    brand = 'OnePlus';
+                    logo = '📱';
+                } else if (uaLower.includes('pixel')) {
+                    brand = 'Google Pixel';
+                    logo = '📱';
+                } else if (uaLower.includes('windows')) {
+                    brand = 'Windows PC';
+                    logo = '🖥️';
+                } else if (uaLower.includes('android')) {
+                    brand = 'Android Device';
+                    logo = '📱';
+                }
+                return { brand, logo };
+            }
+
+            const deviceInfo = detectDevice();
+            document.getElementById('deviceLogo').textContent = deviceInfo.logo;
+            document.getElementById('deviceName').innerHTML =
+                `<strong>${deviceInfo.brand}</strong><span style="font-size:0.7rem;color:#888;"> | ${navigator.platform || 'Unknown'}</span>`;
+
+            // ==================== CONTROL BUTTONS (Ripple + Liquid + Sound) ====================
+            const ctrlButtons = document.querySelectorAll('.ctrl-btn');
+            ctrlButtons.forEach(btn => {
+                btn.addEventListener('pointerdown', function(e) {
+                    playClickSound();
+                    // Ripple effect
+                    const rect = btn.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    const ripple = document.createElement('span');
+                    ripple.className = 'ripple';
+                    ripple.style.width = size + 'px';
+                    ripple.style.height = size + 'px';
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    btn.appendChild(ripple);
+                    ripple.addEventListener('animationend', () => ripple.remove());
+
+                    // Liquid glass effect
+                    btn.classList.add('liquid-active');
+                    setTimeout(() => btn.classList.remove('liquid-active'), 450);
+                });
+            });
+
+            // ==================== FPS CHART ====================
+            const fpsCanvas = document.getElementById('fpsCanvas');
+            const fpsDisplay = document.getElementById('fpsDisplay');
+            const fpsOptions = document.querySelectorAll('.fps-option');
+            let targetFPS = 60;
+            let fpsHistory = new Array(60).fill(60);
+            let currentFPS = 60;
+            const maxDataPoints = 60;
+
+            function resizeCanvas() {
+                const wrapper = fpsCanvas.parentElement;
+                const w = wrapper.clientWidth;
+                const h = wrapper.clientHeight;
+                const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                if (fpsCanvas.width !== w * dpr || fpsCanvas.height !== h * dpr) {
+                    fpsCanvas.width = w * dpr;
+                    fpsCanvas.height = h * dpr;
+                    fpsCanvas.style.width = w + 'px';
+                    fpsCanvas.style.height = h + 'px';
+                }
+            }
+
+            function drawChart() {
+                resizeCanvas();
+                const ctx = fpsCanvas.getContext('2d');
+                const w = fpsCanvas.width;
+                const h = fpsCanvas.height;
+                const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                ctx.clearRect(0, 0, w, h);
+
+                // Grid lines
+                ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+                ctx.lineWidth = 1 * dpr;
+                const gridLines = 4;
+                for (let i = 0; i <= gridLines; i++) {
+                    const y = (h / gridLines) * i;
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(w, y);
+                    ctx.stroke();
+                }
+
+                // Draw FPS line
+                const maxFPS = Math.max(targetFPS * 1.3, 160);
+                const minFPS = 0;
+                const range = maxFPS - minFPS;
+                const stepX = w / (maxDataPoints - 1);
+
+                // Glow
+                ctx.shadowColor = 'rgba(0,255,136,0.6)';
+                ctx.shadowBlur = 8 * dpr;
+                ctx.strokeStyle = '#00ff88';
+                ctx.lineWidth = 2.5 * dpr;
+                ctx.lineJoin = 'round';
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                for (let i = 0; i < fpsHistory.length; i++) {
+                    const val = fpsHistory[i];
+                    const x = i * stepX;
+                    const y = h - ((val - minFPS) / range) * h;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+
+                // Fill under line
+                ctx.beginPath();
+                for (let i = 0; i < fpsHistory.length; i++) {
+                    const val = fpsHistory[i];
+                    const x = i * stepX;
+                    const y = h - ((val - minFPS) / range) * h;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.lineTo(w, h);
+                ctx.lineTo(0, h);
+                ctx.closePath();
+                const gradient = ctx.createLinearGradient(0, 0, 0, h);
+                gradient.addColorStop(0, 'rgba(0,255,136,0.2)');
+                gradient.addColorStop(0.7, 'rgba(0,255,136,0.02)');
+                gradient.addColorStop(1, 'rgba(0,255,136,0)');
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                // Target line
+                ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+                ctx.lineWidth = 1 * dpr;
+                ctx.setLineDash([6 * dpr, 4 * dpr]);
+                ctx.beginPath();
+                const targetY = h - ((targetFPS - minFPS) / range) * h;
+                ctx.moveTo(0, targetY);
+                ctx.lineTo(w, targetY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            function updateFPSHistory() {
+                // Simulate FPS approaching target with some noise
+                const diff = targetFPS - currentFPS;
+                const step = diff * 0.15 + (Math.random() - 0.5) * 4;
+                currentFPS += step;
+                if (Math.abs(diff) < 0.5) currentFPS = targetFPS + (Math.random() - 0.5) * 3;
+                currentFPS = Math.max(25, Math.min(targetFPS * 1.15, currentFPS));
+                fpsHistory.push(currentFPS);
+                if (fpsHistory.length > maxDataPoints) fpsHistory.shift();
+                fpsDisplay.textContent = Math.round(currentFPS);
+            }
+
+            function setTargetFPS(fps) {
+                targetFPS = fps;
+                fpsOptions.forEach(opt => {
+                    opt.classList.toggle('active', parseInt(opt.dataset.fps) === fps);
+                });
+                // Reset history to smoothly transition
+                const lastVal = fpsHistory[fpsHistory.length - 1] || fps;
+                fpsHistory = new Array(maxDataPoints).fill(lastVal);
+                currentFPS = lastVal;
+            }
+
+            fpsOptions.forEach(opt => {
+                opt.addEventListener('click', function() {
+                    const fps = parseInt(this.dataset.fps);
+                    setTargetFPS(fps);
+                    playBeep(800 + fps / 2, 0.06, 'sine', 0.15);
+                });
+            });
+
+            // Initial
+            setTargetFPS(60);
+            fpsHistory = new Array(maxDataPoints).fill(60);
+            currentFPS = 60;
+
+            function animateChart(timestamp) {
+                updateFPSHistory();
+                drawChart();
+                requestAnimationFrame(animateChart);
+            }
+            requestAnimationFrame(animateChart);
+
+            // Resize handler
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+                drawChart();
+            });
+
+            // ==================== TÂM ẢO MODAL ====================
+            const tamAoiTrigger = document.getElementById('tamAoiTrigger');
+            const tamAoiModal = document.getElementById('tamAoiModal');
+            const modalClose = document.getElementById('modalClose');
+            const sensitivitySlider = document.getElementById('sensitivitySlider');
+            const sensitivityValue = document.getElementById('sensitivityValue');
+            const sizeSlider = document.getElementById('sizeSlider');
+            const sizeValue = document.getElementById('sizeValue');
+            const opacitySlider = document.getElementById('opacitySlider');
+            const opacityValue = document.getElementById('opacityValue');
+
+            tamAoiTrigger.addEventListener('click', () => {
+                playClickSound();
+                tamAoiModal.classList.add('open');
+            });
+            modalClose.addEventListener('click', () => {
+                playBeep(600, 0.06, 'triangle', 0.12);
+                tamAoiModal.classList.remove('open');
+            });
+            tamAoiModal.addEventListener('click', function(e) {
+                if (e.target === tamAoiModal) {
+                    tamAoiModal.classList.remove('open');
+                }
+            });
+            sensitivitySlider.addEventListener('input', () => {
+                sensitivityValue.textContent = sensitivitySlider.value;
+            });
+            sizeSlider.addEventListener('input', () => {
+                sizeValue.textContent = sizeSlider.value;
+            });
+            opacitySlider.addEventListener('input', () => {
+                opacityValue.textContent = opacitySlider.value;
+            });
+
+            // ==================== SCRIPT ACTIVATE ====================
+            const scriptActivate = document.getElementById('scriptActivate');
+            let scriptActive = false;
+            scriptActivate.addEventListener('click', () => {
+                playClickSound();
+                scriptActive = !scriptActive;
+                if (scriptActive) {
+                    scriptActivate.textContent = 'ĐÃ KÍCH HOẠT ✅';
+                    scriptActivate.style.background = 'linear-gradient(135deg, #ff3d5c, #ff5c7a)';
+                    scriptActivate.style.boxShadow = '0 4px 20px rgba(255,60,90,0.45)';
+                    scriptActivate.style.color = '#fff';
+                } else {
+                    scriptActivate.textContent = 'KÍCH HOẠT';
+                    scriptActivate.style.background = 'linear-gradient(135deg, #00c853, #00e676)';
+                    scriptActivate.style.boxShadow = '0 4px 18px rgba(0,200,80,0.35)';
+                    scriptActivate.style.color = '#000';
+                }
+            });
+
+            // ==================== GAME BUTTONS (Deep Link) ====================
+            const btnFF = document.getElementById('btnFreeFire');
+            const btnFFMax = document.getElementById('btnFreeFireMax');
+
+            function openGame(packageName, urlScheme, fallbackStore) {
+                playClickSound();
+                const uaLower = navigator.userAgent.toLowerCase();
+                const isAndroid = uaLower.includes('android');
+                const isIOS = uaLower.includes('iphone') || uaLower.includes('ipad') || uaLower.includes('ipod');
+
+                // Try deep link
+                let deepLink = '';
+                if (isAndroid) {
+                    deepLink = `intent://#Intent;scheme=${urlScheme};package=${packageName};S.browser_fallback_url=${encodeURIComponent(fallbackStore)};end`;
+                } else if (isIOS) {
+                    deepLink = `${urlScheme}://`;
+                } else {
+                    // Desktop - just open store
+                    window.open(fallbackStore, '_blank');
+                    return;
+                }
+
+                const startTime = Date.now();
+                window.location.href = deepLink;
+
+                // Fallback after timeout if app not installed
+                if (isAndroid || isIOS) {
+                    setTimeout(() => {
+                        if (Date.now() - startTime < 2500) {
+                            window.location.href = fallbackStore;
+                        }
+                    }, 2000);
+                }
+            }
+
+            btnFF.addEventListener('click', () => {
+                openGame(
+                    'com.dts.freefireth',
+                    'freefire',
+                    'https://play.google.com/store/apps/details?id=com.dts.freefireth'
+                );
+            });
+            btnFFMax.addEventListener('click', () => {
+                openGame(
+                    'com.dts.freefiremax',
+                    'freefiremax',
+                    'https://play.google.com/store/apps/details?id=com.dts.freefiremax'
+                );
+            });
+
+            // ==================== LIVE CLOCK ====================
+            function updateClock() {
+                const now = new Date();
+                const h = String(now.getHours()).padStart(2, '0');
+                const m = String(now.getMinutes()).padStart(2, '0');
+                const s = String(now.getSeconds()).padStart(2, '0');
+                document.getElementById('liveClock').textContent = `🕐 ${h}:${m}:${s}`;
+            }
+            updateClock();
+            setInterval(updateClock, 1000);
+
+            // ==================== INITIAL RESIZE ====================
+            resizeCanvas();
+
+            console.log('✅ Booster Hub đã sẵn sàng!');
+            console.log('📱 Thiết bị:', deviceInfo.brand);
+            console.log('🎯 FPS mặc định: 60 | Chọn 60/120/144 để thay đổi đồ thị');
+            console.log('🔊 Âm thanh tít tít khi bấm nút');
+            console.log('📞 Dev Zalo: 0989249990');
+        })();
+    </script>
 </body>
 </html>
