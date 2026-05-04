@@ -3,167 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AimHead Demo</title>
+    <title>AimHead</title>
+    
     <link rel="manifest" href="manifest.json">
+    
     <style>
         :root {
             --neon-color: #00ffcc;
             --bg-color: #0a0a0a;
             --glass-bg: rgba(255, 255, 255, 0.1);
         }
-
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
             background-color: var(--bg-color);
             color: white;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            overflow-x: hidden;
         }
-
-        /* Hiệu ứng Liquid Glass cho Header */
         .header {
             width: 100%;
             padding: 20px 0;
             text-align: center;
             background: var(--glass-bg);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
         }
-
         h1 {
             margin: 0;
             font-size: 24px;
-            text-transform: uppercase;
-            letter-spacing: 3px;
             color: var(--neon-color);
-            text-shadow: 0 0 10px var(--neon-color), 0 0 20px var(--neon-color);
+            text-shadow: 0 0 10px var(--neon-color);
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
-
         .container {
             padding: 20px;
             width: 100%;
             max-width: 400px;
             box-sizing: border-box;
+            margin-top: 20px;
         }
-
-        /* Card hiệu ứng Kính */
         .card {
             background: var(--glass-bg);
             backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px;
             padding: 20px;
-            margin-bottom: 20px;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
-
-        .card h2 {
-            font-size: 18px;
-            margin-top: 0;
-            color: var(--neon-color);
-        }
-
-        /* Input và Button hiệu ứng Neon */
-        .control-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 14px;
-            opacity: 0.8;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            accent-color: var(--neon-color);
-        }
-
         .btn-active {
             width: 100%;
-            padding: 12px;
-            border: none;
+            padding: 15px;
+            margin-top: 10px;
             border-radius: 10px;
             background: transparent;
             color: var(--neon-color);
             border: 1px solid var(--neon-color);
             font-weight: bold;
+            font-size: 16px;
             text-transform: uppercase;
             cursor: pointer;
-            transition: 0.3s;
             box-shadow: 0 0 5px var(--neon-color);
         }
-
         .btn-active:active {
             background: var(--neon-color);
             color: black;
             box-shadow: 0 0 20px var(--neon-color);
         }
-
-        .status {
-            text-align: center;
-            font-size: 12px;
-            margin-top: 10px;
-            color: #888;
-        }
     </style>
 </head>
 <body>
-
     <div class="header">
         <h1>AimHead</h1>
     </div>
-
     <div class="container">
         <div class="card">
-            <h2>Cấu hình độ nhạy</h2>
-            <div class="control-group">
-                <label>Tầm nhìn xung quanh (General): 85%</label>
-                <input type="range" min="0" max="100" value="85">
-            </div>
-            <div class="control-group">
-                <label>Red Dot Sight: 90%</label>
-                <input type="range" min="0" max="100" value="90">
-            </div>
-            <div class="control-group">
-                <label>2x Scope: 75%</label>
-                <input type="range" min="0" max="100" value="75">
-            </div>
-        </div>
-
-        <div class="card">
-            <h2>Tối ưu hóa hệ thống</h2>
-            <button class="btn-active" onclick="activate()">Kích hoạt AimHead</button>
-            <p id="msg" class="status">Sẵn sàng tối ưu hóa...</p>
-        </div>
-
-        <div class="card" style="text-align: center;">
-            <p style="font-size: 14px; opacity: 0.7;">Phiên bản Demo v1.0<br>Dành cho NGUYEN DAI QUOC DAT</p>
+            <h2 style="color: var(--neon-color); margin-top: 0;">Bảng Điều Khiển</h2>
+            <p style="opacity: 0.8; font-size: 14px;">Hệ thống đã sẵn sàng kết nối.</p>
+            <button class="btn-active" onclick="alert('AimHead đang chạy ngầm!')">Kích Hoạt</button>
         </div>
     </div>
-
-    <script>
-        function activate() {
-            const msg = document.getElementById('msg');
-            msg.innerText = "Đang quét thông số...";
-            msg.style.color = "#00ffcc";
-            
-            setTimeout(() => {
-                msg.innerText = "Đã tối ưu hóa thành công!";
-                alert("AimHead: Đã áp dụng cấu hình mới!");
-            }, 2000);
-        }
-    </script>
 </body>
 </html>
