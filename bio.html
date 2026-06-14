@@ -1,629 +1,1156 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liquid Island - Quoc Dat</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>quocdat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            overflow: hidden;
-        }
+  :root {
+    --neon: #4fc3f7;
+    --neon2: #7c4dff;
+    --glass: rgba(255,255,255,0.045);
+    --glass-border: rgba(255,255,255,0.09);
+    --glass-hover: rgba(255,255,255,0.08);
+    --bg: #060810;
+    --text: #f0f4ff;
+    --muted: rgba(180,200,255,0.45);
+    --dock-h: 88px;
+  }
 
-        .container {
-            width: 100%;
-            max-width: 420px;
-            height: 100vh;
-            max-height: 900px;
-            background: radial-gradient(circle at top right, rgba(50, 100, 150, 0.1), transparent),
-                        radial-gradient(circle at bottom left, rgba(100, 50, 150, 0.1), transparent);
-            border-radius: 40px;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-        }
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+    overscroll-behavior: none;
+  }
 
-        /* Status Bar */
-        .status-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 20px;
-            font-size: 12px;
-            color: #fff;
-            background: rgba(0, 0, 0, 0.2);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
+  /* ── ANIMATED BACKGROUND ── */
+  .bg-canvas {
+    position: fixed; inset: 0; z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.18;
+    animation: drift 18s ease-in-out infinite alternate;
+  }
+  .orb-1 { width: 520px; height: 520px; background: radial-gradient(circle, #1a6fff 0%, transparent 70%); top: -120px; left: -100px; animation-duration: 20s; }
+  .orb-2 { width: 380px; height: 380px; background: radial-gradient(circle, #7c4dff 0%, transparent 70%); bottom: 10%; right: -80px; animation-duration: 15s; animation-delay: -7s; }
+  .orb-3 { width: 280px; height: 280px; background: radial-gradient(circle, #00e5ff 0%, transparent 70%); top: 40%; left: 30%; animation-duration: 22s; animation-delay: -12s; }
 
-        .status-left, .status-right {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
+  @keyframes drift {
+    0%   { transform: translate(0,0) scale(1); }
+    50%  { transform: translate(30px, -40px) scale(1.08); }
+    100% { transform: translate(-20px, 30px) scale(0.95); }
+  }
 
-        /* Main Content */
-        .content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 40px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+  /* noise grain */
+  .bg-canvas::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.025;
+  }
 
-        .content::-webkit-scrollbar {
-            width: 6px;
-        }
+  /* ── SCROLL CONTAINER ── */
+  .scroll-root {
+    position: relative; z-index: 1;
+    min-height: 100dvh;
+    padding-bottom: calc(var(--dock-h) + 24px);
+  }
 
-        .content::-webkit-scrollbar-track {
-            background: transparent;
-        }
+  /* ── HERO SECTION ── */
+  .hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 72px 24px 36px;
+    text-align: center;
+    position: relative;
+  }
 
-        .content::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 3px;
-        }
+  /* avatar */
+  .avatar-wrap {
+    position: relative;
+    width: 114px; height: 114px;
+    margin-bottom: 22px;
+    will-change: transform;
+  }
+  .avatar-ring {
+    position: absolute; inset: -5px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, #4fc3f7, #7c4dff, #ff4081, #4fc3f7);
+    animation: spin-ring 4s linear infinite;
+    filter: blur(1px);
+  }
+  .avatar-ring-mask {
+    position: absolute; inset: 3px;
+    border-radius: 50%;
+    background: #07091280;
+    backdrop-filter: blur(0px);
+  }
+  .avatar-img {
+    position: absolute; inset: 5px;
+    border-radius: 50%;
+    object-fit: cover;
+    width: calc(100% - 10px);
+    height: calc(100% - 10px);
+    background: linear-gradient(135deg, #1a2a4a 0%, #0d1117 100%);
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  /* SVG avatar placeholder */
+  .avatar-img svg {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+  }
+  .avatar-glow {
+    position: absolute; inset: -20px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(79,195,247,0.35) 0%, transparent 70%);
+    animation: pulse-glow 3s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes spin-ring { to { transform: rotate(360deg); } }
+  @keyframes pulse-glow {
+    0%,100% { opacity: 0.5; transform: scale(1); }
+    50%      { opacity: 1;   transform: scale(1.12); }
+  }
 
-        /* Tab Content */
-        .tab-content {
-            width: 100%;
-            display: none;
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
+  /* name */
+  .name {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 8vw, 2.8rem);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #fff 30%, var(--neon) 70%, var(--neon2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 10px;
+    animation: fade-up 0.8s cubic-bezier(.16,1,.3,1) both;
+  }
+  .bio {
+    font-size: 0.85rem;
+    color: var(--muted);
+    letter-spacing: 0.4px;
+    font-weight: 400;
+    animation: fade-up 0.8s 0.15s cubic-bezier(.16,1,.3,1) both;
+    margin-bottom: 28px;
+  }
+  .bio span { color: rgba(180,200,255,0.7); }
 
-        .tab-content.active {
-            display: block;
-            opacity: 1;
-        }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
 
-        /* Main Tab */
-        .title {
-            color: #fff;
-            font-size: 36px;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 8px;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        }
+  /* status badge */
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(79,195,247,0.08);
+    border: 1px solid rgba(79,195,247,0.2);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 0.72rem;
+    color: var(--neon);
+    letter-spacing: 0.5px;
+    margin-bottom: 32px;
+    animation: fade-up 0.8s 0.25s cubic-bezier(.16,1,.3,1) both;
+  }
+  .status-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #4fc3f7;
+    box-shadow: 0 0 8px #4fc3f7;
+    animation: blink 2s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-        .subtitle {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 13px;
-            text-align: center;
-            margin-bottom: 40px;
-        }
+  /* CTA buttons */
+  .cta-row {
+    display: flex; gap: 12px;
+    animation: fade-up 0.8s 0.35s cubic-bezier(.16,1,.3,1) both;
+  }
+  .btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 22px;
+    border-radius: 16px;
+    border: 1px solid var(--glass-border);
+    background: var(--glass);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    color: #fff;
+    font-size: 0.83rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.25s cubic-bezier(.16,1,.3,1);
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .btn::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.07), transparent);
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+  .btn:hover::before { opacity: 1; }
+  .btn:hover {
+    transform: translateY(-3px);
+    border-color: rgba(79,195,247,0.35);
+    box-shadow: 0 8px 32px rgba(79,195,247,0.18);
+  }
+  .btn:active { transform: scale(0.96) translateY(0); }
+  .btn-primary {
+    background: linear-gradient(135deg, rgba(79,195,247,0.18), rgba(124,77,255,0.18));
+    border-color: rgba(79,195,247,0.3);
+  }
 
-        /* Glass Card */
-        .glass-card {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 25px;
-            padding: 20px;
-            margin-bottom: 15px;
-            backdrop-filter: blur(20px);
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
-            transition: all 0.3s ease;
-        }
+  /* ── CARDS SECTION ── */
+  .cards {
+    padding: 8px 20px 0;
+    display: flex; flex-direction: column; gap: 14px;
+  }
 
-        .glass-card:hover {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 255, 255, 0.25);
-        }
+  .glass-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s cubic-bezier(.16,1,.3,1), box-shadow 0.3s;
+    animation: card-in 0.7s cubic-bezier(.16,1,.3,1) both;
+  }
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+  }
+  .glass-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(79,195,247,0.12);
+  }
+  @keyframes card-in {
+    from { opacity: 0; transform: translateY(24px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .card-delay-1 { animation-delay: 0.4s; }
+  .card-delay-2 { animation-delay: 0.55s; }
+  .card-delay-3 { animation-delay: 0.7s; }
 
-        .card-status {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
-        }
+  /* stats grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .stat-item {
+    text-align: center;
+    padding: 14px 8px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    transition: all 0.25s;
+  }
+  .stat-item:hover {
+    background: rgba(79,195,247,0.06);
+    border-color: rgba(79,195,247,0.15);
+    transform: scale(1.04);
+  }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, #fff, var(--neon));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .stat-label {
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-top: 3px;
+    letter-spacing: 0.3px;
+  }
 
-        .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-            flex-shrink: 0;
-        }
+  /* card header */
+  .card-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 16px;
+  }
+  .card-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: #fff;
+  }
+  .card-sub {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 1px;
+  }
 
-        .status-indicator.stopped {
-            background: #ff4757;
-            box-shadow: 0 0 10px rgba(255, 71, 87, 0.6);
-        }
+  /* social row */
+  .social-row {
+    display: flex; gap: 10px;
+  }
+  .social-btn {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 14px 8px;
+    border-radius: 16px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255,255,255,0.03);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.25s cubic-bezier(.16,1,.3,1);
+    position: relative;
+    overflow: hidden;
+  }
+  .social-btn:hover {
+    transform: translateY(-4px) scale(1.04);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+  }
+  .social-btn .s-icon { font-size: 1.5rem; }
+  .social-btn .s-label { font-size: 0.68rem; color: var(--muted); font-weight: 500; }
 
-        .status-indicator.active {
-            background: #00d4ff;
-            box-shadow: 0 0 10px rgba(0, 212, 255, 0.6);
-        }
+  .tiktok-btn:hover { border-color: rgba(105,201,208,0.4); background: rgba(105,201,208,0.07); }
+  .web-btn:hover    { border-color: rgba(124,77,255,0.4);  background: rgba(124,77,255,0.07); }
+  .contact-btn:hover{ border-color: rgba(79,195,247,0.4);  background: rgba(79,195,247,0.07); }
 
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.6;
-            }
-        }
+  /* progress bars */
+  .skill-list { display: flex; flex-direction: column; gap: 12px; }
+  .skill-row { display: flex; flex-direction: column; gap: 6px; }
+  .skill-meta { display: flex; justify-content: space-between; font-size: 0.75rem; }
+  .skill-name { color: rgba(255,255,255,0.8); font-weight: 500; }
+  .skill-pct  { color: var(--neon); font-weight: 600; }
+  .skill-bar  { height: 5px; background: rgba(255,255,255,0.07); border-radius: 99px; overflow: hidden; }
+  .skill-fill {
+    height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--neon), var(--neon2));
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 1.2s cubic-bezier(.16,1,.3,1);
+    box-shadow: 0 0 8px rgba(79,195,247,0.5);
+  }
+  .skill-fill.animate { transform: scaleX(1); }
 
-        .card-title {
-            color: #fff;
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
+  /* ── BOTTOM DOCK ── */
+  .dock-wrap {
+    position: fixed;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: min(420px, 100vw);
+    padding: 0 20px 20px;
+    z-index: 100;
+    pointer-events: none;
+  }
+  .dock-wrap * { pointer-events: auto; }
 
-        .card-subtitle {
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 12px;
-        }
+  .dock {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background: rgba(12,14,22,0.72);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 32px;
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    padding: 10px 16px;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.06) inset,
+      0 -1px 0 rgba(255,255,255,0.08) inset,
+      0 32px 80px rgba(0,0,0,0.7),
+      0 0 60px rgba(79,195,247,0.06);
+    position: relative;
+    overflow: hidden;
+  }
+  .dock::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 10%; right: 10%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent);
+  }
 
-        .card-button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 15px;
-            font-weight: 600;
-            color: #fff;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 14px;
-            margin-top: 15px;
-        }
+  .tab {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 9px 20px;
+    border-radius: 22px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: rgba(255,255,255,0.4);
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    transition: color 0.25s, background 0.25s;
+    position: relative;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: pan-y;
+    will-change: transform;
+  }
+  .tab-icon { font-size: 1.25rem; line-height: 1; transition: transform 0.3s cubic-bezier(.16,1,.3,1); }
+  .tab.active { color: #fff; }
+  .tab.active .tab-icon { transform: scale(1.15); }
+  .tab-active-bg {
+    position: absolute; inset: 0;
+    border-radius: 22px;
+    background: rgba(79,195,247,0.1);
+    border: 1px solid rgba(79,195,247,0.2);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .tab.active .tab-active-bg { opacity: 1; }
 
-        .btn-gray {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: rgba(255, 255, 255, 0.8);
-        }
+  /* liquid glass press effect */
+  .tab.pressed {
+    animation: liquid-press 0.5s cubic-bezier(.16,1,.3,1) forwards;
+  }
+  @keyframes liquid-press {
+    0%   { transform: scale(1); filter: none; }
+    25%  { transform: scale(1.12) translateY(-4px); filter: brightness(1.3) saturate(1.5); }
+    50%  { transform: scale(1.18) translateY(-8px) scaleX(1.04); filter: brightness(1.5) saturate(2) blur(0.3px); }
+    75%  { transform: scale(1.14) translateY(-5px); filter: brightness(1.3) saturate(1.5); }
+    100% { transform: scale(1.12) translateY(-4px); filter: brightness(1.2) saturate(1.3); }
+  }
+  .tab.holding {
+    transform: scale(1.12) translateY(-4px);
+    filter: brightness(1.2) saturate(1.3);
+  }
+  .tab.holding .tab-active-bg {
+    opacity: 1;
+    background: rgba(79,195,247,0.2);
+    box-shadow: 0 0 24px rgba(79,195,247,0.35), 0 8px 24px rgba(0,0,0,0.4);
+    border-color: rgba(79,195,247,0.5);
+  }
 
-        .btn-gray:hover {
-            background: rgba(255, 255, 255, 0.12);
-        }
+  /* drag indicator */
+  .drag-indicator {
+    position: absolute;
+    bottom: -3px; left: 50%;
+    transform: translateX(-50%);
+    width: 28px; height: 3px;
+    background: linear-gradient(90deg, var(--neon), var(--neon2));
+    border-radius: 99px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    box-shadow: 0 0 8px var(--neon);
+  }
+  .tab.active .drag-indicator { opacity: 1; }
 
-        .btn-gray:active {
-            transform: scale(0.98);
-        }
+  /* page sections */
+  .page {
+    display: none;
+  }
+  .page.visible {
+    display: block;
+    animation: fade-up 0.5s cubic-bezier(.16,1,.3,1) both;
+  }
 
-        .btn-blue {
-            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
-            border: none;
-            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
-        }
+  /* ── RESPONSIVE ── */
+  @media (max-width: 380px) {
+    .hero { padding: 60px 16px 28px; }
+    .cards { padding: 8px 14px 0; }
+    .tab { padding: 9px 14px; }
+    .btn { padding: 11px 16px; font-size: 0.78rem; }
+  }
 
-        .btn-blue:hover {
-            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
-        }
+  /* parallax container */
+  .parallax-hero {
+    transition: transform 0.1s linear;
+    will-change: transform;
+  }
 
-        .btn-blue:active {
-            transform: scale(0.98);
-        }
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 0; }
 
-        /* IP Tab */
-        .ip-container {
-            text-align: center;
-            margin-top: 30px;
-            width: 100%;
-        }
+  /* glow text effect */
+  .glow-text {
+    text-shadow: 0 0 20px rgba(79,195,247,0.4);
+  }
 
-        .ip-label {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 14px;
-            margin-bottom: 15px;
-            display: block;
-        }
+  /* TikTok page */
+  .tiktok-embed-card {
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid var(--glass-border);
+    background: var(--glass);
+    padding: 20px;
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+    text-align: center;
+  }
+  .tiktok-stats { display: flex; gap: 24px; justify-content: center; }
+  .t-stat { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .t-num { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: #fff; }
+  .t-label { font-size: 0.7rem; color: var(--muted); }
 
-        .ip-display {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 25px;
-            padding: 30px 20px;
-            backdrop-filter: blur(20px);
-            margin-bottom: 20px;
-            word-break: break-all;
-        }
+  .recent-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 0 8px;
+  }
 
-        .ip-address {
-            color: #00d4ff;
-            font-size: 26px;
-            font-weight: 700;
-            font-family: 'Monaco', 'Courier New', monospace;
-            text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
-            margin-bottom: 15px;
-        }
+  .video-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .video-thumb {
+    aspect-ratio: 9/16;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #1a2540, #0d1117);
+    border: 1px solid var(--glass-border);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.25s, box-shadow 0.25s;
+  }
+  .video-thumb:hover { transform: scale(1.04); box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+  .video-thumb-inner {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+    background: linear-gradient(135deg, rgba(79,195,247,0.08), rgba(124,77,255,0.08));
+  }
+  .video-views {
+    position: absolute; bottom: 5px; left: 5px;
+    font-size: 0.62rem; color: rgba(255,255,255,0.8); font-weight: 600;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  }
 
-        .ip-info {
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 13px;
-        }
+  /* web page */
+  .project-card {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.25s cubic-bezier(.16,1,.3,1);
+    margin-bottom: 10px;
+  }
+  .project-card:hover {
+    background: rgba(79,195,247,0.06);
+    border-color: rgba(79,195,247,0.2);
+    transform: translateX(4px);
+  }
+  .project-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem; flex-shrink: 0;
+  }
+  .project-info { flex: 1; min-width: 0; }
+  .project-name { font-weight: 600; font-size: 0.88rem; color: #fff; margin-bottom: 2px; }
+  .project-desc { font-size: 0.72rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .project-arrow { color: var(--muted); font-size: 0.9rem; }
 
-        .copy-btn {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
-            border: none;
-            border-radius: 15px;
-            color: #fff;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 14px;
-        }
-
-        .copy-btn:hover {
-            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
-        }
-
-        .copy-btn:active {
-            transform: scale(0.98);
-        }
-
-        /* Account Tab */
-        .account-container {
-            text-align: center;
-            margin-top: 20px;
-            width: 100%;
-        }
-
-        .account-avatar {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 50px;
-            margin: 0 auto 20px;
-            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
-            color: #fff;
-        }
-
-        .account-name {
-            color: #fff;
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .account-email {
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 13px;
-            margin-bottom: 30px;
-        }
-
-        .account-info {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 20px;
-            padding: 20px;
-            backdrop-filter: blur(20px);
-            margin-bottom: 15px;
-            text-align: left;
-        }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 14px;
-        }
-
-        .info-row:last-child {
-            border-bottom: none;
-        }
-
-        .info-label {
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        /* Bottom Navigation */
-        .nav-bar {
-            position: relative;
-            background: rgba(20, 20, 40, 0.3);
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 15px 20px 25px;
-            display: flex;
-            justify-content: space-around;
-            align-items: flex-end;
-        }
-
-        .nav-background {
-            position: absolute;
-            bottom: 0;
-            left: 20px;
-            right: 20px;
-            height: 65px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 25px;
-            backdrop-filter: blur(20px);
-            z-index: 1;
-            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.05),
-                        0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        .nav-item {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 22px;
-            cursor: pointer;
-            position: relative;
-            z-index: 2;
-            transition: all 0.3s ease;
-            color: rgba(255, 255, 255, 0.5);
-            user-select: none;
-        }
-
-        .nav-item.active {
-            color: #00d4ff;
-            transform: scale(1.15);
-            filter: drop-shadow(0 0 15px rgba(0, 212, 255, 0.5));
-        }
-
-        .nav-item:active {
-            transform: scale(0.92);
-        }
-
-        /* Liquid effect on press */
-        .nav-background.shift-left {
-            transform: translateX(-65px);
-        }
-
-        .nav-background.shift-center {
-            transform: translateX(0);
-        }
-
-        .nav-background.shift-right {
-            transform: translateX(65px);
-        }
-
-        @media (max-width: 500px) {
-            .container {
-                max-width: 100%;
-                max-height: 100%;
-                border-radius: 20px;
-            }
-
-            .title {
-                font-size: 28px;
-            }
-        }
-    </style>
+  /* section sub-head */
+  .section-head {
+    padding: 6px 20px 10px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <!-- Status Bar -->
-        <div class="status-bar">
-            <div class="status-left">
-                <span id="time">9:41</span>
-            </div>
-            <div class="status-right">
-                <i class="fas fa-signal"></i>
-                <i class="fas fa-battery-full"></i>
-            </div>
+
+<!-- Ambient background -->
+<div class="bg-canvas">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<!-- Main scroll area -->
+<div class="scroll-root">
+
+  <!-- HOME PAGE -->
+  <div id="page-home" class="page visible">
+
+    <!-- Hero -->
+    <div class="hero parallax-hero" id="hero">
+
+      <!-- Avatar -->
+      <div class="avatar-wrap" id="avatarWrap">
+        <div class="avatar-glow"></div>
+        <div class="avatar-ring"></div>
+        <div class="avatar-ring-mask"></div>
+        <div class="avatar-img">
+          <!-- Inline SVG avatar: cool aesthetic dark boy silhouette -->
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="bg-grad" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#1a2a4a"/>
+                <stop offset="100%" stop-color="#060810"/>
+              </radialGradient>
+              <radialGradient id="skin-grad" cx="50%" cy="30%" r="60%">
+                <stop offset="0%" stop-color="#c8a882"/>
+                <stop offset="100%" stop-color="#a07850"/>
+              </radialGradient>
+              <linearGradient id="jacket" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#1e2235"/>
+                <stop offset="100%" stop-color="#0d0f1a"/>
+              </linearGradient>
+              <linearGradient id="glow-hair" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#2a1a05"/>
+                <stop offset="100%" stop-color="#0d0905"/>
+              </linearGradient>
+              <filter id="soft">
+                <feGaussianBlur stdDeviation="0.5"/>
+              </filter>
+            </defs>
+            <circle cx="50" cy="50" r="50" fill="url(#bg-grad)"/>
+            <!-- subtle grid lines -->
+            <line x1="0" y1="50" x2="100" y2="50" stroke="rgba(79,195,247,0.05)" stroke-width="0.5"/>
+            <line x1="50" y1="0" x2="50" y2="100" stroke="rgba(79,195,247,0.05)" stroke-width="0.5"/>
+            <!-- body / jacket -->
+            <ellipse cx="50" cy="95" rx="34" ry="24" fill="url(#jacket)"/>
+            <ellipse cx="50" cy="82" rx="22" ry="18" fill="#161b2e"/>
+            <!-- collar -->
+            <path d="M38 74 Q50 68 62 74 L65 80 Q50 76 35 80 Z" fill="#1e2235"/>
+            <!-- neck -->
+            <rect x="44" y="63" width="12" height="14" rx="4" fill="url(#skin-grad)" filter="url(#soft)"/>
+            <!-- head -->
+            <ellipse cx="50" cy="47" rx="18" ry="20" fill="url(#skin-grad)"/>
+            <!-- hair -->
+            <path d="M32 42 Q33 28 50 26 Q67 28 68 42 Q66 34 50 32 Q34 34 32 42Z" fill="url(#glow-hair)"/>
+            <!-- styled hair top -->
+            <path d="M36 36 Q40 24 50 22 Q62 24 64 32 Q58 20 50 21 Q42 22 36 36Z" fill="#1a0e02"/>
+            <!-- left ear -->
+            <ellipse cx="32" cy="48" rx="3.5" ry="4.5" fill="url(#skin-grad)"/>
+            <!-- right ear -->
+            <ellipse cx="68" cy="48" rx="3.5" ry="4.5" fill="url(#skin-grad)"/>
+            <!-- left earring -->
+            <circle cx="30" cy="50" r="1.5" fill="#4fc3f7" opacity="0.9"/>
+            <!-- eyes -->
+            <ellipse cx="43" cy="46" rx="4.5" ry="3" fill="#0d0905"/>
+            <ellipse cx="57" cy="46" rx="4.5" ry="3" fill="#0d0905"/>
+            <!-- eye shine -->
+            <circle cx="44.5" cy="45" r="1.2" fill="rgba(255,255,255,0.7)"/>
+            <circle cx="58.5" cy="45" r="1.2" fill="rgba(255,255,255,0.7)"/>
+            <!-- eyebrows -->
+            <path d="M39 42 Q43 40 47 41" stroke="#2a1a05" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+            <path d="M53 41 Q57 40 61 42" stroke="#2a1a05" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+            <!-- nose -->
+            <path d="M48 51 Q50 55 52 51" stroke="rgba(120,80,40,0.6)" stroke-width="1" fill="none" stroke-linecap="round"/>
+            <!-- lips -->
+            <path d="M44 59 Q50 63 56 59" stroke="#a07850" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <!-- neon accent glow under jaw -->
+            <ellipse cx="50" cy="100" rx="30" ry="6" fill="rgba(79,195,247,0.08)"/>
+          </svg>
         </div>
+      </div>
 
-        <!-- Content -->
-        <div class="content">
-            <!-- Main Tab -->
-            <div class="tab-content active" id="main-tab">
-                <h1 class="title">Liquid Island</h1>
-                <p class="subtitle">Trang cá nhân của Quoc Dat</p>
+      <!-- Name & bio -->
+      <h1 class="name">quocdat</h1>
+      <p class="bio">
+        <span>TikTok Creator</span> &nbsp;•&nbsp; <span>UI Lover</span> &nbsp;•&nbsp; <span>Mobile Tweaker</span>
+      </p>
 
-                <div class="glass-card">
-                    <div class="card-status">
-                        <div class="status-indicator stopped"></div>
-                        <div style="flex: 1;">
-                            <div class="card-title">Service is stopped</div>
-                            <div class="card-subtitle">Goblet overlay & lock screen support active</div>
-                        </div>
-                    </div>
-                </div>
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        Available for collab
+      </div>
 
-                <div class="glass-card">
-                    <div class="card-title" style="margin-bottom: 12px;">Grant Accessibility Access</div>
-                    <button class="card-button btn-gray">Enable Access</button>
-                </div>
-
-                <div class="glass-card">
-                    <div class="card-status">
-                        <div class="status-indicator active"></div>
-                        <div style="flex: 1;">
-                            <div class="card-title">Call Screening Active</div>
-                            <div class="card-subtitle">Call screening enabled by you</div>
-                        </div>
-                    </div>
-                    <button class="card-button btn-blue">View Details</button>
-                </div>
-            </div>
-
-            <!-- IP Tab -->
-            <div class="tab-content" id="ip-tab">
-                <h1 class="title">Your IP</h1>
-                <p class="subtitle">Địa chỉ IP hiện tại của bạn</p>
-
-                <div class="ip-container">
-                    <div class="glass-card" style="margin-bottom: 0;">
-                        <span class="ip-label">IP Address</span>
-                        <div class="ip-display">
-                            <div class="ip-address" id="ip-address">Detecting...</div>
-                            <div class="ip-info" id="ip-info">Loading location data...</div>
-                        </div>
-                        <button class="copy-btn" onclick="copyIP()">Copy IP Address</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Account Tab -->
-            <div class="tab-content" id="account-tab">
-                <h1 class="title">Account</h1>
-                <p class="subtitle">Tài khoản của bạn</p>
-
-                <div class="account-container">
-                    <div class="account-avatar">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="account-name">Quoc Dat</div>
-                    <div class="account-email">quocdat@example.com</div>
-
-                    <div class="glass-card">
-                        <div class="info-row">
-                            <span class="info-label">Username</span>
-                            <span>quocdat_dev</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Status</span>
-                            <span style="color: #00d4ff;">Premium</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Joined</span>
-                            <span>June 2026</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bottom Navigation -->
-        <div class="nav-bar">
-            <div class="nav-background shift-left" id="nav-bg"></div>
-            <div class="nav-item active" onclick="switchTab('main-tab', 'shift-left', this)">
-                <i class="fas fa-home"></i>
-            </div>
-            <div class="nav-item" onclick="switchTab('ip-tab', 'shift-center', this)">
-                <i class="fas fa-globe"></i>
-            </div>
-            <div class="nav-item" onclick="switchTab('account-tab', 'shift-right', this)">
-                <i class="fas fa-user"></i>
-            </div>
-        </div>
+      <!-- CTA buttons -->
+      <div class="cta-row">
+        <a href="#" class="btn btn-primary" onclick="switchTab('tiktok'); return false;">
+          <span>🎵</span> TikTok
+        </a>
+        <a href="#" class="btn" onclick="switchTab('web'); return false;">
+          <span>🌐</span> Website
+        </a>
+        <a href="mailto:quocdat@example.com" class="btn">
+          <span>✉️</span> Contact
+        </a>
+      </div>
     </div>
 
-    <!-- JavaScript xử lý toàn bộ logic -->
-    <script>
-        // 1. Cập nhật thời gian thực trên thanh Status Bar
-        function updateTime() {
-            const timeElement = document.getElementById('time');
-            const now = new Date();
-            let hours = now.getHours();
-            let minutes = now.getMinutes();
-            
-            // Định dạng 2 chữ số
-            hours = hours < 10 ? '0' + hours : hours;
-            minutes = minutes < 10 ? '0' + minutes : minutes;
-            
-            timeElement.textContent = `${hours}:${minutes}`;
-        }
-        setInterval(updateTime, 1000);
-        updateTime(); // Chạy ngay lập tức khi load trang
+    <!-- Stats card -->
+    <div class="cards">
+      <div class="glass-card card-delay-1">
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(79,195,247,0.12);">📊</div>
+          <div>
+            <div class="card-title">Số liệu nổi bật</div>
+            <div class="card-sub">Cập nhật mới nhất</div>
+          </div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-num" data-count="128">0</div>
+            <div class="stat-label">K Followers</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num" data-count="4.2">0</div>
+            <div class="stat-label">M Likes</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num" data-count="97">0</div>
+            <div class="stat-label">Projects</div>
+          </div>
+        </div>
+      </div>
 
-        // 2. Xử lý chuyển đổi Tab và hiệu ứng Liquid Shift của thanh Nav
-        function switchTab(tabId, shiftClass, element) {
-            // Loại bỏ class active ở các tab content cũ
-            const tabs = document.querySelectorAll('.tab-content');
-            tabs.forEach(tab => {
-                tab.classList.remove('active');
-            });
+      <!-- Social links card -->
+      <div class="glass-card card-delay-2">
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(124,77,255,0.12);">🔗</div>
+          <div>
+            <div class="card-title">Kết nối với mình</div>
+            <div class="card-sub">Tất cả link trong một nơi</div>
+          </div>
+        </div>
+        <div class="social-row">
+          <a href="#" class="social-btn tiktok-btn" onclick="switchTab('tiktok'); return false;">
+            <span class="s-icon">🎵</span>
+            <span class="s-label">TikTok</span>
+          </a>
+          <a href="#" class="social-btn web-btn" onclick="switchTab('web'); return false;">
+            <span class="s-icon">🌐</span>
+            <span class="s-label">Website</span>
+          </a>
+          <a href="mailto:quocdat@example.com" class="social-btn contact-btn">
+            <span class="s-icon">💬</span>
+            <span class="s-label">Contact</span>
+          </a>
+        </div>
+      </div>
 
-            // Hiển thị tab content được chọn
-            const activeTab = document.getElementById(tabId);
-            if (activeTab) {
-                activeTab.classList.add('active');
-            }
+      <!-- Skills card -->
+      <div class="glass-card card-delay-3" id="skillsCard">
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(255,64,129,0.12);">⚡</div>
+          <div>
+            <div class="card-title">Skills & Expertise</div>
+            <div class="card-sub">Lĩnh vực chuyên môn</div>
+          </div>
+        </div>
+        <div class="skill-list">
+          <div class="skill-row">
+            <div class="skill-meta"><span class="skill-name">Content Creation</span><span class="skill-pct">95%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="--w:0.95"></div></div>
+          </div>
+          <div class="skill-row">
+            <div class="skill-meta"><span class="skill-name">UI / UX Design</span><span class="skill-pct">88%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="--w:0.88"></div></div>
+          </div>
+          <div class="skill-row">
+            <div class="skill-meta"><span class="skill-name">Mobile Tweaking</span><span class="skill-pct">92%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="--w:0.92"></div></div>
+          </div>
+          <div class="skill-row">
+            <div class="skill-meta"><span class="skill-name">Video Editing</span><span class="skill-pct">85%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="--w:0.85"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-            // Loại bỏ class active ở các icon nav cũ
-            const navItems = document.querySelectorAll('.nav-item');
-            navItems.forEach(item => {
-                item.classList.remove('active');
-            });
+  </div>
 
-            // Thêm class active cho icon hiện tại
-            element.classList.add('active');
+  <!-- TIKTOK PAGE -->
+  <div id="page-tiktok" class="page">
+    <div style="padding: 64px 20px 0;">
+      <div class="glass-card">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+          <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#69c9d0,#010101);display:flex;align-items:center;justify-content:center;font-size:1.5rem;">🎵</div>
+          <div>
+            <div style="font-family:Syne,sans-serif;font-weight:800;font-size:1.1rem;">@quocdat</div>
+            <div style="font-size:0.75rem;color:var(--muted);">TikTok Creator</div>
+          </div>
+          <a href="https://tiktok.com/@quocdat" target="_blank" style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:12px;background:rgba(105,201,208,0.12);border:1px solid rgba(105,201,208,0.25);color:#69c9d0;font-size:0.78rem;font-weight:600;text-decoration:none;">Follow</a>
+        </div>
+        <div class="tiktok-stats">
+          <div class="t-stat"><span class="t-num">128K</span><span class="t-label">Followers</span></div>
+          <div class="t-stat"><span class="t-num">4.2M</span><span class="t-label">Likes</span></div>
+          <div class="t-stat"><span class="t-num">243</span><span class="t-label">Videos</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="section-head" style="margin-top:16px;">Recent Videos</div>
+    <div style="padding:0 20px 0;">
+      <div class="glass-card">
+        <div class="video-grid">
+          <div class="video-thumb"><div class="video-thumb-inner">📱</div><span class="video-views">👁 82K</span></div>
+          <div class="video-thumb"><div class="video-thumb-inner">✨</div><span class="video-views">👁 156K</span></div>
+          <div class="video-thumb"><div class="video-thumb-inner">🎨</div><span class="video-views">👁 43K</span></div>
+          <div class="video-thumb"><div class="video-thumb-inner">🔥</div><span class="video-views">👁 201K</span></div>
+          <div class="video-thumb"><div class="video-thumb-inner">💡</div><span class="video-views">👁 67K</span></div>
+          <div class="video-thumb"><div class="video-thumb-inner">🎯</div><span class="video-views">👁 98K</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-            // Điều khiển thanh background chạy mượt (Liquid effect)
-            const navBg = document.getElementById('nav-bg');
-            navBg.className = 'nav-background ' + shiftClass;
+  <!-- WEBSITE PAGE -->
+  <div id="page-web" class="page">
+    <div style="padding: 64px 20px 0;">
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(124,77,255,0.14);">🌐</div>
+          <div>
+            <div class="card-title">quocdat's Projects</div>
+            <div class="card-sub">Các dự án đang hoạt động</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section-head" style="margin-top:14px;">Pinned</div>
+    <div style="padding:0 20px;">
+      <a href="#" class="project-card">
+        <div class="project-icon" style="background:rgba(79,195,247,0.1);">🎨</div>
+        <div class="project-info">
+          <div class="project-name">UI Component Library</div>
+          <div class="project-desc">Premium dark-mode UI kit for mobile apps</div>
+        </div>
+        <span class="project-arrow">›</span>
+      </a>
+      <a href="#" class="project-card">
+        <div class="project-icon" style="background:rgba(124,77,255,0.1);">📱</div>
+        <div class="project-info">
+          <div class="project-name">Android Tweaks Guide</div>
+          <div class="project-desc">Hướng dẫn custom Android cực xịn 2025</div>
+        </div>
+        <span class="project-arrow">›</span>
+      </a>
+      <a href="#" class="project-card">
+        <div class="project-icon" style="background:rgba(255,64,129,0.1);">🎵</div>
+        <div class="project-info">
+          <div class="project-name">TikTok Growth Blog</div>
+          <div class="project-desc">Tips tăng trưởng TikTok 0 → 100K followers</div>
+        </div>
+        <span class="project-arrow">›</span>
+      </a>
+    </div>
+    <div class="section-head" style="margin-top:4px;">Stack</div>
+    <div style="padding:0 20px 0;">
+      <div class="glass-card">
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <span style="padding:6px 14px;border-radius:10px;background:rgba(79,195,247,0.08);border:1px solid rgba(79,195,247,0.18);font-size:0.73rem;color:var(--neon);">HTML / CSS</span>
+          <span style="padding:6px 14px;border-radius:10px;background:rgba(255,212,0,0.08);border:1px solid rgba(255,212,0,0.18);font-size:0.73rem;color:#ffd400;">JavaScript</span>
+          <span style="padding:6px 14px;border-radius:10px;background:rgba(124,77,255,0.08);border:1px solid rgba(124,77,255,0.18);font-size:0.73rem;color:#b39ddb;">Figma</span>
+          <span style="padding:6px 14px;border-radius:10px;background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.18);font-size:0.73rem;color:#00e5ff;">Android</span>
+          <span style="padding:6px 14px;border-radius:10px;background:rgba(255,64,129,0.08);border:1px solid rgba(255,64,129,0.18);font-size:0.73rem;color:#ff4081;">CapCut</span>
+          <span style="padding:6px 14px;border-radius:10px;background:rgba(79,195,247,0.06);border:1px solid rgba(79,195,247,0.12);font-size:0.73rem;color:var(--muted);">After Effects</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
-            // Nếu người dùng chọn tab IP, tự động kích hoạt API lấy IP luôn
-            if (tabId === 'ip-tab') {
-                getIPAddress();
-            }
-        }
+</div>
 
-        // 3. Tự động lấy Địa chỉ IP thật và Quốc gia/Nhà mạng từ API miễn phí
-        function getIPAddress() {
-            const ipAddressText = document.getElementById('ip-address');
-            const ipInfoText = document.getElementById('ip-info');
+<!-- Bottom Dock -->
+<div class="dock-wrap">
+  <div class="dock" id="dock">
+    <button class="tab active" id="tab-home" data-page="home" role="tab" aria-selected="true">
+      <div class="tab-active-bg"></div>
+      <div class="drag-indicator"></div>
+      <span class="tab-icon">🏠</span>
+      <span>Home</span>
+    </button>
+    <button class="tab" id="tab-tiktok" data-page="tiktok" role="tab" aria-selected="false">
+      <div class="tab-active-bg"></div>
+      <div class="drag-indicator"></div>
+      <span class="tab-icon">🎵</span>
+      <span>TikTok</span>
+    </button>
+    <button class="tab" id="tab-web" data-page="web" role="tab" aria-selected="false">
+      <div class="tab-active-bg"></div>
+      <div class="drag-indicator"></div>
+      <span class="tab-icon">🌐</span>
+      <span>Website</span>
+    </button>
+  </div>
+</div>
 
-            // Chỉ gọi API nếu chưa lấy dữ liệu trước đó
-            if (ipAddressText.textContent !== "Detecting...") return;
+<script>
+// ── UTILITY ──────────────────────────────────────────
+const lerp = (a, b, t) => a + (b - a) * t;
+const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
 
-            fetch('https://ipapi.co/json/')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.ip) {
-                        ipAddressText.textContent = data.ip;
-                        ipInfoText.textContent = `${data.city}, ${data.country_name} • ${data.org || 'Unknown Network'}`;
-                    } else {
-                        ipAddressText.textContent = "Unavailable";
-                        ipInfoText.textContent = "Không thể truy cập dữ liệu IP";
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching IP:', error);
-                    ipAddressText.textContent = "Error";
-                    ipInfoText.textContent = "Vui lòng kiểm tra lại kết nối mạng!";
-                });
-        }
+// ── TAB SWITCHING ─────────────────────────────────────
+const pages = { home: 'page-home', tiktok: 'page-tiktok', web: 'page-web' };
+const tabs  = { home: 'tab-home',  tiktok: 'tab-tiktok',  web: 'tab-web'  };
+let currentPage = 'home';
 
-        // 4. Xử lý chức năng sao chép IP vào bộ nhớ tạm (Clipboard)
-        function copyIP() {
-            const ipText = document.getElementById('ip-address').textContent;
-            const copyBtn = document.querySelector('.copy-btn');
+function switchTab(name) {
+  if (name === currentPage) return;
+  // hide old
+  document.getElementById(pages[currentPage]).classList.remove('visible');
+  document.getElementById(tabs[currentPage]).classList.remove('active');
+  document.getElementById(tabs[currentPage]).setAttribute('aria-selected','false');
+  // show new
+  currentPage = name;
+  document.getElementById(pages[name]).classList.add('visible');
+  const t = document.getElementById(tabs[name]);
+  t.classList.add('active');
+  t.setAttribute('aria-selected','true');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (name === 'home') triggerSkillBars();
+}
 
-            if (ipText === "Detecting..." || ipText === "Error" || ipText === "Unavailable") {
-                alert("Chưa có địa chỉ IP hợp lệ để sao chép!");
-                return;
-            }
+// ── DOCK TAB INTERACTION ──────────────────────────────
+let holdTimer = null;
+let holdingTab = null;
+let dragData = null;
 
-            navigator.clipboard.writeText(ipText).then(() => {
-                // Đổi trạng thái nút bấm tạm thời để thông báo thành công
-                const originalText = copyBtn.textContent;
-                copyBtn.textContent = "Copied Success! ✓";
-                copyBtn.style.background = "linear-gradient(135deg, #2ed573 0%, #1e90ff 100%)";
-                
-                setTimeout(() => {
-                    copyBtn.textContent = originalText;
-                    copyBtn.style.background = ""; // Reset về CSS cũ
-                }, 2000);
-            }).catch(err => {
-                alert("Lỗi! Không thể sao chép: " + err);
-            });
-        }
-    </script>
+function setupTab(btn) {
+  const page = btn.dataset.page;
+
+  // pointer down → start hold
+  btn.addEventListener('pointerdown', e => {
+    btn.setPointerCapture(e.pointerId);
+    holdTimer = setTimeout(() => {
+      btn.classList.add('holding');
+      holdingTab = btn;
+      // haptic if available
+      if (navigator.vibrate) navigator.vibrate(10);
+    }, 180);
+
+    // drag init
+    dragData = { startX: e.clientX, curX: e.clientX, vel: 0, lastX: e.clientX };
+  });
+
+  btn.addEventListener('pointermove', e => {
+    if (!dragData) return;
+    const dx = e.clientX - dragData.lastX;
+    dragData.vel = dx;
+    dragData.lastX = e.clientX;
+    dragData.curX = e.clientX;
+
+    if (!holdingTab) return;
+    // drag translate
+    const totalDx = e.clientX - dragData.startX;
+    const maxDrag = 50;
+    const clamped = clamp(totalDx, -maxDrag, maxDrag);
+    const squish = 1 + Math.abs(clamped) * 0.001;
+    btn.style.transform = `translateX(${clamped}px) scale(${1.12}) translateY(-4px) scaleX(${squish})`;
+  });
+
+  const endDrag = (e) => {
+    clearTimeout(holdTimer);
+    if (holdingTab) {
+      holdingTab.classList.remove('holding');
+      holdingTab.style.transform = '';
+      // spring release
+      holdingTab.style.transition = 'transform 0.6s cubic-bezier(.16,1,.3,1)';
+      setTimeout(() => { if(holdingTab) holdingTab.style.transition = ''; holdingTab = null; }, 600);
+    } else {
+      // simple tap
+      switchTab(page);
+      btn.classList.add('pressed');
+      setTimeout(() => btn.classList.remove('pressed'), 500);
+    }
+    dragData = null;
+  };
+
+  btn.addEventListener('pointerup', endDrag);
+  btn.addEventListener('pointercancel', endDrag);
+}
+
+document.querySelectorAll('.tab').forEach(setupTab);
+
+// ── SKILL BAR ANIMATION ───────────────────────────────
+function triggerSkillBars() {
+  const fills = document.querySelectorAll('.skill-fill');
+  fills.forEach((f, i) => {
+    setTimeout(() => f.classList.add('animate'), 200 + i * 100);
+  });
+}
+
+// Intersection observer for skills card
+const skillObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { triggerSkillBars(); skillObs.disconnect(); }
+  });
+}, { threshold: 0.3 });
+const skillsCard = document.getElementById('skillsCard');
+if (skillsCard) skillObs.observe(skillsCard);
+
+// ── COUNTER ANIMATION ─────────────────────────────────
+function animateCounter(el, target, suffix = '') {
+  const isFloat = String(target).includes('.');
+  let start = 0;
+  const dur = 1800;
+  const startTime = performance.now();
+  const step = (now) => {
+    const p = Math.min((now - startTime) / dur, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    const val = start + (target - start) * ease;
+    el.textContent = (isFloat ? val.toFixed(1) : Math.round(val)) + suffix;
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+const statObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.querySelectorAll('[data-count]').forEach(el => {
+        const v = parseFloat(el.dataset.count);
+        const suffix = el.dataset.count.includes('.') ? 'M' : 'K';
+        animateCounter(el, v, el.closest('.stat-item').querySelector('.stat-label').textContent.includes('Project') ? '' : suffix);
+      });
+      statObs.disconnect();
+    }
+  });
+}, { threshold: 0.4 });
+document.querySelectorAll('.stats-grid').forEach(el => statObs.observe(el));
+
+// fix: rerun stat if already visible
+setTimeout(() => {
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const v = parseFloat(el.dataset.count);
+    const label = el.closest('.stat-item')?.querySelector('.stat-label')?.textContent || '';
+    const suffix = label.includes('Project') ? '' : (String(v).includes('.') ? 'M' : 'K');
+    animateCounter(el, v, suffix);
+  });
+}, 600);
+
+// ── PARALLAX ON MOUSE MOVE ────────────────────────────
+const hero = document.getElementById('hero');
+const avatarWrap = document.getElementById('avatarWrap');
+let mouseX = 0, mouseY = 0;
+let curX = 0, curY = 0;
+
+document.addEventListener('mousemove', e => {
+  const cx = window.innerWidth / 2;
+  const cy = window.innerHeight / 2;
+  mouseX = (e.clientX - cx) / cx;
+  mouseY = (e.clientY - cy) / cy;
+});
+
+let rafRunning = false;
+function animParallax() {
+  curX = lerp(curX, mouseX, 0.07);
+  curY = lerp(curY, mouseY, 0.07);
+  if (hero) {
+    hero.style.transform = `translate(${curX * 6}px, ${curY * 4}px)`;
+  }
+  if (avatarWrap) {
+    avatarWrap.style.transform = `translate(${curX * -10}px, ${curY * -8}px)`;
+  }
+  requestAnimationFrame(animParallax);
+}
+animParallax();
+
+// ── LIQUID GLASS: SVG displacement filter on hold ─────
+// Inject SVG filter for liquid distortion
+const svgFilter = document.createElementNS('http://www.w3.org/2000/svg','svg');
+svgFilter.style.cssText = 'position:absolute;width:0;height:0;';
+svgFilter.innerHTML = `
+  <defs>
+    <filter id="liquid" x="-30%" y="-30%" width="160%" height="160%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise" seed="5">
+        <animate attributeName="baseFrequency" values="0.04;0.06;0.04" dur="3s" repeatCount="indefinite"/>
+      </feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G" result="distorted">
+        <animate attributeName="scale" values="0;0;0" dur="3s" repeatCount="indefinite" id="dispAnim"/>
+      </feDisplacementMap>
+    </filter>
+  </defs>`;
+document.body.appendChild(svgFilter);
+
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('pointerdown', () => {
+    const dispMap = svgFilter.querySelector('feDisplacementMap animate');
+    if (dispMap) {
+      dispMap.setAttribute('values', '0;12;8');
+      dispMap.beginElement && dispMap.beginElement();
+    }
+    btn.style.filter = 'url(#liquid) brightness(1.2)';
+  });
+  btn.addEventListener('pointerup pointercancel', () => {
+    btn.style.filter = '';
+  });
+  btn.addEventListener('pointercancel', () => { btn.style.filter = ''; });
+});
+
+// ── SCROLL REVEAL ─────────────────────────────────────
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.style.opacity = '1';
+      e.target.style.transform = 'translateY(0) scale(1)';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.glass-card').forEach(card => {
+  revealObs.observe(card);
+});
+
+// ── RIPPLE EFFECT ON CARDS ────────────────────────────
+document.querySelectorAll('.glass-card').forEach(card => {
+  card.addEventListener('click', e => {
+    const r = document.createElement('span');
+    const rect = card.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height) * 1.5;
+    r.style.cssText = `
+      position:absolute;
+      width:${size}px;height:${size}px;
+      left:${e.clientX - rect.left - size/2}px;
+      top:${e.clientY - rect.top - size/2}px;
+      border-radius:50%;
+      background:radial-gradient(circle, rgba(79,195,247,0.12), transparent);
+      transform:scale(0);
+      animation:ripple 0.6s ease-out forwards;
+      pointer-events:none;
+    `;
+    card.style.position = 'relative';
+    card.appendChild(r);
+    setTimeout(() => r.remove(), 600);
+  });
+});
+
+const rippleCSS = document.createElement('style');
+rippleCSS.textContent = `@keyframes ripple { to { transform:scale(1); opacity:0; } }`;
+document.head.appendChild(rippleCSS);
+
+// ── DOCK PARALLAX SHADOW ──────────────────────────────
+const dock = document.getElementById('dock');
+document.addEventListener('scroll', () => {
+  const scrolled = window.scrollY;
+  dock.style.boxShadow = `
+    0 0 0 1px rgba(255,255,255,0.06) inset,
+    0 -1px 0 rgba(255,255,255,0.08) inset,
+    0 ${32 + scrolled * 0.02}px 80px rgba(0,0,0,${0.7 + scrolled * 0.0003}),
+    0 0 60px rgba(79,195,247,0.06)
+  `;
+}, { passive: true });
+</script>
 </body>
 </html>
