@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liquid Island - Quoc Dat</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px;
+            height: 100vh;
+            max-height: 900px;
+            background: radial-gradient(circle at top right, rgba(50, 100, 150, 0.1), transparent),
+                        radial-gradient(circle at bottom left, rgba(100, 50, 150, 0.1), transparent);
+            border-radius: 40px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Status Bar */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            font-size: 12px;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .status-left, .status-right {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        /* Main Content */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            width: 100%;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Main Tab */
+        .title {
+            color: #fff;
+            font-size: 36px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        /* Glass Card */
+        .glass-card {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 25px;
+            padding: 20px;
+            margin-bottom: 15px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .card-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            flex-shrink: 0;
+        }
+
+        .status-indicator.stopped {
+            background: #ff4757;
+            box-shadow: 0 0 10px rgba(255, 71, 87, 0.6);
+        }
+
+        .status-indicator.active {
+            background: #00d4ff;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.6);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.6;
+            }
+        }
+
+        .card-title {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .card-subtitle {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+        }
+
+        .card-button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 15px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            margin-top: 15px;
+        }
+
+        .btn-gray {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .btn-gray:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .btn-gray:active {
+            transform: scale(0.98);
+        }
+
+        .btn-blue {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-blue:hover {
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .btn-blue:active {
+            transform: scale(0.98);
+        }
+
+        /* IP Tab */
+        .ip-container {
+            text-align: center;
+            margin-top: 30px;
+            width: 100%;
+        }
+
+        .ip-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .ip-display {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 25px;
+            padding: 30px 20px;
+            backdrop-filter: blur(20px);
+            margin-bottom: 20px;
+            word-break: break-all;
+        }
+
+        .ip-address {
+            color: #00d4ff;
+            font-size: 26px;
+            font-weight: 700;
+            font-family: 'Monaco', 'Courier New', monospace;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+            margin-bottom: 15px;
+        }
+
+        .ip-info {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 13px;
+        }
+
+        .copy-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            border: none;
+            border-radius: 15px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .copy-btn:hover {
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .copy-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Account Tab */
+        .account-container {
+            text-align: center;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .account-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+            color: #fff;
+        }
+
+        .account-name {
+            color: #fff;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .account-email {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 13px;
+            margin-bottom: 30px;
+        }
+
+        .account-info {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(20px);
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Bottom Navigation */
+        .nav-bar {
+            position: relative;
+            background: rgba(20, 20, 40, 0.3);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 15px 20px 25px;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+        }
+
+        .nav-background {
+            position: absolute;
+            bottom: 0;
+            left: 20px;
+            right: 20px;
+            height: 65px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 25px;
+            backdrop-filter: blur(20px);
+            z-index: 1;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.05),
+                        0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 22px;
+            cursor: pointer;
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.5);
+            user-select: none;
+        }
+
+        .nav-item.active {
+            color: #00d4ff;
+            transform: scale(1.15);
+            filter: drop-shadow(0 0 15px rgba(0, 212, 255, 0.5));
+        }
+
+        .nav-item:active {
+            transform: scale(0.92);
+        }
+
+        /* Liquid effect on press */
+        .nav-background.shift-left {
+            transform: translateX(-65px);
+        }
+
+        .nav-background.shift-center {
+            transform: translateX(0);
+        }
+
+        .nav-background.shift-right {
+            transform: translateX(65px);
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                max-width: 100%;
+                max-height: 100%;
+                border-radius: 20px;
+            }
+
+            .title {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-left">
+                <span id="time">9:41</span>
+            </div>
+            <div class="status-right">
+                <i class="fas fa-signal"></i>
+                <i class="fas fa-battery-full"></i>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Main Tab -->
+            <div class="tab-content active" id="main-tab">
+                <h1 class="title">Liquid Island</h1>
+                <p class="subtitle">Trang cá nhân của Quoc Dat</p>
+
+                <div class="glass-card">
+                    <div class="card-status">
+                        <div class="status-indicator stopped"></div>
+                        <div style="flex: 1;">
+                            <div class="card-title">Service is stopped</div>
+                            <div class="card-subtitle">Goblet overlay & lock screen support active</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <div class="card-title" style="margin-bottom: 12px;">Grant Accessibility Access</div>
+                    <button class="card-button btn-gray">Enable Access</button>
+                </div>
+
+                <div class="glass-card">
+                    <div class="card-status">
+                        <div class="status-indicator active"></div>
+                        <div style="flex: 1;">
+                            <div class="card-title">Call Screening Active</div>
+                            <div class="card-subtitle">Call screening enabled by you</div>
+                        </div>
+                    </div>
+                    <button class="card-button btn-blue">View Details</button>
+                </div>
+            </div>
+
+            <!-- IP Tab -->
+            <div class="tab-content" id="ip-tab">
+                <h1 class="title">Your IP</h1>
+                <p class="subtitle">Địa chỉ IP hiện tại của bạn</p>
+
+                <div class="ip-container">
+                    <div class="glass-card" style="margin-bottom: 0;">
+                        <span class="ip-label">IP Address</span>
+                        <div class="ip-display">
+                            <div class="ip-address" id="ip-address">Detecting...</div>
+                            <div class="ip-info" id="ip-info">Loading location data...</div>
+                        </div>
+                        <button class="copy-btn" onclick="copyIP()">Copy IP Address</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Tab -->
+            <div class="tab-content" id="account-tab">
+                <h1 class="title">Account</h1>
+                <p class="subtitle">Tài khoản của bạn</p>
+
+                <div class="account-container">
+                    <div class="account-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="account-name">Quoc Dat</div>
+                    <div class="account-email">quocdat@example.com</div>
+
+                    <div class="glass-card">
+                        <div class="info-row">
+                            <span class="info-label">Username</span>
+                            <span>quocdat_dev</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Status</span>
+                            <span style="color: #00d4ff;">Premium</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Joined</span>
+                            <span>June 2026</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="nav-bar">
+            <div class="nav-background shift-left" id="nav-bg"></div>
+            <div class="nav-item active" onclick="switchTab('main-tab', 'shift-left', this)">
+                <i class="fas fa-home"></i>
+            </div>
+            <div class="nav-item" onclick="switchTab('ip-tab', 'shift-center', this)">
+                <i class="fas fa-globe"></i>
+            </div>
+            <div class="nav-item" onclick="switchTab('account-tab', 'shift-right', this)">
+                <i class="fas fa-user"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript xử lý toàn bộ logic -->
+    <script>
+        // 1. Cập nhật thời gian thực trên thanh Status Bar
+        function updateTime() {
+            const timeElement = document.getElementById('time');
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            
+            // Định dạng 2 chữ số
+            hours = hours < 10 ? '0' + hours : hours;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            
+            timeElement.textContent = `${hours}:${minutes}`;
+        }
+        setInterval(updateTime, 1000);
+        updateTime(); // Chạy ngay lập tức khi load trang
+
+        // 2. Xử lý chuyển đổi Tab và hiệu ứng Liquid Shift của thanh Nav
+        function switchTab(tabId, shiftClass, element) {
+            // Loại bỏ class active ở các tab content cũ
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Hiển thị tab content được chọn
+            const activeTab = document.getElementById(tabId);
+            if (activeTab) {
+                activeTab.classList.add('active');
+            }
+
+            // Loại bỏ class active ở các icon nav cũ
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Thêm class active cho icon hiện tại
+            element.classList.add('active');
+
+            // Điều khiển thanh background chạy mượt (Liquid effect)
+            const navBg = document.getElementById('nav-bg');
+            navBg.className = 'nav-background ' + shiftClass;
+
+            // Nếu người dùng chọn tab IP, tự động kích hoạt API lấy IP luôn
+            if (tabId === 'ip-tab') {
+                getIPAddress();
+            }
+        }
+
+        // 3. Tự động lấy Địa chỉ IP thật và Quốc gia/Nhà mạng từ API miễn phí
+        function getIPAddress() {
+            const ipAddressText = document.getElementById('ip-address');
+            const ipInfoText = document.getElementById('ip-info');
+
+            // Chỉ gọi API nếu chưa lấy dữ liệu trước đó
+            if (ipAddressText.textContent !== "Detecting...") return;
+
+            fetch('https://ipapi.co/json/')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.ip) {
+                        ipAddressText.textContent = data.ip;
+                        ipInfoText.textContent = `${data.city}, ${data.country_name} • ${data.org || 'Unknown Network'}`;
+                    } else {
+                        ipAddressText.textContent = "Unavailable";
+                        ipInfoText.textContent = "Không thể truy cập dữ liệu IP";
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching IP:', error);
+                    ipAddressText.textContent = "Error";
+                    ipInfoText.textContent = "Vui lòng kiểm tra lại kết nối mạng!";
+                });
+        }
+
+        // 4. Xử lý chức năng sao chép IP vào bộ nhớ tạm (Clipboard)
+        function copyIP() {
+            const ipText = document.getElementById('ip-address').textContent;
+            const copyBtn = document.querySelector('.copy-btn');
+
+            if (ipText === "Detecting..." || ipText === "Error" || ipText === "Unavailable") {
+                alert("Chưa có địa chỉ IP hợp lệ để sao chép!");
+                return;
+            }
+
+            navigator.clipboard.writeText(ipText).then(() => {
+                // Đổi trạng thái nút bấm tạm thời để thông báo thành công
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = "Copied Success! ✓";
+                copyBtn.style.background = "linear-gradient(135deg, #2ed573 0%, #1e90ff 100%)";
+                
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                    copyBtn.style.background = ""; // Reset về CSS cũ
+                }, 2000);
+            }).catch(err => {
+                alert("Lỗi! Không thể sao chép: " + err);
+            });
+        }
+    </script>
+</body>
+</html>
