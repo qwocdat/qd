@@ -1,0 +1,380 @@
+-- Blox Fruits Hack Hub | quocdat hub | Black/White GUI + Auto Farm Level + ESP + Copy Frame
+-- Sử dụng với Synapse X, Krnl, Fluxus hoặc executor tương tự
+
+local plr = game:GetService("Players").LocalPlayer
+local mouse = plr:GetMouse()
+local ws = game:GetService("Workspace")
+local rs = game:GetService("RunService")
+local uis = game:GetService("UserInputService")
+
+-- Tạo GUI đen trắng với tên "quocdat hub"
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "quocdat_hub"
+screenGui.Parent = plr:WaitForChild("PlayerGui")
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 500, 0, 650)
+mainFrame.Position = UDim2.new(0.5, -250, 0.5, -325)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+mainFrame.BorderSizePixel = 2
+mainFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)
+mainFrame.Parent = screenGui
+
+-- Thanh tiêu đề
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 35)
+titleBar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+titleBar.BorderSizePixel = 0
+titleBar.Parent = mainFrame
+
+local titleText = Instance.new("TextLabel")
+titleText.Size = UDim2.new(1, 0, 1, 0)
+titleText.BackgroundTransparency = 1
+titleText.Text = "QUOCDAT HUB | BLOX FRUIT"
+titleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleText.Font = Enum.Font.GothamBold
+titleText.TextSize = 20
+titleText.Parent = titleBar
+
+-- Tab buttons
+local tabMainBtn = Instance.new("TextButton")
+tabMainBtn.Size = UDim2.new(0.33, 0, 0, 40)
+tabMainBtn.Position = UDim2.new(0, 0, 0, 35)
+tabMainBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+tabMainBtn.Text = "MAIN"
+tabMainBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+tabMainBtn.Parent = mainFrame
+
+local tabEspBtn = Instance.new("TextButton")
+tabEspBtn.Size = UDim2.new(0.33, 0, 0, 40)
+tabEspBtn.Position = UDim2.new(0.33, 0, 0, 35)
+tabEspBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+tabEspBtn.Text = "ESP"
+tabEspBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+tabEspBtn.Parent = mainFrame
+
+local tabCopyBtn = Instance.new("TextButton")
+tabCopyBtn.Size = UDim2.new(0.34, 0, 0, 40)
+tabCopyBtn.Position = UDim2.new(0.66, 0, 0, 35)
+tabCopyBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+tabCopyBtn.Text = "COPY"
+tabCopyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+tabCopyBtn.Parent = mainFrame
+
+-- Container nội dung
+local contentContainer = Instance.new("Frame")
+contentContainer.Size = UDim2.new(1, 0, 1, -75)
+contentContainer.Position = UDim2.new(0, 0, 0, 75)
+contentContainer.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+contentContainer.BackgroundTransparency = 0
+contentContainer.BorderSizePixel = 0
+contentContainer.Parent = mainFrame
+
+-- ========== TAB MAIN ==========
+local mainTab = Instance.new("Frame")
+mainTab.Size = UDim2.new(1, 0, 1, 0)
+mainTab.BackgroundTransparency = 1
+mainTab.Visible = true
+mainTab.Parent = contentContainer
+
+local autoFarmBtn = Instance.new("TextButton")
+autoFarmBtn.Size = UDim2.new(0.8, 0, 0, 50)
+autoFarmBtn.Position = UDim2.new(0.1, 0, 0.05, 0)
+autoFarmBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+autoFarmBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
+autoFarmBtn.Text = "AUTO FARM [OFF]"
+autoFarmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+autoFarmBtn.Font = Enum.Font.Gotham
+autoFarmBtn.TextSize = 18
+autoFarmBtn.Parent = mainTab
+
+local radiusLabel = Instance.new("TextLabel")
+radiusLabel.Size = UDim2.new(0.4, 0, 0, 25)
+radiusLabel.Position = UDim2.new(0.05, 0, 0.2, 0)
+radiusLabel.BackgroundTransparency = 1
+radiusLabel.Text = "Farm Radius: 250"
+radiusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+radiusLabel.Parent = mainTab
+
+local radiusSlider = Instance.new("TextButton")
+radiusSlider.Size = UDim2.new(0.5, 0, 0, 25)
+radiusSlider.Position = UDim2.new(0.45, 0, 0.2, 0)
+radiusSlider.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+radiusSlider.BorderColor3 = Color3.fromRGB(255, 255, 255)
+radiusSlider.Text = "250"
+radiusSlider.TextColor3 = Color3.fromRGB(255, 255, 255)
+radiusSlider.Parent = mainTab
+
+-- ========== TAB ESP ==========
+local espTab = Instance.new("Frame")
+espTab.Size = UDim2.new(1, 0, 1, 0)
+espTab.BackgroundTransparency = 1
+espTab.Visible = false
+espTab.Parent = contentContainer
+
+local espToggleBtn = Instance.new("TextButton")
+espToggleBtn.Size = UDim2.new(0.8, 0, 0, 50)
+espToggleBtn.Position = UDim2.new(0.1, 0, 0.05, 0)
+espToggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+espToggleBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
+espToggleBtn.Text = "ESP [OFF]"
+espToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+espToggleBtn.Parent = espTab
+
+-- ========== TAB COPY (khung sao chép) ==========
+local copyTab = Instance.new("Frame")
+copyTab.Size = UDim2.new(1, 0, 1, 0)
+copyTab.BackgroundTransparency = 1
+copyTab.Visible = false
+copyTab.Parent = contentContainer
+
+local copyFrame = Instance.new("Frame")
+copyFrame.Size = UDim2.new(0.9, 0, 0.7, 0)
+copyFrame.Position = UDim2.new(0.05, 0, 0.15, 0)
+copyFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+copyFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)
+copyFrame.BorderSizePixel = 1
+copyFrame.Parent = copyTab
+
+local copyText = Instance.new("TextLabel")
+copyText.Size = UDim2.new(1, 0, 0.4, 0)
+copyText.Position = UDim2.new(0, 0, 0, 10)
+copyText.BackgroundTransparency = 1
+copyText.Text = "QUOCDAT HUB - COPY SCRIPT"
+copyText.TextColor3 = Color3.fromRGB(255, 200, 100)
+copyText.Font = Enum.Font.GothamBold
+copyText.TextSize = 16
+copyText.Parent = copyFrame
+
+local codeBox = Instance.new("TextBox")
+codeBox.Size = UDim2.new(0.9, 0, 0.4, 0)
+codeBox.Position = UDim2.new(0.05, 0, 0.25, 0)
+codeBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+codeBox.BorderColor3 = Color3.fromRGB(200, 200, 200)
+codeBox.Text = "loadstring(game:HttpGet('https://pastebin.com/raw/quocdat_hub'))()"
+codeBox.TextColor3 = Color3.fromRGB(150, 255, 150)
+codeBox.TextWrapped = true
+codeBox.Font = Enum.Font.Code
+codeBox.TextSize = 14
+codeBox.ClearTextOnFocus = false
+codeBox.Parent = copyFrame
+
+local copyButton = Instance.new("TextButton")
+copyButton.Size = UDim2.new(0.4, 0, 0, 35)
+copyButton.Position = UDim2.new(0.3, 0, 0.75, 0)
+copyButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+copyButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
+copyButton.Text = "SAO CHÉP LINK"
+copyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+copyButton.Parent = copyFrame
+
+copyButton.MouseButton1Click:Connect(function()
+local clip = game:GetService("Clipboard")
+if clip then
+clip:set(codeBox.Text)
+copyButton.Text = "ĐÃ COPY!"
+wait(1)
+copyButton.Text = "SAO CHÉP LINK"
+end
+end)
+
+-- Chuyển tab
+tabMainBtn.MouseButton1Click:Connect(function()
+mainTab.Visible = true
+espTab.Visible = false
+copyTab.Visible = false
+tabMainBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+tabEspBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+tabCopyBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+end)
+tabEspBtn.MouseButton1Click:Connect(function()
+mainTab.Visible = false
+espTab.Visible = true
+copyTab.Visible = false
+tabEspBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+tabMainBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+tabCopyBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+end)
+tabCopyBtn.MouseButton1Click:Connect(function()
+mainTab.Visible = false
+espTab.Visible = false
+copyTab.Visible = true
+tabCopyBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+tabMainBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+tabEspBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+end)
+
+-- Biến trạng thái
+local autoFarm = false
+local farmRadius = 250
+local espEnabled = false
+local lastAttackTime = 0
+local attackDelay = 0.3
+
+-- Hàm tìm quái gần nhất
+local function getClosestMob()
+local closest = nil
+local minDist = farmRadius
+local char = plr.Character
+if not char or not char:FindFirstChild("HumanoidRootPart") then return nil end
+local plrPos = char.HumanoidRootPart.Position
+for _, obj in pairs(ws:GetChildren()) do
+if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj.Humanoid.Health > 0 then
+local hrp = obj:FindFirstChild("HumanoidRootPart")
+if hrp then
+local dist = (plrPos - hrp.Position).Magnitude
+if dist < minDist then
+minDist = dist
+closest = obj
+end
+end
+end
+end
+return closest
+end
+
+-- Hàm tấn công
+local function attack(mob)
+if not mob or not mob:FindFirstChild("Humanoid") or mob.Humanoid.Health <= 0 then return end
+local hrp = mob:FindFirstChild("HumanoidRootPart")
+if not hrp then return end
+local tool = plr.Character:FindFirstChildWhichIsA("Tool")
+if tool then
+local combatRemote = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes") and game:GetService("ReplicatedStorage").Remotes:FindFirstChild("Combat")
+if combatRemote then
+combatRemote:FireServer(tool, hrp)
+end
+else
+local humanoid = plr.Character:FindFirstChild("Humanoid")
+if humanoid then
+local backpackTool = plr.Backpack:FindFirstChildWhichIsA("Tool")
+if backpackTool then
+humanoid:EquipTool(backpackTool)
+end
+end
+end
+end
+
+-- Auto Farm loop (bay tới quái)
+rs.Heartbeat:Connect(function()
+if autoFarm and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+local target = getClosestMob()
+if target then
+local targetHrp = target:FindFirstChild("HumanoidRootPart")
+if targetHrp then
+plr.Character.HumanoidRootPart.CFrame = targetHrp.CFrame * CFrame.new(0, 0, 4)
+wait(0.02)
+if tick() - lastAttackTime >= attackDelay then
+attack(target)
+lastAttackTime = tick()
+end
+end
+else
+wait(0.3)
+end
+end
+end)
+
+autoFarmBtn.MouseButton1Click:Connect(function()
+autoFarm = not autoFarm
+if autoFarm then
+autoFarmBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+autoFarmBtn.Text = "AUTO FARM [ON]"
+else
+autoFarmBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+autoFarmBtn.Text = "AUTO FARM [OFF]"
+end
+end)
+
+-- Thanh trượt radius
+local dragRadius = false
+radiusSlider.MouseButton1Down:Connect(function()
+dragRadius = true
+local startX = mouse.X
+local startRad = farmRadius
+local connMove
+connMove = mouse.Move:Connect(function()
+if dragRadius then
+local delta = (mouse.X - startX) / 2
+local newRad = math.clamp(startRad + delta, 50, 500)
+farmRadius = math.floor(newRad)
+radiusLabel.Text = "Farm Radius: " .. farmRadius
+radiusSlider.Text = tostring(farmRadius)
+end
+end)
+local connRelease
+connRelease = uis.InputEnded:Connect(function(input)
+if input.UserInputType == Enum.UserInputType.MouseButton1 then
+dragRadius = false
+connMove:Disconnect()
+connRelease:Disconnect()
+end
+end)
+end)
+
+-- ESP
+local espObjects = {}
+local function updateESP()
+for _, v in pairs(espObjects) do
+pcall(function() v:Destroy() end)
+end
+espObjects = {}
+if not espEnabled then return end
+for _, obj in pairs(ws:GetChildren()) do
+if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj.Humanoid.Health > 0 then
+local hrp = obj:FindFirstChild("HumanoidRootPart")
+if hrp then
+local box = Instance.new("BoxHandleAdornment")
+box.Size = Vector3.new(4, 5, 2)
+box.Adornee = hrp
+box.Color3 = Color3.fromRGB(255, 255, 255)
+box.Transparency = 0.4
+box.AlwaysOnTop = true
+box.ZIndex = 0
+box.Parent = hrp
+table.insert(espObjects, box)
+
+end
+
+espToggleBtn.MouseButton1Click:Connect(function()
+espEnabled = not espEnabled
+if espEnabled then
+espToggleBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+espToggleBtn.Text = "ESP [ON]"
+updateESP()
+spawn(function()
+while espEnabled do
+updateESP()
+wait(1)
+end
+end)
+else
+espToggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+espToggleBtn.Text = "ESP [OFF]"
+for _, v in pairs(espObjects) do
+pcall(function() v:Destroy() end)
+end
+espObjects = {}
+end
+end)
+
+-- Nút unload
+local unloadBtn = Instance.new("TextButton")
+unloadBtn.Size = UDim2.new(0.3, 0, 0, 35)
+unloadBtn.Position = UDim2.new(0.35, 0, 0.92, 0)
+unloadBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+unloadBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
+unloadBtn.Text = "UNLOAD HUB"
+unloadBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+unloadBtn.Parent = mainFrame
+
+unloadBtn.MouseButton1Click:Connect(function()
+screenGui:Destroy()
+autoFarm = false
+for _, v in pairs(espObjects) do
+pcall(function() v:Destroy() end)
+end
+print("quocdat hub unloaded")
+end)
+
+print("quocdat hub loaded successfully | Auto Farm + ESP + Copy Frame")
