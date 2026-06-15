@@ -1,380 +1,397 @@
--- Blox Fruits Hack Hub | quocdat hub | Black/White GUI + Auto Farm Level + ESP + Copy Frame
--- Sử dụng với Synapse X, Krnl, Fluxus hoặc executor tương tự
+-- @tiktokacckhoe1
 
-local plr = game:GetService("Players").LocalPlayer
-local mouse = plr:GetMouse()
-local ws = game:GetService("Workspace")
-local rs = game:GetService("RunService")
-local uis = game:GetService("UserInputService")
+if not game:IsLoaded() then game.Loaded:Wait() end
+repeat task.wait() until game.Players.LocalPlayer
 
--- Tạo GUI đen trắng với tên "quocdat hub"
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "quocdat_hub"
-screenGui.Parent = plr:WaitForChild("PlayerGui")
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CoreGui = game:GetService("CoreGui")
+local Workspace = game:GetService("Workspace")
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
+local VirtualUser = game:GetService("VirtualUser")
 
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 500, 0, 650)
-mainFrame.Position = UDim2.new(0.5, -250, 0.5, -325)
-mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-mainFrame.BorderSizePixel = 2
-mainFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)
-mainFrame.Parent = screenGui
+local LocalPlayer = Players.LocalPlayer
 
--- Thanh tiêu đề
-local titleBar = Instance.new("Frame")
-titleBar.Size = UDim2.new(1, 0, 0, 35)
-titleBar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-titleBar.BorderSizePixel = 0
-titleBar.Parent = mainFrame
+local Config = {
+    Speed = 250,  -- Tá»‘c Ä‘á»™ bay
+    AutoBuyRandom = true,  -- Random
+    AutoStore = true,  -- Cáº¥t trĂ¡i
+    HopIfNoFruit = true,  -- Hop server sau 7 giĂ¢y
+    EnableESP = true,  -- ESP
+    Team = "Pirates"  -- Phe 
+}
 
-local titleText = Instance.new("TextLabel")
-titleText.Size = UDim2.new(1, 0, 1, 0)
-titleText.BackgroundTransparency = 1
-titleText.Text = "QUOCDAT HUB | BLOX FRUIT"
-titleText.TextColor3 = Color3.fromRGB(255, 255, 255)
-titleText.Font = Enum.Font.GothamBold
-titleText.TextSize = 20
-titleText.Parent = titleBar
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local TitleLabel = Instance.new("TextLabel")
+local TimeLabel = Instance.new("TextLabel")
+local StatusLabel = Instance.new("TextLabel")
+local UIPadding = Instance.new("UIPadding")
+local UIListLayout = Instance.new("UIListLayout")
 
--- Tab buttons
-local tabMainBtn = Instance.new("TextButton")
-tabMainBtn.Size = UDim2.new(0.33, 0, 0, 40)
-tabMainBtn.Position = UDim2.new(0, 0, 0, 35)
-tabMainBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-tabMainBtn.Text = "MAIN"
-tabMainBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-tabMainBtn.Parent = mainFrame
-
-local tabEspBtn = Instance.new("TextButton")
-tabEspBtn.Size = UDim2.new(0.33, 0, 0, 40)
-tabEspBtn.Position = UDim2.new(0.33, 0, 0, 35)
-tabEspBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-tabEspBtn.Text = "ESP"
-tabEspBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-tabEspBtn.Parent = mainFrame
-
-local tabCopyBtn = Instance.new("TextButton")
-tabCopyBtn.Size = UDim2.new(0.34, 0, 0, 40)
-tabCopyBtn.Position = UDim2.new(0.66, 0, 0, 35)
-tabCopyBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-tabCopyBtn.Text = "COPY"
-tabCopyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-tabCopyBtn.Parent = mainFrame
-
--- Container nội dung
-local contentContainer = Instance.new("Frame")
-contentContainer.Size = UDim2.new(1, 0, 1, -75)
-contentContainer.Position = UDim2.new(0, 0, 0, 75)
-contentContainer.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-contentContainer.BackgroundTransparency = 0
-contentContainer.BorderSizePixel = 0
-contentContainer.Parent = mainFrame
-
--- ========== TAB MAIN ==========
-local mainTab = Instance.new("Frame")
-mainTab.Size = UDim2.new(1, 0, 1, 0)
-mainTab.BackgroundTransparency = 1
-mainTab.Visible = true
-mainTab.Parent = contentContainer
-
-local autoFarmBtn = Instance.new("TextButton")
-autoFarmBtn.Size = UDim2.new(0.8, 0, 0, 50)
-autoFarmBtn.Position = UDim2.new(0.1, 0, 0.05, 0)
-autoFarmBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-autoFarmBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
-autoFarmBtn.Text = "AUTO FARM [OFF]"
-autoFarmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-autoFarmBtn.Font = Enum.Font.Gotham
-autoFarmBtn.TextSize = 18
-autoFarmBtn.Parent = mainTab
-
-local radiusLabel = Instance.new("TextLabel")
-radiusLabel.Size = UDim2.new(0.4, 0, 0, 25)
-radiusLabel.Position = UDim2.new(0.05, 0, 0.2, 0)
-radiusLabel.BackgroundTransparency = 1
-radiusLabel.Text = "Farm Radius: 250"
-radiusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-radiusLabel.Parent = mainTab
-
-local radiusSlider = Instance.new("TextButton")
-radiusSlider.Size = UDim2.new(0.5, 0, 0, 25)
-radiusSlider.Position = UDim2.new(0.45, 0, 0.2, 0)
-radiusSlider.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-radiusSlider.BorderColor3 = Color3.fromRGB(255, 255, 255)
-radiusSlider.Text = "250"
-radiusSlider.TextColor3 = Color3.fromRGB(255, 255, 255)
-radiusSlider.Parent = mainTab
-
--- ========== TAB ESP ==========
-local espTab = Instance.new("Frame")
-espTab.Size = UDim2.new(1, 0, 1, 0)
-espTab.BackgroundTransparency = 1
-espTab.Visible = false
-espTab.Parent = contentContainer
-
-local espToggleBtn = Instance.new("TextButton")
-espToggleBtn.Size = UDim2.new(0.8, 0, 0, 50)
-espToggleBtn.Position = UDim2.new(0.1, 0, 0.05, 0)
-espToggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-espToggleBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
-espToggleBtn.Text = "ESP [OFF]"
-espToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-espToggleBtn.Parent = espTab
-
--- ========== TAB COPY (khung sao chép) ==========
-local copyTab = Instance.new("Frame")
-copyTab.Size = UDim2.new(1, 0, 1, 0)
-copyTab.BackgroundTransparency = 1
-copyTab.Visible = false
-copyTab.Parent = contentContainer
-
-local copyFrame = Instance.new("Frame")
-copyFrame.Size = UDim2.new(0.9, 0, 0.7, 0)
-copyFrame.Position = UDim2.new(0.05, 0, 0.15, 0)
-copyFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-copyFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)
-copyFrame.BorderSizePixel = 1
-copyFrame.Parent = copyTab
-
-local copyText = Instance.new("TextLabel")
-copyText.Size = UDim2.new(1, 0, 0.4, 0)
-copyText.Position = UDim2.new(0, 0, 0, 10)
-copyText.BackgroundTransparency = 1
-copyText.Text = "QUOCDAT HUB - COPY SCRIPT"
-copyText.TextColor3 = Color3.fromRGB(255, 200, 100)
-copyText.Font = Enum.Font.GothamBold
-copyText.TextSize = 16
-copyText.Parent = copyFrame
-
-local codeBox = Instance.new("TextBox")
-codeBox.Size = UDim2.new(0.9, 0, 0.4, 0)
-codeBox.Position = UDim2.new(0.05, 0, 0.25, 0)
-codeBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-codeBox.BorderColor3 = Color3.fromRGB(200, 200, 200)
-codeBox.Text = "loadstring(game:HttpGet('https://pastebin.com/raw/quocdat_hub'))()"
-codeBox.TextColor3 = Color3.fromRGB(150, 255, 150)
-codeBox.TextWrapped = true
-codeBox.Font = Enum.Font.Code
-codeBox.TextSize = 14
-codeBox.ClearTextOnFocus = false
-codeBox.Parent = copyFrame
-
-local copyButton = Instance.new("TextButton")
-copyButton.Size = UDim2.new(0.4, 0, 0, 35)
-copyButton.Position = UDim2.new(0.3, 0, 0.75, 0)
-copyButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-copyButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
-copyButton.Text = "SAO CHÉP LINK"
-copyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-copyButton.Parent = copyFrame
-
-copyButton.MouseButton1Click:Connect(function()
-local clip = game:GetService("Clipboard")
-if clip then
-clip:set(codeBox.Text)
-copyButton.Text = "ĐÃ COPY!"
-wait(1)
-copyButton.Text = "SAO CHÉP LINK"
+ScreenGui.Name = "NejiFindFruits"
+if CoreGui:FindFirstChild("NejiFindFruits") then
+    CoreGui.NejiFindFruits:Destroy()
 end
-end)
-
--- Chuyển tab
-tabMainBtn.MouseButton1Click:Connect(function()
-mainTab.Visible = true
-espTab.Visible = false
-copyTab.Visible = false
-tabMainBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-tabEspBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-tabCopyBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-end)
-tabEspBtn.MouseButton1Click:Connect(function()
-mainTab.Visible = false
-espTab.Visible = true
-copyTab.Visible = false
-tabEspBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-tabMainBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-tabCopyBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-end)
-tabCopyBtn.MouseButton1Click:Connect(function()
-mainTab.Visible = false
-espTab.Visible = false
-copyTab.Visible = true
-tabCopyBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-tabMainBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-tabEspBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-end)
-
--- Biến trạng thái
-local autoFarm = false
-local farmRadius = 250
-local espEnabled = false
-local lastAttackTime = 0
-local attackDelay = 0.3
-
--- Hàm tìm quái gần nhất
-local function getClosestMob()
-local closest = nil
-local minDist = farmRadius
-local char = plr.Character
-if not char or not char:FindFirstChild("HumanoidRootPart") then return nil end
-local plrPos = char.HumanoidRootPart.Position
-for _, obj in pairs(ws:GetChildren()) do
-if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj.Humanoid.Health > 0 then
-local hrp = obj:FindFirstChild("HumanoidRootPart")
-if hrp then
-local dist = (plrPos - hrp.Position).Magnitude
-if dist < minDist then
-minDist = dist
-closest = obj
-end
-end
-end
-end
-return closest
-end
-
--- Hàm tấn công
-local function attack(mob)
-if not mob or not mob:FindFirstChild("Humanoid") or mob.Humanoid.Health <= 0 then return end
-local hrp = mob:FindFirstChild("HumanoidRootPart")
-if not hrp then return end
-local tool = plr.Character:FindFirstChildWhichIsA("Tool")
-if tool then
-local combatRemote = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes") and game:GetService("ReplicatedStorage").Remotes:FindFirstChild("Combat")
-if combatRemote then
-combatRemote:FireServer(tool, hrp)
-end
+if gethui then
+    ScreenGui.Parent = gethui()
+elseif game:GetService("CoreGui") then
+    ScreenGui.Parent = game:GetService("CoreGui")
 else
-local humanoid = plr.Character:FindFirstChild("Humanoid")
-if humanoid then
-local backpackTool = plr.Backpack:FindFirstChildWhichIsA("Tool")
-if backpackTool then
-humanoid:EquipTool(backpackTool)
+    ScreenGui.Parent = LocalPlayer.PlayerGui
 end
-end
-end
+ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true 
+
+local Background = Instance.new("Frame")
+Background.Name = "Background"
+Background.Parent = ScreenGui
+Background.Size = UDim2.new(1, 0, 1, 0)
+Background.Position = UDim2.new(0, 0, 0, 0)
+Background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Background.BackgroundTransparency = 0.5
+Background.BorderSizePixel = 0
+
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = Background 
+MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+MainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+MainFrame.BackgroundTransparency = 1.000 
+MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+MainFrame.Size = UDim2.new(0, 800, 0, 300)
+
+UIListLayout.Parent = MainFrame
+UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Padding = UDim.new(0, 15) 
+
+UIPadding.Parent = MainFrame
+UIPadding.PaddingTop = UDim.new(0, 20)
+UIPadding.PaddingBottom = UDim.new(0, 20)
+
+TitleLabel.Name = "TitleLabel"
+TitleLabel.Parent = MainFrame
+TitleLabel.BackgroundTransparency = 1.000
+TitleLabel.Size = UDim2.new(1, 0, 0, 60)
+TitleLabel.Font = Enum.Font.FredokaOne
+TitleLabel.Text = "NEJI Hub - Finder Fruits"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+TitleLabel.TextSize = 50
+TitleLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+TitleLabel.TextStrokeTransparency = 0.3
+
+StatusLabel.Name = "StatusLabel"
+StatusLabel.Parent = MainFrame
+StatusLabel.BackgroundTransparency = 1.000
+StatusLabel.Size = UDim2.new(1, 0, 0, 40)
+StatusLabel.Font = Enum.Font.GothamBold
+StatusLabel.Text = "Status : NEJI HUB"
+StatusLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+StatusLabel.TextSize = 28
+StatusLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+StatusLabel.TextStrokeTransparency = 0.5
+
+local InfoLabel = Instance.new("TextLabel")
+InfoLabel.Name = "InfoLabel"
+InfoLabel.Parent = MainFrame
+InfoLabel.BackgroundTransparency = 1.000
+InfoLabel.Size = UDim2.new(1, 0, 0, 35)
+InfoLabel.Font = Enum.Font.GothamBold
+InfoLabel.Text = "Tiktok: @tiktokacckhoe1"
+InfoLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+InfoLabel.TextSize = 22
+InfoLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+InfoLabel.TextStrokeTransparency = 0.5
+
+local function UpdateStatus(text)
+    StatusLabel.Text = "Status : " .. text
 end
 
--- Auto Farm loop (bay tới quái)
-rs.Heartbeat:Connect(function()
-if autoFarm and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-local target = getClosestMob()
-if target then
-local targetHrp = target:FindFirstChild("HumanoidRootPart")
-if targetHrp then
-plr.Character.HumanoidRootPart.CFrame = targetHrp.CFrame * CFrame.new(0, 0, 4)
-wait(0.02)
-if tick() - lastAttackTime >= attackDelay then
-attack(target)
-lastAttackTime = tick()
+local function GetCharacter()
+    return LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 end
+
+local function GetRootPart()
+    local Char = GetCharacter()
+    return Char:WaitForChild("HumanoidRootPart", 10)
 end
-else
-wait(0.3)
+
+local function GetHumanoid()
+    local Char = GetCharacter()
+    return Char:WaitForChild("Humanoid", 10)
 end
+
+local function CreateESP(instance)
+    if not Config.EnableESP then return end
+    if instance:FindFirstChild("NejiESP") then return end
+
+    local bill = Instance.new("BillboardGui")
+    bill.Name = "ESP"
+    bill.Adornee = instance:FindFirstChild("Handle") or instance
+    bill.Size = UDim2.new(0, 200, 0, 50)
+    bill.AlwaysOnTop = true
+    bill.Parent = instance
+
+    local nameLabel = Instance.new("TextLabel")
+    nameLabel.Parent = bill
+    nameLabel.Size = UDim2.new(1, 0, 1, 0)
+    nameLabel.BackgroundTransparency = 1
+    nameLabel.Text = instance.Name
+    nameLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+    nameLabel.TextStrokeTransparency = 0
+    nameLabel.Font = Enum.Font.GothamBold
+    nameLabel.TextSize = 15
 end
+
+local startTime = os.time()
+task.spawn(function()
+    while true do
+        local currentTime = os.time()
+        local diff = currentTime - startTime
+        local h = math.floor(diff / 3600)
+        local m = math.floor((diff % 3600) / 60)
+        local s = diff % 60
+        TimeLabel.Text = string.format("Time : %dh %dm %ds", h, m, s)
+        task.wait(1)
+    end
 end)
 
-autoFarmBtn.MouseButton1Click:Connect(function()
-autoFarm = not autoFarm
-if autoFarm then
-autoFarmBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-autoFarmBtn.Text = "AUTO FARM [ON]"
-else
-autoFarmBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-autoFarmBtn.Text = "AUTO FARM [OFF]"
-end
-end)
+local currentTween = nil
+local function TweenTo(targetCFrame)
+    local HRP = GetRootPart()
+    if not HRP then return end
+    
+    local Char = GetCharacter()
+    local Hum = GetHumanoid()
+    if not Hum or Hum.Health <= 0 then return end
 
--- Thanh trượt radius
-local dragRadius = false
-radiusSlider.MouseButton1Down:Connect(function()
-dragRadius = true
-local startX = mouse.X
-local startRad = farmRadius
-local connMove
-connMove = mouse.Move:Connect(function()
-if dragRadius then
-local delta = (mouse.X - startX) / 2
-local newRad = math.clamp(startRad + delta, 50, 500)
-farmRadius = math.floor(newRad)
-radiusLabel.Text = "Farm Radius: " .. farmRadius
-radiusSlider.Text = tostring(farmRadius)
-end
-end)
-local connRelease
-connRelease = uis.InputEnded:Connect(function(input)
-if input.UserInputType == Enum.UserInputType.MouseButton1 then
-dragRadius = false
-connMove:Disconnect()
-connRelease:Disconnect()
-end
-end)
-end)
+    local Distance = (HRP.Position - targetCFrame.Position).Magnitude
+    local Info = TweenInfo.new(Distance / Config.Speed, Enum.EasingStyle.Linear)
+    
+    if currentTween then currentTween:Cancel() end
 
--- ESP
-local espObjects = {}
-local function updateESP()
-for _, v in pairs(espObjects) do
-pcall(function() v:Destroy() end)
-end
-espObjects = {}
-if not espEnabled then return end
-for _, obj in pairs(ws:GetChildren()) do
-if obj:IsA("Model") and obj:FindFirstChild("Humanoid") and obj.Humanoid.Health > 0 then
-local hrp = obj:FindFirstChild("HumanoidRootPart")
-if hrp then
-local box = Instance.new("BoxHandleAdornment")
-box.Size = Vector3.new(4, 5, 2)
-box.Adornee = hrp
-box.Color3 = Color3.fromRGB(255, 255, 255)
-box.Transparency = 0.4
-box.AlwaysOnTop = true
-box.ZIndex = 0
-box.Parent = hrp
-table.insert(espObjects, box)
-
+    currentTween = TweenService:Create(HRP, Info, {CFrame = targetCFrame})
+    currentTween:Play()
+    
+    local NoclipConn
+    NoclipConn = RunService.Stepped:Connect(function()
+        if currentTween and currentTween.PlaybackState == Enum.PlaybackState.Playing and Char then
+            for _, part in pairs(Char:GetDescendants()) do
+                if part:IsA("BasePart") and part.CanCollide then
+                    part.CanCollide = false
+                end
+            end
+            if HRP then HRP.Velocity = Vector3.zero end
+        else
+            if NoclipConn then NoclipConn:Disconnect() end
+        end
+    end)
+    return currentTween
 end
 
-espToggleBtn.MouseButton1Click:Connect(function()
-espEnabled = not espEnabled
-if espEnabled then
-espToggleBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-espToggleBtn.Text = "ESP [ON]"
-updateESP()
-spawn(function()
-while espEnabled do
-updateESP()
-wait(1)
+local function InvokeCommF(arg1, arg2, arg3)
+    local CommF = ReplicatedStorage.Remotes.CommF_
+    if CommF then
+        return CommF:InvokeServer(arg1, arg2, arg3)
+    end
 end
-end)
-else
-espToggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-espToggleBtn.Text = "ESP [OFF]"
-for _, v in pairs(espObjects) do
-pcall(function() v:Destroy() end)
+
+local function StoreFruit(fruitInstance)
+    local fruitName = fruitInstance:GetAttribute("OriginalName") or fruitInstance.Name
+    local args = { [1] = "StoreFruit", [2] = fruitName, [3] = fruitInstance }
+    pcall(function() ReplicatedStorage.Remotes.CommF_:InvokeServer(unpack(args)) end)
 end
-espObjects = {}
+
+local function BuyRandomFruit()
+    pcall(function() InvokeCommF("Cousin", "Buy") end)
 end
+
+local function AutoChooseTeam()
+    pcall(function() InvokeCommF("SetTeam", Config.Team) end)
+end
+
+local function ServerHop()
+    local PlaceID = game.PlaceId
+    local AllIDs = {}
+    local success, result = pcall(function()
+        local record = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. PlaceID .. "/servers/Public?sortOrder=Asc&limit=100"))
+        for i, v in pairs(record.data) do
+            if v.playing < v.maxPlayers and v.id ~= game.JobId then
+                table.insert(AllIDs, v.id)
+            end
+        end
+    end)
+    
+    if #AllIDs > 0 then
+        TeleportService:TeleportToPlaceInstance(PlaceID, AllIDs[math.random(1, #AllIDs)], LocalPlayer)
+    else
+        UpdateStatus("Retrying...")
+        task.wait(1)
+        ServerHop()
+    end
+end
+
+task.spawn(function()
+    while LocalPlayer.Team == nil or LocalPlayer.Team.Name == "Neutral" do
+        AutoChooseTeam()
+        task.wait(0.5)
+    end
 end)
 
--- Nút unload
-local unloadBtn = Instance.new("TextButton")
-unloadBtn.Size = UDim2.new(0.3, 0, 0, 35)
-unloadBtn.Position = UDim2.new(0.35, 0, 0.92, 0)
-unloadBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-unloadBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
-unloadBtn.Text = "UNLOAD HUB"
-unloadBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-unloadBtn.Parent = mainFrame
+local HopStart = nil
+local StoredAttempts = {}
+local IsBusyStoring = false
 
-unloadBtn.MouseButton1Click:Connect(function()
-screenGui:Destroy()
-autoFarm = false
-for _, v in pairs(espObjects) do
-pcall(function() v:Destroy() end)
-end
-print("quocdat hub unloaded")
+task.spawn(function()
+    while true do
+        task.wait(8)
+        StoredAttempts = {} 
+    end
 end)
 
-print("quocdat hub loaded successfully | Auto Farm + ESP + Copy Frame")
+task.spawn(function()
+    while true do
+        task.wait()
+        
+        local Char = GetCharacter()
+        local Hum = GetHumanoid()
+        local HRP = GetRootPart()
+
+        if Char and Hum and Hum.Health > 0 and HRP then
+            
+            IsBusyStoring = false
+
+            if Config.AutoStore then
+                local function tryStore(container)
+                    for _, tool in pairs(container:GetChildren()) do
+                        if tool:IsA("Tool") and (string.find(tool.Name, "Fruit") or tool:GetAttribute("OriginalName")) then
+                            local fName = tool:GetAttribute("OriginalName") or tool.Name
+                            if not StoredAttempts[fName] then StoredAttempts[fName] = 0 end
+                            
+                            if StoredAttempts[fName] < 5 then
+                                IsBusyStoring = true
+                                UpdateStatus("Äang cáº¥t: " .. fName)
+                                StoreFruit(tool)
+                                StoredAttempts[fName] = StoredAttempts[fName] + 1
+                                task.wait(0.1) 
+                            else
+                               IsBusyStoring = true
+                                UpdateStatus("KhĂ´ng thá»ƒ cáº¥t! Äang hop...")
+                                ServerHop()
+                                task.wait(10)
+                            end
+                        end
+                    end
+                end
+                tryStore(LocalPlayer.Backpack)
+                if Char then tryStore(Char) end
+            end
+
+            if Config.AutoBuyRandom then
+                BuyRandomFruit()
+            end
+
+            local foundFruit = false
+            local fruits = {}
+            for _, v in pairs(Workspace:GetChildren()) do
+                if (v:IsA("Tool") or v:IsA("Model")) and string.find(v.Name, "Fruit") then
+                    if v:FindFirstChild("Handle") then
+                        table.insert(fruits, v)
+                    end
+                end
+            end
+
+            for _, v in pairs(fruits) do
+                foundFruit = true
+                HopStart = nil
+                
+                CreateESP(v)
+                UpdateStatus("Äang bay Ä‘áº¿n " .. v.Name)
+                
+                local targetHandle = v:FindFirstChild("Handle")
+                
+                if targetHandle then
+                    local tween = TweenTo(targetHandle.CFrame)
+                    if tween then tween.Completed:Wait() end
+                    
+                    if v.Parent ~= Workspace then
+                        local myFruit = LocalPlayer.Backpack:FindFirstChild(v.Name) or Char:FindFirstChild(v.Name)
+                        if not myFruit then
+                            UpdateStatus("TrĂ¡i máº¥t! Hop...")
+                            ServerHop() 
+                            task.wait(10)
+                        end
+                    end
+
+                    if (targetHandle.Position - HRP.Position).Magnitude < 15 then
+                        if firetouchinterest then
+                            firetouchinterest(HRP, targetHandle, 0)
+                            firetouchinterest(HRP, targetHandle, 1)
+                        end
+                        local pickupTime = tick()
+                        while v.Parent == Workspace and (tick() - pickupTime < 1) do
+                            HRP.CFrame = targetHandle.CFrame
+                            if Hum then Hum:EquipTool(v) end
+                            task.wait()
+                        end
+                    end
+                end
+            end
+
+            if not foundFruit then
+                if currentTween then 
+                    currentTween:Cancel() 
+                    currentTween = nil
+                end
+
+                if Config.HopIfNoFruit then
+                    if IsBusyStoring then
+                        HopStart = nil
+                    else
+                        if HopStart == nil then HopStart = tick() end
+                        local timePassed = tick() - HopStart
+                        local timeLeft = 7 - timePassed
+
+                        if timeLeft > 0 then
+                            UpdateStatus("Hop trong " .. math.ceil(timeLeft) .. "s")
+                        else
+                            UpdateStatus("Äang hop...")
+                            ServerHop()
+                            HopStart = nil 
+                        end
+                    end
+                else
+                    if not IsBusyStoring then
+                        UpdateStatus("Khu vá»±c quĂ©t...") 
+                    end
+                    HopStart = nil
+                end
+            else
+                HopStart = nil
+            end
+        else
+            UpdateStatus("Äang chá» nhĂ¢n váº­t...")
+        end
+    end
+end)
+
+task.spawn(function()
+    local VirtualInputManager = game:GetService("VirtualInputManager")
+    LocalPlayer.Idled:Connect(function()
+        if VirtualInputManager then
+            pcall(function()
+                VirtualInputManager:SendKeyEvent(true, "Space", false, game)
+                task.wait()
+                VirtualInputManager:SendKeyEvent(false, "Space", false, game)
+            end)
+        elseif VirtualUser then
+             pcall(function()
+                VirtualUser:CaptureController()
+                VirtualUser:ClickButton2(Vector2.new())
+            end)
+        end
+    end)
+end)
